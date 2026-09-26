@@ -1,0 +1,11 @@
+# Ignore local secrets and SQLite data files
+.env
+db/*.db
+db/*.db-*
+vendor/bundle/
+.bundle/
+*.gem
+.ruby-gemset
+.ruby-version
+.idea/
+.vscode/
