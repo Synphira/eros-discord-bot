@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module Engine
   module Shop
-    # Define shop inventory with equipment and special items
+    # Canonical shop stock only — cursed / treasure / boss trophies stay out of the shop.
     INVENTORY = [
-      # Weapons
       {
         name: 'Rusty Dagger',
         type: 'weapon',
@@ -30,7 +31,6 @@ module Engine
         cost: 60,
         rarity: 3
       },
-      # Armor
       {
         name: 'Leather Harness',
         type: 'armor',
@@ -58,7 +58,6 @@ module Engine
         cost: 80,
         rarity: 4
       },
-      # Accessories
       {
         name: 'Lust Ward Amulet',
         type: 'accessory',
@@ -86,7 +85,6 @@ module Engine
         cost: 45,
         rarity: 3
       },
-      # Special items
       {
         name: 'Curse Purification Scroll',
         type: 'special',
@@ -105,51 +103,109 @@ module Engine
       }
     ].freeze
 
+    CATEGORIES = %w[weapon armor accessory special].freeze
+
+    CATEGORY_LABELS = {
+      'weapon' => 'Weapons',
+      'armor' => 'Armor',
+      'accessory' => 'Accessories',
+      'special' => 'Special'
+    }.freeze
+
+    # Max buy buttons per category page (one Discord row = 5).
+    PAGE_SIZE = 5
+
     module_function
 
     def sync_to_db!
       INVENTORY.each do |item|
-        Equipment.find_or_create(name: item[:name]) do |e|
-          e.type = item[:type]
-          e.slot = item[:slot]
-          e.description = item[:description]
-          e.stat_modifiers = item[:stat_modifiers]
-          e.cost = item[:cost]
-          e.rarity = item[:rarity]
+        record = ::Equipment.find_or_create(name: item[:name]) do |e|
+          apply_shop_template!(e, item)
         end
+        apply_shop_template!(record, item)
+        record.save_changes
       end
     end
 
+    def apply_shop_template!(record, item)
+      record.type = item[:type]
+      record.slot = item[:slot]
+      record.description = item[:description]
+      record.stat_modifiers = item[:stat_modifiers] || {}
+      record.cost = item[:cost]
+      record.rarity = item[:rarity]
+      record.cursed = false
+      record.violation_type = nil
+      record.removal_cost = 0
+    end
+    module_function :apply_shop_template!
+
+    def shop_names
+      INVENTORY.map { |i| i[:name] }
+    end
+
+    def shop_item?(equipment)
+      return false unless equipment
+      return false if equipment.cursed
+
+      shop_names.include?(equipment.name)
+    end
+
+    # Stock for one category, cheapest first, never cursed / non-shop rows.
+    def stock_for(category)
+      category = normalize_category(category)
+      names = INVENTORY.select { |i| i[:type] == category }.map { |i| i[:name] }
+      ::Equipment.where(name: names, cursed: false).all.sort_by { |e| [e.cost.to_i, e.name] }
+    end
+
+    def normalize_category(category)
+      key = category.to_s.downcase
+      CATEGORIES.include?(key) ? key : 'weapon'
+    end
+
+    def page_count(category)
+      total = stock_for(category).size
+      return 1 if total.zero?
+
+      (total + PAGE_SIZE - 1) / PAGE_SIZE
+    end
+
+    def page_items(category, page)
+      category = normalize_category(category)
+      page = [[page.to_i, 0].max, page_count(category) - 1].min
+      stock_for(category).slice(page * PAGE_SIZE, PAGE_SIZE) || []
+    end
+
     def buy_item(player, item_id)
-      item = Equipment[item_id]
+      item = ::Equipment[item_id]
       return { ok: false, error: :not_found, message: 'Item not found.' } unless item
+      return { ok: false, error: :not_sold, message: 'That item is not sold here.' } unless shop_item?(item)
+      return { ok: false, error: :cursed, message: 'The shop refuses cursed living gear.' } if item.cursed
 
       if player.lp < item.cost
-        return { ok: false, error: :insufficient_lp, message: "You don't have enough Lust Points! You need #{item.cost} LP." }
+        return {
+          ok: false,
+          error: :insufficient_lp,
+          message: "You don't have enough Lust Points! You need **#{item.cost}** LP (you have `#{player.lp}`)."
+        }
       end
 
-      # Check if player already has this item
-      existing = DB[:player_equipment].where(player_id: player.discord_id, equipment_id: item_id).first
-      if existing
-        return { ok: false, error: :already_owned, message: "You already own this item!" }
+      if player.owns_equipment?(item.id) && item.type != 'special'
+        return { ok: false, error: :already_owned, message: "You already own **#{item.name}**." }
       end
 
-      # Handle special consumables
       if item.type == 'special'
         case item.name
         when 'Curse Purification Scroll'
-          if player.active_curse_count > 0
+          if player.active_curse_count.positive?
             player.spend_lp!(item.cost)
-            # Remove a random curse
             curse_to_remove = player.active_curses_ordered.sample
             player.remove_curse_at!(player.active_curses_ordered.index(curse_to_remove))
             return { ok: true, message: "You used the scroll to remove the **#{curse_to_remove.name}** curse!" }
-          else
-            return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" }
           end
+          return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" }
         when 'Bottled Sanctuary'
           player.spend_lp!(item.cost)
-          # Persist via encounter-style column if present; otherwise skip flag.
           if player.columns.include?(:sanctuary)
             player.update(sanctuary: true)
           end
@@ -157,27 +213,36 @@ module Engine
         end
       end
 
-      # Regular equipment
       player.spend_lp!(item.cost)
-      DB[:player_equipment].insert(
-        player_id: player.discord_id,
-        equipment_id: item_id,
-        is_equipped: false,
-        acquired_at: Time.now
-      )
+      grant = player.grant_equipment!(item, auto_equip: false)
+      unless grant[:ok]
+        player.gain_lp!(item.cost)
+        return grant
+      end
 
-      { ok: true, message: "You purchased **#{item.name}**! Check your inventory with !equipment." }
+      { ok: true, message: "You purchased **#{item.name}**! Check your inventory with `!equipment`." }
     end
 
     def sell_item(player, equipment_id)
-      item = DB[:player_equipment].where(player_id: player.discord_id, id: equipment_id).first
-      return { ok: false, error: :not_found, message: 'Item not found.' } unless item
+      row = DB[:player_equipment]
+            .where(player_id: player.discord_id, equipment_id: equipment_id)
+            .first
+      return { ok: false, error: :not_found, message: 'Item not found in your pack.' } unless row
 
-      equipment = Equipment[item[:equipment_id]]
-      sell_price = (equipment.cost * 0.5).round  # Sell for 50% of purchase price
+      equipment = ::Equipment[row[:equipment_id]]
+      return { ok: false, error: :not_found, message: 'Item not found.' } unless equipment
 
+      if equipment.cursed
+        return {
+          ok: false,
+          error: :cursed,
+          message: "Living gear can't be sold — use `!remove #{equipment.name}` (costs LP)."
+        }
+      end
+
+      sell_price = [(equipment.cost * 0.5).round, 1].max
       player.gain_lp!(sell_price)
-      DB[:player_equipment].where(id: equipment_id).delete
+      DB[:player_equipment].where(id: row[:id]).delete
 
       { ok: true, message: "You sold **#{equipment.name}** for **#{sell_price}** LP!" }
     end

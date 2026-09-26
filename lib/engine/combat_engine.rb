@@ -110,10 +110,18 @@ module Engine
       else
         return { ok: false, error: :unknown_action, log: ['Unknown action.'] }
       end
-    
+
+      @player.check_mimic_violations!(log)
+      broken = climax_from_mimics?(enc, log)
+      return finish_broken!(enc, log) if broken
+
       return finish_victory!(enc, log) if enc[:hp] <= 0
-    
+
       broken = apply_monster_turn!(enc, log)
+      return finish_broken!(enc, log) if broken
+
+      @player.check_mimic_violations!(log)
+      broken = climax_from_mimics?(enc, log)
       return finish_broken!(enc, log) if broken
     
       if @player.defiance <= 0
@@ -164,9 +172,9 @@ module Engine
       base
     end
 
-    # Monster hits raise lust only (resistance softens; curse mults apply).
+    # Monster hits raise lust only (resistance + lust_resist soften; curse mults apply).
     def monster_lust_hit(enc)
-      base = enc[:lust_damage] - (@player.effective_resistance / 2)
+      base = enc[:lust_damage] - (@player.effective_resistance / 2) - @player.effective_lust_resist
       base = (base * @player.curse_effect_product("#{enc[:type]}_damage_mult", default: 1.0)).to_f
       base *= @player.lust_damage_multiplier(monster_type: enc[:type])
       base = base.round
@@ -174,35 +182,33 @@ module Engine
       base
     end
 
-   # In lib/engine/combat.rb, modify the apply_fight! method:
+    def apply_fight!(enc, log)
+      damage = player_hit_damage(enc)
+      enc[:hp] = [enc[:hp] - damage, 0].max
+      log << "You deal **#{damage}** damage to the #{enc[:name]}! " \
+             "(HP `#{enc[:hp]}/#{enc[:max_hp]}`)"
 
-  def apply_fight!(enc, log)
-    damage = player_hit_damage(enc)
-    enc[:hp] = [enc[:hp] - damage, 0].max
-    log << "You deal **#{damage}** damage to the #{enc[:name]}! " \
-           "(HP `#{enc[:hp]}/#{enc[:max_hp]}`)"
-    
-    climax = @player.try_climax!(monster_type: enc[:type])
-  if climax
-    log.concat(climax[:lines])
-    if climax[:broken]
-      if immortal_vs?(enc[:type])
-        @player.update(defiance: 1)
-        log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-        return false
+      climax = @player.try_climax!(monster_type: enc[:type])
+      if climax
+        log.concat(climax[:lines])
+        if climax[:broken]
+          if immortal_vs?(enc[:type])
+            @player.update(defiance: 1)
+            log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
+            return false
+          end
+          log << "You've been completely broken! Game over."
+          return true
+        end
       end
-      log << "You've been completely broken! Game over."
-      return true
-    end
-  end
-  
-  # Life drain for undead
-  return unless enc[:type] == 'undead' && @player.curse_effect_flag?('undead_drain')
 
-  drain = [damage / 2, 1].max
-  @player.adjust_defiance!(drain)
-  log << "Life Drain: you siphon **#{drain}** defiance! (now #{@player.defiance})"
-end
+      # Life drain for undead
+      return unless enc[:type] == 'undead' && @player.curse_effect_flag?('undead_drain')
+
+      drain = [damage / 2, 1].max
+      @player.adjust_defiance!(drain)
+      log << "Life Drain: you siphon **#{drain}** defiance! (now #{@player.defiance})"
+    end
 
     # --- Flee --------------------------------------------------------------
 
@@ -236,17 +242,23 @@ end
     # --- Submit ------------------------------------------------------------
 
     def apply_submit!(enc, log)
-      scene = MonsterScenes.generate_assault(@player, enc[:name], monster_type: enc[:type])
-      log << "You submit to the #{enc[:name]}, allowing it to sexually assault you without resistance."
-      log << "_#{scene}_"
+      # Scale LP with monster strength (encounters have no :level field).
+      lp_reward = 1 + (enc[:strength].to_i / 2)
+      @player.gain_lp!(lp_reward)
+      log << "You submit to the #{enc[:name]}, gaining **#{lp_reward}** Lust Points for your willingness."
 
-      lust_increase = monster_lust_hit(enc)
-      # Submit is more intense than a normal hit
-      lust_increase = [(lust_increase * 1.5).round, enc[:lust_damage]].max
-      lust_increase = 1 if lust_increase < 1
+      scene = MonsterScenes.generate_willing_scene(@player, enc[:name], monster_type: enc[:type])
+      log << { scene: scene }
 
+      lust_increase = (monster_lust_hit(enc) * 0.5).round
       @player.gain_lust!(lust_increase)
-      log << "Your lust increases by **#{lust_increase}** from the willing violation! (now #{@player.lust})"
+      log << "Your lust increases by **#{lust_increase}** from the passionate encounter! (now #{@player.lust})"
+
+      if check_monster_orgasm(enc)
+        log << "The #{enc[:name]} shudders with pleasure, completely satisfied by your submission!"
+        log << 'The monster, now spent, allows you to escape without further incident.'
+        return true
+      end
 
       climax = @player.try_climax!(monster_type: enc[:type])
       return false unless climax
@@ -258,11 +270,35 @@ end
           log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
           return false
         end
-        log << "You've been completely broken by the relentless assault! Game over."
+        log << "You've been completely consumed by pleasure! Game over."
         return true
       end
 
       false
+    end
+
+    def check_monster_orgasm(_enc)
+      submission_bonus = @player.effective_submission
+      base_chance = 0.2 + (submission_bonus * 0.1)
+      chance = [base_chance, 0.7].min
+      rand <= chance
+    end
+
+    def climax_from_mimics?(enc, log)
+      climax = @player.try_climax!(monster_type: enc[:type])
+      return false unless climax
+
+      log.concat(climax[:lines])
+      return false unless climax[:broken]
+
+      if immortal_vs?(enc[:type])
+        @player.update(defiance: 1)
+        log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
+        return false
+      end
+
+      log << "You've been broken by your own living gear! Game over."
+      true
     end
 
     # --- Monster turn ------------------------------------------------------
@@ -280,8 +316,9 @@ end
       lust_hit = monster_lust_hit(enc)
       @player.gain_lust!(lust_hit)
 
+      log << "The #{enc[:name]} sexually assaults you!"
       assault_scene = MonsterScenes.generate_assault(@player, enc[:name], monster_type: enc[:type])
-      log << "The #{enc[:name]} sexually assaults you! #{assault_scene}"
+      log << { scene: assault_scene }
       log << "Your lust surges by **#{lust_hit}** from the violation! (now #{@player.lust})."
 
       climax = @player.try_climax!(monster_type: enc[:type])
@@ -322,27 +359,29 @@ end
             e.stat_modifiers = {}
             e.cost = 0
             e.rarity = 5
+            e.cursed = false
+            e.removal_cost = 0
+          end
+          # Refresh description if the catalog row already existed.
+          if item.description.to_s.empty? && reward[:description]
+            item.update(description: reward[:description])
           end
 
-          owned = DB[:player_equipment]
-                  .where(player_id: @player.discord_id, equipment_id: item.id)
-                  .first
-          unless owned
-            DB[:player_equipment].insert(
-              player_id: @player.discord_id,
-              equipment_id: item.id,
-              is_equipped: false,
-              acquired_at: Time.now
-            )
+          grant = @player.grant_equipment!(item, auto_equip: false)
+          if grant[:ok]
             log << "You also received **#{reward[:special_item]}** as a trophy!"
+          elsif grant[:error] == :duplicate
+            log << "You already carry **#{reward[:special_item]}** — no duplicate trophy."
+          else
+            log << grant[:message]
           end
         end
 
         cleared = @player.current_floor
         @player.update(
-          highest_boss_defeated: [cleared, @player.highest_boss_defeated.to_i].max,
-          current_floor: cleared + 1
+          highest_boss_defeated: [cleared, @player.highest_boss_defeated.to_i].max
         )
+        @player.advance_floor!
         log << "The path beyond opens — you advance to **Floor #{@player.current_floor}**."
       else
         # Regular monster victory
@@ -376,7 +415,10 @@ end
                "−#{loss[:agi_lost]} AGI · −#{loss[:res_lost]} RES)."
       end
 
-      log << 'Floor, defiance, and lust reset — LP, curses, and gear persist.'
+      if loss[:gear_lost]&.any?
+        log << "Your non-cursed gear is lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
+      end
+      log << 'Floor, defiance, and lust reset — LP, curses, and living (cursed) gear persist.'
       { ok: true, defeated: true, encounter: enc, log: log, curse: result[:curse] }
     end
 
@@ -390,7 +432,10 @@ end
                "(−#{loss[:level_lost]} Lv · −#{loss[:str_lost]} STR · " \
                "−#{loss[:agi_lost]} AGI · −#{loss[:res_lost]} RES)."
       end
-      log << 'Floor, defiance, and lust reset — LP, curses, and gear persist.'
+      if loss[:gear_lost]&.any?
+        log << "Your non-cursed gear is lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
+      end
+      log << 'Floor, defiance, and lust reset — LP, curses, and living (cursed) gear persist.'
       { ok: true, broken: true, encounter: enc, log: log, curse: result[:curse] }
     end
 

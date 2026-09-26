@@ -1,0 +1,20 @@
+---
+description: Always update CHANGELOG.md when changing or adding project features
+alwaysApply: true
+---
+
+# Changelog discipline
+
+Whenever you **add**, **change**, or **fix** behavior in this repo, update [`CHANGELOG.md`](CHANGELOG.md) in the same change set.
+
+## How to update
+
+1. Put entries under today’s date (`## YYYY-MM-DD`). Create that heading if missing (newest dates first).
+2. Use sections as needed: `### Added`, `### Changed`, `### Fixed`, `### Removed`.
+3. Write short, user-facing bullets (what a player or operator notices), not file dumps.
+4. Mention migrations, new commands, or breaking behavior when relevant.
+5. Do **not** log pure refactors, formatting-only edits, or dependency bumps unless they affect players/ops.
+
+## Do not skip
+
+Updating the changelog is part of finishing the task — same bar as leaving the code working. If the user asks for a change, the changelog entry ships with it unless they explicitly say not to.

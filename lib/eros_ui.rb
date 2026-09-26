@@ -110,9 +110,98 @@ module ErosUI
     when :combat then attach_combat_buttons(container, owner_id)
     when :levelup then attach_levelup_buttons(container, owner_id)
     when Hash
+      if with_actions[:shop]
+        attach_shop_buttons(container, with_actions[:shop], owner_id)
+      end
+      if with_actions[:event_choices]
+        attach_event_choice_buttons(container, with_actions[:event_choices], owner_id)
+      elsif with_actions[:event_continue]
+        attach_event_continue_button(container, owner_id)
+      end
       if with_actions[:removecurse]
         attach_removecurse_buttons(container, with_actions[:removecurse], owner_id)
       end
+      attach_explore_buttons(container, owner_id) if with_actions[:explore]
+    end
+  end
+
+  def attach_shop_buttons(container, shop, owner_id)
+    category = Engine::Shop.normalize_category(shop[:category] || shop['category'])
+    page = (shop[:page] || shop['page']).to_i
+    pages = [(shop[:pages] || shop['pages']).to_i, 1].max
+    items = Array(shop[:items] || shop['items'])
+
+    container.row do |row|
+      Engine::Shop::CATEGORIES.each do |cat|
+        row.button(
+          label: Engine::Shop::CATEGORY_LABELS[cat],
+          style: cat == category ? :primary : :secondary,
+          custom_id: "eros:shop:cat:#{cat}:#{owner_id}"
+        )
+      end
+    end
+
+    items.each_slice(5) do |slice|
+      container.row do |row|
+        slice.each do |item|
+          id = item[:id] || item['id']
+          name = item[:name] || item['name']
+          cost = item[:cost] || item['cost']
+          label = "#{name} · #{cost} LP"
+          label = "#{name[0, 40]}… · #{cost}" if label.length > 80
+          row.button(
+            label: label,
+            style: :success,
+            custom_id: "eros:shop:buy:#{id}:#{category}:#{page}:#{owner_id}"
+          )
+        end
+      end
+    end
+
+    return if pages <= 1
+
+    container.row do |row|
+      row.button(
+        label: '◀ Prev',
+        style: :secondary,
+        custom_id: "eros:shop:page:#{category}:#{[page - 1, 0].max}:#{owner_id}"
+      ) if page.positive?
+
+      row.button(
+        label: "Pg #{page + 1}/#{pages}",
+        style: :secondary,
+        custom_id: "eros:shop:page:#{category}:#{page}:#{owner_id}"
+      )
+
+      row.button(
+        label: 'Next ▶',
+        style: :secondary,
+        custom_id: "eros:shop:page:#{category}:#{[page + 1, pages - 1].min}:#{owner_id}"
+      ) if page < pages - 1
+    end
+  end
+
+  def attach_event_choice_buttons(container, choices, owner_id)
+    Array(choices).each_slice(5) do |slice|
+      container.row do |row|
+        slice.each do |choice|
+          row.button(
+            label: choice[:label] || choice['label'] || choice[:key],
+            style: choice[:key].to_s == 'ignore' ? :secondary : :primary,
+            custom_id: "eros:event_choice:#{choice[:key] || choice['key']}:#{owner_id}"
+          )
+        end
+      end
+    end
+  end
+
+  def attach_event_continue_button(container, owner_id)
+    container.row do |row|
+      row.button(
+        label: 'Continue',
+        style: :primary,
+        custom_id: "eros:event_continue:#{owner_id}"
+      )
     end
   end
 
@@ -192,15 +281,52 @@ module ErosUI
     end
   end
 
+  def attach_submission_buttons(container, owner_id)
+    # Discord allows 5 buttons per row; we have exactly 5 choices.
+    container.row do |row|
+      CharacterArchetypes::SUBMISSION_CHOICES.each do |key, entry|
+        row.button(
+          label: entry[:label],
+          style: :secondary,
+          custom_id: "eros:submission:#{key}:#{owner_id}"
+        )
+      end
+    end
+  end
+
+  # Combat logs mix plain strings with `{ scene: "..." }` entries.
+  # Scenes render in their own italic block between dividers.
+  def append_action_log(container, log)
+    buffer = []
+
+    flush = lambda do
+      return if buffer.empty?
+
+      container.text_display(content: buffer.join("\n"))
+      buffer.clear
+    end
+
+    Array(log).each do |entry|
+      scene =
+        if entry.is_a?(Hash)
+          entry[:scene] || entry['scene']
+        end
+
+      if scene
+        flush.call
+        container.separator(divider: true, spacing: :small)
+        container.text_display(content: "_#{scene}_")
+        container.separator(divider: true, spacing: :small)
+      else
+        buffer << entry.to_s
+      end
+    end
+
+    flush.call
+  end
+
   def build_status_container(container, player)
     threat = Engine::ThreatCalculator.calculate(player)
-    active = player.active_curses
-    curse_lines =
-      if active.empty?
-        '_None — the dark has not marked you yet._'
-      else
-        active.map { |c| "• **#{c.name}** _(#{c.category})_ — #{c.description}" }.join("\n")
-      end
 
     container.text_display(content: '## Endless Ruins of Sin — Delver Status')
     container.text_display(content: '_Descend. Endure. Desire._')
@@ -208,7 +334,9 @@ module ErosUI
     container.text_display(
       content: "**#{player.gender}** — #{player.body_parts_display}\n" \
                "Lv **#{player.level}** · Floor **#{player.current_floor}** " \
-               "_(#{player.pos_x}, #{player.pos_y})_"
+               "_(#{player.pos_x}, #{player.pos_y})_\n" \
+               "**Deepest floor** `#{player.highest_floor_reached}`\n" \
+               "**Submission** `#{player.submission}` _(#{player.submission_display})_"
     )
     container.text_display(
       content: "**HP** `#{player.hp}/#{player.max_hp}`  ·  " \
@@ -226,11 +354,22 @@ module ErosUI
                "_LP contrib #{threat.lp_component}% · Curses +#{threat.curse_component}_"
     )
     container.separator(divider: true, spacing: :small)
-    container.text_display(content: "**Active Curses**\n#{curse_lines}")
-    container.text_display(
-      content: "**Combat:** #{player.reconcile_encounter! ? 'Engaged' : 'Quiet for now'}"
-    )
+    combat_line = player.reconcile_encounter! ? 'Engaged' : 'Quiet for now'
+    event = player.event_data
+    if event
+      extra =
+        if event[:mode].to_s == 'timed'
+          " · Event: **#{event[:name]}** _(turn #{event[:turn]}/#{event[:duration]})_ — press **Continue**"
+        else
+          " · Event: **#{event[:name]}** — choose a button"
+        end
+      container.text_display(content: "**Combat:** #{combat_line}#{extra}")
+    else
+      container.text_display(content: "**Combat:** #{combat_line}")
+    end
     container.separator(divider: false, spacing: :small)
-    container.text_display(content: '-# Defeat resets floor & defiance — LP & curses persist.')
+    container.text_display(
+      content: '-# Defeat resets the run — LP, curses, living gear, and deepest floor persist. Use `/curses` for brands.'
+    )
   end
 end

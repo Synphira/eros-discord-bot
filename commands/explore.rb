@@ -8,7 +8,6 @@ module Commands
     module_function
 
     def run(event)
-
       player = ErosHelpers.require_player(event) or return
 
       if Eros.encounter_for(player)
@@ -25,7 +24,6 @@ module Commands
       case result.kind
       when :monster, :boss
         if result.kind == :boss
-          # BossFights already stored the encounter on the player.
           enc = result.monster
           enc = Engine::CombatEngine.encounter_snapshot(enc) unless enc.is_a?(Hash)
           Eros.set_encounter!(player, enc.merge(is_boss: true))
@@ -46,6 +44,14 @@ module Commands
             c.text_display(content: started[:message])
           end
         end
+      when :event
+        render_event(event, player, result.event_result || {
+          mode: :done,
+          colour: result.colour,
+          log: [result.message],
+          choices: [],
+          broken: result.broken
+        })
       when :trap
         if result.broken
           ErosUI.reply_v2(event, colour: 0x444444) do |c|
@@ -56,9 +62,46 @@ module Commands
             c.text_display(content: result.message)
           end
         end
+      when :treasure
+        if result.broken
+          ErosUI.reply_v2(event, colour: 0x444444) do |c|
+            c.text_display(content: result.message)
+          end
+        else
+          ErosUI.reply_v2(event, colour: result.colour, with_actions: :explore) do |c|
+            ErosUI.append_action_log(c, result.message.split("\n"))
+          end
+        end
       else
         ErosUI.reply_v2(event, colour: result.colour, with_actions: :explore) do |c|
           c.text_display(content: result.message)
+        end
+      end
+    end
+
+    def render_event(event, _player, result)
+      result = result.transform_keys(&:to_sym) if result.is_a?(Hash)
+      mode = result[:mode].to_sym
+      colour = result[:colour] || Engine::RandomEvents::COLOUR
+      log = result[:log] || []
+
+      actions =
+        case mode
+        when :choice
+          { event_choices: result[:choices] }
+        when :continue
+          { event_continue: true }
+        else
+          result[:broken] ? false : :explore
+        end
+
+      ErosUI.reply_v2(event, colour: colour, with_actions: actions) do |c|
+        c.text_display(content: "## #{result[:name] || 'Random Event'}") if result[:name]
+        ErosUI.append_action_log(c, log)
+        if mode == :choice && result[:choices]&.any?
+          c.separator(divider: true, spacing: :small)
+          lines = result[:choices].map { |ch| "• **#{ch[:label]}** — #{ch[:text]}" }
+          c.text_display(content: lines.join("\n"))
         end
       end
     end

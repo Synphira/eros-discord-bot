@@ -3,19 +3,19 @@
 require_relative 'threat_calculator'
 require_relative 'monster_types'
 require_relative 'boss_fights'
+require_relative 'treasure'
+require_relative 'random_events'
 
 module Engine
   # Exploration — weighted room roll for /explore and !explore.
   #
-  #   0–27  (28%) monster
-  #  28–44  (17%) trap
-  #  45–59  (15%) treasure → +10 LP
-  #  60–74  (15%) stairs  → advance one floor (only path up)
-  #  75–99  (25%) empty
+  #   event chance first (when not in an active event)
+  #   then: monster / trap / treasure / stairs / empty
   #
   class Exploration
     RoomResult = Struct.new(
-      :kind, :message, :colour, :with_actions, :monster, :trap, :broken, keyword_init: true
+      :kind, :message, :colour, :with_actions, :monster, :trap, :broken,
+      :event_result, keyword_init: true
     )
 
     TREASURE_LP = 10
@@ -25,7 +25,8 @@ module Engine
       trap: 0xb8860b,
       treasure: 0xb8860b,
       stairs: 0x4a6fa5,
-      empty: 0x4a7c59
+      empty: 0x4a7c59,
+      event: Engine::RandomEvents::COLOUR
     }.freeze
 
     def self.roll(player)
@@ -50,6 +51,11 @@ module Engine
     end
 
     def roll
+      # Finish / resume pending events before a new room.
+      if @player.active_event?
+        return pending_event_nudge
+      end
+
       # Boss gate once per floor multiple of 5 (not every explore on that floor).
       floor = @player.current_floor
       if (floor % 5).zero? && floor > @player.highest_boss_defeated.to_i
@@ -65,6 +71,11 @@ module Engine
             message: boss[:message]
           )
         end
+      end
+
+      # Random lewd events (not during combat).
+      if Engine::RandomEvents.should_trigger?(@player)
+        return event_room(Engine::RandomEvents.start!(@player))
       end
 
       # Regular room type roll — high Threat biases toward monster encounters.
@@ -90,6 +101,57 @@ module Engine
     end
 
     private
+
+    def pending_event_nudge
+      data = @player.event_data
+      if data[:mode].to_s == 'choice'
+        choices = Engine::RandomEvents.glory_hole_choices(@player)
+        RoomResult.new(
+          kind: :event,
+          colour: COLOURS[:event],
+          with_actions: false,
+          event_result: {
+            mode: :choice,
+            name: data[:name],
+            colour: COLOURS[:event],
+            log: [
+              "You are still before the **#{data[:name]}**.",
+              'Choose a button below.'
+            ],
+            choices: choices
+          },
+          message: "You are still before the **#{data[:name]}**. Choose a button."
+        )
+      else
+        RoomResult.new(
+          kind: :event,
+          colour: COLOURS[:event],
+          with_actions: false,
+          event_result: {
+            mode: :continue,
+            name: data[:name],
+            colour: COLOURS[:event],
+            log: [
+              "**#{data[:name]}** still holds you.",
+              "_Turn #{data[:turn]}/#{data[:duration]} — press **Continue**._"
+            ],
+            choices: []
+          },
+          message: "**#{data[:name]}** still holds you. Press **Continue**."
+        )
+      end
+    end
+
+    def event_room(result)
+      RoomResult.new(
+        kind: :event,
+        colour: result[:colour] || COLOURS[:event],
+        with_actions: false,
+        broken: result[:broken],
+        event_result: result,
+        message: Array(result[:log]).map { |e| e.is_a?(Hash) ? (e[:scene] || e['scene']).to_s : e.to_s }.join("\n")
+      )
+    end
 
     def monster_room
       monster = self.class.generate_monster(@player.current_floor, player: @player)
@@ -133,23 +195,20 @@ module Engine
     end
 
     def treasure_room
-      @player.gain_lp!(TREASURE_LP)
+      result = Engine::Treasure.open_chest(@player)
+      broken = result[:broken]
 
       RoomResult.new(
         kind: :treasure,
+        broken: broken,
         colour: COLOURS[:treasure],
-        with_actions: true,
-        message: <<~MSG.strip
-          **Floor #{@player.current_floor}** — a glint in the dark.
-
-          You found a treasure chest! You gain **+#{TREASURE_LP} Lust Points**.
-          LP now `#{@player.lp}`.
-        MSG
+        with_actions: !broken,
+        message: result[:lines].join("\n")
       )
     end
 
     def stairs_room
-      @player.update(current_floor: @player.current_floor + 1)
+      @player.advance_floor!
 
       RoomResult.new(
         kind: :stairs,
@@ -159,6 +218,7 @@ module Engine
           **Stairs downward** — stone steps spiral into colder dark.
 
           You descend to **Floor #{@player.current_floor}**.
+          Deepest reached: **#{@player.highest_floor_reached}**.
           The threats below will be stronger.
         MSG
       )
@@ -191,7 +251,7 @@ module Engine
           if climax[:broken]
             @player.reset_run!
             lines << "You've been completely broken by the trap! Your run ends here."
-            lines << 'Floor, defiance, and lust reset — LP and curses persist.'
+            lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear is lost.'
             return [lines.join("\n"), true]
           end
         end

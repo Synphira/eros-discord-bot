@@ -21,6 +21,8 @@ require_relative 'lib/engine/curse_catalog'
 require_relative 'lib/engine/exploration'
 require_relative 'lib/engine/combat_engine'
 require_relative 'lib/engine/shop'
+require_relative 'lib/engine/treasure'
+require_relative 'lib/engine/random_events'
 require_relative 'lib/character_archetypes'
 require_relative 'lib/eros_ui'
 require_relative 'lib/eros_helpers'
@@ -67,7 +69,9 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::Buttons::Flee,
   Commands::Buttons::Submit,
   Commands::Buttons::LevelUp,
-  Commands::Buttons::Curses
+  Commands::Buttons::Curses,
+  Commands::Buttons::RandomEvent,
+  Commands::Buttons::Shop
 ].each { |mod| bot.include!(mod) }
 
 bot.ready do |_event|
@@ -76,7 +80,8 @@ bot.ready do |_event|
     puts "Curse catalog synced (#{Curse.count} curses)."
     
     Engine::Shop.sync_to_db!
-    puts "Shop inventory synced (#{Equipment.count} items)."
+    Engine::Treasure.sync_to_db!
+    puts "Shop / treasure inventory synced (#{Equipment.count} items)."
   rescue StandardError => e
     warn "Curse catalog sync warning: #{e.message}"
     warn "Shop inventory sync warning: #{e.message}"

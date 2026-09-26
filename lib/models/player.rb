@@ -56,7 +56,7 @@ class Player < Sequel::Model(:players)
   # --- Factory -------------------------------------------------------------
 
   # Build a fresh delver from a CharacterArchetypes entry.
-  def self.create_from_archetype!(discord_id:, archetype:)
+  def self.create_from_archetype!(discord_id:, archetype:, submission: 0)
     create(
       discord_id: discord_id,
       gender: archetype[:gender],
@@ -67,14 +67,20 @@ class Player < Sequel::Model(:players)
       strength: 5,
       agility: 5,
       resistance: 5,
+      submission: submission.to_i,
       pos_x: 0,
       pos_y: 0,
       hp: 100,
       max_hp: 100,
       lp: 0,
       current_floor: 1,
+      highest_floor_reached: 1,
       in_combat: false
     )
+  end
+
+  def submission_display
+    CharacterArchetypes.submission_label(submission)
   end
 
   def body_parts_list
@@ -143,6 +149,14 @@ class Player < Sequel::Model(:players)
     [base + equipment_effect_sum('resistance'), 1].max
   end
 
+  def effective_lust_resist
+    equipment_effect_sum('lust_resist') + curse_effect_sum('lust_resist').round
+  end
+
+  def effective_submission
+    submission.to_i + equipment_effect_sum('submission')
+  end
+
   # Global + type-specific lust multipliers for the current foe.
   def lust_damage_multiplier(monster_type: nil)
     mult = curse_effect_product('lust_mult', default: 1.0)
@@ -163,12 +177,15 @@ class Player < Sequel::Model(:players)
     [[(MAX_DEFIANCE * mult).round, 1].max, MAX_DEFIANCE].min
   end
 
-  # Full run wipe after defeat or being broken. LP, curses, and gear persist.
+  # Full run wipe after defeat or being broken.
+  # LP, curses, and cursed mimic gear persist; normal equipment is lost.
   def reset_run!
     old_level = level
     old_str = strength
     old_agi = agility
     old_res = resistance
+
+    stripped = strip_non_cursed_equipment!
 
     update(
       level: 1,
@@ -183,6 +200,7 @@ class Player < Sequel::Model(:players)
       hp: max_hp,
       in_combat: false,
       active_encounter: nil,
+      active_event: nil,
       highest_boss_defeated: 0
     )
 
@@ -190,11 +208,28 @@ class Player < Sequel::Model(:players)
       level_lost: [old_level - 1, 0].max,
       str_lost: [old_str - 5, 0].max,
       agi_lost: [old_agi - 5, 0].max,
-      res_lost: [old_res - 5, 0].max
+      res_lost: [old_res - 5, 0].max,
+      gear_lost: stripped
     }
   end
 
-  # --- Active encounter (survives process restart) -------------------------
+  # Bump lifetime deepest floor (never decreases; survives reset_run!).
+  def note_floor_reached!(floor = current_floor)
+    floor = floor.to_i
+    return current_floor if floor < 1
+
+    best = [highest_floor_reached.to_i, floor].max
+    attrs = {}
+    attrs[:current_floor] = floor if floor != current_floor
+    attrs[:highest_floor_reached] = best if best > highest_floor_reached.to_i
+    update(attrs) unless attrs.empty?
+    current_floor
+  end
+
+  # Advance one floor down and record the new deepest.
+  def advance_floor!
+    note_floor_reached!(current_floor + 1)
+  end
 
   def encounter_data
     raw = self[:active_encounter]
@@ -213,6 +248,31 @@ class Player < Sequel::Model(:players)
 
   def clear_encounter!
     update(in_combat: false, active_encounter: nil)
+  end
+
+  # --- Random events (choice / multi-turn) ----------------------------------
+
+  def event_data
+    raw = self[:active_event]
+    return nil if raw.nil? || raw.to_s.strip.empty?
+
+    data = JSON.parse(raw)
+    data.is_a?(Hash) ? data.transform_keys(&:to_sym) : nil
+  rescue JSON::ParserError
+    nil
+  end
+
+  def active_event?
+    !event_data.nil?
+  end
+
+  def store_event!(snapshot)
+    payload = snapshot.is_a?(Hash) ? snapshot : snapshot.to_h
+    update(active_event: JSON.generate(payload.transform_keys(&:to_s)))
+  end
+
+  def clear_event!
+    update(active_event: nil)
   end
 
   # Drop a stale in_combat flag left after a restart with no saved monster.
@@ -434,6 +494,54 @@ class Player < Sequel::Model(:players)
 
   # --- Equipment -----------------------------------------------------------
 
+  def owns_equipment?(equipment_id)
+    DB[:player_equipment].where(player_id: discord_id, equipment_id: equipment_id).count.positive?
+  end
+
+  def grant_equipment!(item, auto_equip: false)
+    item = ::Equipment[item] unless item.is_a?(::Equipment)
+    return { ok: false, error: :not_found, message: 'Item not found.' } unless item
+
+    if owns_equipment?(item.id)
+      return { ok: false, error: :duplicate, message: "You already own **#{item.name}**." }
+    end
+
+    begin
+      DB[:player_equipment].insert(
+        player_id: discord_id,
+        equipment_id: item.id,
+        is_equipped: false,
+        acquired_at: Time.now
+      )
+    rescue Sequel::UniqueConstraintViolation
+      return { ok: false, error: :duplicate, message: "You already own **#{item.name}**." }
+    end
+
+    if auto_equip || item.cursed
+      equip_result = equip_item(item.id)
+      if equip_result[:ok]
+        return {
+          ok: true,
+          message: "You bind **#{item.name}** to your body. #{Engine::Treasure.format_stat_changes(item.stat_modifiers)}"
+        }
+      end
+
+      return {
+        ok: true,
+        message: "Added **#{item.name}** to your pack, but it couldn't auto-equip — #{equip_result[:message]}"
+      }
+    end
+
+    { ok: true, message: "Added **#{item.name}** to your inventory." }
+  end
+
+  def equipped_mimics
+    equipment_dataset
+      .where(Sequel[:player_equipment][:is_equipped] => true)
+      .where(Sequel[:equipment][:cursed] => true)
+      .all
+  end
+
   def equipment_for_slot(slot)
     equipment_dataset.where(
       Sequel[:player_equipment][:is_equipped] => true,
@@ -447,6 +555,13 @@ class Player < Sequel::Model(:players)
 
     current = equipment_for_slot(item.slot)
     if current
+      if current.cursed && current.id != item.id
+        return {
+          ok: false,
+          error: :cursed_slot,
+          message: "Your **#{current.name}** won't come off normally. Use `!remove #{current.name}` (costs LP)."
+        }
+      end
       DB[:player_equipment]
         .where(player_id: discord_id, equipment_id: current.id)
         .update(is_equipped: false)
@@ -463,11 +578,72 @@ class Player < Sequel::Model(:players)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
 
+    if item.cursed
+      return {
+        ok: false,
+        error: :cursed,
+        message: "**#{item.name}** is living gear — spend LP with `!remove #{item.name}` to destroy it."
+      }
+    end
+
     DB[:player_equipment]
       .where(player_id: discord_id, equipment_id: equipment_id)
       .update(is_equipped: false)
 
     { ok: true, message: "Unequipped **#{item.name}**!" }
+  end
+
+  # Spend LP to destroy cursed mimic gear.
+  def remove_cursed_equipment!(equipment_id)
+    item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
+    return { ok: false, error: :not_found, message: 'Item not found.' } unless item
+    return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `!unequip`." } unless item.cursed
+
+    cost = item.removal_cost.to_i
+    unless spend_lp!(cost)
+      return {
+        ok: false,
+        error: :insufficient_lp,
+        message: "You need **#{cost}** LP to remove **#{item.name}** (you have `#{lp}`)."
+      }
+    end
+
+    DB[:player_equipment].where(player_id: discord_id, equipment_id: item.id).delete
+    {
+      ok: true,
+      message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free."
+    }
+  end
+
+  # Drop all non-cursed gear (defeat/break). Returns names removed.
+  def strip_non_cursed_equipment!
+    rows = DB[:player_equipment]
+           .join(:equipment, id: :equipment_id)
+           .where(player_id: discord_id)
+           .where(Sequel[:equipment][:cursed] => false)
+           .select(Sequel[:equipment][:name], Sequel[:player_equipment][:id])
+           .all
+
+    names = rows.map { |r| r[:name] }
+    ids = rows.map { |r| r[:id] }
+    DB[:player_equipment].where(id: ids).delete unless ids.empty?
+    names
+  end
+
+  def check_mimic_violations!(log)
+    equipped_mimics.each do |item|
+      chance = 0.1 + (current_floor * 0.02)
+      chance = [[chance, 0.35].min, 0.1].max
+      next if rand > chance
+
+      log << "Your **#{item.name}** suddenly comes to life!"
+      scene = Engine::MimicScenes.generate(item.violation_type, self, item.name)
+      log << { scene: scene }
+
+      lust_hit = (5 + current_floor).round
+      gain_lust!(lust_hit)
+      log << "The violation increases your lust by **#{lust_hit}**! (now #{lust})"
+    end
   end
 
   def equipment_effect_sum(key)

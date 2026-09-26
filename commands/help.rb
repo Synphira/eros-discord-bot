@@ -7,17 +7,18 @@ module Commands
 
     COMMANDS = [
   ['/create · /start', '!create · !start', 'Create your delver (body type select)'],
-  ['/status', '!status', 'Character sheet: body, stats, defiance, lust, LP, Threat'],
+  ['/status', '!status', 'Character sheet: stats, deepest floor, Threat (curses via /curses)'],
   ['/explore', '!explore', 'Room roll — monster / trap / treasure / stairs / empty'],
   ['/levelup', '!levelup', 'Spend LP on STR / AGI / RES (10) or Level (50)'],
   ['/curses', '!curses', 'List active curses by monster type'],
   ['/removecurse', '!removecurse [N]', 'Purge a curse for 50 LP'],
-  ['/shop', '!shop', 'View shop inventory and buy items'],
-  ['/buy', '!buy [item]', 'Buy an item from the shop'],
-  ['/sell', '!sell [item]', 'Sell an item to the shop'],
-  ['/equipment', '!equipment', 'View and manage your equipment'],
+  ['/shop', '!shop', 'Browse shop by category (buy buttons + pages)'],
+  ['/buy', '!buy [item]', 'Buy a shop item by name'],
+  ['/sell', '!sell [item]', 'Sell non-cursed gear by name'],
+  ['/equipment', '!equipment', 'View gear (cursed items show LP removal cost)'],
   ['/equip', '!equip [item]', 'Equip an item'],
-  ['/unequip', '!unequip [item]', 'Unequip an item'],
+  ['/unequip', '!unequip [item]', 'Unequip normal gear'],
+  ['/remove', '!remove [item]', 'Destroy cursed mimic gear for LP'],
   ['/help', '!help', 'List all commands'],
   ['—', '!fight · !flee · !submit', 'Combat actions (also buttons)']
 ].freeze

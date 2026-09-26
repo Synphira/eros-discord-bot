@@ -5,16 +5,20 @@ module Commands
     extend Discordrb::EventContainer
     extend Discordrb::Commands::CommandContainer
 
+    # discord_id => { archetype_id: Integer }
+    PENDING = {}
+
     module_function
 
     def show_menu(event)
-
       if Player[event.user.id]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
           c.text_display(content: 'You already have a character! Use `/status` or `!status`.')
         end
         return
       end
+
+      PENDING.delete(event.user.id)
 
       ErosUI.reply_v2(event, colour: 0xff00ff) do |c|
         c.text_display(content: CharacterArchetypes.menu_text)
@@ -24,8 +28,7 @@ module Commands
       end
     end
 
-    def finish(event, archetype_id)
-
+    def show_submission_menu(event, archetype_id)
       if Player[event.user.id]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
           c.text_display(content: 'You already have a character!')
@@ -41,10 +44,44 @@ module Commands
         return
       end
 
+      PENDING[event.user.id] = { archetype_id: archetype_id.to_i }
+
+      ErosUI.reply_v2(event, colour: 0xff00ff) do |c|
+        c.text_display(
+          content: "**Body:** #{archetype[:label]} _(#{archetype[:blurb]})_\n\n" \
+                   "#{CharacterArchetypes.submission_menu_text}"
+        )
+        c.separator(divider: true, spacing: :small)
+        c.text_display(content: '_Choose a button, or `!create eager|curious|neutral|reluctant|resistant`._')
+        ErosUI.attach_submission_buttons(c, event.user.id)
+      end
+    end
+
+    def finish(event, archetype_id: nil, submission_choice: 'neutral')
+      if Player[event.user.id]
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: 'You already have a character!')
+        end
+        return
+      end
+
+      pending = PENDING[event.user.id]
+      archetype_id ||= pending&.dig(:archetype_id)
+      archetype = CharacterArchetypes.fetch(archetype_id)
+      unless archetype
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: 'Start with `/create` and pick a body type first.')
+        end
+        return
+      end
+
+      submission = CharacterArchetypes.submission_value(submission_choice)
       player = Player.create_from_archetype!(
         discord_id: event.user.id,
-        archetype: archetype
+        archetype: archetype,
+        submission: submission
       )
+      PENDING.delete(event.user.id)
 
       ErosUI.reply_v2(event, colour: 0xff00ff) do |c|
         c.text_display(content: '## Welcome to Endless Ruins of Sin')
@@ -54,7 +91,8 @@ module Commands
           content: "Profile sealed for <@#{player.discord_id}>.\n" \
                    "**#{player.gender}** — #{player.body_parts_display}\n" \
                    "Lv #{player.level} · Defiance `#{player.defiance}` · Lust `#{player.lust}` · LP `#{player.lp}`\n" \
-                   "STR #{player.strength} · AGI #{player.agility} · RES #{player.resistance}"
+                   "STR #{player.strength} · AGI #{player.agility} · RES #{player.resistance}\n" \
+                   "Submission `#{player.submission}` _(#{player.submission_display})_"
         )
         c.separator(divider: false, spacing: :small)
         c.text_display(
@@ -69,7 +107,19 @@ module Commands
 
     command(:create, description: 'Create your Endless Ruins of Sin delver (!create or !create 1-5)') do |event, choice|
       if choice && !choice.empty?
-        Commands::Create.finish(event, choice.to_i)
+        if choice.match?(/\A[1-5]\z/)
+          Commands::Create.show_submission_menu(event, choice.to_i)
+        elsif CharacterArchetypes::SUBMISSION_CHOICES.key?(choice.downcase) ||
+              %w[willing open].include?(choice.downcase)
+          Commands::Create.finish(event, submission_choice: choice)
+        else
+          ErosUI.reply_v2(event, ephemeral: true) do |c|
+            c.text_display(
+              content: 'Use `!create 1`–`5` for body type, then ' \
+                       '`!create eager|curious|neutral|reluctant|resistant`.'
+            )
+          end
+        end
       else
         Commands::Create.show_menu(event)
       end

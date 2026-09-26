@@ -23,7 +23,7 @@ module Commands
 
       unless result[:ok]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: result[:log].join("\n"))
+          ErosUI.append_action_log(c, result[:log])
         end
         return
       end
@@ -31,7 +31,7 @@ module Commands
       if result[:fled]
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
-          c.text_display(content: result[:log].join("\n"))
+          ErosUI.append_action_log(c, result[:log])
         end
         return
       end
@@ -39,7 +39,7 @@ module Commands
       if result[:victory]
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
-          c.text_display(content: result[:log].join("\n"))
+          ErosUI.append_action_log(c, result[:log])
         end
         return
       end
@@ -47,7 +47,7 @@ module Commands
       if result[:defeated] || result[:broken]
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x444444) do |c|
-          c.text_display(content: result[:log].join("\n"))
+          ErosUI.append_action_log(c, result[:log])
         end
         return
       end
@@ -57,7 +57,7 @@ module Commands
       enc = result[:encounter]
       colour = enc[:color] || 0x8b1a1a
       ErosUI.reply_v2(event, colour: colour, with_actions: :combat) do |c|
-        c.text_display(content: result[:log].join("\n"))
+        ErosUI.append_action_log(c, result[:log])
         c.separator(divider: true, spacing: :small)
         c.text_display(
           content: "**#{enc[:name]}** _(#{enc[:type_name]})_ HP `#{enc[:hp]}/#{enc[:max_hp]}` · " \
