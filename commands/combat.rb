@@ -1,0 +1,84 @@
+# frozen_string_literal: true
+
+module Commands
+  module Combat
+    extend Discordrb::EventContainer
+    extend Discordrb::Commands::CommandContainer
+
+    module_function
+
+    def run_action(event, action)
+
+      player = ErosHelpers.require_player(event) or return
+
+      enc = Eros.encounter_for(player)
+      unless enc
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: 'You are not in combat. Use `/explore` or `!explore` first.')
+        end
+        return
+      end
+
+      result = Engine::CombatEngine.act!(player, action, enc)
+
+      unless result[:ok]
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: result[:log].join("\n"))
+        end
+        return
+      end
+
+      if result[:fled]
+        Eros.clear_encounter!(player)
+        ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
+          c.text_display(content: result[:log].join("\n"))
+        end
+        return
+      end
+
+      if result[:victory]
+        Eros.clear_encounter!(player)
+        ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
+          c.text_display(content: result[:log].join("\n"))
+        end
+        return
+      end
+
+      if result[:defeated] || result[:broken]
+        Eros.clear_encounter!(player)
+        ErosUI.reply_v2(event, colour: 0x444444) do |c|
+          c.text_display(content: result[:log].join("\n"))
+        end
+        return
+      end
+
+      # Ongoing — update encounter snapshot and show combat buttons again.
+      Eros.set_encounter!(player, result[:encounter])
+      enc = result[:encounter]
+      colour = enc[:color] || 0x8b1a1a
+      ErosUI.reply_v2(event, colour: colour, with_actions: :combat) do |c|
+        c.text_display(content: result[:log].join("\n"))
+        c.separator(divider: true, spacing: :small)
+        c.text_display(
+          content: "**#{enc[:name]}** _(#{enc[:type_name]})_ HP `#{enc[:hp]}/#{enc[:max_hp]}` · " \
+                   "STR `#{enc[:strength]}` · Your Defiance `#{player.defiance}` · Lust `#{player.lust}`"
+        )
+      end
+    end
+
+    command(:fight, description: 'Attack the current monster') do |event|
+      Commands::Combat.run_action(event, :fight)
+      nil
+    end
+
+    command(:flee, description: 'Try to escape combat') do |event|
+      Commands::Combat.run_action(event, :flee)
+      nil
+    end
+
+    command(:submit, description: 'Submit to the monster') do |event|
+      Commands::Combat.run_action(event, :submit)
+      nil
+    end
+  end
+end

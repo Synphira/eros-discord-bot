@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Catalog of dungeon curses. Categories match the E.R.O.S. setting bible.
+# Catalog of dungeon curses. Categories match the Endless Ruins of Sin setting bible.
 # stat_modifier_json stores flexible per-curse modifiers as a JSON object.
 Sequel.migration do
   change do

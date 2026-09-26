@@ -1,0 +1,73 @@
+# frozen_string_literal: true
+
+module Commands
+  module Explore
+    extend Discordrb::EventContainer
+    extend Discordrb::Commands::CommandContainer
+
+    module_function
+
+    def run(event)
+
+      player = ErosHelpers.require_player(event) or return
+
+      if Eros.encounter_for(player)
+        ErosUI.reply_v2(event, ephemeral: true, with_actions: :combat) do |c|
+          c.text_display(
+            content: 'You are already in combat. Choose **Fight**, **Flee**, or **Submit**.'
+          )
+        end
+        return
+      end
+
+      result = Engine::Exploration.roll(player)
+
+      case result.kind
+      when :monster, :boss
+        if result.kind == :boss
+          # BossFights already stored the encounter on the player.
+          enc = result.monster
+          enc = Engine::CombatEngine.encounter_snapshot(enc) unless enc.is_a?(Hash)
+          Eros.set_encounter!(player, enc.merge(is_boss: true))
+          ErosUI.reply_v2(event, colour: result.colour, with_actions: :combat) do |c|
+            c.text_display(content: result.message)
+            c.separator(divider: true, spacing: :small)
+            c.text_display(
+              content: '**Boss fight!** Choose **Fight**, **Flee**, or **Submit**.'
+            )
+          end
+        else
+          started = Engine::CombatEngine.start_encounter(player, monster: result.monster)
+          Eros.set_encounter!(player, started[:encounter])
+
+          ErosUI.reply_v2(event, colour: result.colour, with_actions: :combat) do |c|
+            c.text_display(content: result.message)
+            c.separator(divider: true, spacing: :small)
+            c.text_display(content: started[:message])
+          end
+        end
+      when :trap
+        if result.broken
+          ErosUI.reply_v2(event, colour: 0x444444) do |c|
+            c.text_display(content: result.message)
+          end
+        else
+          ErosUI.reply_v2(event, colour: result.colour, with_actions: :explore) do |c|
+            c.text_display(content: result.message)
+          end
+        end
+      else
+        ErosUI.reply_v2(event, colour: result.colour, with_actions: :explore) do |c|
+          c.text_display(content: result.message)
+        end
+      end
+    end
+
+    application_command(:explore) { |event| Commands::Explore.run(event) }
+
+    command(:explore, description: 'Step deeper into the endless dungeon') do |event|
+      Commands::Explore.run(event)
+      nil
+    end
+  end
+end

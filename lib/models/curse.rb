@@ -5,7 +5,7 @@ require 'json'
 # ---------------------------------------------------------------------------
 # Curse — catalog entry for a persistent affliction.
 #
-# Categories (E.R.O.S. setting):
+# Categories (Endless Ruins of Sin setting):
 #   Viscous | Infernal | Wild | Abyssal | Botanical | Necrotic | Mimetic
 #
 # Active (non-suppressed) curses raise Threat by +15 each

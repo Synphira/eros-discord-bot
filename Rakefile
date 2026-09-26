@@ -39,3 +39,10 @@ namespace :db do
     puts DB.table_exists?(:schema_info) ? DB[:schema_info].get(:version) : 'none'
   end
 end
+
+namespace :commands do
+  desc 'Register (bulk-overwrite) Discord slash commands. Optional DISCORD_GUILD_ID for instant guild sync.'
+  task :register do
+    load File.expand_path('register_commands.rb', __dir__)
+  end
+end

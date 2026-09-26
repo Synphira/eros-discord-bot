@@ -1,11 +1,22 @@
 # frozen_string_literal: true
 
+require 'json'
 require 'sequel'
 require 'logger'
 require 'fileutils'
 
+# json gem 3.x dropped :create_additions; Sequel 5.x still passes it.
+# Override before any serialization plugin runs.
+module Sequel
+  module SequelMethods
+    def parse_json(json)
+      JSON.parse(json)
+    end
+  end
+end
+
 # ---------------------------------------------------------------------------
-# SQLite connection for E.R.O.S.
+# SQLite connection for Endless Ruins of Sin.
 #
 # Prefers DATABASE_URL (e.g. sqlite://db/eros.db). Falls back to
 # SQLITE_PATH or the default path under db/eros.db.
@@ -33,6 +44,7 @@ DB.loggers << Logger.new($stdout) if ENV['EROS_SQL_LOG'] == '1'
 # so callers that only migrate may skip requiring this file's model requires
 # by setting EROS_SKIP_MODELS=1.
 unless ENV['EROS_SKIP_MODELS'] == '1'
-  require_relative '../lib/models/player'
   require_relative '../lib/models/curse'
+  require_relative '../lib/models/equipment'
+  require_relative '../lib/models/player'
 end
