@@ -46,6 +46,7 @@ Slash and prefix share the same handlers (prefix defaults to `!`):
 | `/explore` | `!explore` | Room roll; monsters open **Fight / Flee / Submit** combat |
 | `/curses` | `!curses` | List active curses grouped by monster type |
 | `/removecurse` | `!removecurse` · `!removecurse N` | Purge a curse for **50 LP** (buttons or number) |
+| `/restart` | `!restart` | Erase your delver entirely (confirm button), then pick a new body type + Submission |
 | `/levelup` | `!levelup` | Spend LP: STR/AGI/RES (10) or Level (50, +1 all stats) |
 | `/shop` | `!shop` | Browse shop by category — buy buttons, Prev/Next pages |
 | `/buy` · `/sell` | `!buy` · `!sell` | Buy / sell by name (cursed gear cannot be sold) |

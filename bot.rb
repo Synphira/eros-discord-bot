@@ -62,6 +62,7 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::RemoveCurse,
   Commands::Shop,
   Commands::Equipment,
+  Commands::Restart,
   Commands::Buttons::CreateCharacter,
   Commands::Buttons::ExplorePath,
   Commands::Buttons::Rest,
@@ -81,6 +82,7 @@ bot.ready do |_event|
     
     Engine::Shop.sync_to_db!
     Engine::Treasure.sync_to_db!
+    Engine::BossFights.sync_trophies!
     puts "Shop / treasure inventory synced (#{Equipment.count} items)."
   rescue StandardError => e
     warn "Curse catalog sync warning: #{e.message}"

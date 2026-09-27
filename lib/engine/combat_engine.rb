@@ -41,7 +41,8 @@ module Engine
         max_hp: (h[:max_hp] || h['max_hp'] || h[:hp] || h['hp']).to_i,
         special: h[:special] || h['special'],
         enraged: h[:enraged] || h['enraged'],
-        is_boss: h[:is_boss] || h['is_boss']
+        is_boss: h[:is_boss] || h['is_boss'],
+        negation_used: h[:negation_used] || h['negation_used']
       }
     end
 
@@ -68,10 +69,13 @@ module Engine
       )
 
       @player.store_encounter!(self.class.encounter_snapshot(encounter))
+      start_lines = @player.apply_combat_start_effects!(type)
+      message = build_start_message(encounter)
+      message += "\n\n#{start_lines.join("\n")}" if start_lines.any?
       {
         ok: true,
         encounter: encounter,
-        message: build_start_message(encounter)
+        message: message
       }
     end
 
@@ -103,8 +107,9 @@ module Engine
         flee_result = apply_flee!(enc, log)
         return finish_flee!(enc, log) if flee_result == :fled
       when :submit
-        broken = apply_submit!(enc, log)
-        return finish_broken!(enc, log) if broken
+        outcome = apply_submit!(enc, log)
+        return finish_broken!(enc, log) if outcome == :broken
+        return finish_satisfied!(enc, log) if outcome == :satisfied
       when :blocked
         # Action prevented by boss special; monster still acts.
       else
@@ -128,7 +133,7 @@ module Engine
         if immortal_vs?(enc[:type])
           @player.update(defiance: 1)
           log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-        else
+        elsif !@player.try_cheat_death!(log)
           return finish_defeat!(enc, log)
         end
       end
@@ -159,7 +164,8 @@ module Engine
         max_hp: max_hp,
         special: encounter[:special] || encounter['special'],
         enraged: encounter[:enraged] || encounter['enraged'],
-        is_boss: encounter[:is_boss] || encounter['is_boss']
+        is_boss: encounter[:is_boss] || encounter['is_boss'],
+        negation_used: encounter[:negation_used] || encounter['negation_used']
       }
     end
 
@@ -169,7 +175,9 @@ module Engine
       base = @player.effective_strength - (enc[:agility] / 2)
       base = base.round
       base = 1 if base < 1
-      base
+      # Flat on-hit bonuses (Soul-Draining Blade, Hellfire Blood vs demons) bypass armor.
+      base + @player.equipment_effect_sum('damage').round +
+        @player.curse_effect_sum("#{enc[:type]}_thorns").round
     end
 
     # Monster hits raise lust only (resistance + lust_resist soften; curse mults apply).
@@ -205,9 +213,8 @@ module Engine
       # Life drain for undead
       return unless enc[:type] == 'undead' && @player.curse_effect_flag?('undead_drain')
 
-      drain = [damage / 2, 1].max
-      @player.adjust_defiance!(drain)
-      log << "Life Drain: you siphon **#{drain}** defiance! (now #{@player.defiance})"
+      drain = @player.heal_defiance!([damage / 2, 1].max)
+      log << "Life Drain: you siphon **#{drain}** defiance! (now #{@player.defiance}/#{@player.max_defiance})"
     end
 
     # --- Flee --------------------------------------------------------------
@@ -218,12 +225,13 @@ module Engine
         return :blocked
       end
 
-      flee_chance = @player.agility * 10
-      flee_chance += @player.curse_effect_sum('agility') * 10
+      flee_chance = @player.effective_agility * 10.0
+      flee_chance *= 1.0 + @player.flee_bonus
       flee_chance *= @player.curse_effect_product("#{enc[:type]}_escape_bonus", default: 1.0)
+      flee_chance *= @player.curse_effect_product("#{enc[:type]}_escape_penalty", default: 1.0)
       bind = @player.curse_effect_product("#{enc[:type]}_bind_bonus", default: 1.0)
       flee_chance /= bind if bind.positive?
-      flee_chance = [[flee_chance, 1].max, 100].min
+      flee_chance = [[flee_chance.round, 1].max, 100].min
 
       if rand(100) < flee_chance
         log << 'You successfully flee from combat!'
@@ -241,6 +249,7 @@ module Engine
 
     # --- Submit ------------------------------------------------------------
 
+    # Returns :satisfied (monster spent — encounter ends), :broken, or nil (fight continues).
     def apply_submit!(enc, log)
       # Scale LP with monster strength (encounters have no :level field).
       lp_reward = 1 + (enc[:strength].to_i / 2)
@@ -254,34 +263,39 @@ module Engine
       @player.gain_lust!(lust_increase)
       log << "Your lust increases by **#{lust_increase}** from the passionate encounter! (now #{@player.lust})"
 
-      if check_monster_orgasm(enc)
-        log << "The #{enc[:name]} shudders with pleasure, completely satisfied by your submission!"
-        log << 'The monster, now spent, allows you to escape without further incident.'
-        return true
-      end
-
       climax = @player.try_climax!(monster_type: enc[:type])
-      return false unless climax
-
-      log.concat(climax[:lines])
-      if climax[:broken]
-        if immortal_vs?(enc[:type])
-          @player.update(defiance: 1)
-          log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-          return false
+      if climax
+        log.concat(climax[:lines])
+        if climax[:broken]
+          if immortal_vs?(enc[:type])
+            @player.update(defiance: 1)
+            log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
+          else
+            log << "You've been completely consumed by pleasure! Game over."
+            return :broken
+          end
         end
-        log << "You've been completely consumed by pleasure! Game over."
-        return true
       end
 
-      false
+      chance = monster_satisfy_chance
+      if rand < chance
+        log << "The #{enc[:name]} shudders with pleasure, completely satisfied by your submission!"
+        log << 'The monster, now spent, lets you slip away without further incident.'
+        return :satisfied
+      end
+
+      log << "The #{enc[:name]} isn't satisfied yet _(#{(chance * 100).round}% chance)_…"
+      nil
     end
 
-    def check_monster_orgasm(_enc)
-      submission_bonus = @player.effective_submission
-      base_chance = 0.2 + (submission_bonus * 0.1)
-      chance = [base_chance, 0.7].min
-      rand <= chance
+    # Submission makes monsters easier to satisfy: 20% base, +10% per point, 5–80%.
+    def monster_satisfy_chance
+      (0.2 + (@player.effective_submission * 0.1)).clamp(0.05, 0.8)
+    end
+
+    def finish_satisfied!(enc, log)
+      @player.clear_encounter!
+      { ok: true, satisfied: true, encounter: enc, log: log }
     end
 
     def climax_from_mimics?(enc, log)
@@ -307,10 +321,24 @@ module Engine
     def apply_monster_turn!(enc, log)
       return false if enc[:hp] <= 0
 
-      regen = @player.curse_effect_sum("#{enc[:type]}_defiance_regen").round
+      regen = @player.equipment_effect_sum('defiance_regen').round
       if regen.positive?
-        @player.adjust_defiance!(regen)
-        log << "You regain **#{regen}** defiance! (now #{@player.defiance})"
+        gained = @player.heal_defiance!(regen)
+        log << "Your gear restores **#{gained}** defiance. (now #{@player.defiance}/#{@player.max_defiance})" if gained.positive?
+      end
+
+      # Phantom Latch: at most one negated attack per combat.
+      negation = @player.curse_effect_sum('negation_chance')
+      if !enc[:negation_used] && negation.positive? && rand < negation
+        enc[:negation_used] = true
+        log << "Your flesh briefly merges with a nearby object — the #{enc[:name]}'s attack is **absorbed**! " \
+               '_(Phantom Latch, once per combat)_'
+        return false
+      end
+
+      if enc[:type] != 'undead' && rand >= @player.curse_effect_product('accuracy', default: 1.0)
+        log << "The #{enc[:name]} flinches from your necrotic aura and **misses** you!"
+        return false
       end
 
       lust_hit = monster_lust_hit(enc)
@@ -352,24 +380,11 @@ module Engine
         log << "You defeated the #{enc[:name]}! You gain **#{reward[:lp]}** Lust Points!"
 
         if reward[:special_item]
-          item = ::Equipment.find_or_create(name: reward[:special_item]) do |e|
-            e.type = 'special'
-            e.slot = 'accessory'
-            e.description = reward[:description]
-            e.stat_modifiers = {}
-            e.cost = 0
-            e.rarity = 5
-            e.cursed = false
-            e.removal_cost = 0
-          end
-          # Refresh description if the catalog row already existed.
-          if item.description.to_s.empty? && reward[:description]
-            item.update(description: reward[:description])
-          end
-
-          grant = @player.grant_equipment!(item, auto_equip: false)
+          Engine::BossFights.sync_trophies!
+          item = ::Equipment.first(name: reward[:special_item])
+          grant = @player.grant_equipment!(item, auto_equip: true)
           if grant[:ok]
-            log << "You also received **#{reward[:special_item]}** as a trophy!"
+            log << "You also received **#{reward[:special_item]}** as a trophy! _(#{item.description})_"
           elsif grant[:error] == :duplicate
             log << "You already carry **#{reward[:special_item]}** — no duplicate trophy."
           else
@@ -387,6 +402,7 @@ module Engine
         # Regular monster victory
         lp_gain = VICTORY_LP
         lp_gain = (lp_gain * @player.curse_effect_product("#{enc[:type]}_lp_mult", default: 1.0)).to_i
+        lp_gain += @player.curse_effect_sum("#{enc[:type]}_lp_bonus").round
 
         if @player.curse_effect_flag?("#{enc[:type]}_no_lp")
           log << "You defeated the #{enc[:name]}! You gain no Lust Points due to your curse."
@@ -418,7 +434,7 @@ module Engine
       if loss[:gear_lost]&.any?
         log << "Your non-cursed gear is lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
       end
-      log << 'Floor, defiance, and lust reset — LP, curses, and living (cursed) gear persist.'
+      log << 'Floor, defiance, and lust reset — LP, curses, boss trophies, and living (cursed) gear persist.'
       { ok: true, defeated: true, encounter: enc, log: log, curse: result[:curse] }
     end
 
@@ -435,7 +451,7 @@ module Engine
       if loss[:gear_lost]&.any?
         log << "Your non-cursed gear is lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
       end
-      log << 'Floor, defiance, and lust reset — LP, curses, and living (cursed) gear persist.'
+      log << 'Floor, defiance, and lust reset — LP, curses, boss trophies, and living (cursed) gear persist.'
       { ok: true, broken: true, encounter: enc, log: log, curse: result[:curse] }
     end
 
@@ -456,7 +472,7 @@ module Engine
         **Combat!** What do you want to do?
 
         **#{encounter.name}** _(#{encounter.type_name})_ — HP `#{encounter.hp}/#{encounter.max_hp}` · STR `#{encounter.strength}` · AGI `#{encounter.agility}` · Lust hit `#{encounter.lust_damage}`
-        Your Defiance `#{@player.defiance}` · Lust `#{@player.lust}` · STR #{@player.effective_strength} · AGI #{@player.effective_agility} · RES #{@player.effective_resistance}
+        Your Defiance `#{@player.defiance}/#{@player.max_defiance}` · Lust `#{@player.lust}` · STR #{@player.effective_strength} · AGI #{@player.effective_agility} · RES #{@player.effective_resistance}
 
         This monster will sexually assault you regardless of your choice. Choose **Fight**, **Flee**, or **Submit** — or type `!fight` / `!flee` / `!submit`.
       MSG

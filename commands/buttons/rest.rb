@@ -28,8 +28,8 @@ module Commands
 
         old_lust = player.lust
         old_def = player.defiance
-        player.update(lust: [player.lust - lust_relief, 0].max)
-        player.adjust_defiance!(defiance_gain)
+        player.update(lust: [player.lust - lust_relief, player.base_lust].max) if player.lust > player.base_lust
+        player.heal_defiance!(defiance_gain)
         threat = Engine::ThreatCalculator.calculate(player)
 
         lust_lost = old_lust - player.lust
@@ -43,7 +43,7 @@ module Commands
           c.text_display(
             content: "You rest against cold stone and catch your breath.\n" \
                      "**−#{lust_lost} Lust** (now `#{player.lust}`) · " \
-                     "**+#{def_gained} Defiance** (now `#{player.defiance}`)\n" \
+                     "**+#{def_gained} Defiance** (now `#{player.defiance}/#{player.max_defiance}`)\n" \
                      "Threat **#{ErosUI.threat_label(threat.category)}** " \
                      "#{ErosUI.threat_bar(threat.percent)}"
           )

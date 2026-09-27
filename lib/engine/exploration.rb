@@ -73,6 +73,8 @@ module Engine
         end
       end
 
+      return sanctuary_room if @player.sanctuary
+
       # Random lewd events (not during combat).
       if Engine::RandomEvents.should_trigger?(@player)
         return event_room(Engine::RandomEvents.start!(@player))
@@ -81,6 +83,7 @@ module Engine
       # Regular room type roll — high Threat biases toward monster encounters.
       threat = ThreatCalculator.monster_modifiers(@player)
       monster_chance = [[28 + threat.encounter_bonus, 55].min, 15].max
+      monster_chance = [[(monster_chance * @player.encounter_rate_multiplier).round, 5].max, 70].min
       trap_end = monster_chance + 17
       treasure_end = trap_end + 15
       stairs_end = treasure_end + 15
@@ -101,6 +104,18 @@ module Engine
     end
 
     private
+
+    # Bottled Sanctuary: one guaranteed-safe room (treasure, stairs, or empty).
+    def sanctuary_room
+      @player.update(sanctuary: false)
+      room = case rand(100)
+             when 0...35 then treasure_room
+             when 35...65 then stairs_room
+             else empty_room
+             end
+      room.message = "_The bottled sanctuary shields you — this room is safe._\n\n#{room.message}"
+      room
+    end
 
     def pending_event_nudge
       data = @player.event_data
@@ -189,7 +204,7 @@ module Engine
           You've triggered a **#{trap[:name]}**!
           #{detail}
 
-          Lust `#{@player.lust}` · Defiance `#{@player.defiance}` · LP `#{@player.lp}` · AGI `#{@player.agility}`
+          Lust `#{@player.lust}` · Defiance `#{@player.defiance}/#{@player.max_defiance}` · LP `#{@player.lp}` · AGI `#{@player.agility}`
         MSG
       )
     end
@@ -234,7 +249,7 @@ module Engine
 
           You find an empty room. Nothing of interest here.
 
-          Defiance `#{@player.defiance}` · Lust `#{@player.lust}` · LP `#{@player.lp}`
+          Defiance `#{@player.defiance}/#{@player.max_defiance}` · Lust `#{@player.lust}` · LP `#{@player.lp}`
         MSG
       )
     end

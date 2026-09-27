@@ -19,6 +19,7 @@ module Commands
   ['/equip', '!equip [item]', 'Equip an item'],
   ['/unequip', '!unequip [item]', 'Unequip normal gear'],
   ['/remove', '!remove [item]', 'Destroy cursed mimic gear for LP'],
+  ['/restart', '!restart', 'Erase your delver entirely and pick a new body type + Submission'],
   ['/help', '!help', 'List all commands'],
   ['—', '!fight · !flee · !submit', 'Combat actions (also buttons)']
 ].freeze

@@ -19,7 +19,8 @@ module SlashCommands
     { name: 'explore', description: 'Step deeper into the endless dungeon' },
     { name: 'levelup', description: 'Spend Lust Points on STR / AGI / RES / Level' },
     { name: 'curses', description: 'List your active curses by monster type' },
-    { name: 'removecurse', description: 'Spend 50 LP to purge a curse' }
+    { name: 'removecurse', description: 'Spend 50 LP to purge a curse' },
+    { name: 'restart', description: 'Erase your delver and start over with a new body type' }
   ].freeze
 
   module_function

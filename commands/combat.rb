@@ -28,7 +28,7 @@ module Commands
         return
       end
 
-      if result[:fled]
+      if result[:fled] || result[:satisfied]
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
           ErosUI.append_action_log(c, result[:log])
@@ -61,7 +61,8 @@ module Commands
         c.separator(divider: true, spacing: :small)
         c.text_display(
           content: "**#{enc[:name]}** _(#{enc[:type_name]})_ HP `#{enc[:hp]}/#{enc[:max_hp]}` · " \
-                   "STR `#{enc[:strength]}` · Your Defiance `#{player.defiance}` · Lust `#{player.lust}`"
+                   "STR `#{enc[:strength]}` · Your Defiance `#{player.defiance}/#{player.max_defiance}` · " \
+                   "Lust `#{player.lust}`"
         )
       end
     end

@@ -38,6 +38,15 @@ module Commands
           c.text_display(content: "**#{slot.capitalize}:** #{label}")
         end
 
+        trophies = player.equipped_items.select { |item| item.slot == Player::TROPHY_SLOT }
+        trophy_label = trophies.empty? ? 'None' : trophies.map(&:name).join(', ')
+        c.text_display(content: "**Trophies:** #{trophy_label}")
+        phylactery = trophies.any? { |t| t.stat_modifiers['cheat_death'] }
+        if phylactery
+          state = player.phylactery_used ? 'spent this run' : 'ready'
+          c.text_display(content: "_Lich's Phylactery: **#{state}**_")
+        end
+
         c.separator(divider: true, spacing: :small)
         c.text_display(content: '**Inventory:**')
 
@@ -53,7 +62,8 @@ module Commands
             bits << '[CURSED]' if item.cursed
             bits << "remove #{item.removal_cost} LP" if item.cursed
             status = bits.empty? ? '' : " #{bits.join(' · ')}"
-            c.text_display(content: "#{index + 1}. **#{item.name}**#{status}\n_#{item.description}_")
+            effects = item.stat_modifiers.empty? ? '' : "\n#{Engine::Treasure.format_stat_changes(item.stat_modifiers)}"
+            c.text_display(content: "#{index + 1}. **#{item.name}**#{status}\n_#{item.description}_#{effects}")
           end
         end
 

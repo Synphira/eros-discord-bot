@@ -45,8 +45,9 @@ module Engine
 }.freeze
 
     ENCOUNTER_KEYS = {
-      beast: 'beast_encounter_rate',
-      undead: 'undead_tracking'
+      beast: %w[beast_encounter_rate],
+      undead: %w[undead_tracking undead_encounter_rate],
+      plant: %w[plant_encounter_rate]
     }.freeze
 
     module_function
@@ -94,8 +95,10 @@ module Engine
     def weighted_type(player)
       weights = keys.map do |type|
         weight = 1.0
-        if player && ENCOUNTER_KEYS[type]
-          weight *= player.curse_effect_product(ENCOUNTER_KEYS[type], default: 1.0)
+        if player
+          Array(ENCOUNTER_KEYS[type]).each do |key|
+            weight *= player.curse_effect_product(key, default: 1.0)
+          end
         end
         [type, [weight, 0.01].max]
       end

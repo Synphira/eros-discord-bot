@@ -136,34 +136,45 @@ class Player < Sequel::Model(:players)
 
   def effective_strength
     base = [strength + curse_effect_sum('strength').round, 1].max
-    [base + equipment_effect_sum('strength'), 1].max
+    [base + equipment_effect_sum('strength').round, 1].max
   end
 
   def effective_agility
     base = [agility + curse_effect_sum('agility').round, 1].max
-    [base + equipment_effect_sum('agility'), 1].max
+    [base + equipment_effect_sum('agility').round, 1].max
   end
 
   def effective_resistance
     base = [resistance + curse_effect_sum('resistance').round, 1].max
-    [base + equipment_effect_sum('resistance'), 1].max
+    [base + equipment_effect_sum('resistance').round, 1].max
   end
 
   def effective_lust_resist
-    equipment_effect_sum('lust_resist') + curse_effect_sum('lust_resist').round
+    (equipment_effect_sum('lust_resist') + curse_effect_sum('lust_resist')).round
   end
 
   def effective_submission
-    submission.to_i + equipment_effect_sum('submission')
+    submission.to_i + equipment_effect_sum('submission').round
   end
 
-  # Global + type-specific lust multipliers for the current foe.
+  # Global + type-specific lust multipliers (curses and gear) for the current foe.
   def lust_damage_multiplier(monster_type: nil)
     mult = curse_effect_product('lust_mult', default: 1.0)
+    mult *= equipment_effect_product('lust_mult')
+    mult *= curse_effect_product('damage_reduction', default: 1.0)
     if monster_type
       mult *= curse_effect_product("#{monster_type}_lust_mult", default: 1.0)
     end
     mult <= 0 ? 1.0 : mult
+  end
+
+  # Multiplier on the chance an explore room is a monster room.
+  def encounter_rate_multiplier
+    curse_effect_product('encounter_rate', default: 1.0) * equipment_effect_product('encounter_rate')
+  end
+
+  def flee_bonus
+    equipment_effect_sum('flee_bonus')
   end
 
   def max_lp_base
@@ -172,9 +183,45 @@ class Player < Sequel::Model(:players)
 
   # --- Life / death / run reset --------------------------------------------
 
+  # Defiance is the delver's HP: "max HP" effects raise the defiance cap.
+  def max_defiance
+    bonus = curse_effect_sum('max_hp_bonus') + equipment_effect_sum('max_hp')
+    [MAX_DEFIANCE + bonus.round, 1].max
+  end
+
   def starting_defiance
     mult = curse_effect_product('defiance_start', default: 1.0)
-    [[(MAX_DEFIANCE * mult).round, 1].max, MAX_DEFIANCE].min
+    [[(max_defiance * mult).round, 1].max, max_defiance].min
+  end
+
+  # Lust never rests below this (Infernal Lust: meter starts 30% higher).
+  def base_lust
+    [[curse_effect_sum('lust_start_bonus').round, 0].max, CLIMAX_THRESHOLD - 10].min
+  end
+
+  # Restorative defiance gains, scaled by healing curses (e.g. Deathly Resilience).
+  def heal_defiance!(amount)
+    scaled = (amount * curse_effect_product('healing_mult', default: 1.0)).round
+    scaled = 1 if amount.positive? && scaled < 1
+    before = defiance
+    adjust_defiance!(scaled)
+    defiance - before
+  end
+
+  def clamp_defiance!
+    update(defiance: max_defiance) if defiance > max_defiance
+  end
+
+  # Lich's Phylactery: once per run, survive a finishing blow.
+  def try_cheat_death!(lines)
+    return false if phylactery_used
+    return false unless equipment_effect_flag?('cheat_death')
+
+    restored = [(max_defiance / 2.0).round, 1].max
+    update(defiance: restored, lust: base_lust, phylactery_used: true)
+    lines << "**Lich's Phylactery** cracks and pulls your soul back! Defiance restored to **#{restored}** " \
+             '_(once per run)_.'
+    true
   end
 
   # Full run wipe after defeat or being broken.
@@ -193,15 +240,15 @@ class Player < Sequel::Model(:players)
       agility: 5,
       resistance: 5,
       defiance: starting_defiance,
-      lust: 0,
+      lust: base_lust,
       current_floor: 1,
       pos_x: 0,
       pos_y: 0,
-      hp: max_hp,
       in_combat: false,
       active_encounter: nil,
       active_event: nil,
-      highest_boss_defeated: 0
+      highest_boss_defeated: 0,
+      phylactery_used: false
     )
 
     {
@@ -304,12 +351,8 @@ class Player < Sequel::Model(:players)
     end
   end
 
-  def heal!(amount)
-    update(hp: [hp + amount, max_hp].min)
-  end
-
   def restore_defiance!(amount)
-    adjust_defiance!(amount)
+    heal_defiance!(amount)
   end
 
   # Afflict a curse from the defeating monster's type catalog.
@@ -389,7 +432,7 @@ class Player < Sequel::Model(:players)
     return nil if lust < CLIMAX_THRESHOLD
 
     lines = []
-    update(lust: 0)
+    update(lust: base_lust)
 
     type = monster_type&.to_s
     climax_lp = type ? curse_effect_sum("#{type}_climax_lp").round : 0
@@ -399,13 +442,18 @@ class Player < Sequel::Model(:players)
     end
 
     adjust_defiance!(-CLIMAX_DEFIANCE_LOSS)
-    lines << "You climax! Your defiance drops by **#{CLIMAX_DEFIANCE_LOSS}**! (now #{defiance})"
+    lines << "You climax! Your defiance drops by **#{CLIMAX_DEFIANCE_LOSS}**! (now #{defiance}/#{max_defiance})"
 
-    { lines: lines, broken: defiance <= 0 }
+    broken = defiance <= 0
+    # A no-death curse already saves you from this foe; keep the phylactery charge.
+    immortal = type && curse_effect_flag?("#{type}_no_death")
+    broken = false if broken && !immortal && try_cheat_death!(lines)
+
+    { lines: lines, broken: broken }
   end
 
   def adjust_defiance!(delta)
-    update(defiance: [[defiance + delta, 0].max, MAX_DEFIANCE].min)
+    update(defiance: [[defiance + delta, 0].max, max_defiance].min)
   end
 
   # --- Shrine / curse removal ----------------------------------------------
@@ -494,6 +542,19 @@ class Player < Sequel::Model(:players)
 
   # --- Equipment -----------------------------------------------------------
 
+  TROPHY_SLOT = 'trophy'
+
+  # Effects that fire when a fight begins. Returns log lines.
+  def apply_combat_start_effects!(monster_type)
+    lines = []
+    regen = curse_effect_sum("#{monster_type}_defiance_regen").round
+    if regen.positive?
+      gained = heal_defiance!(regen)
+      lines << "Photosynthesis: you regain **#{gained}** defiance! (now #{defiance}/#{max_defiance})" if gained.positive?
+    end
+    lines
+  end
+
   def owns_equipment?(equipment_id)
     DB[:player_equipment].where(player_id: discord_id, equipment_id: equipment_id).count.positive?
   end
@@ -553,7 +614,8 @@ class Player < Sequel::Model(:players)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
 
-    current = equipment_for_slot(item.slot)
+    # Boss trophies stack — every trophy can be worn at once.
+    current = item.slot == TROPHY_SLOT ? nil : equipment_for_slot(item.slot)
     if current
       if current.cursed && current.id != item.id
         return {
@@ -570,6 +632,7 @@ class Player < Sequel::Model(:players)
     DB[:player_equipment]
       .where(player_id: discord_id, equipment_id: equipment_id)
       .update(is_equipped: true)
+    clamp_defiance!
 
     { ok: true, message: "Equipped **#{item.name}**!" }
   end
@@ -589,6 +652,7 @@ class Player < Sequel::Model(:players)
     DB[:player_equipment]
       .where(player_id: discord_id, equipment_id: equipment_id)
       .update(is_equipped: false)
+    clamp_defiance!
 
     { ok: true, message: "Unequipped **#{item.name}**!" }
   end
@@ -609,6 +673,7 @@ class Player < Sequel::Model(:players)
     end
 
     DB[:player_equipment].where(player_id: discord_id, equipment_id: item.id).delete
+    clamp_defiance!
     {
       ok: true,
       message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free."
@@ -621,6 +686,7 @@ class Player < Sequel::Model(:players)
            .join(:equipment, id: :equipment_id)
            .where(player_id: discord_id)
            .where(Sequel[:equipment][:cursed] => false)
+           .exclude(Sequel[:equipment][:slot] => TROPHY_SLOT)
            .select(Sequel[:equipment][:name], Sequel[:player_equipment][:id])
            .all
 
@@ -646,11 +712,27 @@ class Player < Sequel::Model(:players)
     end
   end
 
+  def equipped_items
+    equipment_dataset.where(Sequel[:player_equipment][:is_equipped] => true).all
+  end
+
+  def equipment_effect_values(key)
+    equipped_items.map { |item| item.stat_modifiers[key.to_s] }.compact
+  end
+
+  # Additive gear effects (float — callers round where an integer stat is needed).
   def equipment_effect_sum(key)
-    equipment_dataset
-      .where(Sequel[:player_equipment][:is_equipped] => true)
-      .all
-      .sum { |item| item.stat_modifiers[key.to_s].to_i }
+    equipment_effect_values(key).sum { |v| v.is_a?(Numeric) ? v.to_f : 0.0 }
+  end
+
+  # Multiplicative gear effects (e.g. lust_mult 0.8).
+  def equipment_effect_product(key)
+    vals = equipment_effect_values(key).select { |v| v.is_a?(Numeric) && v.positive? }
+    vals.reduce(1.0) { |acc, v| acc * v.to_f }
+  end
+
+  def equipment_effect_flag?(key)
+    equipment_effect_values(key).any? { |v| v == true || v.to_s == 'true' }
   end
 end
 

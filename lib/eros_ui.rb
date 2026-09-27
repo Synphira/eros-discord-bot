@@ -336,11 +336,11 @@ module ErosUI
                "Lv **#{player.level}** · Floor **#{player.current_floor}** " \
                "_(#{player.pos_x}, #{player.pos_y})_\n" \
                "**Deepest floor** `#{player.highest_floor_reached}`\n" \
-               "**Submission** `#{player.submission}` _(#{player.submission_display})_"
+               "**Submission** `#{player.effective_submission}` _(#{player.submission_display}, " \
+               "base #{player.submission})_"
     )
     container.text_display(
-      content: "**HP** `#{player.hp}/#{player.max_hp}`  ·  " \
-               "**Defiance** `#{player.defiance}`  ·  " \
+      content: "**Defiance** `#{player.defiance}/#{player.max_defiance}`  ·  " \
                "**Lust** `#{player.lust}`  ·  " \
                "**LP** `#{player.lp}`"
     )

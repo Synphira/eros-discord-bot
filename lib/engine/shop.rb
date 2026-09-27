@@ -26,8 +26,8 @@ module Engine
         name: 'Soul-Draining Blade',
         type: 'weapon',
         slot: 'weapon',
-        description: 'A dark blade that feeds on the life force of its victims.',
-        stat_modifiers: { 'strength' => 4, 'lust_damage' => 2 },
+        description: 'A dark blade that feeds on the life force of its victims. +2 damage on every hit.',
+        stat_modifiers: { 'strength' => 4, 'damage' => 2 },
         cost: 60,
         rarity: 3
       },
@@ -53,7 +53,7 @@ module Engine
         name: 'Abyssal Plate',
         type: 'armor',
         slot: 'chest',
-        description: 'Armor forged in the deepest parts of the abyss.',
+        description: 'Armor forged in the deepest parts of the abyss. +10 max Defiance.',
         stat_modifiers: { 'resistance' => 5, 'max_hp' => 10 },
         cost: 80,
         rarity: 4
@@ -71,7 +71,7 @@ module Engine
         name: 'Talisman of Escape',
         type: 'accessory',
         slot: 'accessory',
-        description: 'A talisman that improves your chances of fleeing.',
+        description: 'A talisman that improves your chances of fleeing by 20%.',
         stat_modifiers: { 'flee_bonus' => 0.2 },
         cost: 35,
         rarity: 2
@@ -80,8 +80,8 @@ module Engine
         name: 'Ring of Sustenance',
         type: 'accessory',
         slot: 'accessory',
-        description: 'A ring that slowly restores your vitality.',
-        stat_modifiers: { 'hp_regen' => 1 },
+        description: 'A ring that slowly restores your vitality. +3 Defiance each combat round.',
+        stat_modifiers: { 'defiance_regen' => 3 },
         cost: 45,
         rarity: 3
       },
@@ -89,7 +89,7 @@ module Engine
         name: 'Curse Purification Scroll',
         type: 'special',
         slot: 'consumable',
-        description: 'A scroll that can remove one curse without spending LP.',
+        description: 'Burns away one random curse on the spot (no extra removal fee).',
         cost: 100,
         rarity: 4
       },
@@ -97,7 +97,7 @@ module Engine
         name: 'Bottled Sanctuary',
         type: 'special',
         slot: 'consumable',
-        description: 'A magical sanctuary that guarantees safety for your next exploration.',
+        description: 'Your next exploration is safe: no monsters, traps, or events.',
         cost: 75,
         rarity: 3
       }
@@ -200,15 +200,18 @@ module Engine
           if player.active_curse_count.positive?
             player.spend_lp!(item.cost)
             curse_to_remove = player.active_curses_ordered.sample
-            player.remove_curse_at!(player.active_curses_ordered.index(curse_to_remove))
+            DB[:player_curses].where(player_id: player.discord_id, curse_id: curse_to_remove.id).delete
+            player.clamp_defiance!
             return { ok: true, message: "You used the scroll to remove the **#{curse_to_remove.name}** curse!" }
           end
           return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" }
         when 'Bottled Sanctuary'
-          player.spend_lp!(item.cost)
-          if player.columns.include?(:sanctuary)
-            player.update(sanctuary: true)
+          if player.sanctuary
+            return { ok: false, error: :already_active, message: 'Your sanctuary is already active — explore first.' }
           end
+
+          player.spend_lp!(item.cost)
+          player.update(sanctuary: true)
           return { ok: true, message: 'You drink from the bottled sanctuary. Your next exploration will be safe!' }
         end
       end

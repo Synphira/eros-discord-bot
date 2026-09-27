@@ -146,6 +146,13 @@ module Engine
         end
 
       lines.concat(loot[:lines])
+
+      bonus_lp = player.curse_effect_sum('mimic_treasure_lp').round
+      if bonus_lp.positive?
+        player.gain_lp!(bonus_lp)
+        lines << "Your craving for containers pays off — **+#{bonus_lp} LP** (now `#{player.lp}`)."
+      end
+
       {
         lines: lines,
         climax: loot[:climax],
@@ -192,15 +199,15 @@ module Engine
       if roll < 35
         # LP pouch
         amount = TREASURE_LP_BASE + (level / 2)
-        amount += player.curse_effect_sum('mimic_treasure_lp').round
         player.gain_lp!(amount)
         lines << "A pouch of lust-essence — **+#{amount} LP** (now `#{player.lp}`)."
       elsif roll < 60
         # Defiance tonic — drunk immediately
         amount = 15 + (level * 2)
         before = player.defiance
-        player.adjust_defiance!(amount)
-        lines << "A **Defiance Tonic**. You drink it on the spot — **+#{amount} Defiance** (`#{before}` → `#{player.defiance}`)."
+        gained = player.heal_defiance!(amount)
+        lines << "A **Defiance Tonic**. You drink it on the spot — **+#{gained} Defiance** " \
+                 "(`#{before}` → `#{player.defiance}/#{player.max_defiance}`)."
       elsif roll < 85
         # Basic equipment
         gear_lines = grant_random_basic_gear(player)
@@ -218,8 +225,8 @@ module Engine
       # Rare bonus: second defiance sip
       if rand < 0.08
         bonus = 8 + level
-        player.adjust_defiance!(bonus)
-        lines << "A cracked vial spills into your mouth — **+#{bonus} Defiance** more (now `#{player.defiance}`)."
+        gained = player.heal_defiance!(bonus)
+        lines << "A cracked vial spills into your mouth — **+#{gained} Defiance** more (now `#{player.defiance}`)."
       end
 
       { lines: lines, climax: climax, broken: broken }
@@ -251,7 +258,11 @@ module Engine
       return '_none_' if stats.nil? || stats.empty?
 
       stats.map do |stat, amount|
-        sign = amount.to_i.positive? ? '+' : ''
+        next "`#{stat}`" if amount == true
+        next "`#{stat}` #{amount}" unless amount.is_a?(Numeric)
+        next "`#{stat}` ×#{amount}" if stat.to_s.end_with?('_mult', '_rate')
+
+        sign = amount.positive? ? '+' : ''
         "`#{stat}` #{sign}#{amount}"
       end.join(', ')
     end

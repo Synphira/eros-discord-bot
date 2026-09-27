@@ -52,6 +52,21 @@ module Engine
         description: 'You find yourself attracted to inanimate objects, gaining 5 LP when finding treasure but taking 20% more damage from mimics',
         effects: { 'mimic_treasure_lp' => 5, 'mimic_damage_mult' => 1.2 }
         },
+        {
+          name: 'Mimic Flesh',
+          description: "Your skin takes on a partially wood-and-flesh texture, sometimes forming small openings or appendages without your control. This makes you slightly more durable (10% less damage from all monsters) but your body's unnatural transformation causes constant arousal (15% more lust damage).",
+          effects: { 'damage_reduction' => 0.9, 'mimic_lust_mult' => 1.15 }
+        },
+        {
+          name: 'Box Cravings',
+          description: 'You find yourself inexplicably drawn to boxes and containers, sometimes unable to resist opening them. This makes you more likely to discover hidden treasures (5 LP per container found) but also makes you vulnerable to mimic attacks (15% more damage from mimics).',
+          effects: { 'mimic_treasure_lp' => 5, 'mimic_damage_mult' => 1.15 }
+        },
+        {
+          name: 'Phantom Latch',
+          description: 'A spectral connection sometimes forms between your body and nearby objects, causing them to temporarily merge with your flesh. This grants you limited object absorption abilities (10% chance to negate one attack per combat) but the merging sensation is intensely pleasurable (20% more lust damage).',
+          effects: { 'negation_chance' => 0.1, 'mimic_lust_mult' => 1.2 }
+        },
       ],
       'demon' => [
         {
@@ -99,7 +114,7 @@ module Engine
         {
           name: 'Gelatinous Form',
           description: 'Your body becomes partially amorphous, reducing all damage by 15% but making you 25% more vulnerable to lust',
-          effects: { 'slime_damage_reduction' => 0.85, 'slime_lust_mult' => 1.25 }
+          effects: { 'damage_reduction' => 0.85, 'slime_lust_mult' => 1.25 }
         },
         {
           name: 'Fluid Form',
