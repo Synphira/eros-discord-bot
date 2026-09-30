@@ -3,7 +3,7 @@
 Sequel.migration do
   change do
     alter_table(:players) do
-      add_column :highest_floor_reached, Integer, null: false, default: 1
+      add_column :conditions, String, text: true, null: false, default: '[]'
     end
   end
 end

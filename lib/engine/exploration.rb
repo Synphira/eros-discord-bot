@@ -7,11 +7,6 @@ require_relative 'treasure'
 require_relative 'random_events'
 
 module Engine
-  # Exploration — weighted room roll for /explore and !explore.
-  #
-  #   event chance first (when not in an active event)
-  #   then: monster / trap / treasure / stairs / empty
-  #
   class Exploration
     RoomResult = Struct.new(
       :kind, :message, :colour, :with_actions, :monster, :trap, :broken,
@@ -51,14 +46,12 @@ module Engine
     end
 
     def roll
-      # Finish / resume pending events before a new room.
       if @player.active_event?
         return pending_event_nudge
       end
 
-      # Boss gate once per floor multiple of 5 (not every explore on that floor).
       floor = @player.current_floor
-      if (floor % 5).zero? && floor > @player.highest_boss_defeated.to_i
+      if Engine::Tower.boss_floor?(floor) && floor > @player.highest_boss_defeated.to_i
         boss = Engine::BossFights.start_boss_encounter(@player, floor)
         if boss
           colour = boss[:encounter].is_a?(Hash) ? boss[:encounter][:color] : boss[:encounter].color
@@ -75,15 +68,14 @@ module Engine
 
       return sanctuary_room if @player.sanctuary
 
-      # Random lewd events (not during combat).
       if Engine::RandomEvents.should_trigger?(@player)
         return event_room(Engine::RandomEvents.start!(@player))
       end
 
-      # Regular room type roll — high Threat biases toward monster encounters.
       threat = ThreatCalculator.monster_modifiers(@player)
       monster_chance = [[28 + threat.encounter_bonus, 55].min, 15].max
-      monster_chance = [[(monster_chance * @player.encounter_rate_multiplier).round, 5].max, 70].min
+      rate = @player.encounter_rate_multiplier * Engine::TransformationSystem.monster_rate(@player)
+      monster_chance = [[(monster_chance * rate).round, 5].max, 70].min
       trap_end = monster_chance + 17
       treasure_end = trap_end + 15
       stairs_end = treasure_end + 15
@@ -105,7 +97,6 @@ module Engine
 
     private
 
-    # Bottled Sanctuary: one guaranteed-safe room (treasure, stairs, or empty).
     def sanctuary_room
       @player.update(sanctuary: false)
       room = case rand(100)
@@ -120,7 +111,7 @@ module Engine
     def pending_event_nudge
       data = @player.event_data
       if data[:mode].to_s == 'choice'
-        choices = Engine::RandomEvents.glory_hole_choices(@player)
+        choices = Engine::RandomEvents.choices_for(@player, data)
         RoomResult.new(
           kind: :event,
           colour: COLOURS[:event],
@@ -190,6 +181,23 @@ module Engine
 
     def trap_room
       trap = self.class.generate_trap
+      if rand < @player.trap_avoid_chance
+        @player.bump_tracker!('traps_avoided')
+        return RoomResult.new(
+          kind: :trap,
+          trap: trap,
+          broken: false,
+          colour: COLOURS[:empty],
+          with_actions: true,
+          message: <<~MSG.strip
+            **Floor #{@player.current_floor}** — a pressure plate clicks underfoot.
+
+            You spot the **#{trap[:name]}** just in time and leap clear! _(AGI #{@player.effective_agility} · #{(@player.trap_avoid_chance * 100).round}% to avoid)_
+          MSG
+        )
+      end
+
+      @player.bump_tracker!('traps_triggered')
       detail, broken = apply_trap!(trap)
 
       RoomResult.new(
@@ -223,7 +231,8 @@ module Engine
     end
 
     def stairs_room
-      @player.advance_floor!
+      expired = @player.advance_floor!
+      worn = Player.worn_off_line(expired)
 
       RoomResult.new(
         kind: :stairs,
@@ -234,7 +243,7 @@ module Engine
 
           You descend to **Floor #{@player.current_floor}**.
           Deepest reached: **#{@player.highest_floor_reached}**.
-          The threats below will be stronger.
+          The threats below will be stronger.#{worn ? "\n#{worn}" : ''}
         MSG
       )
     end
@@ -254,7 +263,6 @@ module Engine
       )
     end
 
-    # Returns [detail_string, broken?]
     def apply_trap!(trap)
       case trap[:effect]
       when :lust
@@ -266,7 +274,7 @@ module Engine
           if climax[:broken]
             @player.reset_run!
             lines << "You've been completely broken by the trap! Your run ends here."
-            lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear is lost.'
+            lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear and trophies are lost.'
             return [lines.join("\n"), true]
           end
         end

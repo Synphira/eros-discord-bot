@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Per-run flags: Lich's Phylactery charge and Bottled Sanctuary protection.
 Sequel.migration do
   change do
     alter_table(:players) do

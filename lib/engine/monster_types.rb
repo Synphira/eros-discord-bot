@@ -3,7 +3,6 @@
 require_relative 'threat_calculator'
 
 module Engine
-  # Weighted monster type picks based on active curse encounter/tracking rates.
   module MonsterTypes
     TYPES = {
       beast: {
@@ -60,9 +59,9 @@ module Engine
       TYPES.keys
     end
 
-    def generate_monster(floor, player: nil)
+    def generate_monster(floor, player: nil, type: nil)
       f = [floor.to_i, 1].max
-      type = weighted_type(player)
+      type = type && TYPES.key?(type.to_sym) ? type.to_sym : weighted_type(player)
       info = TYPES.fetch(type)
 
       strength = 2 + (f / 2)
@@ -72,10 +71,11 @@ module Engine
 
       if player
         threat = ThreatCalculator.monster_modifiers(player)
-        strength = [(strength * threat.stat_mult).round, 1].max
-        agility = [(agility * threat.stat_mult).round, 1].max
-        hp = [(hp * threat.stat_mult).round, 8].max
-        lust_damage = [(lust_damage * threat.lust_mult).round, 1].max
+        cycle = player.cycle_multiplier
+        strength = [(strength * threat.stat_mult * cycle).round, 1].max
+        agility = [(agility * threat.stat_mult * cycle).round, 1].max
+        hp = [(hp * threat.stat_mult * cycle).round, 8].max
+        lust_damage = [(lust_damage * threat.lust_mult * cycle).round, 1].max
       end
 
       {
@@ -99,6 +99,7 @@ module Engine
           Array(ENCOUNTER_KEYS[type]).each do |key|
             weight *= player.curse_effect_product(key, default: 1.0)
           end
+          weight *= Engine::TransformationSystem.monster_weight(player, type)
         end
         [type, [weight, 0.01].max]
       end

@@ -21,7 +21,9 @@ module Commands
           equipment_by_slot[item.slot] << item
         end
 
-        %w[weapon head chest legs feet accessory].each do |slot|
+        %w[weapon head chest legs groin feet accessory].each do |slot|
+          next if slot == 'groin' && equipment_by_slot['groin'].nil?
+
           equipped = equipment_by_slot[slot]&.find do |item|
             DB[:player_equipment]
               .where(player_id: player.discord_id, equipment_id: item.id, is_equipped: true)
@@ -38,10 +40,11 @@ module Commands
           c.text_display(content: "**#{slot.capitalize}:** #{label}")
         end
 
-        trophies = player.equipped_items.select { |item| item.slot == Player::TROPHY_SLOT }
-        trophy_label = trophies.empty? ? 'None' : trophies.map(&:name).join(', ')
-        c.text_display(content: "**Trophies:** #{trophy_label}")
-        phylactery = trophies.any? { |t| t.stat_modifiers['cheat_death'] }
+        trophy = player.equipment_for_slot(Player::TROPHY_SLOT)
+        spare = (equipment_by_slot[Player::TROPHY_SLOT] || []).reject { |t| trophy && t.id == trophy.id }
+        spare_note = spare.empty? ? '' : " _(#{spare.size} more in your pack — `/equip` to swap)_"
+        c.text_display(content: "**Trophy:** #{trophy ? trophy.name : 'None'}#{spare_note}")
+        phylactery = trophy&.stat_modifiers&.dig('cheat_death')
         if phylactery
           state = player.phylactery_used ? 'spent this run' : 'ready'
           c.text_display(content: "_Lich's Phylactery: **#{state}**_")
@@ -69,7 +72,8 @@ module Commands
 
         c.separator(divider: false, spacing: :small)
         c.text_display(
-          content: '_`!equip` / `!unequip` for normal gear · `!remove [name]` to destroy cursed gear with LP._'
+          content: '_`!equip` / `!unequip` for normal gear · `!remove [name]` to destroy cursed gear with LP · ' \
+                   'one trophy at a time; trophies are lost on defeat._'
         )
       end
     end

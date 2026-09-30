@@ -2,15 +2,6 @@
 
 require 'json'
 
-# ---------------------------------------------------------------------------
-# Curse — catalog entry for a persistent affliction.
-#
-# Categories (Endless Ruins of Sin setting):
-#   Viscous | Infernal | Wild | Abyssal | Botanical | Necrotic | Mimetic
-#
-# Active (non-suppressed) curses raise Threat by +15 each
-# (see Engine::ThreatCalculator).
-# ---------------------------------------------------------------------------
 class Curse < Sequel::Model(:curses)
   CATEGORIES = %w[
     Viscous

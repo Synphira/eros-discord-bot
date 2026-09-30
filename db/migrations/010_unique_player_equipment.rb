@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-# One copy of each equipment item per player.
 Sequel.migration do
   up do
-    # Collapse duplicate player_equipment rows (keep equipped if any, else lowest id).
     duplicates = DB[:player_equipment]
                  .select_group(:player_id, :equipment_id)
                  .select_append { count(id).as(cnt) }
@@ -18,7 +16,6 @@ Sequel.migration do
       keep = rows.find { |r| r[:is_equipped] } || rows.first
       drop_ids = rows.map { |r| r[:id] } - [keep[:id]]
       DB[:player_equipment].where(id: drop_ids).delete unless drop_ids.empty?
-      # Ensure the kept row stays equipped if any duplicate was.
       if rows.any? { |r| r[:is_equipped] } && !keep[:is_equipped]
         DB[:player_equipment].where(id: keep[:id]).update(is_equipped: true)
       end
@@ -28,7 +25,6 @@ Sequel.migration do
       add_index %i[player_id equipment_id], unique: true, name: :player_equipment_unique_item
     end
 
-    # Catalog: unique names so trophies/shop never fork into parallel IDs.
     name_dups = DB[:equipment]
                 .select_group(:name)
                 .select_append { count(id).as(cnt) }

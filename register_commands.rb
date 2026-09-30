@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-# One-shot slash-command registrar (REST only — no gateway / websocket).
-#
-#   bundle exec ruby register_commands.rb
-#   DISCORD_GUILD_ID=your_guild_id bundle exec ruby register_commands.rb
-
 require 'bundler/setup'
 require 'dotenv/load'
 require 'discordrb'

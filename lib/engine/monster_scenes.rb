@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Engine
-  # NSFW Submit scenes — per monster type, filtered by the player's body_parts.
   module MonsterScenes
     module_function
 
@@ -18,11 +17,9 @@ module Engine
         else []
         end
 
-      scenes = generic_scenes(monster_name) if scenes.empty?
-      scenes.sample
+      Engine::ContentOptions.pick(player, scenes, fallback: generic_scenes(monster_name))
     end
 
-    # Combat-turn assault text — more forceful than Submit scenes.
     def generate_assault(player, monster_name, monster_type: nil)
       parts = player.body_parts_list.map(&:to_s)
       scenes =
@@ -36,8 +33,7 @@ module Engine
         else []
         end
 
-      scenes = generic_assault(monster_name) if scenes.empty?
-      scenes.sample
+      Engine::ContentOptions.pick(player, scenes, fallback: generic_assault(monster_name))
     end
 
     def generate_beast_assault(parts, monster_name)
@@ -439,11 +435,51 @@ module Engine
       else []
       end
   
-    scenes = generic_willing(monster_name) if scenes.empty?
-    scenes.sample
+    Engine::ContentOptions.pick(player, scenes, fallback: generic_willing(monster_name))
   end
-  
-  # Add these new willing scene methods:
+
+  PRAISE = {
+    'beast' => [
+      'The %<name>s rumbles a deep, contented purr and nuzzles your neck — a clear sign you have pleased it.',
+      'The %<name>s licks your cheek affectionately, its tail wagging. Good pet.',
+      'The %<name>s rests its heavy head against you, huffing warm approval.'
+    ],
+    'demon' => [
+      '"Such a delicious little mortal," the %<name>s purrs, tracing a claw under your chin. "You learn so quickly."',
+      '"Mm, you were made for this," the %<name>s whispers. "I may have to keep you."',
+      'The %<name>s laughs low and pleased. "Exquisite. Hell itself would envy me."'
+    ],
+    'slime' => [
+      'The %<name>s wobbles happily, its surface rippling in bright, contented colours.',
+      'The %<name>s gives a pleased little gurgle and hugs you in a warm, squishy embrace.',
+      'The %<name>s glows softly, humming a bubbly note of approval.'
+    ],
+    'undead' => [
+      '"Warm... so warm," the %<name>s rasps reverently. "You remind me what it was to live."',
+      'The %<name>s bows its hollow head to you, cold fingers tender now. "Thank you, living one."',
+      'The %<name>s sighs a long, peaceful breath it no longer needs. "Perfect."'
+    ],
+    'plant' => [
+      'The %<name>s blooms around you, its petals unfurling in a burst of sweet, grateful perfume.',
+      'The %<name>s rustles contentedly, gently stroking your hair with a soft tendril.',
+      'The %<name>s showers you with glittering pollen — its way of saying you did beautifully.'
+    ],
+    'mimic' => [
+      'The %<name>s clacks its lid in delighted applause. You are clearly its favourite treasure.',
+      'The %<name>s shivers with pleasure, its false wood creaking a happy tune.',
+      'The %<name>s wraps a tongue around your wrist like a proud little ribbon.'
+    ]
+  }.freeze
+
+  GENERIC_PRAISE = [
+    'The %<name>s regards you with open admiration. "Good. Very good."',
+    'The %<name>s murmurs its approval, clearly delighted with you.'
+  ].freeze
+
+  def generate_praise(player, monster_name, monster_type)
+    lines = PRAISE.fetch(monster_type.to_s, GENERIC_PRAISE).map { |l| format(l, name: monster_name) }
+    Engine::ContentOptions.pick(player, lines, fallback: GENERIC_PRAISE.map { |l| format(l, name: monster_name) })
+  end
   
   def generate_beast_willing(parts, monster_name)
     scenes = []

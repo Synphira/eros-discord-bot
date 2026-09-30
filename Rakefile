@@ -5,12 +5,6 @@ require 'dotenv/load'
 require 'sequel'
 require 'rake'
 
-# ---------------------------------------------------------------------------
-# Database migration helpers
-#   bundle exec rake db:migrate
-#   bundle exec rake db:migrate[0]   # roll back to version 0
-# ---------------------------------------------------------------------------
-
 namespace :db do
   desc 'Run Sequel migrations (optional VERSION=, e.g. rake db:migrate[2])'
   task :migrate, [:version] do |_t, args|

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Shared helpers used by slash commands, prefix commands, and button handlers.
 module ErosHelpers
   module_function
 
@@ -8,7 +7,6 @@ module ErosHelpers
     Player[discord_id]
   end
 
-  # Returns the player, or replies with a prompt and nil.
   def require_player(event)
     player = find_player(event.user.id)
     return player if player
@@ -19,7 +17,6 @@ module ErosHelpers
     nil
   end
 
-  # Returns false (and sends an ephemeral) if this button isn't for the clicker.
   def assert_button_owner!(event)
     owner_id = button_owner_id(event.custom_id)
     unless owner_id
@@ -37,7 +34,6 @@ module ErosHelpers
     false
   end
 
-  # Owner snowflake is always the last `:` segment when present.
   def button_owner_id(custom_id)
     last = custom_id.to_s.split(':').last
     return nil unless last&.match?(/\A\d{5,}\z/)
@@ -46,16 +42,13 @@ module ErosHelpers
   end
 end
 
-# Encounter cache keyed by Discord user id, backed by players.active_encounter.
 module Eros
   ENCOUNTERS = {}
 
   module_function
 
-  # Always reconcile against the DB so defeat/reset can't leave a ghost fight.
   def encounter_for(player)
     id = player.discord_id
-    # Fresh read — Sequel may have a stale in-memory row after reset_run!.
     player.refresh if player.respond_to?(:refresh)
 
     data = player.reconcile_encounter!

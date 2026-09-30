@@ -6,6 +6,127 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-09-30
+
+### Added
+
+- **Hybrid transformations**: 17 permanent forms you unlock like titles and switch between with **`/transformation`** or **`!transformation [name|clear]`** (aliases `!hybrid`, `!transform`). Your active form shows as **Hybrid: X** on `/status` and `/profile`. The profile counts how many forms you've unlocked, and the nav has a new **Hybrids** button
+  - Forms: **Kitten**, **Puppy** (same unlock and effects as Kitten), **HuCow**, Harpy, Slimekin, Succubus, Incubus, Imp, Dryad, Alraune, Living Doll, Furniture, Vampire, Ghost, Latexdoll, Rubberslime, and **Angel**
+  - Most forms unlock by accepting fetish events and submitting to monster types (for example, Kitten needs 5 petplay events and 10 beast submissions). Each form makes its favourite event themes and monster types more likely while it's active
+  - **Angel** unlocks with the **Pure** title: 30% fewer monster rooms, 35% more random events, and +20% weight on every event type
+  - Forms whose requirements use a content theme you turned off stay hidden until you enable it. Forms survive defeat and `/restart`
+
+- **33 fetish choice events**, each with **Accept** / **Decline** buttons (some add **Fight**, and the Strap-On Chamber adds **Receive**). Accepting pays LP + lust and usually applies a temporary **condition**. Events: Bimbo Transformation, Inflation Trap, Living Clothing, Beast Taming, Rubber Chamber, Oviposition Chamber, Chastity Trap, Hypnotic Mist, Glory Room, Observation Deck, Giant's Chamber, Shrinking Chamber, Futa Fountain, Living Furniture, Mirror of Change, Milking Chamber, Breeding Chamber, Nectar Fountain, Golden Chamber, Binding Room, Discipline Room, Public Shame, Whispering Chamber, Sensory Void, Auction Block, Strap-On Chamber, Glory Booth, Foot Worship Chamber, Orgy Room, Public Chamber, Viewing Chamber, Feasting Chamber, Bestial Pool
+  - **Fight** turns the event into a normal combat against a matching monster type
+  - Trap-style events (Inflation Trap, Chastity Trap, Hypnotic Mist, Binding Room, Whispering Chamber) roll **AGI** when you decline; failing means you get caught anyway
+- **Conditions** — timed buffs and debuffs that last 2–4 floors, shown on `/status` and cleared on defeat. Examples: Bimbo Brain (more submission and submit LP, less RES), Entranced (can't flee), Pocket-Sized (more AGI and dodge), Owned (extra submit LP, worse flee). Futa Fountain and Mirror of Change temporarily add or swap body parts
+- **New living gear** that only binds through events: Living Bodysuit, Living Stockings, Living Gloves, and the **Chastity Belt** (in its own slot; climaxes are **denied** while worn, so lust stays at 95 and each denial costs 6 defiance). All four can be unlocked in the Cursed Shop
+- **Content options expanded to 43 themes** in three menus: Core (12, on by default), Bodies (14, opt-in), and Kinks (17, opt-in). New themes include bimbofication, futanari, gender bending, giant growth, shrinking, weight gain, furry, latex, living clothing, breeding, petplay, hypnosis, mindbreak, sensory deprivation, objectification, humiliation, slavery, voyeurism, group sex, bukkake, facials, strap-ons, and watersports
+- **`!sluttify [on/off]`** (prefix only): turns all 43 content themes on or off at once. With no argument it turns everything on, or turns everything off if it's already all on
+- **`!fetish_options <option> <on/off>`** (alias `!fetish`, plus `/fetish_options`) — toggle one theme by key or name; with no arguments it lists every theme
+- **33 fetish titles** (e.g. Bimbo, Living Balloon, Good Pet, Broodmother, Chaste Slave, Beastkin) and **35 achievements** in a new **Kinks** category, including Kink Explorer and Connoisseur of Sin for accepting 25 or 100 fetish events. Titles and achievements for disabled themes are hidden unless you have already earned them
+- Dev: `!dev event <key|list>` forces any event; `!dev conditions [clear]` shows or clears conditions
+- **Staff titles**: **Sin Sculptor** for the developer and **Climax Checker** for bug testers (anyone in `BUG_TESTER_IDS`). They are awarded automatically, shown by default when no title is picked, and hidden from everyone else
+- **Curse suppression**: `/suppresscurse` (`!suppresscurse N`, alias `!suppress`), or the new **Suppress** menu in `/removecurse`. For **25 LP**, half the removal price, a curse stops working until your next defeat, then it reactivates (the defeat message lists which ones). Suppressed curses show struck through in the curse list
+- **Bug testers** can now use `!dev` commands and debug mode. List their Discord IDs, comma-separated, in **`BUG_TESTER_IDS`** in `.env`, then restart the bot
+
+### Changed
+
+- **Threat rebalanced** so it no longer hits 100% after one boss's LP. Holding LP now adds threat with diminishing returns, at most 60%, and the LP needed grows with your level: about 15% at 100 LP and 50% at 600 LP on level 1. Each active curse adds 8% (was 15%), capped at 40%; suppressed curses don't count
+- The `/removecurse` panel now uses two dropdowns (**Remove** for 50 LP, **Suppress** for 25 LP) instead of one button per curse, so it stays within Discord's limits with many curses
+- **Submitting to a boss is now a gamble instead of a one-turn win.** You need **3 successful submits** in the same fight; each has the normal satisfy chance (20% + 10% per Submission, up to 80%). The boss keeps attacking between submits and you can't dodge, so you may climax or break first. Satisfying a boss pays **×1.75 of the boss LP reward**. Progress shows as "satisfaction 1/3" and the boss intro explains the rules
+- The Chastity Mimic event was replaced by the new **Chastity Trap** choice event
+- Older events now count toward the matching new titles: Milking Shrine (milked and lactation), Swelling Fountain (giant growth), Bloating Slime (inflation), Egg Chamber (oviposition), Paddle Golem (discipline), Foot Idol (feet), Edging Altar (chastity), Bonding Vines (bondage), and Public Humiliation (exhibitionism)
+- Submission can now be raised or lowered by curses and conditions, not just gear
+- `/status` is now focused on the current run. The deepest-floor line moved out (it's still on `/profile`), and a **Body** line shows your current sizes for the parts your body has, including temporary ones from conditions like Futa Blessing
+- The `/status` footer now says that trophies and conditions are lost on defeat
+
+### Fixed
+
+- **Conditions never wore off:** the floor countdown wasn't being saved, so event conditions (Bimbo Brain, Futa Blessing, Mirror-Changed, etc.) lasted until defeat. They now expire after their listed number of floors, and the stairs or boss-clear message says which ones wore off. Clearing the Tower Lord also counts as a floor passed
+- Busy combat turns (several cursed-gear triggers, boss specials, praise) could exceed Discord's 40-component limit, so the Fight/Submit button did nothing. The action log now merges scene blocks and trims text to stay within Discord's limits
+
+### Operators
+
+- **Bot status** now reads **"Playing with X users in Y towers."** (total members across all servers, and number of servers). It refreshes right away when the bot joins or leaves a server, and every 2 minutes using fresh member counts from Discord (`PRESENCE_REFRESH_SECONDS` to change). For instant updates on member joins and leaves, enable **Server Members Intent** in the Developer Portal, then set `SERVER_MEMBERS_INTENT=true` in `.env`
+- **Errors post to Discord**: each error report is also sent to the channel in **`ERROR_CHANNEL_ID`** (it must be in the server in `ERROR_GUILD_ID`, both in `.env`). Posts never ping anyone, and the same error repeating within a minute posts once, with a repeat count on the next post
+- The developer's Discord ID now lives in **`DEVELOPER_ID`** in `.env` instead of the code. If it's missing or invalid, nobody gets owner access; bug testers in `BUG_TESTER_IDS` keep theirs
+- **Clearer error logs**: each error now prints one block with what failed, which command or button triggered it and who pressed it, where in the bot's code it broke, and a plain-English hint for common Discord errors (component limit, expired interaction, missing permissions, database). Library frames are hidden, and full traces go to `logs/errors.log`
+- Run **`bundle exec rake db:migrate`** (migration 017 adds hybrid forms) and **`bundle exec rake commands:register`** for `/transformation`. Developers get `!dev hybrid <key|all|none>`
+- Run **`bundle exec rake db:migrate`** (migration 016 adds `players.conditions`), then **`bundle exec rake commands:register`** (adds `/fetish_options`, `/suppresscurse`, and the Kinks achievement category), then restart the bot
+
+---
+
+## 2026-09-29
+
+### Added
+
+- **`/options`** (`!options`) — content preferences and body sizes
+  - **Core themes** (on by default): oral, vaginal, anal, breast play, knotting, tentacles, bondage, breath play, exhibitionism, aphrodisiacs, possession, toys. Scenes touching a disabled theme are re-rolled or replaced with a softer line; glory hole choices and matching events are hidden
+  - **Opt-in themes** (off by default), each adding a new random event: lactation (Milking Shrine), body growth (Swelling Fountain), inflation (Bloating Slime), oviposition (Egg Chamber), spanking (Paddle Golem), orgasm denial (Edging Altar, multi-turn), feet (Foot Idol), chastity (Chastity Mimic)
+  - **Body sizes** — penis small/average/large, breasts small/medium/large, butt small/medium/large/huge (only parts your body has). The Swelling Fountain grows one step at a time and never past the largest size
+- **Cursed Shop** (`/cursedshop`, or the **Cursed** tab in `/shop`) — any living item you have worn and torn free with `/remove` can be taken again for free
+- **Monster praise** — after you submit, the monster adds a line of praise that fits its type
+- **AGI now does more:**
+  - Dodge monster attacks while fighting or fleeing: 10% + 2% per AGI above half the foe's AGI, from 5% to 50%. No dodging while submitting
+  - Sidestep trap rooms and the Dildo Trap: 10% + 2% per AGI, 10–60%
+  - Wriggle free of multi-turn events early: 5% + 2% per AGI each turn, 5–40%
+- **New titles:** Succubus Bane, Succubus's Pet, Incubus Bane, Incubus's Plaything, Royal Consort
+- **New achievements:** Succubus Hunter / Charmed, Incubus Hunter / Charmed, Throne Warmer (satisfy 3 bosses), Royal Court, Light on Your Feet (avoid 10 traps), Escape Artist, Mimic Tamer
+- **Slash versions of every player command:** `/fight`, `/flee`, `/submit`, `/shop`, `/buy`, `/sell`, `/equipment`, `/equip`, `/unequip`, `/remove`, `/name`, `/title`, `/options`, `/cursedshop`. `/levelup`, `/removecurse`, `/profile`, `/achievements` and `/leaderboard` gained optional arguments
+- **Developer commands** (`!dev …`) — prefix only and locked to the developer's Discord ID; nobody else gets any response. They cover editing stats, LP, floor and cycle; granting or removing curses, items, titles and achievements; a **debug mode** (one-hit kills, monsters never act, guaranteed flee and satisfy, traps avoided); instantly winning a fight; and jumping to the next boss, the final boss, or a cycle clear
+
+### Changed
+
+- **Leveling rebalance**
+  - A stat now costs **5 + its current value** in LP (STR 5 → 10 LP, STR 15 → 20 LP), so dumping everything into STR gets steadily pricier
+  - **Level Up** costs 80% of all three stats combined. It gives +1 to every stat, raises **max defiance** (`100 + 10·√(level − 1)`), and **fully restores defiance**
+  - **RES** now cuts lust from every hit by a percentage, `100 / (100 + RES × 5)` (RES 5 ≈ −20%, RES 20 = −50%), instead of a flat amount
+- **Boss trophies:** you can wear only **one at a time** (swap with `/equip`), and they are **lost on defeat** like other non-cursed gear. Existing players keep one equipped trophy; any others move to the pack
+- **`/titles`** is paged (8 per page), with a dropdown to equip any earned title on the page (or Auto)
+- **`/achievements`** is split into categories (Combat, Submission, Exploration, Curses, Lust, Events, Challenges), with pages
+- **Pure** now needs 30 floors cleared **in a single run** without submitting; the count resets when you are defeated, so one early submission no longer locks you out
+- **`/restart`** keeps your titles, achievements, all progress counters, deepest floor, Cursed Shop unlocks and content options
+- Cursed chest items you **don't own yet are 10× likelier** to appear than ones you already wear
+- Monster attack and event text reworded to be less harsh (for example, "sexually assaults you" and "violation" are gone)
+
+### Fixed
+
+- **Submitting to a boss no longer loops the fight:** a satisfied boss now counts as cleared and moves you to the next floor, and a satisfied Tower Lord clears the cycle. This closes the infinite-LP farm. Bosses are half as easy to satisfy as normal monsters
+- Getting broken by climax during your own **Fight** action now ends the fight properly
+
+### Operators
+
+- Run `bundle exec rake db:migrate` (migration **015**: preferences, body sizes, legacy progress, one trophy per player), then `bundle exec rake commands:register` (27 slash commands), then restart the bot
+
+## 2026-09-28
+
+### Added
+
+- **The Tower Lord** — 7th and final boss on **Floor 35** (Archdemon; blocks fleeing, floods you with lust, enrages below 30% HP). Players already deeper than 35 face it on their next explore
+- **Cycles (New Game+)** — defeating the Tower Lord awards **500 LP × cycle**, returns you to Floor 1 of the next cycle, and keeps your level, stats, LP, and all gear
+  - Cycle 2+ monsters and bosses get **+20% base stats per cycle**, and monster / boss LP rewards scale the same way
+  - Any defeat returns you to **Cycle 1**
+- **Character names** — chosen in a pop-up after picking Submission during `/create`; unique (case-insensitive), 2–24 characters. Existing delvers can set one with `/profile` → **Rename** or `!name Your Name`
+- **Titles** (10) and **Achievements** (10) with LP rewards, unlocked automatically after fights and explores; progress shown for locked entries. Pick a displayed title with buttons in `/titles` or `!title <name|auto>`
+- Lifetime stats: floors cleared, monsters / bosses defeated, LP earned, submissions, chests opened, curses acquired, cycles completed, deepest point reached
+- **`/profile`** (`!profile [character name]` to look up others), **`/titles`**, **`/achievements`**, **`/leaderboard`** (`!leaderboard cycles|depth|kills|lp`) — leaderboards list **character names only**, never Discord usernames; unnamed delvers are hidden
+- Migration `014_add_profiles_and_cycles`. **Run `bundle exec rake commands:register`** for the new slash commands
+- **12 more titles** — Beast Breeder, Demon Consort, Slime Vessel, Undead Paramour, Plant Pollinated (15 submissions to that type), Mimic Seedbed, Pure (30 floors cleared with zero submissions ever), Broken, Lust Addict, Pit Survivor, Glory Hole Veteran, Trap Expert
+- **14 more achievements** — per-type submission goals, **Mimic Seedbed** (slay the Mimic Broodmother while wearing 5+ living cursed items, +500 LP), Pit Veteran, Glory Hole Regular, Trap Expert, Dildo Collector, No Escape (reach floor 20 in one run without trying to flee), Monster Friend, Curse Addict (10 curses at once), Survival Expert (20 climaxes without breaking)
+- New lifetime stats behind them: submissions per monster type, tentacle pits survived, glory hole uses (ignoring doesn't count), traps triggered (trap rooms + dildo traps), flee attempts (lifetime and per run), peak simultaneous curses, climaxes survived
+
+### Changed
+
+- `/status` shows your character name and title at the top, then just your body type (Male, Male (FtM), Female, Female (MtF), Hermaphrodite) — the body-part list is gone; also shows **Cycle** and floor out of 35
+- Refunds and item sales no longer count toward "LP earned"
+
+### Fixed
+
+- `/leaderboard` (and its button) failed to open — the Cycles tab and the Leaderboard nav button shared a button ID
+
+---
+
 ## 2026-09-26
 
 ### Added

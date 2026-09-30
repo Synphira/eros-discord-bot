@@ -2,7 +2,6 @@
 
 module Engine
   module Shop
-    # Canonical shop stock only — cursed / treasure / boss trophies stay out of the shop.
     INVENTORY = [
       {
         name: 'Rusty Dagger',
@@ -112,7 +111,6 @@ module Engine
       'special' => 'Special'
     }.freeze
 
-    # Max buy buttons per category page (one Discord row = 5).
     PAGE_SIZE = 5
 
     module_function
@@ -151,7 +149,6 @@ module Engine
       shop_names.include?(equipment.name)
     end
 
-    # Stock for one category, cheapest first, never cursed / non-shop rows.
     def stock_for(category)
       category = normalize_category(category)
       names = INVENTORY.select { |i| i[:type] == category }.map { |i| i[:name] }
@@ -219,7 +216,7 @@ module Engine
       player.spend_lp!(item.cost)
       grant = player.grant_equipment!(item, auto_equip: false)
       unless grant[:ok]
-        player.gain_lp!(item.cost)
+        player.refund_lp!(item.cost)
         return grant
       end
 
@@ -244,7 +241,7 @@ module Engine
       end
 
       sell_price = [(equipment.cost * 0.5).round, 1].max
-      player.gain_lp!(sell_price)
+      player.refund_lp!(sell_price)
       DB[:player_equipment].where(id: row[:id]).delete
 
       { ok: true, message: "You sold **#{equipment.name}** for **#{sell_price}** LP!" }

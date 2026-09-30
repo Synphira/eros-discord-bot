@@ -1,6 +1,7 @@
+require_relative 'tower'
+
 module Engine
   module BossFights
-    # Define boss encounters for every 5 floors
     BOSSES = {
       5 => {
         name: 'Mimic Broodmother',
@@ -79,10 +80,23 @@ module Engine
         hp: 200,
         max_hp: 200,
         special: 'primal_rage'
+      },
+      Tower::FINAL_BOSS_FLOOR => {
+        name: 'The Tower Lord',
+        type: 'demon',
+        type_name: 'Archdemon',
+        description: 'The ancient sovereign of the Endless Ruins. Every sin in the tower flows up into its throne.',
+        color: 0x5c0a2e,
+        strength: 28,
+        agility: 16,
+        lust_damage: 35,
+        hp: 260,
+        max_hp: 260,
+        special: 'tower_dominion',
+        final: true
       }
     }.freeze
 
-    # Boss trophies — worn in the stacking `trophy` slot. `max_hp` raises max defiance.
     TROPHIES = {
       'Mimic Tongue Amulet' => {
         description: "An amulet made from a mimic's tongue. +2 Submission — monsters are far easier to satisfy.",
@@ -139,8 +153,10 @@ module Engine
     end
 
     def boss_for_floor(floor)
-      return nil unless (floor % 5).zero?
-      BOSSES[floor]
+      return nil unless Tower.boss_floor?(floor)
+      return BOSSES[Tower::FINAL_BOSS_FLOOR] if Tower.final_boss_floor?(floor)
+
+      BOSSES[floor.to_i]
     end
 
     def start_boss_encounter(player, floor)
@@ -148,10 +164,11 @@ module Engine
       return nil unless boss
 
       threat = ThreatCalculator.monster_modifiers(player)
-      strength = [(boss[:strength] * threat.stat_mult).round, 1].max
-      agility = [(boss[:agility] * threat.stat_mult).round, 1].max
-      hp = [(boss[:hp] * threat.stat_mult).round, 20].max
-      lust_damage = [(boss[:lust_damage] * threat.lust_mult).round, 1].max
+      cycle = player.cycle_multiplier
+      strength = [(boss[:strength] * threat.stat_mult * cycle).round, 1].max
+      agility = [(boss[:agility] * threat.stat_mult * cycle).round, 1].max
+      hp = [(boss[:hp] * threat.stat_mult * cycle).round, 20].max
+      lust_damage = [(boss[:lust_damage] * threat.lust_mult * cycle).round, 1].max
 
       encounter = CombatEngine::Encounter.new(
         name: boss[:name],
@@ -170,14 +187,28 @@ module Engine
       player.store_encounter!(CombatEngine.encounter_snapshot(encounter))
       start_lines = player.apply_combat_start_effects!(boss[:type])
 
-      message = <<~MSG.strip
-        **Floor #{floor}** — the air grows heavy.
+      intro =
+        if boss[:final]
+          "**Floor #{floor} — The Tower Lord's Chamber.** Treasure glitters in the dark around an ancient throne."
+        else
+          "**Floor #{floor}** — the air grows heavy."
+        end
+      warning =
+        if boss[:final]
+          'This is the final guardian. Defeat it to conquer the tower and begin the next cycle.'
+        else
+          "This foe is far more dangerous than any you've faced before."
+        end
+      cycle_note = player.current_cycle.to_i > 1 ? " · Cycle #{player.current_cycle} ×#{cycle.round(2)}" : ''
 
-        You stand before the **#{boss[:name]}**!
+      message = <<~MSG.strip
+        #{intro}
+
+        You stand before **#{boss[:name]}**!
         _#{boss[:description]}_
 
-        This foe is far more dangerous than any you've faced before.
-        _(Threat #{threat.category.to_s.upcase} — ×#{threat.stat_mult} power · ×#{threat.lust_mult} lust)_
+        #{warning}
+        _(Threat #{threat.category.to_s.upcase} — ×#{threat.stat_mult} power · ×#{threat.lust_mult} lust#{cycle_note})_
         HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
       MSG
       message += "\n#{start_lines.join("\n")}" if start_lines.any?
@@ -193,34 +224,33 @@ module Engine
     def apply_boss_special(player, encounter, action, log)
       case encounter[:special]
       when 'spawns_minions'
-        if rand(100) < 30  # 30% chance each turn
+        if rand(100) < 30
           log << "The #{encounter[:name]} spawns smaller mimics to assist it!"
-          # Increase damage this turn
           encounter[:lust_damage] = (encounter[:lust_damage] * 1.2).round
         end
 
       when 'seductive_gaze'
-        if action == :fight && rand(100) < 40  # 40% chance when fighting
+        if action == :fight && rand(100) < 40
           log << "The #{encounter[:name]} catches your eye with her seductive gaze! Your will wavers!"
           player.gain_lust!(10)
           log << "Lust +10! (now #{player.lust})"
         end
 
       when 'dominating_presence'
-        if action == :flee && rand(100) < 60  # 60% chance when fleeing
+        if action == :flee && rand(100) < 60
           log << "The #{encounter[:name]}'s dominating presence paralyzes you with fear!"
           return :blocked
         end
 
       when 'root_grasp'
-        if rand(100) < 25  # 25% chance each turn
+        if rand(100) < 25
           log << "The #{encounter[:name]}'s roots grasp at your ankles, reducing your agility!"
           player.update(agility: [player.agility - 1, 1].max)
           log << "Agility -1! (now #{player.agility})"
         end
 
       when 'soul_drain'
-        if action == :submit && rand(100) < 50  # 50% chance when submitting
+        if action == :submit && rand(100) < 50
           log << "The #{encounter[:name]} drains your soul as you submit!"
           player.adjust_defiance!(-5)
           log << "Defiance -5! (now #{player.defiance})"
@@ -232,24 +262,42 @@ module Engine
           encounter[:lust_damage] = (encounter[:lust_damage] * 1.5).round
           encounter[:enraged] = true
         end
+
+      when 'tower_dominion'
+        if action == :flee && rand(100) < 50
+          log << "#{encounter[:name]} raises a hand — the chamber doors slam shut!"
+          return :blocked
+        end
+        if rand(100) < 30
+          log << "The tower itself pulses with #{encounter[:name]}'s will, flooding you with heat!"
+          player.gain_lust!(12)
+          log << "Lust +12! (now #{player.lust})"
+        end
+        if encounter[:hp] < (encounter[:max_hp] * 0.3) && !encounter[:enraged]
+          log << "#{encounter[:name]} rises from its throne in fury — its touch burns hotter!"
+          encounter[:lust_damage] = (encounter[:lust_damage] * 1.3).round
+          encounter[:enraged] = true
+        end
       end
 
       nil
     end
 
-    def boss_defeat_reward(player, encounter)
+    def boss_defeat_reward(player, _encounter)
       floor = player.current_floor
-      
-      # Boss-specific rewards
-      case floor
-      when 5 then { lp: 100, special_item: 'Mimic Tongue Amulet' }
-      when 10 then { lp: 150, special_item: "Queen's Favor" }
-      when 15 then { lp: 200, special_item: "King's Crown" }
-      when 20 then { lp: 250, special_item: 'Treant Heartwood' }
-      when 25 then { lp: 300, special_item: "Lich's Phylactery" }
-      when 30 then { lp: 500, special_item: 'Alpha Beast Trophy' }
-      else { lp: 100 * (floor / 5), special_item: 'Boss Trophy' }
-      end
+      return { lp: 0, tower_clear: true } if Tower.final_boss_floor?(floor)
+
+      base =
+        case floor
+        when 5 then { lp: 100, special_item: 'Mimic Tongue Amulet' }
+        when 10 then { lp: 150, special_item: "Queen's Favor" }
+        when 15 then { lp: 200, special_item: "King's Crown" }
+        when 20 then { lp: 250, special_item: 'Treant Heartwood' }
+        when 25 then { lp: 300, special_item: "Lich's Phylactery" }
+        when 30 then { lp: 500, special_item: 'Alpha Beast Trophy' }
+        else { lp: 100 * (floor / 5), special_item: 'Boss Trophy' }
+        end
+      base.merge(lp: (base[:lp] * player.cycle_multiplier).round)
     end
   end
 end

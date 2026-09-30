@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-# Presentation helpers for Endless Ruins of Sin — all Discord replies use Components V2
-# (IS_COMPONENTS_V2 / has_components: true). Content and embeds are disabled;
-# text goes in Text Display components, often wrapped in a Container.
-#
-# Buttons edit the message they came from (update_message).
-# Slash / prefix commands always send a new message.
 module ErosUI
   module_function
 
@@ -44,10 +38,6 @@ module ErosUI
     event.is_a?(Discordrb::Events::ComponentEvent)
   end
 
-  # Unified reply: Components V2 for both interactions and prefix/message events.
-  # with_actions: false | :explore | :combat | true (:explore)
-  # Ephemeral replies always create a new (private) response.
-  # Action buttons are locked to event.user (owner id embedded in custom_id).
   def reply_v2(event, ephemeral: false, colour: ACCENT, with_actions: false, &block)
     owner_id = event.user.id
 
@@ -58,18 +48,17 @@ module ErosUI
       return
     end
 
-    # Buttons / selects: edit the message the component belongs to.
     if component_event?(event)
       begin
         update_v2(event, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
       rescue StandardError => e
-        warn "Component update failed: #{e.class}: #{e.message}"
+        warn "[panel] Editing the message failed (#{e.message.to_s.lines.map(&:strip).reject(&:empty?).join(' — ')}); " \
+             'sending a new message instead.'
         respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
       end
       return
     end
 
-    # Slash / prefix: always a fresh message.
     if interaction_event?(event)
       respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
     else
@@ -139,6 +128,7 @@ module ErosUI
           custom_id: "eros:shop:cat:#{cat}:#{owner_id}"
         )
       end
+      row.button(label: 'Cursed', style: :danger, custom_id: "eros:cshop:open:#{owner_id}")
     end
 
     items.each_slice(5) do |slice|
@@ -187,7 +177,7 @@ module ErosUI
         slice.each do |choice|
           row.button(
             label: choice[:label] || choice['label'] || choice[:key],
-            style: choice[:key].to_s == 'ignore' ? :secondary : :primary,
+            style: choice[:style] || (choice[:key].to_s == 'ignore' ? :secondary : :primary),
             custom_id: "eros:event_choice:#{choice[:key] || choice['key']}:#{owner_id}"
           )
         end
@@ -223,26 +213,29 @@ module ErosUI
   end
 
   def attach_levelup_buttons(container, owner_id)
+    player = Player[owner_id]
+    cost = ->(stat) { player ? " (#{player.stat_upgrade_cost(stat)} LP)" : '' }
+    level_cost = player ? " (#{player.level_upgrade_cost} LP)" : ''
     container.row do |row|
-      row.button(label: 'STR (10 LP)', style: :primary, custom_id: "eros:levelup:strength:#{owner_id}")
-      row.button(label: 'AGI (10 LP)', style: :primary, custom_id: "eros:levelup:agility:#{owner_id}")
-      row.button(label: 'RES (10 LP)', style: :primary, custom_id: "eros:levelup:resistance:#{owner_id}")
-      row.button(label: 'Level (50 LP)', style: :success, custom_id: "eros:levelup:level:#{owner_id}")
+      row.button(label: "STR#{cost.call(:strength)}", style: :primary, custom_id: "eros:levelup:strength:#{owner_id}")
+      row.button(label: "AGI#{cost.call(:agility)}", style: :primary, custom_id: "eros:levelup:agility:#{owner_id}")
+      row.button(label: "RES#{cost.call(:resistance)}", style: :primary, custom_id: "eros:levelup:resistance:#{owner_id}")
+      row.button(label: "Level#{level_cost}", style: :success, custom_id: "eros:levelup:level:#{owner_id}")
     end
   end
 
-  # Up to 5 remove buttons per row; `entries` is [{index:, curse:}, ...]
   def attach_removecurse_buttons(container, entries, owner_id)
-    entries.each_slice(5) do |slice|
+    {
+      'remove' => "Remove a curse permanently (#{Player::CURSE_REMOVE_COST} LP)",
+      'suppress' => "Suppress a curse until defeat (#{Player::CURSE_SUPPRESS_COST} LP)"
+    }.each do |action, placeholder|
       container.row do |row|
-        slice.each do |entry|
-          label = "#{entry[:index] + 1}. #{entry[:curse].name}"
-          label = "#{label[0, 77]}..." if label.length > 80
-          row.button(
-            label: label,
-            style: :danger,
-            custom_id: "eros:removecurse:#{entry[:index]}:#{owner_id}"
-          )
+        row.string_select(custom_id: "eros:curseact:#{action}:#{owner_id}", placeholder: placeholder,
+                          min_values: 1, max_values: 1) do |menu|
+          entries.first(25).each do |entry|
+            menu.option(label: "#{entry[:index] + 1}. #{entry[:curse].name}"[0, 100], value: entry[:index].to_s,
+                        description: entry[:curse].description.to_s[0, 100])
+          end
         end
       end
     end
@@ -250,7 +243,8 @@ module ErosUI
 
   def build_curses_text(player, with_cost: false)
     grouped = player.curses_grouped_by_type
-    return 'You don\'t have any curses!' if grouped.empty?
+    suppressed = player.suppressed_curses
+    return 'You don\'t have any curses!' if grouped.empty? && suppressed.empty?
 
     lines = [with_cost ? 'Your curses:' : 'Your current curses:']
     grouped.each do |type, entries|
@@ -259,13 +253,21 @@ module ErosUI
       lines << "**#{type_name} Curses:**"
       entries.each do |entry|
         curse = entry[:curse]
-        cost = with_cost ? ' (Cost: 50 LP)' : ''
-        lines << "#{entry[:index] + 1}. **#{curse.name}**: #{curse.description}#{cost}"
+        lines << "#{entry[:index] + 1}. **#{curse.name}**: #{curse.description}"
       end
     end
+    if suppressed.any?
+      lines << ''
+      lines << '**Suppressed** _(no effect until you are defeated)_:'
+      suppressed.sort_by(&:name).each { |curse| lines << "• ~~#{curse.name}~~" }
+    end
     lines << ''
-    lines << '_Type `!removecurse [number]` or use a button to remove one._' if with_cost
-    lines << "-# LP: `#{player.lp}`" if with_cost
+    if with_cost
+      lines << "_**Remove** (#{Player::CURSE_REMOVE_COST} LP) deletes a curse for good. " \
+               "**Suppress** (#{Player::CURSE_SUPPRESS_COST} LP) silences it until your next defeat._"
+      lines << '_Use the menus, or `!removecurse [number]` / `!suppresscurse [number]`._'
+      lines << "-# LP: `#{player.lp}`"
+    end
     lines.join("\n")
   end
 
@@ -281,8 +283,26 @@ module ErosUI
     end
   end
 
+  def show_name_modal(event, custom_id, current: nil)
+    event.show_modal(title: 'Name Your Delver', custom_id: custom_id) do |modal|
+      modal.label(
+        label: 'Character name',
+        description: 'Shown on your profile and the leaderboard instead of your Discord name.'
+      ) do |label|
+        label.text_input(
+          style: :short,
+          custom_id: 'character_name',
+          min_length: Player::CHARACTER_NAME_LENGTH.min,
+          max_length: Player::CHARACTER_NAME_LENGTH.max,
+          required: true,
+          value: current,
+          placeholder: 'e.g. Lyra Ashvale'
+        )
+      end
+    end
+  end
+
   def attach_submission_buttons(container, owner_id)
-    # Discord allows 5 buttons per row; we have exactly 5 choices.
     container.row do |row|
       CharacterArchetypes::SUBMISSION_CHOICES.each do |key, entry|
         row.button(
@@ -294,35 +314,54 @@ module ErosUI
     end
   end
 
-  # Combat logs mix plain strings with `{ scene: "..." }` entries.
-  # Scenes render in their own italic block between dividers.
+  LOG_COMPONENT_BUDGET = 22
+  LOG_CHAR_BUDGET = 3300
+
   def append_action_log(container, log)
-    buffer = []
-
-    flush = lambda do
-      return if buffer.empty?
-
-      container.text_display(content: buffer.join("\n"))
-      buffer.clear
-    end
-
+    segments = []
     Array(log).each do |entry|
-      scene =
-        if entry.is_a?(Hash)
-          entry[:scene] || entry['scene']
-        end
-
+      scene = entry.is_a?(Hash) ? (entry[:scene] || entry['scene']) : nil
       if scene
-        flush.call
-        container.separator(divider: true, spacing: :small)
-        container.text_display(content: "_#{scene}_")
-        container.separator(divider: true, spacing: :small)
+        segments << [:scene, "_#{scene}_"]
+      elsif segments.last&.first == :text
+        segments.last[1] = "#{segments.last[1]}\n#{entry}"
       else
-        buffer << entry.to_s
+        segments << [:text, entry.to_s]
       end
     end
 
-    flush.call
+    cost = -> { segments.sum { |type, _| type == :scene ? 3 : 1 } }
+    while cost.call > LOG_COMPONENT_BUDGET && segments.size > 1
+      i = (0...(segments.size - 1)).min_by { |j| segments[j][1].size + segments[j + 1][1].size }
+      segments[i] = [:text, "#{segments[i][1]}\n#{segments[i + 1][1]}"]
+      segments.delete_at(i + 1)
+    end
+
+    total = segments.sum { |_, text| text.size }
+    if total > LOG_CHAR_BUDGET
+      segments.map! do |type, text|
+        limit = [(text.size * LOG_CHAR_BUDGET / total.to_f).floor, 40].max
+        [type, text.size > limit ? "#{text[0, limit - 1]}…" : text]
+      end
+    end
+
+    segments.each_with_index do |(type, text), i|
+      if type == :scene
+        container.separator(divider: true, spacing: :small)
+        container.text_display(content: text)
+        container.separator(divider: true, spacing: :small) if segments[i + 1]&.first == :text
+      else
+        container.text_display(content: text)
+      end
+    end
+  end
+
+  def body_sizes_line(player)
+    sizes = Engine::ContentOptions.applicable_sizes(player)
+    return '' if sizes.empty?
+
+    parts = sizes.map { |part, spec| "#{spec[:label]} **#{Engine::ContentOptions.size_of(player, part)}**" }
+    "**Body** #{parts.join(' · ')}\n"
   end
 
   def build_status_container(container, player)
@@ -331,11 +370,19 @@ module ErosUI
     container.text_display(content: '## Endless Ruins of Sin — Delver Status')
     container.text_display(content: '_Descend. Endure. Desire._')
     container.separator(divider: true, spacing: :small)
+    title = player.active_title_name
+    name_line = "### #{player.display_name}"
+    name_line += " — _#{title}_" if title
+    container.text_display(content: name_line)
+    if player.character_name.to_s.empty?
+      container.text_display(content: '-# No character name yet — use `/profile` → **Rename**, or `!name Your Name`.')
+    end
+    hybrid = player.active_transformation_name
     container.text_display(
-      content: "**#{player.gender}** — #{player.body_parts_display}\n" \
-               "Lv **#{player.level}** · Floor **#{player.current_floor}** " \
-               "_(#{player.pos_x}, #{player.pos_y})_\n" \
-               "**Deepest floor** `#{player.highest_floor_reached}`\n" \
+      content: "**#{player.gender}**#{hybrid ? " · **Hybrid:** #{hybrid}" : ''}\n" \
+               "Lv **#{player.level}** · **Cycle #{player.current_cycle}** · " \
+               "Floor **#{player.current_floor}**/#{Engine::Tower::FINAL_BOSS_FLOOR}\n" \
+               "#{body_sizes_line(player)}" \
                "**Submission** `#{player.effective_submission}` _(#{player.submission_display}, " \
                "base #{player.submission})_"
     )
@@ -353,6 +400,14 @@ module ErosUI
       content: "**Threat Level — #{threat_label(threat.category)}** #{threat_bar(threat.percent)}\n" \
                "_LP contrib #{threat.lp_component}% · Curses +#{threat.curse_component}_"
     )
+    conditions = player.condition_list
+    unless conditions.empty?
+      lines = conditions.map do |c|
+        floors = c['floors'].to_i
+        "• **#{c['name']}** — #{c['summary']} _(#{floors} floor#{'s' unless floors == 1})_"
+      end
+      container.text_display(content: "**Conditions**\n#{lines.join("\n")}")
+    end
     container.separator(divider: true, spacing: :small)
     combat_line = player.reconcile_encounter! ? 'Engaged' : 'Quiet for now'
     event = player.event_data
@@ -369,7 +424,8 @@ module ErosUI
     end
     container.separator(divider: false, spacing: :small)
     container.text_display(
-      content: '-# Defeat resets the run — LP, curses, living gear, and deepest floor persist. Use `/curses` for brands.'
+      content: '-# Defeat resets the run and returns you to Cycle 1 — LP, curses, living gear, titles, ' \
+               'and deepest floor persist; trophies and conditions are lost. Use `/curses` for brands, `/profile` for titles & achievements.'
     )
   end
 end

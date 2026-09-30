@@ -4,13 +4,13 @@ Sequel.migration do
       primary_key :id
       
       String :name, null: false
-      String :type, null: false  # weapon, armor, accessory
-      String :slot, null: false   # weapon, head, chest, legs, feet, accessory
+      String :type, null: false
+      String :slot, null: false
       String :description, text: true, null: false, default: ''
       String :stat_modifier_json, text: true, null: false, default: '{}'
       
-      Integer :cost, null: false, default: 0  # LP cost to buy
-      Integer :rarity, null: false, default: 1  # 1-5, affects cost and power
+      Integer :cost, null: false, default: 0
+      Integer :rarity, null: false, default: 1
       
       DateTime :created_at
       DateTime :updated_at

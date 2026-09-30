@@ -1,19 +1,17 @@
 # frozen_string_literal: true
 
-# Endless Ruins of Sin
-# Discord entrypoint: boots the bot and loads command handlers.
-#
-# Slash commands are registered separately (avoids Discord rate limits on restart):
-#   bundle exec rake commands:register
-#
-# Handlers live under commands/ — slash + prefix share the same run().
-
 require 'bundler/setup'
 require 'dotenv/load'
 require 'discordrb'
 require 'fileutils'
 
+require_relative 'lib/error_reporter'
+require_relative 'lib/presence'
 require_relative 'config/database'
+require_relative 'lib/engine/tower'
+require_relative 'lib/engine/title_system'
+require_relative 'lib/engine/transformation_system'
+require_relative 'lib/engine/profile_system'
 require_relative 'lib/engine/threat_calculator'
 require_relative 'lib/engine/monster_types'
 require_relative 'lib/engine/monster_scenes'
@@ -22,7 +20,11 @@ require_relative 'lib/engine/exploration'
 require_relative 'lib/engine/combat_engine'
 require_relative 'lib/engine/shop'
 require_relative 'lib/engine/treasure'
+require_relative 'lib/engine/fetish_events'
 require_relative 'lib/engine/random_events'
+require_relative 'lib/engine/content_options'
+require_relative 'lib/engine/extra_events'
+require_relative 'lib/engine/dev'
 require_relative 'lib/character_archetypes'
 require_relative 'lib/eros_ui'
 require_relative 'lib/eros_helpers'
@@ -34,20 +36,16 @@ end
 
 CLIENT_ID = ENV['DISCORD_CLIENT_ID']
 
+intents = %i[servers server_messages]
+intents << :server_members if Presence.members_intent?
+
 bot = Discordrb::Commands::CommandBot.new(
   token: TOKEN,
   client_id: CLIENT_ID,
   prefix: ENV.fetch('BOT_PREFIX', '!'),
-  intents: %i[servers server_messages]
+  intents: intents
 )
-
-def refresh_presence!(bot)
-  total = bot.servers.values.sum { |server| server.member_count.to_i }
-  noun = total == 1 ? 'user' : 'users'
-  bot.game = "with #{total} #{noun}"
-rescue StandardError => e
-  warn "Presence update failed: #{e.message}"
-end
+ErrorReporter.attach(bot)
 
 Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require path }
 
@@ -63,6 +61,11 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::Shop,
   Commands::Equipment,
   Commands::Restart,
+  Commands::Profile,
+  Commands::Transformation,
+  Commands::Options,
+  Commands::CursedShop,
+  Commands::Dev,
   Commands::Buttons::CreateCharacter,
   Commands::Buttons::ExplorePath,
   Commands::Buttons::Rest,
@@ -89,21 +92,11 @@ bot.ready do |_event|
     warn "Shop inventory sync warning: #{e.message}"
   end
 
-  refresh_presence!(bot)
   puts "Endless Ruins of Sin online as #{bot.profile&.username}"
   puts 'Slash commands are not re-registered on boot — run: bundle exec rake commands:register'
 end
 
-bot.server_create { refresh_presence!(bot) }
-bot.server_delete { refresh_presence!(bot) }
-
-# Member counts drift as people join/leave; refresh periodically.
-Thread.new do
-  loop do
-    sleep 300
-    refresh_presence!(bot) if bot.connected?
-  end
-end
+Presence.install!(bot)
 
 puts 'Starting Endless Ruins of Sin Discord bot...'
 bot.run

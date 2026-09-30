@@ -20,6 +20,14 @@ module Commands
       end
 
       result = Engine::Exploration.roll(player)
+      progress = player.check_progress!
+      if progress.any?
+        if result.kind == :event && result.event_result
+          result.event_result[:log] = Array(result.event_result[:log]) + progress
+        else
+          result.message = "#{result.message}\n\n#{progress.join("\n")}"
+        end
+      end
 
       case result.kind
       when :monster, :boss
@@ -31,7 +39,10 @@ module Commands
             c.text_display(content: result.message)
             c.separator(divider: true, spacing: :small)
             c.text_display(
-              content: '**Boss fight!** Choose **Fight**, **Flee**, or **Submit**.'
+              content: '**Boss fight!** Choose **Fight**, **Flee**, or **Submit**.' \
+                       "\n-# Submitting is a gamble: land #{Engine::CombatEngine::BOSS_SATISFY_NEEDED} successful " \
+                       "submits to satisfy the boss for ×#{Engine::CombatEngine::BOSS_SATISFY_LP_MULT} LP — " \
+                       "but it keeps attacking and you can't dodge while submitting."
             )
           end
         else
@@ -79,11 +90,23 @@ module Commands
       end
     end
 
-    def render_event(event, _player, result)
+    def render_event(event, player, result)
       result = result.transform_keys(&:to_sym) if result.is_a?(Hash)
       mode = result[:mode].to_sym
       colour = result[:colour] || Engine::RandomEvents::COLOUR
-      log = result[:log] || []
+      log = Engine::ContentOptions.scrub!(player, Array(result[:log]).dup)
+
+      if mode == :combat
+        started = Engine::CombatEngine.start_encounter(player, monster: result[:monster])
+        Eros.set_encounter!(player, started[:encounter])
+        ErosUI.reply_v2(event, colour: colour, with_actions: :combat) do |c|
+          c.text_display(content: "## #{result[:name]}") if result[:name]
+          ErosUI.append_action_log(c, log)
+          c.separator(divider: true, spacing: :small)
+          c.text_display(content: started[:message])
+        end
+        return
+      end
 
       actions =
         case mode

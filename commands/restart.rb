@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Commands
-  # /restart + !restart — wipe the delver completely and re-run character creation.
   module Restart
     extend Discordrb::EventContainer
     extend Discordrb::Commands::CommandContainer
@@ -14,15 +13,18 @@ module Commands
       ErosUI.reply_v2(event, colour: 0x8b1a1a) do |c|
         c.text_display(content: '## Start Over?')
         c.text_display(
-          content: "This **permanently erases** your delver and you lose **everything**:\n" \
+          content: "This **erases** your current delver:\n" \
                    "• Level, stats, and all **#{player.lp}** Lust Points\n" \
                    "• Every curse (**#{player.active_curse_count}**) and all gear, cursed or not\n" \
-                   "• Your deepest-floor record (**#{player.highest_floor_reached}**)\n\n" \
+                   "• Your character name, body sizes, and current cycle\n\n" \
+                   "**Kept:** your **#{player.earned_titles.size}** titles, **#{player.earned_achievements.size}** " \
+                   'achievements, all achievement/title progress, your deepest-floor record, Cursed Shop unlocks, ' \
+                   "and your content options.\n\n" \
                    'You will then choose a new **body type** and **Submission** stance.'
         )
         c.separator(divider: true, spacing: :small)
         c.row do |row|
-          row.button(label: 'Erase & Restart', style: :danger, custom_id: "eros:restart:confirm:#{event.user.id}")
+          row.button(label: 'Restart', style: :danger, custom_id: "eros:restart:confirm:#{event.user.id}")
           row.button(label: 'Cancel', style: :secondary, custom_id: "eros:restart:cancel:#{event.user.id}")
         end
       end
@@ -30,6 +32,7 @@ module Commands
 
     def wipe!(discord_id)
       DB.transaction do
+        Player[discord_id]&.save_legacy!
         DB[:player_curses].where(player_id: discord_id).delete
         DB[:player_equipment].where(player_id: discord_id).delete
         DB[:players].where(discord_id: discord_id).delete

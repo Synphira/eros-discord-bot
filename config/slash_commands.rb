@@ -1,41 +1,69 @@
 # frozen_string_literal: true
 
-# Canonical slash-command definitions for Discord registration.
-# Handlers live under commands/; this file is only the Discord API registry.
-#
-# Register once (or after changing names/descriptions):
-#   bundle exec rake commands:register
-#   bundle exec ruby register_commands.rb
-#
-# Optional guild-scoped (instant sync while testing):
-#   DISCORD_GUILD_ID=123 bundle exec rake commands:register
 module SlashCommands
-  # type 1 = CHAT_INPUT
+  STRING = 3
+  INTEGER = 4
+
+  def self.opt(name, description, type: STRING, required: false, choices: nil)
+    { type: type, name: name, description: description, required: required, choices: choices }.compact
+  end
+
+  def self.choices(*values)
+    values.map { |v| { name: v, value: v } }
+  end
+
   DEFINITIONS = [
     { name: 'help', description: 'List all Endless Ruins of Sin commands' },
     { name: 'create', description: 'Create your delver (body type select)' },
     { name: 'start', description: 'Alias of /create — begin character creation' },
     { name: 'status', description: 'Show character sheet, curses, and Threat' },
     { name: 'explore', description: 'Step deeper into the endless dungeon' },
-    { name: 'levelup', description: 'Spend Lust Points on STR / AGI / RES / Level' },
+    { name: 'fight', description: 'Attack the monster you are fighting' },
+    { name: 'flee', description: 'Try to escape combat (AGI helps)' },
+    { name: 'submit', description: 'Submit to the monster you are fighting' },
+    { name: 'levelup', description: 'Spend Lust Points on STR / AGI / RES / Level',
+      options: [opt('choice', 'Upgrade immediately', choices: choices('strength', 'agility', 'resistance', 'level'))] },
     { name: 'curses', description: 'List your active curses by monster type' },
-    { name: 'removecurse', description: 'Spend 50 LP to purge a curse' },
-    { name: 'restart', description: 'Erase your delver and start over with a new body type' }
+    { name: 'removecurse', description: 'Spend 50 LP to purge a curse (or open the remove/suppress menu)',
+      options: [opt('number', 'Curse number from the list', type: INTEGER)] },
+    { name: 'suppresscurse', description: 'Spend 25 LP to silence a curse until your next defeat',
+      options: [opt('number', 'Curse number from the list', type: INTEGER)] },
+    { name: 'shop', description: 'Browse the shop by category',
+      options: [opt('category', 'Shop aisle', choices: choices('weapon', 'armor', 'accessory', 'special'))] },
+    { name: 'buy', description: 'Buy an item from the shop', options: [opt('item', 'Item name', required: true)] },
+    { name: 'sell', description: 'Sell an item from your pack', options: [opt('item', 'Item name', required: true)] },
+    { name: 'cursedshop', description: 'Re-summon living gear you have torn free before (free)' },
+    { name: 'equipment', description: 'View your gear, trophy, and inventory' },
+    { name: 'equip', description: 'Equip an item', options: [opt('item', 'Item name', required: true)] },
+    { name: 'unequip', description: 'Unequip an item', options: [opt('item', 'Item name', required: true)] },
+    { name: 'remove', description: 'Destroy cursed living gear for LP', options: [opt('item', 'Item name', required: true)] },
+    { name: 'restart', description: 'Start over with a new delver (titles & achievements are kept)' },
+    { name: 'profile', description: 'Your character profile, lifetime stats, and rename',
+      options: [opt('name', "Another delver's character name")] },
+    { name: 'name', description: 'Set your character name', options: [opt('name', 'New character name', required: true)] },
+    { name: 'titles', description: 'View and equip earned titles' },
+    { name: 'title', description: 'Equip a title by name (or "auto")', options: [opt('name', 'Title name or auto', required: true)] },
+    { name: 'transformation', description: 'View hybrid forms, or take one by name',
+      options: [opt('name', 'Form name, or "clear" to return to human')] },
+    { name: 'achievements', description: 'View achievements and progress',
+      options: [opt('category', 'Category', choices: choices('combat', 'submission', 'exploration', 'curses', 'lust', 'events', 'kinks', 'challenges'))] },
+    { name: 'leaderboard', description: 'Top delvers by cycles, depth, kills, or LP earned',
+      options: [opt('stat', 'Ranking', choices: choices('cycles', 'depth', 'kills', 'lp'))] },
+    { name: 'options', description: 'Content preferences (fetish toggles) and body sizes' },
+    { name: 'fetish_options', description: 'Toggle one content theme on or off (no option = list all)',
+      options: [opt('option', 'Theme key or name, e.g. bimbofication'), opt('state', 'On or off', choices: choices('on', 'off'))] }
   ].freeze
 
   module_function
 
   def payloads
     DEFINITIONS.map do |defn|
-      {
-        name: defn[:name],
-        description: defn[:description],
-        type: 1
-      }
+      payload = { name: defn[:name], description: defn[:description], type: 1 }
+      payload[:options] = defn[:options] if defn[:options]
+      payload
     end
   end
 
-  # Bulk-overwrite slash commands (one PUT). Prefer REST args; bot is optional fallback.
   def register!(bot = nil, guild_id: nil, token: nil, application_id: nil)
     guild_id ||= ENV['DISCORD_GUILD_ID']
     guild_id = guild_id.to_s.strip
@@ -45,7 +73,6 @@ module SlashCommands
     app_id = application_id || bot&.profile&.id
     raise ArgumentError, 'token and application_id (or a connected bot) required' if token.nil? || app_id.nil?
 
-    # Discordrb API expects Authorization: "Bot <token>" (Bot#token already has the prefix).
     token = token.strip
     token = "Bot #{token}" unless token.start_with?('Bot ')
 

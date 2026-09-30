@@ -28,6 +28,18 @@ module Commands
         return
       end
 
+      result[:log].concat(player.check_progress!)
+      Engine::ContentOptions.scrub!(player, result[:log])
+
+      if result[:tower_cleared]
+        Eros.clear_encounter!(player)
+        ErosUI.reply_v2(event, colour: 0xd4af37, with_actions: :explore) do |c|
+          c.text_display(content: '## The Tower Is Conquered')
+          ErosUI.append_action_log(c, result[:log])
+        end
+        return
+      end
+
       if result[:fled] || result[:satisfied]
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
@@ -52,7 +64,6 @@ module Commands
         return
       end
 
-      # Ongoing — update encounter snapshot and show combat buttons again.
       Eros.set_encounter!(player, result[:encounter])
       enc = result[:encounter]
       colour = enc[:color] || 0x8b1a1a
@@ -66,6 +77,10 @@ module Commands
         )
       end
     end
+
+    application_command(:fight) { |event| Commands::Combat.run_action(event, :fight) }
+    application_command(:flee) { |event| Commands::Combat.run_action(event, :flee) }
+    application_command(:submit) { |event| Commands::Combat.run_action(event, :submit) }
 
     command(:fight, description: 'Attack the current monster') do |event|
       Commands::Combat.run_action(event, :fight)

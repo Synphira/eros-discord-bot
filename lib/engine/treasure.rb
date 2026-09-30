@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Engine
-  # Treasure chests — normal loot (LP, potions, gear) or living mimic equipment.
   module Treasure
     module_function
 
@@ -58,7 +57,55 @@ module Engine
       }
     ].freeze
 
-    # Basic gear that can appear in chests (no duplicates — grant refuses if owned).
+    EVENT_MIMICS = [
+      {
+        name: 'Living Bodysuit',
+        description: 'A second skin of glossy, breathing fabric that squeezes wherever you are most sensitive.',
+        type: 'armor',
+        slot: 'chest',
+        stat_modifiers: { 'resistance' => 2, 'lust_resist' => -1 },
+        violation_type: 'squeeze',
+        removal_cost: 18,
+        rarity: 4
+      },
+      {
+        name: 'Living Stockings',
+        description: 'Sheer stockings that crawl higher on their own, stroking your thighs with every step.',
+        type: 'armor',
+        slot: 'legs',
+        stat_modifiers: { 'agility' => 2, 'lust_resist' => -1 },
+        violation_type: 'squeeze',
+        removal_cost: 14,
+        rarity: 4
+      },
+      {
+        name: 'Living Gloves',
+        description: 'Silken gloves that sometimes decide where your hands should wander.',
+        type: 'accessory',
+        slot: 'accessory',
+        stat_modifiers: { 'strength' => 2, 'lust_resist' => -1 },
+        violation_type: 'squeeze',
+        removal_cost: 14,
+        rarity: 4
+      },
+      {
+        name: 'Chastity Belt',
+        description: 'A locked steel belt humming with denial magic. Release is no longer yours to decide.',
+        type: 'armor',
+        slot: 'groin',
+        stat_modifiers: { 'submission' => 2, 'resistance' => 1, 'deny_climax' => true },
+        violation_type: 'denial',
+        removal_cost: 25,
+        rarity: 5
+      }
+    ].freeze
+
+    LIVING_CLOTHING = EVENT_MIMICS.first(3).freeze
+
+    def all_mimic_templates
+      MIMIC_TEMPLATES + EVENT_MIMICS
+    end
+
     BASIC_GEAR = [
       {
         name: 'Cracked Buckler',
@@ -108,11 +155,10 @@ module Engine
     ].freeze
 
     def sync_to_db!
-      (MIMIC_TEMPLATES + BASIC_GEAR).each do |tpl|
+      (MIMIC_TEMPLATES + EVENT_MIMICS + BASIC_GEAR).each do |tpl|
         item = ::Equipment.find_or_create(name: tpl[:name]) do |e|
           apply_template!(e, tpl)
         end
-        # Keep mimic flags fresh if the row already existed.
         apply_template!(item, tpl)
         item.save_changes
       end
@@ -131,7 +177,6 @@ module Engine
     end
     module_function :apply_template!
 
-    # Returns { lines: [...], climax: hash|nil, broken: bool }
     def open_chest(player)
       sync_to_db!
       level = [player.current_floor, 1].max
@@ -146,6 +191,7 @@ module Engine
         end
 
       lines.concat(loot[:lines])
+      player.bump_tracker!('treasure_found')
 
       bonus_lp = player.curse_effect_sum('mimic_treasure_lp').round
       if bonus_lp.positive?
@@ -160,15 +206,31 @@ module Engine
       }
     end
 
+    UNOWNED_MIMIC_WEIGHT = 10
+    OWNED_MIMIC_WEIGHT = 1
+
+    def pick_mimic_template(player)
+      owned = player.equipment_dataset.select_map(Sequel[:equipment][:name])
+      weighted = MIMIC_TEMPLATES.map do |tpl|
+        [tpl, owned.include?(tpl[:name]) ? OWNED_MIMIC_WEIGHT : UNOWNED_MIMIC_WEIGHT]
+      end
+      roll = rand * weighted.sum(&:last)
+      weighted.each do |tpl, weight|
+        return tpl if roll < weight
+
+        roll -= weight
+      end
+      weighted.last.first
+    end
+
     def generate_mimic_loot(player, level)
-      template = MIMIC_TEMPLATES.sample
+      template = pick_mimic_template(player)
       item = ::Equipment.first(name: template[:name])
       unless item
         return { lines: ['_The chest is empty — the mimic fled._'], climax: nil, broken: false }
       end
 
       if player.owns_equipment?(item.id)
-        # Already own this living gear — fall back to normal loot.
         return generate_normal_loot(player, level).tap do |loot|
           loot[:lines].unshift("_The chest held another **#{item.name}**, but you already wear its twin — something else tumbles out instead._")
         end
@@ -197,24 +259,20 @@ module Engine
 
       roll = rand(100)
       if roll < 35
-        # LP pouch
-        amount = TREASURE_LP_BASE + (level / 2)
+        amount = TREASURE_LP_BASE + (level / 2) + player.curse_effect_sum('treasure_lp').round
         player.gain_lp!(amount)
         lines << "A pouch of lust-essence — **+#{amount} LP** (now `#{player.lp}`)."
       elsif roll < 60
-        # Defiance tonic — drunk immediately
         amount = 15 + (level * 2)
         before = player.defiance
         gained = player.heal_defiance!(amount)
         lines << "A **Defiance Tonic**. You drink it on the spot — **+#{gained} Defiance** " \
                  "(`#{before}` → `#{player.defiance}/#{player.max_defiance}`)."
       elsif roll < 85
-        # Basic equipment
         gear_lines = grant_random_basic_gear(player)
         lines.concat(gear_lines)
       else
-        # Mixed: small LP + chance at gear
-        amount = 5 + (level / 3)
+        amount = 5 + (level / 3) + player.curse_effect_sum('treasure_lp').round
         player.gain_lp!(amount)
         lines << "Loose coins of lust-light — **+#{amount} LP** (now `#{player.lp}`)."
         if rand < 0.4
@@ -222,7 +280,6 @@ module Engine
         end
       end
 
-      # Rare bonus: second defiance sip
       if rand < 0.08
         bonus = 8 + level
         gained = player.heal_defiance!(bonus)
@@ -268,19 +325,30 @@ module Engine
     end
   end
 
-  # NSFW text when cursed gear acts on its own.
   module MimicScenes
     module_function
 
+    VIOLATION_TAGS = {
+      'binding' => 'bondage', 'choking' => 'choking', 'anal' => 'anal', 'denial' => 'chastity'
+    }.freeze
+
     def generate(violation_type, player, item_name)
-      case violation_type.to_s
-      when 'tease' then generate_tease_scene(player, item_name)
-      when 'binding' then generate_binding_scene(player, item_name)
-      when 'positioning' then generate_positioning_scene(player, item_name)
-      when 'choking' then generate_choking_scene(player, item_name)
-      when 'anal' then generate_anal_scene(player, item_name)
-      else "The #{item_name} writhes against you with a will of its own."
-      end
+      type = violation_type.to_s
+      tag = VIOLATION_TAGS[type]
+      type = 'tease' if tag && !Engine::ContentOptions.enabled?(player, tag)
+
+      scene =
+        case type
+        when 'tease' then generate_tease_scene(player, item_name)
+        when 'binding' then generate_binding_scene(player, item_name)
+        when 'positioning' then generate_positioning_scene(player, item_name)
+        when 'choking' then generate_choking_scene(player, item_name)
+        when 'anal' then generate_anal_scene(player, item_name)
+        when 'squeeze' then generate_squeeze_scene(player, item_name)
+        when 'denial' then generate_denial_scene(player, item_name)
+        end
+      fallback = "The #{item_name} writhes against your skin, its movements sending shivers through your body."
+      Engine::ContentOptions.pick(player, [scene].compact, fallback: [fallback])
     end
 
     def generate_tease_scene(player, item_name)
@@ -312,12 +380,12 @@ module Engine
       end
 
       scenes << "The #{item_name} writhes against your skin, its movements sending shivers through your body."
-      scenes.sample
+      Engine::ContentOptions.pick(player, scenes)
     end
 
     def generate_binding_scene(_player, item_name)
       [
-        "The #{item_name} suddenly tightens, binding your limbs and making you helpless.",
+        "The #{item_name} suddenly tightens, binding your limbs snugly in place.",
         "The #{item_name} grows additional straps, wrapping around your body and restricting your movement.",
         "The #{item_name} comes alive, its fabric binding you in an inescapable embrace.",
         "The #{item_name} shifts, wrapping around you and holding you in a vulnerable position.",
@@ -327,10 +395,10 @@ module Engine
 
     def generate_positioning_scene(_player, item_name)
       [
-        "The #{item_name} forces your body into a lewd position, making you present yourself invitingly.",
+        "The #{item_name} coaxes your body into a lewd position, making you present yourself invitingly.",
         "The #{item_name} shifts, moving your limbs until you're in a vulnerable pose.",
         "The #{item_name} takes control of your body, positioning you for easy access.",
-        "The #{item_name} comes alive, forcing you into a humiliating position.",
+        "The #{item_name} comes alive, tugging you into a deliciously shameless pose.",
         "The #{item_name} manipulates your limbs, arranging you like a doll for someone's pleasure."
       ].sample
     end
@@ -347,11 +415,33 @@ module Engine
 
     def generate_anal_scene(_player, item_name)
       [
-        "The #{item_name} grows an appendage that forces its way into your ass, stretching you around its girth.",
-        "The #{item_name} comes alive, a phallic shape emerging to penetrate your tight hole.",
+        "The #{item_name} grows an appendage that slides into your ass, stretching you around its girth.",
+        "The #{item_name} comes alive, a phallic shape emerging to fill your tight hole.",
         "The #{item_name} shifts, forming a plug that fills your ass and begins to move with a will of its own.",
-        "The #{item_name} extends itself, forcing itself into your anus and filling you completely.",
-        "The #{item_name} reveals its true nature, a phallus that breaches your ass and begins to thrust."
+        "The #{item_name} extends itself, easing into your anus and filling you completely.",
+        "The #{item_name} reveals its true nature, a phallus that sinks into your ass and begins to thrust."
+      ].sample
+    end
+
+    def generate_squeeze_scene(player, item_name)
+      parts = player.body_parts_list.map(&:to_s)
+      scenes = [
+        "The #{item_name} contracts all at once, hugging every curve of you like a lover's full-body embrace.",
+        "The #{item_name} ripples across your skin in slow waves, as if tasting you.",
+        "The #{item_name} tightens and loosens in a steady rhythm, matching — then quickening — your heartbeat."
+      ]
+      scenes << "The #{item_name} stretches over your chest and kneads your breasts with hungry pressure." if parts.include?('breasts')
+      scenes << "The #{item_name} molds itself around your cock, stroking it through the fabric." if parts.include?('penis')
+      scenes << "The #{item_name} presses a slick seam against your folds and rubs." if parts.include?('vagina')
+      Engine::ContentOptions.pick(player, scenes)
+    end
+
+    def generate_denial_scene(_player, item_name)
+      [
+        "The #{item_name} hums warmly, building you right up to the edge — then goes cold and still.",
+        "The #{item_name} tightens with a click. Whatever you were about to feel, you won't be allowed to.",
+        "The #{item_name} pulses with teasing vibrations that stop the instant you start to squirm.",
+        "Heat blooms under the #{item_name}'s steel, the lock reminding you exactly who owns your release."
       ].sample
     end
   end

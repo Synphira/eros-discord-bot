@@ -21,7 +21,7 @@ module Commands
       entries = player.active_curses_ordered.each_with_index.map { |curse, i| { index: i, curse: curse } }
       if entries.empty?
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: "You don't have any curses to remove!")
+          c.text_display(content: player.suppressed_curses.any? ? "You have no active curses — the rest are suppressed until your next defeat." : "You don't have any curses to remove!")
         end
         return
       end
@@ -35,7 +35,7 @@ module Commands
       end
     end
 
-    def apply(event, index)
+    def apply(event, index, action: :remove)
 
       player = ErosHelpers.require_player(event) or return
 
@@ -46,7 +46,7 @@ module Commands
         return
       end
 
-      result = player.remove_curse_at!(index.to_i)
+      result = action == :suppress ? player.suppress_curse_at!(index.to_i) : player.remove_curse_at!(index.to_i)
       colour = result[:ok] ? 0x4a7c59 : 0x8b1a1a
 
       remaining = player.active_curses_ordered.each_with_index.map { |curse, i| { index: i, curse: curse } }
@@ -61,7 +61,10 @@ module Commands
       end
     end
 
-    application_command(:removecurse) { |event| Commands::RemoveCurse.show_menu(event) }
+    application_command(:removecurse) do |event|
+      number = event.options['number']
+      number ? Commands::RemoveCurse.apply(event, number.to_i - 1) : Commands::RemoveCurse.show_menu(event)
+    end
 
     command(:removecurse, description: 'Spend 50 LP to remove a curse') do |event, choice|
       if choice && !choice.empty?
@@ -70,6 +73,32 @@ module Commands
         Commands::RemoveCurse.show_menu(event)
       end
       nil
+    end
+
+    application_command(:suppresscurse) do |event|
+      number = event.options['number']
+      if number
+        Commands::RemoveCurse.apply(event, number.to_i - 1, action: :suppress)
+      else
+        Commands::RemoveCurse.show_menu(event)
+      end
+    end
+
+    command(:suppresscurse, aliases: [:suppress],
+                            description: 'Spend 25 LP to suppress a curse until your next defeat') do |event, choice|
+      if choice && !choice.empty?
+        Commands::RemoveCurse.apply(event, choice.to_i - 1, action: :suppress)
+      else
+        Commands::RemoveCurse.show_menu(event)
+      end
+      nil
+    end
+
+    string_select(custom_id: /^eros:curseact:(remove|suppress):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      action = event.custom_id[/\Aeros:curseact:(remove|suppress):\d+\z/, 1].to_sym
+      Commands::RemoveCurse.apply(event, Array(event.values).first.to_i, action: action)
     end
   end
 end

@@ -129,7 +129,10 @@ module Commands
       end
     end
 
-    application_command(:shop) { |event| Commands::Shop.run(event) }
+    application_command(:shop) do |event|
+      category = event.options['category']
+      category ? Commands::Shop.run(event, category: category) : Commands::Shop.run(event)
+    end
     application_command(:buy) { |event| Commands::Shop.buy(event, event.options['item']) }
     application_command(:sell) { |event| Commands::Shop.sell(event, event.options['item']) }
 

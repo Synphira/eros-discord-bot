@@ -3,7 +3,6 @@
 require_relative 'monster_types'
 
 module Engine
-  # Curses organized by the monster type that bestows them on defeat.
   module CurseCatalog
     CATEGORY_FOR_TYPE = {
       'beast' => 'Wild',
@@ -212,7 +211,6 @@ module Engine
       pool.sample
     end
 
-    # Upsert every catalog curse into the Sequel Curse table.
     def sync_to_db!
       CURSES.each do |type, list|
         category = CATEGORY_FOR_TYPE.fetch(type, 'Abyssal')
@@ -222,7 +220,6 @@ module Engine
             c.description = entry[:description]
             c.stat_modifiers = entry[:effects]
           end
-          # Keep description / effects fresh on reboot.
           curse.update(
             category: category,
             description: entry[:description],

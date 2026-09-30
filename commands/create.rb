@@ -5,7 +5,6 @@ module Commands
     extend Discordrb::EventContainer
     extend Discordrb::Commands::CommandContainer
 
-    # discord_id => { archetype_id: Integer }
     PENDING = {}
 
     module_function
@@ -57,12 +56,23 @@ module Commands
       end
     end
 
-    def finish(event, archetype_id: nil, submission_choice: 'neutral')
+    def finish(event, archetype_id: nil, submission_choice: 'neutral', character_name: nil)
       if Player[event.user.id]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
           c.text_display(content: 'You already have a character!')
         end
         return
+      end
+
+      if character_name
+        character_name = Player.normalize_character_name(character_name)
+        error = Player.character_name_error(character_name)
+        if error
+          ErosUI.reply_v2(event, ephemeral: true) do |c|
+            c.text_display(content: "#{error}\nPress your Submission button again to retry.")
+          end
+          return
+        end
       end
 
       pending = PENDING[event.user.id]
@@ -76,11 +86,19 @@ module Commands
       end
 
       submission = CharacterArchetypes.submission_value(submission_choice)
-      player = Player.create_from_archetype!(
-        discord_id: event.user.id,
-        archetype: archetype,
-        submission: submission
-      )
+      begin
+        player = Player.create_from_archetype!(
+          discord_id: event.user.id,
+          archetype: archetype,
+          submission: submission,
+          character_name: character_name
+        )
+      rescue Sequel::UniqueConstraintViolation
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: "**#{character_name}** was just taken — press your Submission button again to retry.")
+        end
+        return
+      end
       PENDING.delete(event.user.id)
 
       ErosUI.reply_v2(event, colour: 0xff00ff) do |c|
@@ -88,8 +106,9 @@ module Commands
         c.text_display(content: '_Descend. Endure. Desire._')
         c.separator(divider: true, spacing: :small)
         c.text_display(
-          content: "Profile sealed for <@#{player.discord_id}>.\n" \
-                   "**#{player.gender}** — #{player.body_parts_display}\n" \
+          content: "### #{player.display_name}\n" \
+                   "Profile sealed for <@#{player.discord_id}>.\n" \
+                   "**#{player.gender}**\n" \
                    "Lv #{player.level} · Defiance `#{player.defiance}` · Lust `#{player.lust}` · LP `#{player.lp}`\n" \
                    "STR #{player.strength} · AGI #{player.agility} · RES #{player.resistance}\n" \
                    "Submission `#{player.submission}` _(#{player.submission_display})_"
@@ -99,6 +118,12 @@ module Commands
           content: 'Seek the **Seal of the Abyss** — or be remade by what finds you first.'
         )
         c.text_display(content: '-# Next: `/explore` or `!explore`')
+        if player.character_name.to_s.empty?
+          c.text_display(content: '-# You have no character name yet — press **Choose Name** or type `!name Your Name`.')
+          c.row do |row|
+            row.button(label: 'Choose Name', style: :primary, custom_id: "eros:profile:rename:#{player.discord_id}")
+          end
+        end
       end
     end
 

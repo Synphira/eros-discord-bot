@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'fetish_events'
+
 module Engine
-  # Random dungeon encounters — glory holes, pits, traps, mist, vines, mirrors, spirits.
-  # Choice events use Discord buttons; multi-turn events use a Continue button.
   module RandomEvents
     COLOUR = 0x9b59b6
 
@@ -14,7 +14,40 @@ module Engine
       bonding_vines
       public_humiliation
       spirit_possession
-    ].freeze
+      milking_shrine
+      swelling_fountain
+      bloating_slime
+      egg_chamber
+      paddle_golem
+      edging_altar
+      foot_idol
+    ].concat(Engine::FetishEvents::KEYS).freeze
+
+    EVENT_TAGS = {
+      'glory_hole' => nil,
+      'tentacle_pit' => 'tentacles',
+      'dildo_trap' => 'toys',
+      'aphrodisiac_mist' => 'aphrodisiacs',
+      'bonding_vines' => 'bondage',
+      'public_humiliation' => 'exhibitionism',
+      'spirit_possession' => 'possession',
+      'milking_shrine' => 'lactation',
+      'swelling_fountain' => 'growth',
+      'bloating_slime' => 'inflation',
+      'egg_chamber' => 'oviposition',
+      'paddle_golem' => 'spanking',
+      'edging_altar' => 'denial',
+      'foot_idol' => 'feet'
+    }.merge(Engine::FetishEvents::TAGS).freeze
+
+    LEGACY_TRACKERS = {
+      'bonding_vines' => 'bondage_events',
+      'public_humiliation' => 'exhibitionism_events'
+    }.freeze
+
+    EVENT_REQUIRES = {
+      'milking_shrine' => 'breasts'
+    }.freeze
 
     module_function
 
@@ -26,17 +59,40 @@ module Engine
       return false if player.active_event?
       return false if player.in_combat || player.encounter_data
 
-      rand <= trigger_chance(player.current_floor)
+      chance = trigger_chance(player.current_floor) * Engine::TransformationSystem.event_rate(player)
+      rand <= [chance, 0.6].min
     end
 
-    def sample_key
-      EVENT_KEYS.sample
+    def available_keys(player)
+      parts = player.body_parts_list.map(&:to_s)
+      EVENT_KEYS.select do |key|
+        tag = EVENT_TAGS[key]
+        next false if tag && !Engine::ContentOptions.enabled?(player, tag)
+        next Engine::FetishEvents.available?(player, key) if Engine::FetishEvents.event?(key)
+
+        need = EVENT_REQUIRES[key]
+        need.nil? || parts.include?(need)
+      end
     end
 
-    # Start an event. Returns a result hash for Discord UI.
+    def sample_key(player = nil)
+      keys = player ? available_keys(player) : EVENT_KEYS
+      return 'glory_hole' if keys.empty?
+      return keys.sample unless player && Engine::TransformationSystem.active(player)
+
+      weights = keys.map { |k| [k, Engine::TransformationSystem.event_weight(player, EVENT_TAGS[k])] }
+      roll = rand * weights.sum { |(_, w)| w }
+      weights.each do |k, w|
+        roll -= w
+        return k if roll <= 0
+      end
+      keys.last
+    end
+
     def start!(player, key: nil)
-      key = (key || sample_key).to_s
+      key = (key || sample_key(player)).to_s
       level = player.current_floor
+      Array(LEGACY_TRACKERS[key]).each { |t| player.bump_tracker!(t) }
       case key
       when 'glory_hole' then start_glory_hole!(player, level)
       when 'tentacle_pit' then start_timed!(player, 'tentacle_pit', level, 3 + rand(3))
@@ -45,8 +101,11 @@ module Engine
       when 'bonding_vines' then start_timed!(player, 'bonding_vines', level, 2 + rand(2))
       when 'public_humiliation' then resolve_immediate!(player, 'public_humiliation', level)
       when 'spirit_possession' then start_timed!(player, 'spirit_possession', level, 2)
+      when 'edging_altar' then start_timed!(player, 'edging_altar', level, 3)
+      when *Engine::ExtraEvents::KEYS then resolve_immediate!(player, key, level)
+      when *Engine::FetishEvents::KEYS then Engine::FetishEvents.start!(player, key, level)
       else
-        resolve_immediate!(player, 'dildo_trap', level)
+        start_glory_hole!(player, level)
       end
     end
 
@@ -72,16 +131,24 @@ module Engine
       }
     end
 
+    def choices_for(player, data)
+      type = data && data[:type].to_s
+      return Engine::FetishEvents.choices(player, type) if Engine::FetishEvents.event?(type)
+
+      glory_hole_choices(player)
+    end
+
     def glory_hole_choices(player)
       parts = player.body_parts_list.map(&:to_s)
-      choices = [
-        { key: 'use_mouth', label: 'Mouth', text: 'Use your mouth to pleasure them' },
-        { key: 'use_hands', label: 'Hands', text: 'Use your hands to pleasure them' }
-      ]
-      if parts.include?('breasts')
+      choices = []
+      if Engine::ContentOptions.enabled?(player, 'oral')
+        choices << { key: 'use_mouth', label: 'Mouth', text: 'Use your mouth to pleasure them' }
+      end
+      choices << { key: 'use_hands', label: 'Hands', text: 'Use your hands to pleasure them' }
+      if parts.include?('breasts') && Engine::ContentOptions.enabled?(player, 'breast_play')
         choices << { key: 'use_breasts', label: 'Breasts', text: 'Use your breasts to pleasure them' }
       end
-      if parts.include?('vagina')
+      if parts.include?('vagina') && Engine::ContentOptions.enabled?(player, 'vaginal')
         choices << { key: 'use_vagina', label: 'Vagina', text: 'Take them inside you' }
       end
       choices << { key: 'ignore', label: 'Ignore', text: 'Ignore it and move on' }
@@ -131,6 +198,16 @@ module Engine
 
     def resolve_immediate!(player, type, level)
       meta = event_meta(type)
+      if type.to_s == 'dildo_trap' && rand < player.trap_avoid_chance
+        player.bump_tracker!('traps_avoided')
+        log = [
+          "**Floor #{level}** — #{meta[:blurb]}",
+          "A hidden mechanism whirs — you roll aside before it can catch you! " \
+          "_(AGI #{player.effective_agility} · #{(player.trap_avoid_chance * 100).round}% to avoid)_"
+        ]
+        return { ok: true, mode: :done, name: meta[:name], colour: COLOUR, log: log, choices: [], broken: false }
+      end
+
       log = [
         "**Floor #{level}** — #{meta[:blurb]}",
         { scene: meta[:description] }
@@ -148,6 +225,8 @@ module Engine
 
       level = data[:level].to_i
       log = []
+      return choose_fetish!(player, data, choice_key.to_s, level, log) if Engine::FetishEvents.event?(data[:type])
+
       ok = apply_glory_choice!(player, choice_key.to_s, level, log)
       unless ok
         return {
@@ -156,13 +235,34 @@ module Engine
           name: data[:name],
           colour: COLOUR,
           log: log + ['Pick another option.'],
-          choices: glory_hole_choices(player)
+          choices: choices_for(player, data)
         }
       end
 
       player.clear_event!
+      player.bump_tracker!('glory_hole_encounters') if choice_key.to_s.start_with?('use_')
       finish = finalize_lust!(player, log)
       colour = finish[:broken] ? 0x444444 : COLOUR
+      finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
+    end
+
+    def choose_fetish!(player, data, choice, level, log)
+      type = data[:type].to_s
+      outcome = Engine::FetishEvents.resolve!(player, type, choice, level, log)
+      unless outcome[:ok]
+        return { ok: true, mode: :choice, name: data[:name], colour: Engine::FetishEvents::COLOUR,
+                 log: ['That option is not available — pick another.'],
+                 choices: Engine::FetishEvents.choices(player, type) }
+      end
+
+      player.clear_event!
+      if outcome[:fight]
+        monster = Engine::MonsterTypes.generate_monster(level, player: player, type: outcome[:fight])
+        return { ok: true, mode: :combat, name: data[:name], colour: 0x8b0000, log: log, monster: monster, choices: [] }
+      end
+
+      finish = finalize_lust!(player, log)
+      colour = finish[:broken] ? 0x444444 : Engine::FetishEvents::COLOUR
       finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
     end
 
@@ -177,6 +277,15 @@ module Engine
       duration = data[:duration].to_i
       log = ["**#{data[:name]}** continues…"]
 
+      chance = player.event_escape_chance
+      if rand < chance
+        player.clear_event!
+        player.bump_tracker!('events_escaped')
+        log << "You twist and wriggle at just the right moment and slip free of the **#{data[:name]}**! " \
+               "_(AGI #{player.effective_agility} · #{(chance * 100).round}% per turn)_"
+        return { ok: true, mode: :done, name: data[:name], colour: COLOUR, log: log, choices: [] }
+      end
+
       apply_turn_effect!(player, type, turn, level, log)
       finish = finalize_lust!(player, log)
 
@@ -187,6 +296,7 @@ module Engine
 
       if turn >= duration
         player.clear_event!
+        player.bump_tracker!('tentacle_pit_survived') if type == 'tentacle_pit'
         log << 'The encounter ends, leaving you breathless and wanting more.'
         return { ok: true, mode: :done, name: data[:name], colour: COLOUR, log: log, choices: [] }
       end
@@ -213,7 +323,10 @@ module Engine
         loss = player.reset_run!
         log << "You've been completely broken by the encounter! Your run ends here."
         if loss[:gear_lost]&.any?
-          log << "Your non-cursed gear is lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
+          log << "Your non-cursed gear and trophies are lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
+        end
+        if loss[:curses_reactivated]&.any?
+          log << "Your suppressed curses **reawaken**: #{loss[:curses_reactivated].map { |n| "**#{n}**" }.join(', ')}."
         end
         log << 'Floor, defiance, and lust reset — LP, curses, living gear, and deepest floor persist.'
         return { broken: true, log: log }
@@ -222,6 +335,9 @@ module Engine
     end
 
     def event_meta(type)
+      extra = Engine::ExtraEvents.meta(type)
+      return extra if extra
+
       case type.to_s
       when 'glory_hole'
         { name: 'Glory Hole', blurb: 'a peculiar alcove.', description: 'A waist-height hole waits in the wall.' }
@@ -336,6 +452,8 @@ module Engine
         apply_dildo_trap!(player, parts, log)
       when 'public_humiliation'
         apply_humiliation!(player, parts, log)
+      when *Engine::ExtraEvents::KEYS
+        Engine::ExtraEvents.apply!(player, type.to_s, level, log)
       else
         player.gain_lust!(5 + level)
         log << "Something strange happens — lust **+#{5 + level}** (now #{player.lust})."
@@ -350,6 +468,8 @@ module Engine
         { name: 'metallic tentacle', material: 'cold, metallic', shape: 'ribbed and flexible' }
       ]
       dildo = dildos.sample
+      player.bump_tracker!('dildo_traps_encountered')
+      player.bump_tracker!('traps_triggered')
       log << { scene: "A #{dildo[:name]} dildo suddenly appears, its #{dildo[:material]} surface pressing against you." }
 
       if parts.include?('vagina')
@@ -361,7 +481,7 @@ module Engine
       end
 
       if parts.include?('anus')
-        log << { scene: 'Another smaller dildo emerges and forces its way into your ass, making you gasp with the sudden penetration.' }
+        log << { scene: 'Another smaller dildo emerges and slides into your ass, making you gasp at the sudden fullness.' }
         player.gain_lust!(8)
       end
 
@@ -396,7 +516,7 @@ module Engine
         player.gain_lust!(10)
       end
       if parts.include?('anus')
-        log << { scene: 'The mirrors show your ass being used by tentacled creatures, your body willingly accepting the violation.' }
+        log << { scene: 'The mirrors show tentacled creatures enjoying your ass, your body eagerly welcoming every inch.' }
         player.gain_lust!(8)
       end
       log << { scene: 'After several minutes, the mirrors return to normal, but the memory lingers in your mind and body.' }
@@ -411,6 +531,7 @@ module Engine
       when 'aphrodisiac_mist' then mist_turn!(player, turn, log)
       when 'bonding_vines' then vines_turn!(player, parts, turn, log)
       when 'spirit_possession' then spirit_turn!(player, parts, turn, log)
+      when 'edging_altar' then Engine::ExtraEvents.edging_turn!(player, parts, turn, log)
       else
         player.gain_lust!(8)
         log << "The dungeon toys with you — lust **+8** (now #{player.lust})."
@@ -420,19 +541,19 @@ module Engine
     def tentacle_pit_turn!(player, parts, turn, log)
       case turn
       when 1
-        log << { scene: "Slimy tentacles wrap around your legs, pulling them apart and exposing you completely. You try to struggle, but the pit holds you fast as the tentacles explore your body." }
+        log << { scene: "Slimy tentacles wrap around your legs, easing them apart and exposing you completely. The pit holds you snugly as the tentacles begin to explore your body." }
         player.gain_lust!(8)
         if parts.include?('vagina')
-          log << { scene: 'A thick tentacle presses against your entrance, slowly forcing its way inside.' }
+          log << { scene: 'A thick tentacle presses against your entrance, slowly sliding its way inside.' }
         elsif parts.include?('penis')
           log << { scene: 'A tentacle coils around your cock, its pulsating length already bringing you to hardness.' }
         end
         player.gain_lust!(7)
       when 2
-        log << { scene: "The tentacles become more aggressive, violating you with rhythmic thrusts. You can't see what's happening, but you feel every slimy touch." }
+        log << { scene: "The tentacles grow bolder, working you with rhythmic thrusts. You can't see what's happening, but you feel every slimy touch." }
         player.gain_lust!(10)
         if parts.include?('anus')
-          log << { scene: 'Another tentacle forces its way into your ass, stretching you around its girth.' }
+          log << { scene: 'Another tentacle slips into your ass, stretching you deliciously around its girth.' }
         end
         player.gain_lust!(8)
       when 3
@@ -479,7 +600,7 @@ module Engine
         end
         player.gain_lust!(8)
       when 2
-        log << { scene: 'The vines become more aggressive, thicker ones forcing their way into your most intimate areas. You struggle but they hold you fast.' }
+        log << { scene: 'The vines grow bolder, thicker ones slipping into your most intimate areas while the rest cradle you in place.' }
         player.gain_lust!(10)
         if parts.include?('breasts')
           log << { scene: 'Vines with flower-like mouths attach to your nipples, sucking and nipping with gentle pressure.' }
@@ -495,20 +616,20 @@ module Engine
     def spirit_turn!(player, parts, turn, log)
       case turn
       when 1
-        log << { scene: "The spirit takes control of your hands, forcing them to explore your body against your will. You try to resist, but the spirit's will is stronger." }
+        log << { scene: "The spirit takes control of your hands, guiding them over your body. Its curiosity is infectious, and soon you're not sure whose desire is whose." }
         if parts.include?('vagina')
-          log << { scene: 'Your hands are forced to your wet folds, spreading them open as the spirit explores your most intimate areas.' }
+          log << { scene: 'Your hands drift to your wet folds, spreading them open as the spirit explores your most intimate areas.' }
         elsif parts.include?('penis')
-          log << { scene: 'Your hands are forced to stroke your cock, bringing it to full hardness despite your resistance.' }
+          log << { scene: 'Your hands wrap around your cock and stroke it, bringing it to full hardness as the spirit savours every sensation.' }
         end
         player.gain_lust!(10)
       else
-        log << { scene: 'The spirit forces you to a corner, positioning you to pleasure any who pass by. You try to scream but it controls your voice, making you moan instead.' }
+        log << { scene: 'The spirit poses you in an alcove, putting you on display for any who pass by. Every sound it pulls from your throat comes out as a moan.' }
         if parts.include?('breasts')
-          log << { scene: 'Your hands are forced to knead your breasts, pinching your nipples to hardness.' }
+          log << { scene: 'Your hands knead your breasts, pinching your nipples to hardness.' }
         end
         player.gain_lust!(12)
-        log << { scene: 'After what feels like an eternity, the spirit suddenly leaves your body, leaving you with the memory of its control.' }
+        log << { scene: 'After what feels like an eternity, the spirit drifts out of your body with a satisfied sigh, leaving a warm afterglow behind.' }
         player.gain_lust!(6)
       end
       log << "Lust now `#{player.lust}`."

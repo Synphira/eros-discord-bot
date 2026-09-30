@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Canonical body-type archetypes and creation questions.
 module CharacterArchetypes
   ALL = {
     1 => {

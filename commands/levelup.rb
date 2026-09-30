@@ -22,15 +22,18 @@ module Commands
         c.text_display(content: '## Level Up')
         c.text_display(
           content: "Welcome to the Level Up menu! You have **#{player.lp}** Lust Points.\n" \
-                   "Lv **#{player.level}** · STR #{player.strength} · AGI #{player.agility} · RES #{player.resistance}"
+                   "Lv **#{player.level}** · STR #{player.strength} · AGI #{player.agility} · RES #{player.resistance} · " \
+                   "Max defiance **#{player.max_defiance}**"
         )
         c.separator(divider: true, spacing: :small)
+        next_max = Player.calculate_max_hp(player.level + 1) - Player.calculate_max_hp(player.level)
         c.text_display(
           content: "What would you like to upgrade?\n" \
-                   "1. **Strength** (10 LP)\n" \
-                   "2. **Agility** (10 LP)\n" \
-                   "3. **Resistance** (10 LP)\n" \
-                   "4. **Level** (50 LP) — also +1 to all stats\n\n" \
+                   "1. **Strength** (#{player.stat_upgrade_cost(:strength)} LP) — damage per hit\n" \
+                   "2. **Agility** (#{player.stat_upgrade_cost(:agility)} LP) — flee, dodge attacks, avoid traps, slip free of events\n" \
+                   "3. **Resistance** (#{player.stat_upgrade_cost(:resistance)} LP) — cuts lust from every hit by a percentage\n" \
+                   "4. **Level** (#{player.level_upgrade_cost} LP) — +1 to all stats, **+#{next_max} max defiance**, and a full defiance restore\n\n" \
+                   "-# Each stat costs 5 + its current value, and a level costs 80% of all three combined.\n" \
                    '_Use the buttons, or `!levelup strength|agility|resistance|level`._'
         )
       end
@@ -71,7 +74,14 @@ module Commands
       end
     end
 
-    application_command(:levelup) { |event| Commands::LevelUp.show_menu(event) }
+    application_command(:levelup) do |event|
+      choice = event.options['choice']
+      if choice && !choice.to_s.empty?
+        Commands::LevelUp.apply(event, choice)
+      else
+        Commands::LevelUp.show_menu(event)
+      end
+    end
 
     command(:levelup, description: 'Spend Lust Points to upgrade stats or level') do |event, choice|
       if choice && !choice.empty?

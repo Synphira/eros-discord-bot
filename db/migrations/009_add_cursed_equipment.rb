@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Cursed living gear + treasure chest loot.
 Sequel.migration do
   change do
     alter_table(:equipment) do
