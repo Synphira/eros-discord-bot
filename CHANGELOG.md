@@ -8,6 +8,11 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-02
 
+### Fixed
+
+- When the bot is slow to answer a button, menu or slash command (Discord allows 3 seconds), the panel is now posted as a new message instead of failing with an "Unknown interaction" error
+- The glory hole no longer silently drops the **Vagina** option when you're in chastity: it now shows a greyed-out **Vagina 🔒** button so it's clear your chastity is what's blocking it
+
 ### Added
 
 - **`/rest`** and **`!rest`**: clears all lust and fully restores defiance, then has a **5-minute cooldown** (the reply shows when you can rest again). The Rest button does the same. It can't be used during combat or an unanswered event

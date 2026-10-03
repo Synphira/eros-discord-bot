@@ -148,8 +148,12 @@ module Engine
       if parts.include?('breasts') && Engine::ContentOptions.enabled?(player, 'breast_play')
         choices << { key: 'use_breasts', label: 'Breasts', text: 'Use your breasts to pleasure them' }
       end
-      if parts.include?('vagina') && Engine::ContentOptions.enabled?(player, 'vaginal')
-        choices << { key: 'use_vagina', label: 'Vagina', text: 'Take them inside you' }
+      if Engine::ContentOptions.enabled?(player, 'vaginal')
+        if parts.include?('vagina')
+          choices << { key: 'use_vagina', label: 'Vagina', text: 'Take them inside you' }
+        elsif Engine::ChastitySystem.caged_parts(player).include?('vagina')
+          choices << { key: 'use_vagina', label: 'Vagina 🔒', text: 'Locked away by your chastity', disabled: true }
+        end
       end
       choices << { key: 'ignore', label: 'Ignore', text: 'Ignore it and move on' }
       choices

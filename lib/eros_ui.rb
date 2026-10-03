@@ -54,16 +54,33 @@ module ErosUI
       rescue StandardError => e
         warn "[panel] Editing the message failed (#{e.message.to_s.lines.map(&:strip).reject(&:empty?).join(' — ')}); " \
              'sending a new message instead.'
-        respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+        respond_or_send(event, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
       end
       return
     end
 
     if interaction_event?(event)
-      respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+      respond_or_send(event, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
     else
       send_v2(event.channel, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
     end
+  end
+
+  UNKNOWN_INTERACTION = 10_062
+
+  def interaction_expired?(error)
+    error.respond_to?(:code) && error.code == UNKNOWN_INTERACTION
+  end
+
+  # Discord only accepts an interaction reply within 3 seconds; after that the
+  # token is dead, so the panel is posted as a normal channel message instead.
+  def respond_or_send(event, colour:, with_actions:, owner_id:, &block)
+    respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+  rescue StandardError => e
+    raise unless interaction_expired?(e) && event.channel
+
+    warn '[panel] Interaction expired before the bot replied (slow response); posting to the channel instead.'
+    send_v2(event.channel, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
   end
 
   def update_v2(event, colour: ACCENT, with_actions: false, owner_id:)
@@ -180,7 +197,8 @@ module ErosUI
           row.button(
             label: choice[:label] || choice['label'] || choice[:key],
             style: choice[:style] || (choice[:key].to_s == 'ignore' ? :secondary : :primary),
-            custom_id: "eros:event_choice:#{choice[:key] || choice['key']}:#{owner_id}"
+            custom_id: "eros:event_choice:#{choice[:key] || choice['key']}:#{owner_id}",
+            disabled: choice[:disabled] || choice['disabled'] || false
           )
         end
       end
