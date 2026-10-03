@@ -6,6 +6,48 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-02
+
+### Added
+
+- **`/rest`** and **`!rest`**: clears all lust and fully restores defiance, then has a **5-minute cooldown** (the reply shows when you can rest again). The Rest button does the same. It can't be used during combat or an unanswered event
+- **Depraved One** title and achievement (+1000 LP): clear the Tower Lord **7 times with every content theme enabled**. Clears only count if all 43 themes are on at the moment of the win
+- **Submission screen after a defeat**: the defeat message now has a **Continue** button that leads to a **Submission** screen, with a **Try again** button that starts exploring again
+- The level-up screen now has an **Explore** button so you can get back to the dungeon straight away
+- **Two cursed weapons** can now turn up in mimic chests. Like other living gear, they bind to you and cost LP to remove
+  - **Dagger of Aching Desire** (+6 damage, -1 lust resist): every hit steals **3 LP** from the monster. 25% of hits flood you with heat instead (+15 lust and **Overwhelming Arousal**, lust taken ×1.15 for 2 floors)
+  - **Whip of Will-Breaking** (+4 damage, +1 Submission): every hit makes the monster **+15% easier to satisfy** for the rest of the fight (up to +45%). 30% of hits lash you back with **Submissive Urge** (Submission +2, STR -1, flee -15% for 2 floors)
+- **Hybrid form buffs and special abilities**: every form now gives a real combat buff, and most also have a special ability that can trigger during fights. Both are listed on `/transformation`. Some examples:
+  - Kitten: +20% dodge and +10% satisfy chance. Puppy: 25% less lust taken and +15% LP from submitting
+  - Imp: 15% chance for a double-damage surprise attack. Vampire: heals 25% of the damage you deal. Dryad: heals 5 defiance at the start of each fight. Alraune: +15% trap avoidance
+  - Specials include stunning the monster for a turn (Harpy, Incubus, Imp, Living Doll, Furniture, Latexdoll), absorbing defiance (Slimekin), stealing LP (Succubus), making the monster hurt itself (Vampire), draining it (Ghost), crushing it (Rubberslime), and Angel's **Divine Intervention**, which can save you when your defiance is low
+- **Climaxes rewritten**: each climax now has its own description, which gets more intense the further past 100 your lust went. Afterwards, **Afterglow Exhaustion** gives STR -1 and AGI -1 for 2 floors
+  - **Orgasm Addict**: after 10 climaxes in one run you become addicted until your next defeat, and climaxes give **Climax High** instead (STR +1, satisfy +5%, +2 LP on submit for 2 floors). Denied climaxes from chastity don't count
+- **6 hidden Lust achievements** that only appear once earned: First Release, Frequent Flyer, Release Addict, Climax Master, Overwhelming Pleasure, and Denial Tolerant
+- **Chastity denial achievements**: **Frustrated** (5 denied climaxes, +20 LP), **Desperate** (10, +40 LP) and **Broken by Denial** (25, +80 LP), plus the **Eternally Denied** title at 25. They need the Chastity theme enabled
+- `/status` shows a 🔒 line describing your chastity while you're locked, and fetish events remind you that you're caged before you choose
+
+### Changed
+
+- **30 fetish events have richer, longer scenes**, and some have new settings (for example, the Giant's Chamber now has purple crystals, the Shrinking Chamber has spore mushrooms, and the Viewing Chamber has a one-way window). Rewards and conditions are unchanged. The Bestial Pool now tells you which animal you take after
+- **Hybrid forms no longer change which events and monsters you meet**, except HuCow and Furniture (which keep their event bonuses) and Angel (which keeps fewer monster rooms and more random events). Angel no longer gives +20% to every event type. HuCow now gets 20% more LP from milking and lactation events
+
+- **`/equipment` is split into two views** with **Equipped** and **Inventory** buttons. The inventory has a dropdown to pick a slot (weapon, head, chest, and so on) and only lists that slot's items, so the message stays short with a large inventory
+- **Growing and shrinking conditions replace each other**: gaining Pocket-Sized removes Towering and the reverse, so you can't have both at once. The event message says which one faded
+- **Mimic Seedbed** now also counts **satisfying** the Mimic Broodmother by submitting while wearing 5 cursed items, not just defeating it
+- Defeat messages no longer say "Your run ends here"; the Submission screen follows instead
+- **Chastity-aware scenes**: while you wear the Chastity Belt or have Locked Tight, monsters, living gear, traps, fetish events and other events no longer touch your locked-away parts. They tease, grind and lick at the cage instead, or use your other holes. The glory hole hides the "take them that way" option while you're locked, and egg/milking/edging/tentacle/vine/spirit/mist scenes have their own caged versions
+- **Denied climaxes react differently**: the text depends on what's locking you (the steel belt or Locked Tight's runes), your lust stays at the edge (95), and each denial now gives **+3 LP** on top of the usual 6-defiance cost
+- **Chastity makes you more sensitive**: monsters' lust damage is **+50%** in the Chastity Belt and **+40%** under Locked Tight
+- **`/status` no longer lists conditions directly**: a **Conditions (n)** button switches to a conditions view (with your chastity state), and **Back to Status** switches back
+- Taking the stairs now shows **Deepest reached** as cycle and floor (e.g. "Cycle 2 · Floor 12"), the same record shown on `/profile`
+
+### Operators
+
+- Run **`bundle exec rake commands:register`** to add `/rest` (31 commands), then restart the bot. No new migration is needed. The chastity changes only need a restart
+
+---
+
 ## 2026-09-30
 
 ### Added
@@ -47,7 +89,6 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 - Busy combat turns (several cursed-gear triggers, boss specials, praise) could exceed Discord's 40-component limit, so the Fight/Submit button did nothing. The action log now merges scene blocks and trims text to stay within Discord's limits
 
 ### Operators
-
 - **Bot status** now reads **"Playing with X users in Y towers."** (total members across all servers, and number of servers). It refreshes right away when the bot joins or leaves a server, and every 2 minutes using fresh member counts from Discord (`PRESENCE_REFRESH_SECONDS` to change). For instant updates on member joins and leaves, enable **Server Members Intent** in the Developer Portal, then set `SERVER_MEMBERS_INTENT=true` in `.env`
 - **Errors post to Discord**: each error report is also sent to the channel in **`ERROR_CHANNEL_ID`** (it must be in the server in `ERROR_GUILD_ID`, both in `.env`). Posts never ping anyone, and the same error repeating within a minute posts once, with a repeat count on the next post
 - The developer's Discord ID now lives in **`DEVELOPER_ID`** in `.env` instead of the code. If it's missing or invalid, nobody gets owner access; bug testers in `BUG_TESTER_IDS` keep theirs

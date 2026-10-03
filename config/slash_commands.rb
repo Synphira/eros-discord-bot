@@ -18,6 +18,7 @@ module SlashCommands
     { name: 'start', description: 'Alias of /create — begin character creation' },
     { name: 'status', description: 'Show character sheet, curses, and Threat' },
     { name: 'explore', description: 'Step deeper into the endless dungeon' },
+    { name: 'rest', description: 'Clear all lust and fully restore defiance (5-minute cooldown)' },
     { name: 'fight', description: 'Attack the monster you are fighting' },
     { name: 'flee', description: 'Try to escape combat (AGI helps)' },
     { name: 'submit', description: 'Submit to the monster you are fighting' },

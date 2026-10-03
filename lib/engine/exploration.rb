@@ -242,7 +242,7 @@ module Engine
           **Stairs downward** — stone steps spiral into colder dark.
 
           You descend to **Floor #{@player.current_floor}**.
-          Deepest reached: **#{@player.highest_floor_reached}**.
+          Deepest reached: **#{Player.depth_label(@player.deepest_depth)}**.
           The threats below will be stronger.#{worn ? "\n#{worn}" : ''}
         MSG
       )
@@ -273,7 +273,7 @@ module Engine
           lines.concat(climax[:lines])
           if climax[:broken]
             @player.reset_run!
-            lines << "You've been completely broken by the trap! Your run ends here."
+            lines << "You've been completely broken by the trap!"
             lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear and trophies are lost.'
             return [lines.join("\n"), true]
           end

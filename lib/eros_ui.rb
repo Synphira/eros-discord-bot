@@ -98,6 +98,8 @@ module ErosUI
     when true, :explore then attach_explore_buttons(container, owner_id)
     when :combat then attach_combat_buttons(container, owner_id)
     when :levelup then attach_levelup_buttons(container, owner_id)
+    when :defeat then attach_defeat_button(container, owner_id)
+    when :submission then attach_try_again_button(container, owner_id)
     when Hash
       if with_actions[:shop]
         attach_shop_buttons(container, with_actions[:shop], owner_id)
@@ -204,6 +206,18 @@ module ErosUI
     end
   end
 
+  def attach_defeat_button(container, owner_id)
+    container.row do |row|
+      row.button(label: 'Continue', style: :secondary, custom_id: "eros:defeat_continue:#{owner_id}")
+    end
+  end
+
+  def attach_try_again_button(container, owner_id)
+    container.row do |row|
+      row.button(label: 'Try again', style: :primary, custom_id: "eros:try_again:#{owner_id}")
+    end
+  end
+
   def attach_combat_buttons(container, owner_id)
     container.row do |row|
       row.button(label: 'Fight', style: :danger, custom_id: "eros:fight:#{owner_id}")
@@ -221,6 +235,9 @@ module ErosUI
       row.button(label: "AGI#{cost.call(:agility)}", style: :primary, custom_id: "eros:levelup:agility:#{owner_id}")
       row.button(label: "RES#{cost.call(:resistance)}", style: :primary, custom_id: "eros:levelup:resistance:#{owner_id}")
       row.button(label: "Level#{level_cost}", style: :success, custom_id: "eros:levelup:level:#{owner_id}")
+    end
+    container.row do |row|
+      row.button(label: 'Explore', style: :secondary, custom_id: "eros:explore_path:#{owner_id}")
     end
   end
 
@@ -400,13 +417,8 @@ module ErosUI
       content: "**Threat Level — #{threat_label(threat.category)}** #{threat_bar(threat.percent)}\n" \
                "_LP contrib #{threat.lp_component}% · Curses +#{threat.curse_component}_"
     )
-    conditions = player.condition_list
-    unless conditions.empty?
-      lines = conditions.map do |c|
-        floors = c['floors'].to_i
-        "• **#{c['name']}** — #{c['summary']} _(#{floors} floor#{'s' unless floors == 1})_"
-      end
-      container.text_display(content: "**Conditions**\n#{lines.join("\n")}")
+    if (chastity = Engine::ChastitySystem.description(player))
+      container.text_display(content: "🔒 #{chastity}")
     end
     container.separator(divider: true, spacing: :small)
     combat_line = player.reconcile_encounter! ? 'Engaged' : 'Quiet for now'
@@ -427,5 +439,25 @@ module ErosUI
       content: '-# Defeat resets the run and returns you to Cycle 1 — LP, curses, living gear, titles, ' \
                'and deepest floor persist; trophies and conditions are lost. Use `/curses` for brands, `/profile` for titles & achievements.'
     )
+  end
+
+  def build_conditions_container(container, player)
+    container.text_display(content: "## Conditions — #{player.display_name}")
+    container.separator(divider: true, spacing: :small)
+    if (chastity = Engine::ChastitySystem.description(player))
+      container.text_display(content: "🔒 #{chastity}")
+    end
+    conditions = player.condition_list
+    if conditions.empty?
+      container.text_display(content: '_No active conditions._')
+    else
+      lines = conditions.map do |c|
+        floors = c['floors'].to_i
+        "• **#{c['name']}** — #{c['summary']} _(#{floors} floor#{'s' unless floors == 1})_"
+      end
+      container.text_display(content: lines.join("\n"))
+    end
+    container.separator(divider: false, spacing: :small)
+    container.text_display(content: '-# Conditions tick down each floor and are cleared on defeat.')
   end
 end

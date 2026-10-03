@@ -79,10 +79,15 @@ module Engine
         requirement: { plant_submissions: 15 },
         description: "You've been fertilized by the tower's flora"
       },
+      'depraved_one' => {
+        name: 'Depraved One',
+        requirement: { depraved_tower_clears: 7 },
+        description: 'You conquered the Tower Lord seven times with every desire laid bare'
+      },
       'mimic_seedbed' => {
         name: 'Mimic Seedbed',
         requirement: { mimic_broodmother_cursed: true },
-        description: "You defeated the Broodmother while fully cursed, earning the mimics' respect"
+        description: "You defeated or satisfied the Broodmother while fully cursed, earning the mimics' respect"
       },
       'succubus_bane' => {
         name: 'Succubus Bane',
@@ -160,6 +165,7 @@ module Engine
         'rubberized' => ['Rubber Doll', :latex_events, 5, 'Your body is encased in the tight embrace of synthetic pleasure'],
         'broodmother' => ['Broodmother', :oviposition_events, 3, "You've carried the young of creatures within you"],
         'chaste' => ['Chaste Slave', :chastity_events, 5, 'Your pleasure is denied so you may serve others better'],
+        'chastity_denied' => ['Eternally Denied', :denied_climaxes, 25, 'Locked away and denied so often that release is only a memory'],
         'empty_head' => ['Empty Head', :mind_control_events, 5, "You've found freedom in giving up your thoughts"],
         'cumslut' => ['Cum Covered', :bukkake_events, 5, 'You wear the essence of many creatures like a badge of honor'],
         'public_display' => ['Public Display', :exhibitionism_events, 5, 'Your body is a gift to be seen by all'],
@@ -192,7 +198,7 @@ module Engine
     ).freeze
 
     TITLE_PRIORITY = %w[
-      sin_sculptor climax_checker mythic legendary master royal_consort mimic_seedbed survivor experienced novice cursed lustful submissive rich
+      sin_sculptor climax_checker depraved_one mythic legendary master royal_consort mimic_seedbed survivor experienced novice cursed lustful submissive rich
       broken addicted pure succubus_bane incubus_bane succubus_pet incubus_toy beast_breeder demon_consort
       slime_vessel undead_paramour plant_pollinated pit_survivor glory_hole_veteran trap_springer
     ].freeze
@@ -242,6 +248,9 @@ module Engine
       ['voyeurism_veteran', 'Watcher', 'Experience voyeurism 3 times', :voyeurism_events, 3, 25],
       ['weight_gain_veteran', 'Well Fed', 'Experience weight gain 3 times', :weight_gain_events, 3, 25],
       ['furry_veteran', 'Beastkin', 'Experience furry transformation 3 times', :furry_events, 3, 25],
+      ['denied_frustrated', 'Frustrated', 'Have a climax denied by chastity 5 times', :denied_climaxes, 5, 20],
+      ['denied_desperate', 'Desperate', 'Have a climax denied by chastity 10 times', :denied_climaxes, 10, 40],
+      ['denied_broken', 'Broken by Denial', 'Have a climax denied by chastity 25 times', :denied_climaxes, 25, 80],
       ['kink_explorer', 'Kink Explorer', 'Accept 25 fetish events', :fetish_events_accepted, 25, 50],
       ['kink_connoisseur', 'Connoisseur of Sin', 'Accept 100 fetish events', :fetish_events_accepted, 100, 150]
     ].map do |id, name, desc, tracker, count, lp|
@@ -306,6 +315,19 @@ module Engine
         requirement: { lp_earned: 1000 }, reward: { lp: 100 } },
       { id: 'survival_expert', category: 'lust', name: 'Survival Expert', description: 'Reach climax 20 times without breaking',
         requirement: { climaxes_survived: 20 }, reward: { lp: 100 } },
+      { id: 'first_orgasm', category: 'lust', name: 'First Release', description: 'Experience your first climax',
+        requirement: { total_climaxes: 1 }, reward: { lp: 10 }, hidden: true },
+      { id: 'frequent_climax', category: 'lust', name: 'Frequent Flyer', description: 'Climax 10 times',
+        requirement: { total_climaxes: 10 }, reward: { lp: 25 }, hidden: true },
+      { id: 'orgasm_addict', category: 'lust', name: 'Release Addict', description: 'Become addicted to climaxing (10 climaxes in one run)',
+        requirement: { climax_addictions: 1 }, reward: { lp: 50 }, hidden: true },
+      { id: 'climax_master', category: 'lust', name: 'Climax Master', description: 'Climax 50 times',
+        requirement: { total_climaxes: 50 }, reward: { lp: 100 }, hidden: true },
+      { id: 'overwhelming_pleasure', category: 'lust', name: 'Overwhelming Pleasure',
+        description: 'Climax with lust 15 or more past the limit',
+        requirement: { max_climax_overflow: 15 }, reward: { lp: 30 }, hidden: true },
+      { id: 'release_denied', category: 'lust', name: 'Denial Tolerant', description: 'Go 3 floors in a row without climaxing',
+        requirement: { best_climax_free_floors: 3 }, reward: { lp: 20 }, hidden: true },
 
       { id: 'pit_veteran', category: 'events', name: 'Pit Veteran', description: 'Survive the tentacle pit 5 times',
         requirement: { tentacle_pit_survived: 5 }, reward: { lp: 50 } },
@@ -317,10 +339,13 @@ module Engine
         requirement: { events_escaped: 5 }, reward: { lp: 40 } },
 
       { id: 'mimic_broodmother_cursed', category: 'challenges', name: 'Mimic Seedbed',
-        description: 'Defeat the Mimic Broodmother while wearing 5 or more cursed items',
+        description: 'Defeat or satisfy the Mimic Broodmother while wearing 5 or more cursed items',
         requirement: { mimic_broodmother_cursed: true }, reward: { lp: 500 } },
       { id: 'no_escape', category: 'challenges', name: 'No Escape', description: 'Reach floor 20 in a single run without trying to flee',
         requirement: { current_floor: 20, run_flee_attempts: { max: 0 } }, reward: { lp: 75 } },
+      { id: 'depraved_one', category: 'challenges', name: 'Depraved One',
+        description: 'Clear the Tower Lord 7 times with every content theme enabled',
+        requirement: { depraved_tower_clears: 7 }, reward: { lp: 1000 } },
       { id: 'royal_court', category: 'challenges', name: 'Royal Court', description: 'Clear both the Succubus Queen and the Incubus King',
         requirement: { royal_demons_cleared: 2 }, reward: { lp: 100 } }
     ].concat(KINK_ACHIEVEMENTS).freeze
@@ -351,7 +376,8 @@ module Engine
       succubus_submissions: 'succubus submissions',
       incubus_submissions: 'incubus submissions',
       royal_demons_cleared: 'demon royals cleared',
-      mimic_broodmother_cursed: 'Broodmother slain while wearing 5 cursed items',
+      mimic_broodmother_cursed: 'Broodmother cleared while wearing 5 cursed items',
+      depraved_tower_clears: 'Tower Lord clears with every content theme on',
       mimics_removed_count: 'living items torn free',
       tentacle_pit_survived: 'tentacle pits survived',
       glory_hole_encounters: 'glory hole uses',
@@ -364,6 +390,11 @@ module Engine
       submission_to_defeat_ratio: 'submit-to-kill ratio',
       max_curses_simultaneous: 'curses at once',
       climaxes_survived: 'climaxes survived',
+      total_climaxes: 'climaxes',
+      denied_climaxes: 'climaxes denied by chastity',
+      climax_addictions: 'times addicted to climaxing',
+      max_climax_overflow: 'lust past the limit at climax',
+      best_climax_free_floors: 'floors in a row without climaxing',
       bimbo_transformations: 'bimbo transformations',
       living_clothing_acquired: 'living outfits bound',
       fetish_events_accepted: 'fetish events accepted',
@@ -387,7 +418,7 @@ module Engine
       mindbreak_events: 'mindbreak', sensory_deprivation_events: 'sensory_deprivation', slavery_events: 'slavery',
       strap_on_events: 'pegging', facial_events: 'facials', foot_fetish_events: 'feet', group_sex_events: 'group_sex',
       public_play_events: 'exhibitionism', voyeurism_events: 'voyeurism', weight_gain_events: 'weight_gain',
-      furry_events: 'furry'
+      furry_events: 'furry', denied_climaxes: 'chastity'
     }.freeze
 
     module_function
@@ -395,6 +426,8 @@ module Engine
     ROLE_KEYS = %i[is_developer is_bug_tester].freeze
 
     def visible?(player, entry)
+      return false if entry[:hidden]
+
       Hash(entry[:requirement]).keys.all? do |key|
         next player.progress_value(key).positive? if ROLE_KEYS.include?(key.to_sym)
 

@@ -58,7 +58,7 @@ module Commands
 
       if result[:defeated] || result[:broken]
         Eros.clear_encounter!(player)
-        ErosUI.reply_v2(event, colour: 0x444444) do |c|
+        ErosUI.reply_v2(event, colour: 0x444444, with_actions: :defeat) do |c|
           ErosUI.append_action_log(c, result[:log])
         end
         return

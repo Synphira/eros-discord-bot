@@ -9,6 +9,7 @@ module Commands
   ['/create · /start', '!create · !start', 'Create your delver (body type select)'],
   ['/status', '!status', 'Character sheet: stats, deepest floor, Threat (curses via /curses)'],
   ['/explore', '!explore', 'Room roll — monster / trap / treasure / stairs / empty'],
+  ['/rest', '!rest', 'Clear all lust and fully restore defiance — once every 5 minutes (also a button)'],
   ['/fight · /flee · /submit', '!fight · !flee · !submit', 'Combat actions (also buttons)'],
   ['/levelup', '!levelup [stat|level]', 'Spend LP on STR / AGI / RES or a Level (+max defiance, full heal)'],
   ['/curses', '!curses', 'List active curses by monster type'],

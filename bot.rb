@@ -11,6 +11,7 @@ require_relative 'config/database'
 require_relative 'lib/engine/tower'
 require_relative 'lib/engine/title_system'
 require_relative 'lib/engine/transformation_system'
+require_relative 'lib/engine/chastity_system'
 require_relative 'lib/engine/profile_system'
 require_relative 'lib/engine/threat_calculator'
 require_relative 'lib/engine/monster_types'
@@ -63,12 +64,12 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::Restart,
   Commands::Profile,
   Commands::Transformation,
+  Commands::Rest,
   Commands::Options,
   Commands::CursedShop,
   Commands::Dev,
   Commands::Buttons::CreateCharacter,
   Commands::Buttons::ExplorePath,
-  Commands::Buttons::Rest,
   Commands::Buttons::Fight,
   Commands::Buttons::Flee,
   Commands::Buttons::Submit,

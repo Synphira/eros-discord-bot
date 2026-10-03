@@ -65,7 +65,7 @@ module Commands
         })
       when :trap
         if result.broken
-          ErosUI.reply_v2(event, colour: 0x444444) do |c|
+          ErosUI.reply_v2(event, colour: 0x444444, with_actions: :defeat) do |c|
             c.text_display(content: result.message)
           end
         else
@@ -75,7 +75,7 @@ module Commands
         end
       when :treasure
         if result.broken
-          ErosUI.reply_v2(event, colour: 0x444444) do |c|
+          ErosUI.reply_v2(event, colour: 0x444444, with_actions: :defeat) do |c|
             c.text_display(content: result.message)
           end
         else
@@ -115,7 +115,7 @@ module Commands
         when :continue
           { event_continue: true }
         else
-          result[:broken] ? false : :explore
+          result[:broken] ? :defeat : :explore
         end
 
       ErosUI.reply_v2(event, colour: colour, with_actions: actions) do |c|
@@ -127,6 +127,25 @@ module Commands
           c.text_display(content: lines.join("\n"))
         end
       end
+    end
+
+    def show_submission(event)
+      ErosUI.reply_v2(event, colour: 0x444444, with_actions: :submission) do |c|
+        c.text_display(content: '## Submission')
+        c.text_display(content: 'You lost all defiance and gave into your desires. The tower forever ravages you.')
+      end
+    end
+
+    button(custom_id: /^eros:defeat_continue:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Explore.show_submission(event)
+    end
+
+    button(custom_id: /^eros:try_again:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Explore.run(event)
     end
 
     application_command(:explore) { |event| Commands::Explore.run(event) }

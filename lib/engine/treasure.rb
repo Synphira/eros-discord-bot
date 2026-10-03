@@ -54,8 +54,48 @@ module Engine
         violation_type: 'anal',
         removal_cost: 20,
         rarity: 4
+      },
+      {
+        name: 'Dagger of Aching Desire',
+        description: 'A wicked dagger that throbs with inner heat. Each wound it deals pulls pleasure out of the victim and into the wielder.',
+        type: 'weapon',
+        slot: 'weapon',
+        stat_modifiers: { 'damage' => 6, 'lust_resist' => -1 },
+        violation_type: 'heat',
+        removal_cost: 20,
+        rarity: 4
+      },
+      {
+        name: 'Whip of Will-Breaking',
+        description: 'A whip that moves on its own. Each strike leaves the target more willing to submit to its wielder.',
+        type: 'weapon',
+        slot: 'weapon',
+        stat_modifiers: { 'damage' => 4, 'submission' => 1 },
+        violation_type: 'whip',
+        removal_cost: 18,
+        rarity: 4
       }
     ].freeze
+
+    WEAPON_PROCS = {
+      'Dagger of Aching Desire' => {
+        steal_lp: 3,
+        hit: 'The dagger pulses as it strikes, draining pleasure from the %<name>s and pouring it into you — **+%<lp>s LP**.',
+        backlash_chance: 0.25,
+        backlash_lust: 15,
+        backlash: "The dagger's heat suddenly floods your own body, overwhelming you with desire! Lust **+%<lust>s** (now %<now>s).",
+        condition: { key: 'aching_heat', name: 'Overwhelming Arousal', floors: 2, effects: { 'lust_mult' => 1.15 } }
+      },
+      'Whip of Will-Breaking' => {
+        pliant: 0.15,
+        pliant_cap: 0.45,
+        hit: 'The whip cracks with unnatural force — the %<name>s grows more pliable to your will _(satisfy +%<pct>s%% this fight)_.',
+        backlash_chance: 0.3,
+        backlash: 'The whip coils back and lashes *you* — suddenly you are desperate to please your enemies!',
+        condition: { key: 'submissive_urge', name: 'Submissive Urge', floors: 2,
+                     effects: { 'submission' => 2, 'strength' => -1, 'flee_bonus' => -0.15 } }
+      }
+    }.freeze
 
     EVENT_MIMICS = [
       {
@@ -104,6 +144,25 @@ module Engine
 
     def all_mimic_templates
       MIMIC_TEMPLATES + EVENT_MIMICS
+    end
+
+    def weapon_proc!(player, enc, log)
+      weapon = player.equipment_for_slot('weapon') or return
+      spec = WEAPON_PROCS[weapon.name] or return
+
+      if spec[:steal_lp]
+        player.gain_lp!(spec[:steal_lp])
+        log << format(spec[:hit], name: enc[:name], lp: spec[:steal_lp])
+      end
+      if spec[:pliant]
+        enc[:pliant] = [enc[:pliant].to_f + spec[:pliant], spec[:pliant_cap]].min
+        log << format(spec[:hit], name: enc[:name], pct: (enc[:pliant] * 100).round)
+      end
+      return unless rand < spec[:backlash_chance]
+
+      player.gain_lust!(spec[:backlash_lust]) if spec[:backlash_lust]
+      log << format(spec[:backlash], lust: spec[:backlash_lust], now: player.lust)
+      Engine::FetishEvents.apply_condition!(player, spec[:condition], log)
     end
 
     BASIC_GEAR = [
@@ -329,7 +388,7 @@ module Engine
     module_function
 
     VIOLATION_TAGS = {
-      'binding' => 'bondage', 'choking' => 'choking', 'anal' => 'anal', 'denial' => 'chastity'
+      'binding' => 'bondage', 'choking' => 'choking', 'anal' => 'anal', 'denial' => 'chastity', 'whip' => 'spanking'
     }.freeze
 
     def generate(violation_type, player, item_name)
@@ -346,14 +405,16 @@ module Engine
         when 'anal' then generate_anal_scene(player, item_name)
         when 'squeeze' then generate_squeeze_scene(player, item_name)
         when 'denial' then generate_denial_scene(player, item_name)
+        when 'heat' then generate_heat_scene(player, item_name)
+        when 'whip' then generate_whip_scene(player, item_name)
         end
       fallback = "The #{item_name} writhes against your skin, its movements sending shivers through your body."
       Engine::ContentOptions.pick(player, [scene].compact, fallback: [fallback])
     end
 
     def generate_tease_scene(player, item_name)
-      parts = player.body_parts_list.map(&:to_s)
-      scenes = []
+      parts = Engine::ChastitySystem.scene_parts(player)
+      scenes = Engine::ChastitySystem.lines_for(player, :tease, actor: item_name)
 
       if parts.include?('vagina')
         scenes << "The #{item_name} shifts against your most sensitive areas, its fabric teasing your clit with supernatural awareness."
@@ -424,12 +485,12 @@ module Engine
     end
 
     def generate_squeeze_scene(player, item_name)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       scenes = [
         "The #{item_name} contracts all at once, hugging every curve of you like a lover's full-body embrace.",
         "The #{item_name} ripples across your skin in slow waves, as if tasting you.",
         "The #{item_name} tightens and loosens in a steady rhythm, matching — then quickening — your heartbeat."
-      ]
+      ] + Engine::ChastitySystem.lines_for(player, :tease, actor: item_name)
       scenes << "The #{item_name} stretches over your chest and kneads your breasts with hungry pressure." if parts.include?('breasts')
       scenes << "The #{item_name} molds itself around your cock, stroking it through the fabric." if parts.include?('penis')
       scenes << "The #{item_name} presses a slick seam against your folds and rubs." if parts.include?('vagina')
@@ -442,6 +503,24 @@ module Engine
         "The #{item_name} tightens with a click. Whatever you were about to feel, you won't be allowed to.",
         "The #{item_name} pulses with teasing vibrations that stop the instant you start to squirm.",
         "Heat blooms under the #{item_name}'s steel, the lock reminding you exactly who owns your release."
+      ].sample
+    end
+
+    def generate_heat_scene(_player, item_name)
+      [
+        "The #{item_name} throbs in your grip, and its heat crawls up your arm and pools low in your belly.",
+        "The #{item_name} pulses like a heartbeat, flooding you with a fever of desire you can't shake.",
+        "Warmth bleeds from the #{item_name} into your palm, every pulse a little hotter and a little lewder.",
+        "The #{item_name} hums against your hip, its stolen pleasure leaking back into you in slow, aching waves."
+      ].sample
+    end
+
+    def generate_whip_scene(_player, item_name)
+      [
+        "The #{item_name} uncoils on its own and lands a crisp stroke across your rear, leaving you gasping and eager.",
+        "The #{item_name} wraps around your thigh and squeezes, whispering that you'd look so much better on your knees.",
+        "The #{item_name} cracks beside your ear, and your body flinches into a submissive kneel before you can stop it.",
+        "The #{item_name} trails its tip slowly up your spine, then snaps — and the sting melts into heat."
       ].sample
     end
   end

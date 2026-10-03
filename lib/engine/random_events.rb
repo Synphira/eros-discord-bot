@@ -139,7 +139,7 @@ module Engine
     end
 
     def glory_hole_choices(player)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       choices = []
       if Engine::ContentOptions.enabled?(player, 'oral')
         choices << { key: 'use_mouth', label: 'Mouth', text: 'Use your mouth to pleasure them' }
@@ -321,7 +321,7 @@ module Engine
       log.concat(climax[:lines])
       if climax[:broken]
         loss = player.reset_run!
-        log << "You've been completely broken by the encounter! Your run ends here."
+        log << "You've been completely broken by the encounter!"
         if loss[:gear_lost]&.any?
           log << "Your non-cursed gear and trophies are lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."
         end
@@ -383,7 +383,7 @@ module Engine
     end
 
     def apply_glory_choice!(player, key, level, log)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       case key
       when 'use_mouth'
         lp_gain = 3 + (level / 2)
@@ -395,6 +395,9 @@ module Engine
         log << "Your lust increases by **#{lust_gain}**. (now #{player.lust})"
         if parts.include?('vagina')
           log << { scene: 'As you pleasure them, your own body responds with growing heat between your legs.' }
+          player.gain_lust!(3)
+        elsif (caged = Engine::ChastitySystem.line(player, :glory))
+          log << { scene: caged }
           player.gain_lust!(3)
         end
         true
@@ -422,7 +425,11 @@ module Engine
         true
       when 'use_vagina'
         unless parts.include?('vagina')
-          log << "You don't have the right equipment for that choice."
+          log << if Engine::ChastitySystem.in_chastity?(player)
+                   'Your chastity seals you away — you can\'t take them that way while you\'re locked.'
+                 else
+                   "You don't have the right equipment for that choice."
+                 end
           return false
         end
         lp_gain = 4 + (level / 2)
@@ -446,7 +453,7 @@ module Engine
     end
 
     def apply_immediate_effect!(player, type, level, log)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       case type.to_s
       when 'dildo_trap'
         apply_dildo_trap!(player, parts, log)
@@ -477,6 +484,9 @@ module Engine
         player.gain_lust!(12)
       elsif parts.include?('penis')
         log << { scene: 'It positions itself under you, pressing against your perineum and sending vibrations through your body.' }
+        player.gain_lust!(10)
+      elsif (caged = Engine::ChastitySystem.line(player, :dildo))
+        log << { scene: caged }
         player.gain_lust!(10)
       end
 
@@ -515,6 +525,10 @@ module Engine
         log << { scene: 'You watch yourself being milked by demonic mouths, your seed willingly given.' }
         player.gain_lust!(10)
       end
+      if (caged = Engine::ChastitySystem.line(player, :mirror))
+        log << { scene: caged }
+        player.gain_lust!(10)
+      end
       if parts.include?('anus')
         log << { scene: 'The mirrors show tentacled creatures enjoying your ass, your body eagerly welcoming every inch.' }
         player.gain_lust!(8)
@@ -525,7 +539,7 @@ module Engine
     end
 
     def apply_turn_effect!(player, type, turn, _level, log)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       case type.to_s
       when 'tentacle_pit' then tentacle_pit_turn!(player, parts, turn, log)
       when 'aphrodisiac_mist' then mist_turn!(player, turn, log)
@@ -547,6 +561,8 @@ module Engine
           log << { scene: 'A thick tentacle presses against your entrance, slowly sliding its way inside.' }
         elsif parts.include?('penis')
           log << { scene: 'A tentacle coils around your cock, its pulsating length already bringing you to hardness.' }
+        else
+          log.concat(Engine::ChastitySystem.scenes(player, :tentacles))
         end
         player.gain_lust!(7)
       when 2
@@ -576,7 +592,8 @@ module Engine
     def mist_turn!(player, turn, log)
       case turn
       when 1
-        log << { scene: 'The aphrodisiac mist makes your skin flush with heat, your senses heightening with every breath. You feel a growing ache between your legs.' }
+        log << { scene: Engine::ChastitySystem.line(player, :mist) ||
+                        'The aphrodisiac mist makes your skin flush with heat, your senses heightening with every breath. You feel a growing ache between your legs.' }
         player.gain_lust!(8)
       when 2
         log << { scene: "The mist's effects intensify, making your clothes feel rough against your sensitized skin. Your mind fills with carnal thoughts." }
@@ -597,6 +614,8 @@ module Engine
           log << { scene: 'A vine coated in sweet nectar presses against your clit, sending jolts of pleasure through you.' }
         elsif parts.include?('penis')
           log << { scene: 'A vine wraps around your cock, its rough texture stimulating you to hardness.' }
+        else
+          log.concat(Engine::ChastitySystem.scenes(player, :vines))
         end
         player.gain_lust!(8)
       when 2
@@ -621,6 +640,8 @@ module Engine
           log << { scene: 'Your hands drift to your wet folds, spreading them open as the spirit explores your most intimate areas.' }
         elsif parts.include?('penis')
           log << { scene: 'Your hands wrap around your cock and stroke it, bringing it to full hardness as the spirit savours every sensation.' }
+        else
+          log.concat(Engine::ChastitySystem.scenes(player, :spirit))
         end
         player.gain_lust!(10)
       else

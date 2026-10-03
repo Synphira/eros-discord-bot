@@ -26,46 +26,53 @@ module Engine
       'inflation_trap' => {
         name: 'Inflation Trap', tag: 'inflation', tracker: 'inflation_events',
         blurb: 'a hose-like vine drips warm syrup.',
-        intro: 'Slick nozzles unfurl from the walls, dripping sweet warm fluid. They sway toward you, ready to fill.',
+        intro: 'You discover a room filled with strange pumping devices. One of them stirs as you approach, ' \
+               'its slick hose twisting toward you with a life of its own, dripping sweet warm fluid...',
         accept: {
-          label: 'Let it fill you', text: 'Get pumped full',
-          scenes: ['The nozzles latch on and pump you full of warm syrup until your belly rounds out, taut and sloshing.',
-                   'Every movement makes you gurgle and blush — you feel stuffed, heavy, and oddly sturdy.'],
+          label: 'Let it connect', text: 'Get pumped full',
+          scenes: ['The hose slides into you and begins to pump. You feel yourself expanding with every pulse, warm syrup filling you deeper and deeper.',
+                   'Your skin stretches tight as you grow rounder and fuller, the pressure inside a dizzy mix of discomfort and intense pleasure. ' \
+                   'Every movement makes you slosh and blush.'],
           lp: 5, lust: 12,
           condition: { key: 'stuffed', name: 'Stuffed Full', floors: 2,
                        effects: { 'agility' => -2, 'max_hp_bonus' => 10 } }
         },
         decline: { label: 'Dodge', text: 'Try to dodge the nozzles (AGI)', lust: 2, escape: true,
-                   scene: 'You slip between the nozzles before they can latch on.' },
+                   scene: 'You twist away from the hose and slip out of the room before it can latch on.' },
         fight: { label: 'Burst it', type: :slime, text: 'The nozzles belong to a bloated slime — and it wants you!' }
       },
       'living_clothing' => {
         name: 'Living Clothing', tag: 'living_clothing', tracker: nil,
-        blurb: 'an outfit hangs on an invisible mannequin.',
-        intro: 'A gorgeous outfit floats in the air, fabric shimmering and rippling as if breathing. It seems to be sizing you up.',
+        blurb: 'a wardrobe of clothes that sway on their own.',
+        intro: 'You enter a room filled with clothing that moves on its own, rippling as if breathing. ' \
+               'As you watch, a few pieces detach themselves from their hangers and drift toward you, sizing you up...',
         accept: {
           label: 'Try it on', text: 'Wear the living outfit (cursed gear)',
-          scenes: ['The fabric leaps onto you before you finish undressing, sealing itself to your skin with a satisfied shiver.'],
+          scenes: ['You let the living clothes dress you. The material tightens and shifts against your skin with a will of its own, ' \
+                   'sealing itself to you with a satisfied shiver.',
+                   'Almost at once it starts to tease — little squeezes and strokes no ordinary fabric could manage.'],
           lp: 4, lust: 10, special: :living_clothing
         },
         decline: { label: 'Leave it', text: 'Leave it hanging', lust: 2,
-                   scene: 'The outfit droops sadly as you walk past.' },
+                   scene: 'You carefully weave around the drifting clothes. They droop sadly back onto their hangers as you leave.' },
         fight: { label: 'Rip it apart', type: :mimic, text: 'The outfit lunges — it was a mimic all along!' }
       },
       'beast_taming' => {
         name: 'Beast Taming', tag: 'petplay', tracker: 'petplay_events',
         blurb: 'a leather collar hangs from a hook.',
-        intro: 'A studded collar and leash wait by a pack of watchful beasts. Their alpha pads forward, curious whether you are master — or pet.',
+        intro: 'You enter a chamber full of training equipment — bowls, leashes, a padded mat. A pack of watchful beasts lounges around it, ' \
+               'and their alpha pads forward with a gleaming collar in its mouth, eyes full of desire to make you its pet...',
         accept: {
-          label: 'Wear the collar', text: 'Become the pack\'s pet',
-          scenes: ['The collar clicks shut. The alpha nuzzles you onto all fours and leads you in a slow, proud circle on the leash.',
-                   'Every scratch behind your ears makes you melt. *Good pet.*'],
+          label: 'Accept the collar', text: 'Become the pack\'s pet',
+          scenes: ['You kneel as the alpha fastens the collar around your neck. The cool metal feels both restrictive and comforting against your skin.',
+                   'It begins to train you — teaching you to kneel, to present yourself, to answer to a click of its tongue. ' \
+                   'Every act of obedience sends a thrill through you. *Good pet.*'],
           lp: 5, lust: 12,
           condition: { key: 'good_pet', name: 'Good Pet', floors: 3,
                        effects: { 'beast_lust_mult' => 0.8, 'beast_submit_lp' => 3, 'flee_bonus' => -0.1 } }
         },
-        decline: { label: 'Back away', text: 'Leave the pack be', lust: 2,
-                   scene: 'The alpha huffs and lets you go.' },
+        decline: { label: 'Refuse the collar', text: 'Leave the pack be', lust: 2,
+                   scene: 'You step away from the alpha. It drops the collar with a disappointed huff and lets you go.' },
         fight: { label: 'Challenge the alpha', type: :beast, text: 'The alpha bares its teeth and charges!' }
       },
       'rubber_chamber' => {
@@ -103,10 +110,12 @@ module Engine
       'chastity_trap' => {
         name: 'Chastity Trap', tag: 'chastity', tracker: 'chastity_events',
         blurb: 'a gleaming belt lies on a pedestal.',
-        intro: 'A steel belt humming with rune-light rests on a velvet pedestal. A tag reads: *"Wear me. Earn your release."*',
+        intro: 'An ornate box sits open on a velvet pedestal, full of gleaming chastity devices. As you approach, a steel belt humming ' \
+               'with rune-light lifts into the air and presents itself to you. A tag reads: *"Wear me. Earn your release."*',
         accept: {
           label: 'Lock it on', text: 'Wear the belt (cursed gear: climaxes denied)',
-          scenes: ['The belt snaps around your hips and locks with a heavy, final click.'],
+          scenes: ['You let the belt settle around your hips. With a heavy, definitive click it locks in place, sealing away your most sensitive places.',
+                   'The denial sends strange waves through you — the more aroused you get, the more the lock itself becomes the pleasure.'],
           parts: { 'penis' => 'Your cock is caged snugly away, twitching uselessly.',
                    'vagina' => 'A smooth shield seals over your folds, humming faintly.' },
           lp: 8, lust: 12, special: :chastity
@@ -117,280 +126,318 @@ module Engine
       'hypnotic_mist' => {
         name: 'Hypnotic Mist', tag: 'mind_control', tracker: 'mind_control_events',
         blurb: 'violet mist swirls in hypnotic spirals.',
-        intro: 'Violet mist spirals around you, and a soothing voice counts slowly down from ten...',
+        intro: 'Violet mist spirals around you, and disembodied voices echo through it, promising pleasure in exchange for obedience. ' \
+               'They whisper straight into your mind, offering relief from the burden of choice, counting slowly down from ten...',
         accept: {
-          label: 'Listen', text: 'Let the voice sink in',
-          scenes: ['*Nine... eight...* Your thoughts slow. *Obey... relax... submit...*',
-                   'You come to swaying, feeling floaty and eager to please.'],
+          label: 'Open your mind', text: 'Let the voices sink in',
+          scenes: ['*Nine... eight...* You relax your defenses and let the voices guide your thoughts. Your own will drifts somewhere distant.',
+                   'Freedom from responsibility brings a pleasure you never expected — your body answers their commands as if they were your own desires. ' \
+                   'You come to swaying, floaty and eager to please.'],
           lp: 5, lust: 12,
           condition: { key: 'entranced', name: 'Entranced', floors: 2,
                        effects: { 'submission' => 2, 'no_flee' => true, 'submit_lp_bonus' => 3 } }
         },
         decline: { label: 'Hold your breath', text: 'Try to push through (AGI)', lust: 2, escape: true,
-                   scene: 'You dash through the mist with your breath held.' },
+                   scene: 'You fight off the intrusive whispers and dash through the mist with your breath held.' },
         fight: { label: 'Find the hypnotist', type: :demon, text: 'You spot the demon weaving the mist!' }
       },
       'glory_room' => {
         name: 'Glory Room', tag: 'bukkake', tracker: 'bukkake_events',
         blurb: 'a ring of holes lines the walls.',
-        intro: 'A circular room lined with holes. Eager shapes wait behind every one — far too many to count.',
+        intro: 'A circular room lined with openings. As you step inside, eager appendages begin to emerge from them — far too many to count — ' \
+               'all clearly intent on covering you with their essence...',
         accept: {
           label: 'Kneel in the centre', text: 'Take them all',
-          scenes: ['You kneel in the middle as they finish on you one after another, until you are dripping and glazed.',
-                   'The crowd behind the walls cheers. You feel absurdly proud.'],
+          scenes: ['You kneel in the centre of the room as they spill their warmth across your body, one after another, until you are dripping and glazed.',
+                   'Being covered so completely marks you as *claimed*. The degradation and adoration blur together, and the crowd behind the walls cheers.'],
           lp: 7, lust: 14,
           condition: { key: 'glazed', name: 'Glazed', floors: 2,
                        effects: { 'hit_lp' => 1, 'lust_mult' => 1.1 } }
         },
         decline: { label: 'Leave', text: 'Leave the room', lust: 3,
-                   scene: 'Disappointed groans follow you out.' }
+                   scene: 'You decide against it and slip back out. Disappointed groans follow you down the corridor.' }
       },
       'observation_deck' => {
         name: 'Observation Deck', tag: 'exhibitionism', tracker: 'exhibitionism_events',
         blurb: 'a lit stage faces rows of hidden eyes.',
-        intro: 'A spotlight snaps on over a small stage. You can feel an unseen audience waiting for a show.',
+        intro: 'A spotlight snaps on over a small stage. You can\'t see the watchers, but you can *feel* their collective gaze on you, ' \
+               'the air thickening with their attention as they wait for a show...',
         accept: {
           label: 'Perform', text: 'Give them a show',
-          scenes: ['You strip slowly under the spotlight, posing and teasing as the hidden audience murmurs.',
+          scenes: ['You strip slowly under the spotlight, revealing yourself to the unseen audience. Their attention lands on you like physical touches.',
+                   'Being seen so completely by so many awakens something in you — the exposure becomes its own kind of intimacy. ' \
                    'Coins of lust-light rain onto the stage when you finish.'],
           lp: 7, lust: 10,
           condition: { key: 'on_display', name: 'On Display', floors: 3,
                        effects: { 'victory_lp_bonus' => 3, 'encounter_rate' => 1.2 } }
         },
         decline: { label: 'Stay hidden', text: 'Slip off the stage', lust: 2,
-                   scene: 'The spotlight flickers off as you duck away.' }
+                   scene: 'The weight of all those eyes is too much. You cover yourself and duck away as the spotlight flickers off.' }
       },
       'giants_chamber' => {
         name: 'Giant\'s Chamber', tag: 'giant', tracker: 'body_growth_events',
-        blurb: 'a colossal throne and a glowing mushroom.',
-        intro: 'A glowing mushroom sits beside a colossal throne. A note reads: *"Eat me, and fit the seat."*',
+        blurb: 'purple crystals pulse beside a colossal throne.',
+        intro: 'Strange purple crystals jut from the floor around a colossal throne. As you approach, their energy pulses with invitation, ' \
+               'and you already feel larger, stronger, more *powerful*...',
         accept: {
-          label: 'Eat it', text: 'Grow huge',
-          scenes: ['You shoot upward, towering and thick-limbed, every inch of you swollen with strength.',
-                   'Your clothes strain and you feel impossibly powerful — and impossibly sensitive.'],
+          label: 'Touch the crystals', text: 'Grow huge',
+          scenes: ['Power surges through you the moment you touch them. You shoot upward, towering and thick-limbed, every inch of you swollen with strength.',
+                   'Looking down at the suddenly tiny room fills you with dominion — this size feels more *right* than your old one. ' \
+                   'You are impossibly powerful, and impossibly sensitive.'],
           lp: 5, lust: 10,
           condition: { key: 'towering', name: 'Towering', floors: 3,
                        effects: { 'strength' => 3, 'agility' => -2 } }
         },
         decline: { label: 'Leave it', text: 'Stay your size', lust: 1,
-                   scene: 'The mushroom glows forlornly.' }
+                   scene: 'You give the crystals a wide berth. Their glow dims forlornly as you pass.' }
       },
       'shrinking_chamber' => {
         name: 'Shrinking Chamber', tag: 'shrinking', tracker: 'body_reduction_events',
-        blurb: 'a tiny doorway and a bottle labelled "Drink me".',
-        intro: 'A little bottle waits by a door no taller than your knee. The label says *Drink me*.',
+        blurb: 'pale mushrooms puff glittering spores.',
+        intro: 'Pale mushrooms carpet this room, puffing clouds of glittering spores beside a door no taller than your knee. ' \
+               'The air grows thick with them, and every breath makes you feel dizzy... and a little smaller.',
         accept: {
-          label: 'Drink it', text: 'Shrink down',
-          scenes: ['The world balloons around you. A curious giantess scoops you up and plays with you like a doll before setting you gently down.',
-                   'Small, quick, and flushed, you slip through the tiny door.'],
+          label: 'Breathe in', text: 'Shrink down',
+          scenes: ['You breathe deep, and with every exhale you shrink — until you are only a few inches tall and the world towers over you.',
+                   'A curious giantess scoops you up and plays with you like a doll, your helplessness terrifyingly arousing, ' \
+                   'before setting you gently down. Small, quick, and flushed, you slip through the tiny door.'],
           lp: 5, lust: 10,
           condition: { key: 'pocket_sized', name: 'Pocket-Sized', floors: 3,
                        effects: { 'agility' => 3, 'strength' => -2, 'dodge_bonus' => 0.1 } }
         },
         decline: { label: 'Leave it', text: 'Stay your size', lust: 1,
-                   scene: 'You leave the bottle for someone smaller.' }
+                   scene: 'You hold your breath and hurry past the mushrooms before the spores can take hold.' }
       },
       'futa_fountain' => {
         name: 'Futa Fountain', tag: 'futanari', tracker: 'futanari_events',
         blurb: 'a fountain shaped like a well-endowed goddess.',
-        intro: 'Warm, shimmering water flows from a statue of a gloriously endowed goddess. Drinkers, it is said, share her gift.',
+        intro: 'Warm water shimmers with strange energy as it flows from a statue of a gloriously endowed goddess. ' \
+               'The air around the fountain hums with transformation magic, promising to make you *complete*...',
         accept: {
           label: 'Drink', text: 'Receive the goddess\'s gift',
-          scenes: ['Heat blooms between your legs as the magic takes hold. You gasp at the new, heavy weight there.'],
+          scenes: ['The water tastes sweet and fills you with warmth, and you feel your body begin to change.',
+                   'Heat blooms between your legs as the magic takes hold, merging the best of both forms. You gasp at the new, heavy weight there.'],
           lp: 6, lust: 14, special: :futa
         },
         decline: { label: 'Refuse', text: 'Don\'t drink', lust: 2,
-                   scene: 'You splash your face and move on.' }
+                   scene: 'The crackle of magic makes you wary. You splash your face and move on without drinking.' }
       },
       'living_furniture' => {
         name: 'Living Furniture', tag: 'objectification', tracker: 'objectification_events',
         blurb: 'a room of eerily lifelike furniture.',
-        intro: 'Chairs, tables, and lamps here are shaped suspiciously like people. An empty pedestal waits for a new piece.',
+        intro: 'The chairs, tables, and lamps in this room are made from *people*. In the centre, an empty pedestal glows softly, ' \
+               'beckoning you toward a new form of existence...',
         accept: {
           label: 'Become furniture', text: 'Take your place on the pedestal',
-          scenes: ['You freeze in position as a footstool. Passers-by rest their feet on you, set drinks on your back, and admire the craftsmanship.',
-                   'When the spell lifts, you are stiff, flushed, and strangely serene.'],
+          scenes: ['You step onto the pedestal and magic envelops you, folding you into a footstool. You can still feel everything — you just can\'t move.',
+                   'Passers-by rest their feet on you, set drinks on your back, and admire the craftsmanship. The helplessness is strangely comforting, ' \
+                   'and when the spell lifts you are stiff, flushed, and serene.'],
           lp: 6, lust: 10,
           condition: { key: 'furniture_mindset', name: 'Furniture Mindset', floors: 2,
                        effects: { 'resistance' => 3, 'agility' => -2, 'submit_lp_bonus' => 2 } }
         },
         decline: { label: 'Walk through', text: 'Ignore the pedestal', lust: 1,
-                   scene: 'The furniture watches you leave.' },
+                   scene: 'You reject the pedestal\'s call and pick your way carefully through the room. The furniture watches you leave.' },
         fight: { label: 'Smash it', type: :mimic, text: 'A chair lurches up on too many legs!' }
       },
       'mirror_of_change' => {
         name: 'Mirror of Change', tag: 'gender_bending', tracker: 'gender_bending_events',
         blurb: 'a mirror shows someone almost like you.',
-        intro: 'Your reflection winks — but it is *different*. It reaches a hand out of the glass, offering to trade places.',
+        intro: 'A tall magic mirror shows not your reflection, but *you* as the opposite sex. The reflection winks, ' \
+               'and reaches a hand out of the glass, promising a whole new perspective...',
         requires: :swappable,
         accept: {
           label: 'Take its hand', text: 'Swap bodies with your reflection (temporary)',
-          scenes: ['You step through the glass and out the other side — your body reshaped into its mirror image.'],
+          scenes: ['The moment your fingers touch, transformation magic tingles through every inch of you.',
+                   'You step through the glass and out the other side — your body reshaped into its mirror image, strange and thrilling and new.'],
           lp: 6, lust: 12, special: :gender_swap
         },
         decline: { label: 'Refuse', text: 'Stay as you are', lust: 1,
-                   scene: 'The reflection shrugs and becomes normal again.' }
+                   scene: 'You keep your hands to yourself. The reflection shrugs and becomes just a reflection again.' }
       },
       'milking_chamber' => {
         name: 'Milking Chamber', tag: 'lactation', tracker: 'being_milked_events',
         blurb: 'brass pumps hiss rhythmically.',
-        intro: 'A padded milking stall with brass pumps and suction cups. A little plaque promises generous payment.',
+        intro: 'A padded stall full of contraptions built to draw fluids from living bodies. A machine of brass pumps and suction cups ' \
+               'hisses awake as you approach, its attachments extending toward you. A little plaque promises generous payment.',
         accept: {
           label: 'Get milked', text: 'Strap in and be milked',
-          scenes: ['The pumps latch on and pull in a slow, relentless rhythm, drawing out everything you have.'],
+          scenes: ['The pumps latch on and pull in a slow, relentless rhythm, the ache blurring into overwhelming pleasure.',
+                   'Your body answers by giving more than you thought possible, and the machine purrs, pleased with your output.'],
           parts: { 'breasts' => 'Your breasts ache and leak as the cups tug, milk streaming into the tubes.',
                    'penis' => 'A sleeve seals around your cock and milks you dry, again and again.' },
+          caged: :milking,
           lp: 10, lust: 12,
           condition: { key: 'drained', name: 'Drained', floors: 2,
                        effects: { 'max_hp_bonus' => -10, 'treasure_lp' => 3 } }
         },
         decline: { label: 'Leave', text: 'Leave the stall', lust: 2,
-                   scene: 'The pumps sigh to a stop.' }
+                   scene: 'You twist free of the reaching cups and back out of the stall. The pumps sigh to a stop.' }
       },
       'breeding_chamber' => {
         name: 'Breeding Chamber', tag: 'breeding', tracker: 'impregnation_events',
         blurb: 'a fertility altar hums with warm light.',
-        intro: 'A soft altar glows with fertility runes. A powerful beast waits beside it, snorting eagerly.',
+        intro: 'This room was built for one purpose: breeding. A soft altar glows with fertility runes, and beside it waits a beast ' \
+               'of immense size and virility, snorting eagerly as its intent becomes very clear...',
         accept: {
           label: 'Lie on the altar', text: 'Let the beast breed you',
-          scenes: ['The beast mounts you and fills you deep, the runes flaring bright as its seed takes root.',
-                   'Your belly glows faintly afterward. You feel warm, nurturing, and blissfully bred.'],
+          scenes: ['You present yourself on the altar. The beast claims you roughly, its purpose undeniable, and fills you deep as the runes flare bright.',
+                   'You feel its seed take root inside you. Your belly glows faintly afterward — warm, nurturing, and blissfully bred.'],
           lp: 7, lust: 14,
           condition: { key: 'bred', name: 'Bred', floors: 3,
                        effects: { 'healing_mult' => 1.25, 'agility' => -1, 'beast_submit_lp' => 2 } }
         },
         decline: { label: 'Refuse', text: 'Leave the altar', lust: 2,
-                   scene: 'The beast snorts and lies back down.' },
+                   scene: 'You back away from the altar. The beast snorts, frustrated, and lies back down.' },
         fight: { label: 'Fight the beast', type: :beast, text: 'The beast rears up, refusing to let you go!' }
       },
       'nectar_fountain' => {
         name: 'Nectar Fountain', tag: 'lactation', tracker: 'lactation_events',
         blurb: 'a fountain of sweet, milky nectar.',
-        intro: 'A fountain burbles with sweet, creamy nectar. One sip, a sign says, and you will *overflow*.',
+        intro: 'A fountain burbles with sweet, creamy nectar, and just standing near it makes your breasts tingle. ' \
+               'One sip, a sign says, and you will *overflow*.',
         requires: 'breasts',
         accept: {
           label: 'Drink deep', text: 'Drink the nectar',
-          scenes: ['Your breasts swell heavy and full, and soon sweet milk beads at your nipples with every step.'],
+          scenes: ['The nectar makes your breasts swell heavy and full, aching and sensitive.',
+                   'Soon sweet milk beads at your nipples with every step — a constant, pleasurable reminder of your changed body.'],
           lp: 6, lust: 12,
           condition: { key: 'nectar_swollen', name: 'Nectar-Swollen', floors: 3,
                        effects: { 'max_hp_bonus' => 10, 'lust_mult' => 1.1 } }
         },
         decline: { label: 'Walk away', text: 'Don\'t drink', lust: 1,
-                   scene: 'You resist the sweet smell.' }
+                   scene: 'You resist the sweet smell and walk on, your chest still tingling.' }
       },
       'golden_chamber' => {
         name: 'Golden Chamber', tag: 'watersports', tracker: 'watersports_events',
         blurb: 'a tiled room with a golden drain.',
-        intro: 'A tiled room with a golden drain. A grinning demon offers to *mark* you as its own.',
+        intro: 'A tiled room with a golden drain, where the creatures mark what they love with warm golden streams. ' \
+               'A grinning demon approaches, its invitation unmistakable — it wants to *mark* you as its own.',
         accept: {
           label: 'Be marked', text: 'Accept the golden shower',
-          scenes: ['Warm streams splash over you as the demon marks you thoroughly. Its scent clings to you like a claim.'],
+          scenes: ['Warm streams splash over you as the demon marks you thoroughly. The act feels intimate, possessive, *claiming*.',
+                   'Its scent clings to you — a warning to some, an invitation to others. You feel owned.'],
           lp: 6, lust: 10,
           condition: { key: 'marked', name: 'Marked', floors: 2,
                        effects: { 'satisfy_bonus' => 0.1, 'demon_lust_mult' => 0.9 } }
         },
         decline: { label: 'Refuse', text: 'Leave', lust: 1,
-                   scene: 'The demon shrugs and lets you go.' }
+                   scene: 'You refuse its advance. The demon seems disappointed, but shrugs and lets you go.' }
       },
       'binding_room' => {
         name: 'Binding Room', tag: 'bondage', tracker: 'bondage_events',
         blurb: 'silken ropes hang from the ceiling.',
-        intro: 'Coils of silk rope hang from hooks. They slither toward you, eager to tie something pretty.',
+        intro: 'Chains and silk ropes hang from hooks all over this room. As you step inside they spring to life, ' \
+               'slithering toward you with purpose, eager to tie something pretty.',
         accept: {
           label: 'Be tied', text: 'Let the ropes bind you',
-          scenes: ['The ropes wrap you in an intricate harness, hoisting you gently and holding you helpless while they tease every inch.',
+          scenes: ['You let the ropes wrap around you. They weave an intricate harness and hoist you into an inescapable embrace, teasing every inch.',
+                   'The helplessness is frustrating and thrilling all at once, the tightness oddly comforting. ' \
                    'When they finally let go, beautiful rope marks remain.'],
           lp: 6, lust: 12,
           condition: { key: 'rope_marks', name: 'Rope Marks', floors: 2,
                        effects: { 'resistance' => 2, 'agility' => -2, 'flee_bonus' => -0.1 } }
         },
         decline: { label: 'Slip past', text: 'Dodge the ropes (AGI)', lust: 2, escape: true,
-                   scene: 'You dart between the ropes before they catch you.' }
+                   scene: 'You struggle against the living ropes, dart between them, and escape before they can catch you.' }
       },
       'discipline_room' => {
         name: 'Discipline Room', tag: 'spanking', tracker: 'discipline_events',
         blurb: 'a stern figure taps a riding crop.',
-        intro: 'A stern demon mistress taps a crop against her palm. *"You have been naughty, haven\'t you?"*',
+        intro: 'Implements of punishment line the walls of this room. A stern demon mistress steps forward, tapping a crop against her palm, ' \
+               'her eyes full of purpose. *"You have been naughty, haven\'t you?"*',
         accept: {
           label: 'Accept punishment', text: 'Bend over and take it',
-          scenes: ['She bends you over and lays into you with crisp, stinging strokes, counting each one aloud.',
+          scenes: ['You bend over the discipline bench as instructed. She lays into you with crisp, stinging strokes, counting each one aloud.',
+                   'With every impact your body answers with more arousal, the pain blurring into pleasure until the punishment feels like a reward. ' \
                    'When she finishes, you thank her — and mean it.'],
           lp: 7, lust: 10, defiance: -5,
           condition: { key: 'disciplined', name: 'Well-Disciplined', floors: 3,
                        effects: { 'strength' => 1, 'resistance' => 1, 'submission' => 1 } }
         },
         decline: { label: 'Refuse', text: 'Refuse her', lust: 2,
-                   scene: 'She tuts and lets you go — this time.' },
+                   scene: 'You respectfully decline. She tuts and lets you go — *this* time.' },
         fight: { label: 'Defy her', type: :demon, text: 'Her eyes flash. *"Oh, a brat. Wonderful."*' }
       },
       'public_shame' => {
         name: 'Public Shame', tag: 'humiliation', tracker: 'humiliation_events',
         blurb: 'a pillory stands in a crowded square.',
-        intro: 'A pillory stands in an illusory town square full of jeering phantoms. A sign invites volunteers.',
+        intro: 'A pillory stands in an illusory town square full of phantoms. The moment you appear they start commenting on your body — ' \
+               'your shape, your anatomy — some with a cruel laughter that somehow sends a thrill through you. A sign invites volunteers.',
         accept: {
           label: 'Step into the stocks', text: 'Endure the crowd',
-          scenes: ['Locked in the stocks, you blush as phantoms laugh, tease, and grope, calling you every lewd name they know.',
-                   'By the end your face burns — and so does the rest of you.'],
+          scenes: ['Locked in the stocks, you listen to their cruel words — and instead of anger, you feel heat. They laugh, tease, and grope, ' \
+                   'calling you every lewd name they know.',
+                   'Mocking as it is, their attention makes you feel *desired*. By the end your face burns — and so does the rest of you.'],
           lp: 7, lust: 12,
           condition: { key: 'shamed', name: 'Shamed', floors: 2,
                        effects: { 'lust_mult' => 1.1, 'victory_lp_bonus' => 2, 'submit_lp_bonus' => 2 } }
         },
         decline: { label: 'Walk away', text: 'Ignore the jeers', lust: 2,
-                   scene: 'Boos follow you out of the square.' }
+                   scene: 'You refuse to let their words touch you and walk on. Boos follow you out of the square.' }
       },
       'whispering_chamber' => {
         name: 'Whispering Chamber', tag: 'mindbreak', tracker: 'mindbreak_events',
         blurb: 'a thousand soft voices whisper at once.',
-        intro: 'The walls whisper sweet, filthy nothings, promising that if you stop thinking, it will all feel so good.',
+        intro: 'A thousand disembodied voices whisper from the walls, picking apart your identity and your purpose. ' \
+               'Their sweet, filthy words offer relief from the burden of *self* — stop thinking, and it will all feel so good.',
         accept: {
           label: 'Stop thinking', text: 'Let your thoughts melt',
-          scenes: ['The whispers pour in until there is no room for anything else. Pleasure. Obedience. Pleasure.',
-                   'You drift out blissed and blank, with a dopey smile.'],
+          scenes: ['You listen, and the whispers begin to wear away who you were. Your old self fades until there is no room for anything else. ' \
+                   'Pleasure. Obedience. Pleasure.',
+                   'In its place you find peace in emptiness, and the silence in your head is bliss. You drift out blank, with a dopey smile.'],
           lp: 7, lust: 14,
           condition: { key: 'hollow_thoughts', name: 'Hollow Thoughts', floors: 3,
                        effects: { 'submission' => 2, 'resistance' => -1, 'submit_lp_bonus' => 4, 'satisfy_bonus' => 0.1 } }
         },
         decline: { label: 'Cover your ears', text: 'Run through (AGI)', lust: 2, escape: true,
-                   scene: 'You clamp your hands over your ears and sprint through.' },
+                   scene: 'You clamp your hands over your ears and sprint through, leaving the whispers behind.' },
         fight: { label: 'Silence them', type: :undead, text: 'The whispers coalesce into a lustful wraith!' }
       },
       'sensory_void' => {
         name: 'Sensory Void', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
         blurb: 'a padded room of total darkness and silence.',
-        intro: 'A padded, lightless, soundless room. A blindfold and earplugs sit by the door.',
+        intro: 'A padded room of total darkness and silence. Your senses already start to fade at the threshold, ' \
+               'and a blindfold and earplugs wait by the door, offering to take the rest — leaving you with nothing but touch.',
         accept: {
           label: 'Put them on', text: 'Surrender to touch alone',
-          scenes: ['Blind and deaf, you float in nothing — until unseen hands begin to touch you, every caress magnified tenfold.'],
+          scenes: ['You let the darkness swallow your senses, leaving you vulnerable and dependent on touch alone.',
+                   'Blind and deaf, you float in nothing — until unseen hands begin to touch you, every caress magnified tenfold. ' \
+                   'The isolation feels strangely comforting.'],
           lp: 6, lust: 14,
           condition: { key: 'heightened_touch', name: 'Heightened Touch', floors: 2,
                        effects: { 'lust_mult' => 1.15, 'dodge_bonus' => 0.05, 'hit_lp' => 2 } }
         },
         decline: { label: 'Leave', text: 'Keep your senses', lust: 1,
-                   scene: 'You leave the eerie silence behind.' }
+                   scene: 'You feel your way back out of the darkness, to where your senses work properly.' }
       },
       'auction_block' => {
         name: 'Auction Block', tag: 'slavery', tracker: 'slavery_events',
         blurb: 'a demon auctioneer bangs a gavel.',
-        intro: 'A demon auctioneer beckons you onto a stage before an eager crowd. *"Such a fine specimen! Shall we start the bidding?"*',
+        intro: 'You stumble into an auction where eager bidders crowd a stage. The demon auctioneer spots you and gestures to the block. ' \
+               '*"Such a fine specimen! Shall we start the bidding?"*',
         accept: {
           label: 'Step up', text: 'Be sold (for a night)',
-          scenes: ['The bidding is fierce. The winner leads you off by a chain and enjoys their purchase thoroughly.',
+          scenes: ['You step onto the block and present yourself. Being appraised and bid on thrills you in ways you never expected.',
+                   'The winner leads you off by a chain and enjoys their purchase thoroughly — the feeling of being *owned* is oddly comforting. ' \
                    'At dawn you are released with a cut of your own sale price.'],
           lp: 12, lust: 12,
           condition: { key: 'owned', name: 'Owned', floors: 3,
                        effects: { 'submission' => 1, 'submit_lp_bonus' => 3, 'flee_bonus' => -0.15 } }
         },
         decline: { label: 'Refuse', text: 'Walk off the stage', lust: 2,
-                   scene: 'The crowd groans.' },
+                   scene: 'You slip away before anyone can place a bid. The crowd groans.' },
         fight: { label: 'Fight the auctioneer', type: :demon, text: 'The auctioneer snarls and lunges!' }
       },
       'strap_on_chamber' => {
         name: 'Strap-On Chamber', tag: 'pegging', tracker: 'strap_on_events',
         blurb: 'a rack of enchanted harnesses.',
-        intro: 'A rack of enchanted strap-ons hums on the wall. An eager succubus waits, happy to give — or receive.',
+        intro: 'Enchanted strap-ons hum on a rack along the wall, twitching as if they have a will of their own. ' \
+               'An eager succubus waits beside them, happy to give — or receive.',
         accept: {
           label: 'Wear one', text: 'Strap on and take charge',
-          scenes: ['You buckle on a harness; the toy warms and *feels*. The succubus moans as you take her hard.'],
+          scenes: ['A harness wraps itself around your waist and settles into place as if it were made for you. The toy warms and *feels*.',
+                   'A strange sense of power fills you with your new length. The succubus moans as you take her hard.'],
           lp: 6, lust: 10,
           condition: { key: 'strapped', name: 'Strapped', floors: 3,
                        effects: { 'strength' => 2, 'victory_lp_bonus' => 2 } }
@@ -408,25 +455,28 @@ module Engine
       'glory_booth' => {
         name: 'Glory Booth', tag: 'facials', tracker: 'facial_events',
         blurb: 'a velvet booth with a single stool.',
-        intro: 'A velvet booth with a stool at face height. A voice outside promises a generous tip.',
+        intro: 'A velvet booth with a stool at face height. Several eager appendages wait beyond its openings, and a sign above ' \
+               'promises a generous tip to anyone who lets them decorate their face.',
         accept: {
           label: 'Take a seat', text: 'Take it on the face',
-          scenes: ['You sit, eyes closed, as your visitor finishes across your face in hot, thick ropes.',
-                   'A tip jingles into the booth as you wipe your eyes.'],
+          scenes: ['You sit, eyes closed, and present your face. One after another they finish across it in hot, thick ropes.',
+                   'Being marked like this excites you deeply. A tip jingles into the booth as you wipe your eyes.'],
           lp: 6, lust: 10,
           condition: { key: 'glazed_face', name: 'Glazed Face', floors: 2,
                        effects: { 'submit_lp_bonus' => 2, 'agility' => -1 } }
         },
         decline: { label: 'Leave', text: 'Leave the booth', lust: 1,
-                   scene: 'You pass by the booth.' }
+                   scene: 'You decide the booth isn\'t for you and walk on.' }
       },
       'foot_worship_chamber' => {
         name: 'Foot Worship Chamber', tag: 'feet', tracker: 'foot_fetish_events',
         blurb: 'a plush chair beside a basin of warm oil.',
-        intro: 'A plush chair and a basin of fragrant oil. Kneeling attendants look up hopefully at your boots.',
+        intro: 'Pillows cover the floor around a plush chair and a basin of fragrant oil. Kneeling attendants look up hopefully at your boots, ' \
+               'practically trembling with the wish to serve.',
         accept: {
           label: 'Sit back', text: 'Have your feet worshipped',
-          scenes: ['The attendants oil, knead, kiss, and suck your toes until your whole body hums with relaxed pleasure.'],
+          scenes: ['You sink into the chair and offer your feet. The attendants oil, knead, kiss, and suck your toes with reverent devotion.',
+                   'They purr at every flex of your soles, and soon your whole body hums with relaxed, worshipped pleasure.'],
           lp: 5, lust: 8,
           condition: { key: 'pampered_soles', name: 'Pampered Soles', floors: 3,
                        effects: { 'agility' => 2, 'flee_bonus' => 0.1 } }
@@ -437,55 +487,62 @@ module Engine
       'orgy_room' => {
         name: 'Orgy Room', tag: 'group_sex', tracker: 'group_sex_events',
         blurb: 'moans echo from a room of tangled bodies.',
-        intro: 'A sprawling room of cushions and tangled bodies. Many hands reach out to pull you in.',
+        intro: 'A sprawling chamber of cushions where creatures tangle together in every act imaginable. They notice you, ' \
+               'bodies glistening with sweat and desire, and many hands reach out to pull you in.',
         accept: {
           label: 'Join in', text: 'Dive into the pile',
-          scenes: ['You are passed from partner to partner, filled and touched from every side at once, lost in a sea of pleasure.',
-                   'You stumble out hours later, sore and glowing.'],
+          scenes: ['You let them pull you down. Hands, mouths, and more explore you from every direction as you are passed from partner to partner.',
+                   'The overwhelming attention drives you from peak to peak, lost in the pleasure of serving so many. You stumble out hours later, sore and glowing.'],
           lp: 8, lust: 16,
           condition: { key: 'afterglow', name: 'Afterglow', floors: 2,
                        effects: { 'healing_mult' => 1.2, 'lust_mult' => 1.1, 'hit_lp' => 1 } }
         },
         decline: { label: 'Back out', text: 'Politely back out', lust: 4,
-                   scene: 'You tear yourself away from the heat.' },
+                   scene: 'You watch from the edge for a while, then tear yourself away from the heat.' },
         fight: { label: 'Fend them off', type: :demon, text: 'One of the revellers — a demon — does not take no for an answer!' }
       },
       'public_chamber' => {
         name: 'Public Chamber', tag: 'exhibitionism', tracker: 'public_play_events',
         blurb: 'a glass-walled room on a busy corridor.',
-        intro: 'A glass room beside a busy corridor full of passing monsters. A bed sits in the middle.',
+        intro: 'A glass room beside a busy corridor full of passing monsters, with a bed in the middle. ' \
+               'As you step inside you feel eyes on you from every side, their attention prickling over your skin like touch.',
         accept: {
           label: 'Put on a show', text: 'Pleasure yourself in plain view',
-          scenes: ['You touch yourself on the bed while monsters press against the glass to watch, egging you on.'],
+          scenes: ['You give them a show, touching yourself on the bed while monsters press against the glass to watch, egging you on.',
+                   'The thrill of being watched by so many, without knowing who, is as terrifying as it is intoxicating.'],
           lp: 6, lust: 12,
           condition: { key: 'emboldened', name: 'Emboldened', floors: 3,
                        effects: { 'strength' => 1, 'victory_lp_bonus' => 2, 'encounter_rate' => 1.15 } }
         },
         decline: { label: 'Keep moving', text: 'Stay out of sight', lust: 1,
-                   scene: 'You hurry past the glass.' }
+                   scene: 'You squirm under all those gazes and hurry past the glass.' }
       },
       'viewing_chamber' => {
         name: 'Viewing Chamber', tag: 'voyeurism', tracker: 'voyeurism_events',
-        blurb: 'a peephole glows in the wall.',
-        intro: 'A small peephole glows in the wall. Through it, you hear someone having a *very* good time.',
+        blurb: 'a one-way window glows in the wall.',
+        intro: 'A one-way window looks into the next chamber, where a pair of monsters is having a *very* good time. ' \
+               'You could watch without ever being seen, their private moments laid bare before you...',
         accept: {
-          label: 'Peek', text: 'Watch through the hole',
-          scenes: ['You press your eye to the hole and watch a pair of monsters go at it. You can\'t look away — or keep your hands still.'],
+          label: 'Watch', text: 'Watch through the glass',
+          scenes: ['You settle in at the window and watch them go at it, every secret, unguarded moment on display.',
+                   'The thrill of seeing what you\'re not meant to see is intoxicating. You can\'t look away — or keep your hands still.'],
           lp: 5, lust: 12,
           condition: { key: 'voyeurs_thrill', name: 'Voyeur\'s Thrill', floors: 2,
                        effects: { 'treasure_lp' => 3, 'explore_lp' => 1 } }
         },
         decline: { label: 'Move on', text: 'Give them privacy', lust: 2,
-                   scene: 'You leave them to it.' }
+                   scene: 'You tear your eyes from the glass and leave them to it.' }
       },
       'feasting_chamber' => {
         name: 'Feasting Chamber', tag: 'weight_gain', tracker: 'weight_gain_events',
         blurb: 'a banquet table groans with food.',
-        intro: 'A banquet of rich, enchanted food. Every bite, a menu promises, *stays with you*.',
+        intro: 'Tables groan under a banquet of rich, enchanted food, the air thick with delicious smells. ' \
+               'Soft voices whisper that the feast has special properties — every bite *stays with you*.',
         accept: {
           label: 'Feast', text: 'Eat your fill',
-          scenes: ['You eat and eat, and the food settles softly onto your hips, belly, and rear.',
-                   'Heavier and pleasantly plush, you waddle on.'],
+          scenes: ['You indulge, eating far more than you thought possible, and with every bite you feel yourself grow softer and larger.',
+                   'The food settles onto your hips, belly, and rear, rounding you out. Heavier and pleasantly plush, you waddle on, ' \
+                   'the change feeling natural and good.'],
           lp: 5, lust: 8, special: :weight_gain,
           condition: { key: 'well_fed', name: 'Well-Fed', floors: 3,
                        effects: { 'max_hp_bonus' => 15, 'agility' => -2 } }
@@ -496,17 +553,18 @@ module Engine
       'bestial_pool' => {
         name: 'Bestial Pool', tag: 'furry', tracker: 'furry_events',
         blurb: 'a pool shimmering with animal spirits.',
-        intro: 'A moonlit pool where animal spirits play. Bathers, it is said, come out a little *wilder*.',
+        intro: 'A moonlit pool where animal spirits play. Your reflection in the water wears ears and a tail, ' \
+               'and it beckons you in, promising a wilder, more natural form...',
         accept: {
-          label: 'Bathe', text: 'Let the spirits change you',
-          scenes: ['Soft fur ripples across your skin; ears perk up on your head and a tail sways behind you.',
-                   'You feel wild, quick, and in heat.'],
-          lp: 6, lust: 12,
+          label: 'Step in', text: 'Let the spirits change you',
+          scenes: ['You step into the pool and feel yourself changing. Soft fur ripples across your skin; ears perk up on your head and a tail sways behind you.',
+                   'The transformation feels natural and *right*. You feel wild, quick, and in heat.'],
+          lp: 6, lust: 12, special: :beastkin,
           condition: { key: 'furred', name: 'Furred', floors: 4,
                        effects: { 'agility' => 1, 'strength' => 1, 'beast_lust_mult' => 1.1, 'beast_dodge_bonus' => 0.05 } }
         },
         decline: { label: 'Stay dry', text: 'Walk around the pool', lust: 1,
-                   scene: 'The spirits splash after you.' },
+                   scene: 'You decide against changing and walk around the pool. The spirits splash after you.' },
         fight: { label: 'Fight the guardian', type: :beast, text: 'A great wolf-spirit rises from the water!' }
       }
     }.freeze
@@ -520,6 +578,8 @@ module Engine
       'Female' => { name: 'Male', add: %w[penis], remove: %w[vagina breasts] },
       'Female (MtF)' => { name: 'Male', add: %w[penis], remove: %w[vagina breasts] }
     }.freeze
+
+    BEASTKIN_ANIMALS = %w[cat wolf rabbit fox bear].freeze
 
     FUTA_CONDITION = { key: 'futa_blessing', name: 'Futa Blessing', floors: 4, effects: { 'strength' => 1 } }.freeze
 
@@ -576,7 +636,8 @@ module Engine
         mode: :choice,
         name: spec[:name],
         colour: COLOUR,
-        log: ["**Floor #{level}** — #{spec[:blurb]}", { scene: spec[:intro] }, 'What do you do?'],
+        log: ["**Floor #{level}** — #{spec[:blurb]}", { scene: spec[:intro] },
+              *Array(Engine::ChastitySystem.reminder(player)).map { |r| "_#{r}_" }, 'What do you do?'],
         choices: choices(player, key)
       }
     end
@@ -623,13 +684,15 @@ module Engine
     end
 
     def accept!(player, _key, spec, opt, level, log)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = spec[:tag] == 'chastity' ? player.body_parts_list.map(&:to_s) : Engine::ChastitySystem.scene_parts(player)
       Array(opt[:scenes]).each { |s| log << { scene: s } }
       Hash(opt[:parts]).each { |part, s| log << { scene: s } if parts.include?(part) }
+      log.concat(Engine::ChastitySystem.scenes(player, opt[:caged])) if opt[:caged]
 
       apply_special!(player, opt[:special], log) if opt[:special]
 
       lp = opt[:lp].to_i + (level / 3)
+      lp = (lp * player.curse_effect_product("#{spec[:tag]}_event_lp_mult", default: 1.0)).round
       lust = opt[:lust].to_i + (level / 2)
       player.gain_lp!(lp) if lp.positive?
       player.gain_lust!(lust) if lust.positive?
@@ -649,9 +712,10 @@ module Engine
 
     def apply_condition!(player, cond, log, parts: [], remove_parts: [])
       summary = describe_effects(cond[:effects])
-      player.add_condition!(cond[:key], name: cond[:name], floors: cond[:floors], effects: cond[:effects],
-                                        summary: summary, parts: parts, remove_parts: remove_parts)
+      replaced = player.add_condition!(cond[:key], name: cond[:name], floors: cond[:floors], effects: cond[:effects],
+                                                   summary: summary, parts: parts, remove_parts: remove_parts)
       log << "**Condition — #{cond[:name]}** _(#{cond[:floors]} floors)_: #{summary}"
+      log << "_#{replaced.map { |n| "**#{n}**" }.join(', ')} fades as your body changes size again._" if replaced.any?
     end
 
     def apply_special!(player, special, log)
@@ -662,6 +726,7 @@ module Engine
       when :chastity then grant_chastity!(player, log)
       when :futa then futa!(player, log)
       when :gender_swap then gender_swap!(player, log)
+      when :beastkin then log << "_Your body takes on the traits of a **#{BEASTKIN_ANIMALS.sample}**._"
       end
     end
 
@@ -713,6 +778,7 @@ module Engine
         log << '_You have grown a cock for the next few floors._'
         apply_condition!(player, cond, log, parts: %w[penis])
       end
+      log.concat(Engine::ChastitySystem.scenes(player, :futa))
     end
 
     def gender_swap!(player, log)

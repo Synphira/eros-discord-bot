@@ -44,6 +44,7 @@ Slash and prefix share the same handlers (prefix defaults to `!`):
 | `/create` · `/start` | `!create` · `!start` | Character creation — body type, then Submission attitude |
 | `/status` | `!status` | Character sheet: stats, deepest floor, Threat (curses via `/curses`) |
 | `/explore` | `!explore` | Room roll; monsters open **Fight / Flee / Submit** combat |
+| `/rest` | `!rest` | Clear all lust and fully restore defiance; 5-minute cooldown |
 | `/curses` | `!curses` | List active curses grouped by monster type |
 | `/removecurse` | `!removecurse` · `!removecurse N` | Purge a curse for **50 LP** (menu or number) |
 | `/suppresscurse` | `!suppresscurse N` | Silence a curse for **25 LP**; it reactivates when you are defeated |
@@ -89,7 +90,7 @@ Buttons are locked to the player who opened the panel. Button presses **edit** t
 - **Rest** (button) — −20 Lust, +15 Defiance (blocked in combat).
 - **Monster types** — Beast, Demon, Slime, Undead, Plant, Mimic (each with roster, color, and assault/submit flavor).
 - **Curses** — Defeat rolls a curse from the foe's type pool. Effects include lust/damage multipliers, encounter weighting, no-flee/no-death, climax LP, defiance start penalties, and flat STR/AGI/RES.
-- **Combat** — **Fight** chips monster **HP**. **Flee** (AGI-based). **Submit** / monster hits raise **lust** with assault scenes; climax at 100 costs 20 defiance. Victory grants LP (no automatic floor advance). Defeat applies a curse and resets floor, level, base stats, defiance, and lust. **Non-cursed gear is lost**; living (cursed) mimic gear persists.
+- **Combat** — **Fight** chips monster **HP**. **Flee** (AGI-based). **Submit** / monster hits raise **lust** with assault scenes; climax at 100 costs 20 defiance and leaves you exhausted (STR/AGI -1 for 2 floors) until 10 climaxes in a run make you addicted, after which climaxes buff you instead. Victory grants LP (no automatic floor advance). Defeat applies a curse and resets floor, level, base stats, defiance, and lust. **Non-cursed gear is lost**; living (cursed) mimic gear persists.
 - **Bosses** — Every 5th floor, once per gate. Defeating *or satisfying* the boss clears it, grants LP and a trophy, and advances one floor. Bosses are half as easy to satisfy as normal monsters. Only one trophy can be worn at a time, and trophies are lost on defeat.
 - **Stats** — STR: damage. AGI: flee, dodge monster attacks (not while submitting), avoid traps, and slip free of multi-turn events. RES: cuts every lust hit by `100 / (100 + RES × 5)`. Max defiance grows with level: `100 + 10·√(level − 1)`.
 - **Explore** — Weighted rooms: monster / trap / treasure / **stairs** (floor+) / empty, plus **random events** (glory hole choices, multi-turn violations, instant traps). Lust traps that hit 100+ also climax.

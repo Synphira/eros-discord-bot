@@ -80,7 +80,7 @@ module Engine
     end
 
     def apply!(player, type, level, log)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       bump_trackers!(player, type)
       case type
       when 'milking_shrine' then milking!(player, parts, level, log)
@@ -103,6 +103,9 @@ module Engine
       bonus = { 'small' => 0, 'medium' => 2, 'large' => 4 }.fetch(size, 0)
       if parts.include?('penis')
         log << { scene: 'The shrine hums approvingly, and a gentle glow wraps around your cock as well, milking you in time with the cups.' }
+        bonus += 2
+      elsif (caged = Engine::ChastitySystem.line(player, :milking))
+        log << { scene: caged }
         bonus += 2
       end
       log << { scene: 'When the cups finally release you, you feel lighter, flushed, and strangely proud.' }
@@ -165,7 +168,10 @@ module Engine
         else 'The voice laughs softly as it pulls you back from the edge one final time, then releases the runes.'
         end
       log << { scene: scene }
-      log << { scene: 'Your cock twitches helplessly, denied.' } if turn == 2 && parts.include?('penis')
+      if turn == 2
+        caged = Engine::ChastitySystem.line(player, :edging)
+        log << { scene: caged || 'Your cock twitches helplessly, denied.' } if caged || parts.include?('penis')
+      end
       gained = [10 + (turn * 5), DENIAL_CAP - player.lust].min
       player.gain_lust!(gained) if gained.positive?
       lp = 2 + turn

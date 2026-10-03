@@ -5,77 +5,109 @@ module Commands
     extend Discordrb::EventContainer
     extend Discordrb::Commands::CommandContainer
 
+    COLOUR = 0x6b5b95
+    SLOTS = %w[weapon head chest legs groin feet accessory trophy].freeze
+
     module_function
 
-    def run(event)
+    def run(event, view: :equipped, slot: nil)
       player = ErosHelpers.require_player(event) or return
 
-      ErosUI.reply_v2(event, colour: 0x6b5b95) do |c|
+      equipped_ids = player.equipped_items.map(&:id)
+      by_slot = player.equipment.group_by(&:slot)
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: '## Endless Ruins of Sin — Equipment')
-        c.text_display(content: '_Gear and living (cursed) bindings._')
+        c.row do |row|
+          row.button(label: 'Equipped', style: view == :equipped ? :primary : :secondary,
+                     custom_id: "eros:equip:view:equipped:#{event.user.id}")
+          row.button(label: "Inventory (#{player.equipment.size})", style: view == :inventory ? :primary : :secondary,
+                     custom_id: "eros:equip:view:inventory:#{event.user.id}")
+        end
         c.separator(divider: true, spacing: :small)
 
-        equipment_by_slot = {}
-        player.equipment.each do |item|
-          equipment_by_slot[item.slot] ||= []
-          equipment_by_slot[item.slot] << item
-        end
-
-        %w[weapon head chest legs groin feet accessory].each do |slot|
-          next if slot == 'groin' && equipment_by_slot['groin'].nil?
-
-          equipped = equipment_by_slot[slot]&.find do |item|
-            DB[:player_equipment]
-              .where(player_id: player.discord_id, equipment_id: item.id, is_equipped: true)
-              .count.positive?
-          end
-
-          label =
-            if equipped
-              tag = equipped.cursed ? ' _(cursed)_' : ''
-              "#{equipped.name}#{tag}"
-            else
-              'None'
-            end
-          c.text_display(content: "**#{slot.capitalize}:** #{label}")
-        end
-
-        trophy = player.equipment_for_slot(Player::TROPHY_SLOT)
-        spare = (equipment_by_slot[Player::TROPHY_SLOT] || []).reject { |t| trophy && t.id == trophy.id }
-        spare_note = spare.empty? ? '' : " _(#{spare.size} more in your pack — `/equip` to swap)_"
-        c.text_display(content: "**Trophy:** #{trophy ? trophy.name : 'None'}#{spare_note}")
-        phylactery = trophy&.stat_modifiers&.dig('cheat_death')
-        if phylactery
-          state = player.phylactery_used ? 'spent this run' : 'ready'
-          c.text_display(content: "_Lich's Phylactery: **#{state}**_")
-        end
-
-        c.separator(divider: true, spacing: :small)
-        c.text_display(content: '**Inventory:**')
-
-        if player.equipment.empty?
-          c.text_display(content: '_Empty — seek chests or the shop._')
+        if view == :inventory
+          render_inventory(c, player, by_slot, equipped_ids, slot, event.user.id)
         else
-          player.equipment.each_with_index do |item, index|
-            equipped = DB[:player_equipment]
-                       .where(player_id: player.discord_id, equipment_id: item.id, is_equipped: true)
-                       .count.positive?
-            bits = []
-            bits << '[EQUIPPED]' if equipped
-            bits << '[CURSED]' if item.cursed
-            bits << "remove #{item.removal_cost} LP" if item.cursed
-            status = bits.empty? ? '' : " #{bits.join(' · ')}"
-            effects = item.stat_modifiers.empty? ? '' : "\n#{Engine::Treasure.format_stat_changes(item.stat_modifiers)}"
-            c.text_display(content: "#{index + 1}. **#{item.name}**#{status}\n_#{item.description}_#{effects}")
-          end
+          render_equipped(c, player, by_slot)
         end
 
         c.separator(divider: false, spacing: :small)
         c.text_display(
-          content: '_`!equip` / `!unequip` for normal gear · `!remove [name]` to destroy cursed gear with LP · ' \
-                   'one trophy at a time; trophies are lost on defeat._'
+          content: '-# `!equip` / `!unequip` for normal gear · `!remove [name]` to destroy cursed gear with LP · ' \
+                   'one trophy at a time; trophies are lost on defeat.'
         )
       end
+    end
+
+    def render_equipped(container, player, by_slot)
+      lines = (SLOTS - [Player::TROPHY_SLOT]).filter_map do |slot|
+        next if slot == 'groin' && by_slot['groin'].nil?
+
+        item = player.equipment_for_slot(slot)
+        label = item ? "#{item.name}#{item.cursed ? ' _(cursed)_' : ''}" : 'None'
+        "**#{slot.capitalize}:** #{label}"
+      end
+
+      trophy = player.equipment_for_slot(Player::TROPHY_SLOT)
+      spare = (by_slot[Player::TROPHY_SLOT] || []).reject { |t| trophy && t.id == trophy.id }
+      spare_note = spare.empty? ? '' : " _(#{spare.size} more in your pack — `/equip` to swap)_"
+      lines << "**Trophy:** #{trophy ? trophy.name : 'None'}#{spare_note}"
+      if trophy&.stat_modifiers&.dig('cheat_death')
+        lines << "_Lich's Phylactery: **#{player.phylactery_used ? 'spent this run' : 'ready'}**_"
+      end
+      container.text_display(content: lines.join("\n"))
+    end
+
+    def render_inventory(container, player, by_slot, equipped_ids, slot, owner_id)
+      if player.equipment.empty?
+        container.text_display(content: '_Your pack is empty — seek chests or the shop._')
+        return
+      end
+
+      slots = SLOTS | by_slot.keys
+      slot = slot.to_s
+      slot = slots.find { |s| by_slot[s]&.any? } unless slots.include?(slot)
+      items = by_slot[slot] || []
+
+      container.row do |row|
+        row.string_select(custom_id: "eros:equip:slot:#{owner_id}", placeholder: 'Choose a slot…',
+                          min_values: 1, max_values: 1) do |menu|
+          slots.each do |s|
+            count = (by_slot[s] || []).size
+            menu.option(label: "#{s.capitalize} (#{count})", value: s, default: s == slot)
+          end
+        end
+      end
+
+      if items.empty?
+        container.text_display(content: "_Nothing in your **#{slot}** slot yet._")
+        return
+      end
+
+      lines = items.map do |item|
+        bits = []
+        bits << '[EQUIPPED]' if equipped_ids.include?(item.id)
+        bits << '[CURSED]' if item.cursed
+        bits << "remove #{item.removal_cost} LP" if item.cursed
+        status = bits.empty? ? '' : " #{bits.join(' · ')}"
+        effects = item.stat_modifiers.empty? ? '' : "\n#{Engine::Treasure.format_stat_changes(item.stat_modifiers)}"
+        "**#{item.name}**#{status}\n_#{item.description}_#{effects}"
+      end
+      container.text_display(content: "### #{slot.capitalize}\n#{lines.join("\n\n")}"[0, 3500])
+    end
+
+    button(custom_id: /^eros:equip:view:(equipped|inventory):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      view = event.custom_id[/\Aeros:equip:view:(\w+):\d+\z/, 1].to_sym
+      Commands::Equipment.run(event, view: view)
+    end
+
+    string_select(custom_id: /^eros:equip:slot:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Equipment.run(event, view: :inventory, slot: Array(event.values).first)
     end
 
     def equip(event, item_name)

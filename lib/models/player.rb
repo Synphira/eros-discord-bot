@@ -70,7 +70,7 @@ class Player < Sequel::Model(:players)
     player
   end
 
-  RUN_TRACKERS = %w[run_flee_attempts run_submissions run_floors_cleared].freeze
+  RUN_TRACKERS = %w[run_flee_attempts run_submissions run_floors_cleared run_climaxes climax_addicted floors_since_climax].freeze
 
   def save_legacy!
     row = {
@@ -322,6 +322,10 @@ class Player < Sequel::Model(:players)
     ((cycle.to_i - 1) * Engine::Tower::FINAL_BOSS_FLOOR) + [floor.to_i, Engine::Tower::FINAL_BOSS_FLOOR].min
   end
 
+  def deepest_depth
+    [tracker('deepest_depth'), depth_for(1, highest_floor_reached)].max
+  end
+
   def self.depth_label(depth)
     depth = [depth.to_i, 1].max
     cycle = ((depth - 1) / Engine::Tower::FINAL_BOSS_FLOOR) + 1
@@ -389,6 +393,7 @@ class Player < Sequel::Model(:players)
     condition_list.each do |cond|
       Hash(cond['effects']).each { |key, value| bags[key.to_s] << value }
     end
+    Engine::TransformationSystem.effects(self).each { |key, value| bags[key.to_s] << value }
     bags
   end
 
@@ -402,8 +407,12 @@ class Player < Sequel::Model(:players)
     condition_list.any? { |c| c['key'] == key.to_s }
   end
 
+  EXCLUSIVE_CONDITIONS = [%w[towering pocket_sized], %w[climax_exhaustion climax_high]].freeze
+
   def add_condition!(key, name:, floors:, effects:, summary:, parts: [], remove_parts: [])
-    list = condition_list.reject { |c| c['key'] == key.to_s }
+    rivals = EXCLUSIVE_CONDITIONS.select { |group| group.include?(key.to_s) }.flatten - [key.to_s]
+    replaced = condition_list.select { |c| rivals.include?(c['key']) }.map { |c| c['name'] }
+    list = condition_list.reject { |c| c['key'] == key.to_s || rivals.include?(c['key']) }
     entry = { 'key' => key.to_s, 'name' => name, 'floors' => floors.to_i,
               'effects' => effects.transform_keys(&:to_s), 'summary' => summary }
     entry['parts'] = parts.map(&:to_s) if parts.any?
@@ -411,6 +420,7 @@ class Player < Sequel::Model(:players)
     list << entry
     update(conditions: list)
     clamp_defiance!
+    replaced
   end
 
   def tick_conditions!
@@ -474,6 +484,7 @@ class Player < Sequel::Model(:players)
     if monster_type
       mult *= curse_effect_product("#{monster_type}_lust_mult", default: 1.0)
     end
+    mult *= Engine::ChastitySystem.arousal_multiplier(self)
     mult <= 0 ? 1.0 : mult
   end
 
@@ -488,7 +499,7 @@ class Player < Sequel::Model(:players)
   def trap_avoid_chance
     return 1.0 if Engine::Dev.debug?(self)
 
-    (0.1 + (0.02 * effective_agility)).clamp(0.1, 0.6)
+    ((0.1 + (0.02 * effective_agility)).clamp(0.1, 0.6) + curse_effect_sum('trap_avoid_bonus')).clamp(0.1, 0.85)
   end
 
   def event_escape_chance
@@ -603,6 +614,9 @@ class Player < Sequel::Model(:players)
   def advance_floor!
     bump_tracker!('floors_cleared')
     bump_tracker!('run_floors_cleared')
+    bump_tracker!('floors_since_climax')
+    streak = tracker('floors_since_climax')
+    set_tracker!('best_climax_free_floors', streak) if streak > tracker('best_climax_free_floors')
     explore_lp = curse_effect_sum('explore_lp').round
     gain_lp!(explore_lp) if explore_lp.positive?
     expired = tick_conditions!
@@ -796,11 +810,17 @@ class Player < Sequel::Model(:players)
     type = monster_type&.to_s
 
     if climax_denied?
+      lines.concat(Engine::ChastitySystem.denial_lines(self))
       update(lust: CLIMAX_THRESHOLD - 5)
       adjust_defiance!(-DENIAL_DEFIANCE_LOSS)
-      lines << "You reach the edge — and are **denied**. The frustration costs **#{DENIAL_DEFIANCE_LOSS}** defiance " \
-               "(now #{defiance}/#{max_defiance}); lust held at #{lust}."
+      gain_lp!(Engine::ChastitySystem::DENIAL_LP)
+      bump_tracker!('denied_climaxes')
+      lines << "Your climax is **denied**. The frustration costs **#{DENIAL_DEFIANCE_LOSS}** defiance " \
+               "(now #{defiance}/#{max_defiance}), but your devotion earns **+#{Engine::ChastitySystem::DENIAL_LP} LP**. " \
+               "Lust held at the edge (#{lust})."
     else
+      overflow = lust - CLIMAX_THRESHOLD
+      lines.concat(climax_flavour(overflow))
       update(lust: base_lust)
       climax_lp = type ? curse_effect_sum("#{type}_climax_lp").round : 0
       if climax_lp.positive?
@@ -810,6 +830,7 @@ class Player < Sequel::Model(:players)
 
       adjust_defiance!(-CLIMAX_DEFIANCE_LOSS)
       lines << "You climax! Your defiance drops by **#{CLIMAX_DEFIANCE_LOSS}**! (now #{defiance}/#{max_defiance})"
+      record_climax!(overflow, lines)
     end
 
     broken = defiance <= 0
@@ -818,6 +839,59 @@ class Player < Sequel::Model(:players)
     bump_tracker!('climaxes_survived') unless broken
 
     { lines: lines, broken: broken }
+  end
+
+  CLIMAX_ADDICTION_AT = 10
+  CLIMAX_AFTERMATH_FLOORS = 2
+
+  def climax_addicted?
+    tracker('climax_addicted').positive?
+  end
+
+  def climax_flavour(overflow)
+    text =
+      if overflow >= 30
+        ['Your body convulses with overwhelming pleasure as wave after wave of ecstasy crashes through you. ' \
+         'Your cry echoes through the chamber as you climax harder than ever before.',
+         'The sheer intensity leaves you trembling and gasping, your vision whited out by pleasure.']
+      elsif overflow >= 15
+        ['Pleasure erupts through your body in a torrent. You arch your back as your orgasm takes hold, ' \
+         'every muscle tensing then releasing with each pulse.',
+         'Your mind goes blank as sensation drowns out thought, leaving you panting as the waves slowly subside.']
+      elsif overflow >= 5
+        ['Heat builds in your core until it breaks. You gasp as pleasure spills through you, your body shuddering with release.',
+         'It leaves you breathless but satisfied, warmth spreading through your limbs as your heartbeat slows.']
+      else
+        ['A gentle warmth spreads through you as you climax, a soft release that eases your need without overwhelming you.',
+         'The brief moment of bliss leaves you calmer — though still craving more.']
+      end
+    text.map { |t| "_#{t}_" }
+  end
+
+  def record_climax!(overflow, lines)
+    bump_tracker!('total_climaxes')
+    bump_tracker!('run_climaxes')
+    set_tracker!('floors_since_climax', 0)
+    set_tracker!('max_climax_overflow', overflow) if overflow > tracker('max_climax_overflow')
+
+    if !climax_addicted? && tracker('run_climaxes') >= CLIMAX_ADDICTION_AT
+      set_tracker!('climax_addicted', 1)
+      bump_tracker!('climax_addictions')
+      lines << '**Orgasm Addict** — your body has grown used to constant release, and now it *craves* it. ' \
+               'From now until your next defeat, climaxing leaves you stronger instead of drained.'
+    end
+
+    if climax_addicted?
+      add_condition!('climax_high', name: 'Climax High', floors: CLIMAX_AFTERMATH_FLOORS,
+                                    effects: { 'strength' => 1, 'satisfy_bonus' => 0.05, 'submit_lp_bonus' => 2 },
+                                    summary: 'STR +1, satisfy +5%, +2 LP on submit')
+      lines << "_The rush of release sharpens you — **Climax High** (STR +1, satisfy +5%, +2 LP on submit) for #{CLIMAX_AFTERMATH_FLOORS} floors._"
+    else
+      add_condition!('climax_exhaustion', name: 'Afterglow Exhaustion', floors: CLIMAX_AFTERMATH_FLOORS,
+                                          effects: { 'strength' => -1, 'agility' => -1 },
+                                          summary: 'STR -1, AGI -1')
+      lines << "_Afterglow exhaustion sets in — **STR -1, AGI -1** for #{CLIMAX_AFTERMATH_FLOORS} floors._"
+    end
   end
 
   def adjust_defiance!(delta)
@@ -938,6 +1012,11 @@ class Player < Sequel::Model(:players)
     if regen.positive?
       gained = heal_defiance!(regen)
       lines << "Photosynthesis: you regain **#{gained}** defiance! (now #{defiance}/#{max_defiance})" if gained.positive?
+    end
+    rooted = curse_effect_sum('combat_start_regen').round
+    if rooted.positive?
+      gained = heal_defiance!(rooted)
+      lines << "Your roots drink in the tower's light — **+#{gained}** defiance. (now #{defiance}/#{max_defiance})" if gained.positive?
     end
     lines
   end

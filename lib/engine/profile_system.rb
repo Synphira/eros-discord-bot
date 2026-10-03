@@ -10,7 +10,7 @@ module Engine
       },
       'depth' => {
         label: 'Deepest Reached',
-        value: ->(p) { [p.tracker('deepest_depth'), p.depth_for(1, p.highest_floor_reached)].max },
+        value: ->(p) { p.deepest_depth },
         format: ->(v) { Player.depth_label(v) }
       },
       'kills' => {

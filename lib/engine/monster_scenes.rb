@@ -5,7 +5,7 @@ module Engine
     module_function
 
     def generate(player, monster_name, monster_type: nil)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       scenes =
         case monster_type.to_s
         when 'beast' then generate_beast_scene(parts, monster_name)
@@ -16,12 +16,13 @@ module Engine
         when 'mimic' then generate_mimic_scene(parts, monster_name)
         else []
         end
+      scenes += Engine::ChastitySystem.lines_for(player, :monster, actor: monster_name)
 
       Engine::ContentOptions.pick(player, scenes, fallback: generic_scenes(monster_name))
     end
 
     def generate_assault(player, monster_name, monster_type: nil)
-      parts = player.body_parts_list.map(&:to_s)
+      parts = Engine::ChastitySystem.scene_parts(player)
       scenes =
         case monster_type.to_s
         when 'beast' then generate_beast_assault(parts, monster_name)
@@ -32,6 +33,7 @@ module Engine
         when 'mimic' then generate_mimic_assault(parts, monster_name)
         else []
         end
+      scenes += Engine::ChastitySystem.lines_for(player, :monster, actor: monster_name)
 
       Engine::ContentOptions.pick(player, scenes, fallback: generic_assault(monster_name))
     end
@@ -423,7 +425,7 @@ module Engine
     end
 
   def generate_willing_scene(player, monster_name, monster_type: nil)
-    parts = player.body_parts_list.map(&:to_s)
+    parts = Engine::ChastitySystem.scene_parts(player)
     scenes =
       case monster_type.to_s
       when 'beast' then generate_beast_willing(parts, monster_name)
@@ -434,6 +436,7 @@ module Engine
       when 'mimic' then generate_mimic_willing(parts, monster_name)
       else []
       end
+    scenes += Engine::ChastitySystem.lines_for(player, :willing, actor: monster_name)
   
     Engine::ContentOptions.pick(player, scenes, fallback: generic_willing(monster_name))
   end

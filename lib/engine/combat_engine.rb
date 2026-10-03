@@ -42,7 +42,8 @@ module Engine
         special: h[:special] || h['special'],
         enraged: h[:enraged] || h['enraged'],
         is_boss: h[:is_boss] || h['is_boss'],
-        negation_used: h[:negation_used] || h['negation_used']
+        negation_used: h[:negation_used] || h['negation_used'],
+        pliant: (h[:pliant] || h['pliant']).to_f
       }
     end
 
@@ -68,8 +69,11 @@ module Engine
         max_hp: max_hp
       )
 
-      @player.store_encounter!(self.class.encounter_snapshot(encounter))
+      snapshot = self.class.encounter_snapshot(encounter)
       start_lines = @player.apply_combat_start_effects!(type)
+      Engine::TransformationSystem.combat_start!(@player, snapshot, start_lines)
+      encounter.agility = snapshot[:agility]
+      @player.store_encounter!(snapshot)
       message = build_start_message(encounter)
       message += "\n\n#{start_lines.join("\n")}" if start_lines.any?
       {
@@ -129,6 +133,7 @@ module Engine
 
       broken = apply_monster_turn!(enc, log, action.to_sym)
       return finish_broken!(enc, log) if broken
+      return finish_victory!(enc, log) if enc[:hp] <= 0
 
       @player.check_mimic_violations!(log)
       broken = climax_from_mimics?(enc, log)
@@ -170,7 +175,8 @@ module Engine
         enraged: encounter[:enraged] || encounter['enraged'],
         is_boss: encounter[:is_boss] || encounter['is_boss'],
         negation_used: encounter[:negation_used] || encounter['negation_used'],
-        satisfaction: (encounter[:satisfaction] || encounter['satisfaction']).to_i
+        satisfaction: (encounter[:satisfaction] || encounter['satisfaction']).to_i,
+        pliant: (encounter[:pliant] || encounter['pliant']).to_f
       }
     end
 
@@ -197,9 +203,19 @@ module Engine
 
     def apply_fight!(enc, log)
       damage = Engine::Dev.debug?(@player) ? enc[:hp] : player_hit_damage(enc)
+      surprise = !Engine::Dev.debug?(@player) && rand < @player.curse_effect_sum('crit_chance')
+      damage *= 2 if surprise
       enc[:hp] = [enc[:hp] - damage, 0].max
+      log << "**Surprise attack!** You catch the #{enc[:name]} off guard." if surprise
       log << "You deal **#{damage}** damage to the #{enc[:name]}! " \
              "(HP `#{enc[:hp]}/#{enc[:max_hp]}`)"
+
+      lifesteal = @player.curse_effect_sum('lifesteal')
+      if lifesteal.positive?
+        drunk = @player.heal_defiance!([(damage * lifesteal).round, 1].max)
+        log << "_You drink in **#{drunk}** defiance from the wound._" if drunk.positive?
+      end
+      Engine::Treasure.weapon_proc!(@player, enc, log)
 
       climax = @player.try_climax!(monster_type: enc[:type])
       if climax
@@ -265,6 +281,7 @@ module Engine
       lp_reward = 1 + (enc[:strength].to_i / 2)
       lp_reward += (@player.curse_effect_sum('submit_lp_bonus') +
                     @player.curse_effect_sum("#{enc[:type]}_submit_lp")).round
+      lp_reward = (lp_reward * @player.curse_effect_product('submit_lp_mult', default: 1.0)).round
       lp_reward = [lp_reward, 1].max
       @player.gain_lp!(lp_reward)
       @player.bump_tracker!('submissions')
@@ -326,8 +343,9 @@ module Engine
       nil
     end
 
-    def monster_satisfy_chance(_enc = {})
-      chance = (0.2 + (@player.effective_submission * 0.1) + @player.curse_effect_sum('satisfy_bonus')).clamp(0.05, 0.8)
+    def monster_satisfy_chance(enc = {})
+      chance = (0.2 + (@player.effective_submission * 0.1) + @player.curse_effect_sum('satisfy_bonus') +
+                enc[:pliant].to_f).clamp(0.05, 0.8)
       chance = 1.0 if Engine::Dev.debug?(@player)
       chance
     end
@@ -379,6 +397,13 @@ module Engine
       if regen.positive?
         gained = @player.heal_defiance!(regen)
         log << "Your gear restores **#{gained}** defiance. (now #{@player.defiance}/#{@player.max_defiance})" if gained.positive?
+      end
+
+      return false if Engine::TransformationSystem.combat_special!(@player, enc, log) == :skip
+
+      if rand < @player.curse_effect_sum('intimidate_chance')
+        log << "The #{enc[:name]} falters before your radiance and backs away without touching you!"
+        return false
       end
 
       negation = @player.curse_effect_sum('negation_chance')
@@ -441,7 +466,7 @@ module Engine
         @player.bump_tracker!('bosses_defeated')
         @player.bump_tracker!('bosses_satisfied') if satisfied
         @player.remember!('bosses_seen', enc[:name].to_s)
-        note_broodmother_feat!(enc, log) unless satisfied
+        note_broodmother_feat!(enc, log, satisfied: satisfied)
         reward = Engine::BossFights.boss_defeat_reward(@player, enc)
         return finish_tower_clear!(enc, log) if reward[:tower_clear]
 
@@ -500,17 +525,22 @@ module Engine
 
     BROODMOTHER_CURSED_ITEMS = 5
 
-    def note_broodmother_feat!(enc, log)
+    def note_broodmother_feat!(enc, log, satisfied: false)
       return unless enc[:name] == Engine::BossFights::BOSSES[5][:name]
       return if @player.tracker('mimic_broodmother_cursed').positive?
       return if @player.equipped_mimics.size < BROODMOTHER_CURSED_ITEMS
 
       @player.set_tracker!('mimic_broodmother_cursed', 1)
-      log << 'Despite being draped in living gear, you have defeated the Mimic Broodmother!'
+      log << if satisfied
+               'Draped in living gear, you gave the Mimic Broodmother everything she craved!'
+             else
+               'Despite being draped in living gear, you have defeated the Mimic Broodmother!'
+             end
       log << 'The remaining mimics bow to you, recognizing you as one of their own.'
     end
 
     def finish_tower_clear!(enc, log)
+      @player.bump_tracker!('depraved_tower_clears') if Engine::ContentOptions.preferences_for(@player).values.all?
       clear = @player.complete_cycle!
       log << "**#{enc[:name]} falls!** The Endless Ruins shudder — you have conquered the tower!"
       log << "Tower clear reward: **+#{clear[:lp]} LP**."
@@ -528,7 +558,6 @@ module Engine
       loss = @player.reset_run!
       @player.clear_encounter!
 
-      log << "You've been defeated! Your run ends here."
       log << curse_affliction_line(result[:curse], result[:entry], result[:newly_afflicted])
 
       if loss[:level_lost] > 0 || loss[:str_lost] > 0
