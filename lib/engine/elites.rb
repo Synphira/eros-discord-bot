@@ -1,0 +1,81 @@
+# frozen_string_literal: true
+
+module Engine
+  module Elites
+    module_function
+
+    VICTORY_LP_MULT = 2
+    SATISFY_LP_BONUS = 10
+    MIN_FLOOR = 3
+
+    AFFIXES = {
+      'rutting' => {
+        name: 'Rutting', mods: { lust_damage: 1.5 }, perk: 'lust hits ×1.5',
+        line: 'It is deep in rut, flushed and dripping with need, and every move it makes is aimed at getting you on your back.'
+      },
+      'slick' => {
+        name: 'Slick', mods: { agility: 2.0 }, perk: 'much harder to hit and escape',
+        line: 'Its body glistens with oil. Your grip slides right off it, and it slips around your guard with ease.'
+      },
+      'towering' => {
+        name: 'Towering', mods: { hp: 1.6, strength: 1.3 }, perk: 'HP ×1.6, STR ×1.3',
+        line: 'It is twice the usual size, and so is everything else about it.'
+      },
+      'insatiable' => {
+        name: 'Insatiable', mods: {}, satisfy: -0.15, submit_lp: 2.0, perk: 'harder to satisfy, double LP per submit',
+        line: 'Its eyes rake over you hungrily. Nothing has ever satisfied it for long, but whoever manages it will be well rewarded.'
+      },
+      'alluring' => {
+        name: 'Alluring', mods: { lust_damage: 1.2 }, satisfy: 0.1, perk: 'lust hits ×1.2, easier to satisfy',
+        line: 'Its scent reaches you first, sweet and heady, and your body starts answering before you even see it.'
+      }
+    }.freeze
+
+    def chance(floor)
+      return 0.0 if floor.to_i < MIN_FLOOR
+
+      base = (0.05 + (floor.to_i * 0.004)).clamp(0.0, 0.18)
+      (base * Engine::Weekly.special('elite_chance')).clamp(0.0, 0.5)
+    end
+
+    def roll!(monster, floor)
+      return monster unless rand < chance(floor)
+
+      apply!(monster, AFFIXES.keys.sample)
+    end
+
+    def apply!(monster, key)
+      affix = AFFIXES.fetch(key)
+      affix[:mods].each { |stat, mult| monster[stat] = [(monster[stat].to_i * mult).round, 1].max }
+      monster[:max_hp] = monster[:hp]
+      monster[:name] = "#{affix[:name]} #{monster[:name]}"
+      monster[:elite] = key
+      monster
+    end
+
+    def affix(enc)
+      return nil unless enc
+
+      key = enc.is_a?(Hash) ? (enc[:elite] || enc['elite']) : enc.elite
+      AFFIXES[key.to_s]
+    end
+
+    def elite?(enc)
+      !affix(enc).nil?
+    end
+
+    def intro(enc)
+      a = affix(enc) or return nil
+      "**Elite — #{a[:name]}!** #{a[:line]}\n-# #{a[:perk]} · beat it for ×#{VICTORY_LP_MULT} LP, " \
+        "or satisfy it for +#{SATISFY_LP_BONUS} LP"
+    end
+
+    def satisfy_bonus(enc)
+      affix(enc)&.dig(:satisfy).to_f
+    end
+
+    def submit_lp_mult(enc)
+      affix(enc)&.dig(:submit_lp) || 1.0
+    end
+  end
+end

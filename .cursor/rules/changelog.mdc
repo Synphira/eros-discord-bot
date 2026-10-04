@@ -5,7 +5,11 @@ alwaysApply: true
 
 # Changelog discipline
 
-Whenever you **add**, **change**, or **fix** behavior in this repo, update [`CHANGELOG.md`](CHANGELOG.md) in the same change set.
+Whenever you **add**, **change**, or **fix** behavior in this repo, update the matching changelog in the same change set:
+
+- **Discord bot** (everything outside `webapp/`): [`CHANGELOG.md`](CHANGELOG.md).
+- **Web version** (anything under `webapp/`): [`webapp/CHANGELOG.md`](webapp/CHANGELOG.md) only — never the bot changelog.
+- A bot change that also reaches the web version through `webapp/tools/sync_from_bot.rb` goes in the bot changelog; add a web entry too only if web players notice something web-specific.
 
 ## How to update
 

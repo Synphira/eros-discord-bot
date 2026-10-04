@@ -42,27 +42,31 @@ module Engine
       scenes = []
 
       if parts.include?('vagina')
-        scenes << "The beast plunges its knotting cock into your eager cunt, swelling with each thrust until you're locked together in blissful union."
-        scenes << "The #{monster_name} mounts you from behind, its powerful hips driving deep as your body responds with waves of pleasure."
-        scenes << "The animal positions you perfectly, entering with practiced movements that make your toes curl in ecstasy."
+        scenes << "The #{monster_name} shoves you onto all fours and mounts you in one motion, its thick, furry cock spearing into your cunt and pounding you with hard, animal thrusts until you're dripping around it."
+        scenes << "The beast hilts itself in your pussy and its knot starts to swell, stretching you wider with every grind until it pops inside and locks you together, its hot cum flooding you in thick pulses."
+        scenes << "The #{monster_name} drags its rough tongue up your folds before burying its cock in you, growling as your cunt clenches and squeezes around every rutting thrust."
       end
 
       if parts.include?('penis')
-        scenes << "The beast's rough tongue laps at your cock, bringing you to the edge with expert precision."
-        scenes << "The #{monster_name} takes your shaft into its hot mouth, its teeth gently grazing as it worships your length."
-        scenes << "The animal's soft paws caress your balls as it strokes you, coaxing pleasure from your very core."
+        scenes << "The #{monster_name} knocks you onto your back and wraps its rough tongue around your cock, lapping from balls to tip until you're throbbing and leaking against its muzzle."
+        scenes << "The beast wraps a padded paw around your cock and strokes you hard and fast, huffing hot breath against your neck until your hips jerk helplessly into its grip."
+        scenes << "The #{monster_name} grinds its furry belly down against your cock, rutting against you until your shaft is slick with your own precum."
       end
 
       if parts.include?('anus')
-        scenes << "The #{monster_name} slides its thick knot into your welcoming ass, your body accommodating its size with hungry anticipation."
-        scenes << "The beast mounts you with primal grace, each movement sending jolts of pleasure through your body."
-        scenes << "The animal's claws grip your hips possessively as it claims your ass, marking you as its mate."
+        scenes << "The #{monster_name} mounts you from behind and forces its thick cock into your ass, its heavy balls slapping against you as it ruts you into the floor."
+        scenes << "The beast buries itself to the hilt in your ass and its knot swells against your rim, stretching you until it slips inside and locks you on its cock while it pumps you full."
+        scenes << "The #{monster_name} grips your hips and pounds your ass with short, relentless strokes, grunting with every slap of its fur against your cheeks."
+      end
+
+      if parts.include?('anus') && parts.include?('penis')
+        scenes << "Every thrust of the #{monster_name}'s cock grinds over your prostate, your own cock bouncing and dribbling precum untouched beneath you."
       end
 
       if parts.include?('breasts')
-        scenes << "The beast's rough tongue traces circles around your nipples, making them ache with need."
-        scenes << "The #{monster_name} nips playfully at your breasts, its teeth sending tingles through your sensitive flesh."
-        scenes << "The animal's soft paws knead your tits, knowing exactly how to make you moan with pleasure."
+        scenes << "The #{monster_name} shoves its muzzle against your chest and drags its rough tongue over your nipples again and again until they're stiff, wet and aching."
+        scenes << "The beast kneads your breasts with its heavy paws, squeezing and rolling your nipples as it grinds against you."
+        scenes << "The #{monster_name} sucks a nipple into its hot mouth, tugging on it hard enough to make you arch and moan."
       end
 
       scenes
@@ -72,27 +76,32 @@ module Engine
       scenes = []
 
       if parts.include?('vagina')
-        scenes << "The demon's fiery cock stretches your willing cunt, its heat amplifying every sensation as it claims you."
-        scenes << "The #{monster_name} summons shadowy tendrils that caress your inner walls, finding spots you never knew existed."
-        scenes << "The demon's barbed member scrapes deliciously against your sensitive flesh, each movement bringing you closer to ecstasy."
+        scenes << "The #{monster_name} spreads your thighs with its claws and drives its scorching cock into your cunt, the soft ridges along its shaft rippling over every inch of your inner walls."
+        scenes << "The demon fucks you with slow, deep strokes, its unnatural heat soaking into you until your pussy is clenching and gushing around it."
+        scenes << "The #{monster_name}'s tail curls between your legs and flicks your clit while its cock pounds you, dragging you to the edge and shoving you over it."
+        scenes << "A glowing sigil blooms low on your belly as the #{monster_name} cums inside you, its hot seed spilling out of your cunt and down your thighs."
       end
 
       if parts.include?('penis')
-        scenes << "The demon's bottomless throat takes your entire length, its supernatural skill bringing you pleasure beyond mortal limits."
-        scenes << "The #{monster_name}'s hot tail coils around your cock, its scales providing the perfect friction as it milks you."
-        scenes << "Shadowy hands fondle your balls, knowing exactly how to tease and please as the demon drains your seed."
+        scenes << "The #{monster_name} sinks to its knees and swallows your cock to the root, its long forked tongue coiling around your shaft as its throat squeezes you."
+        scenes << "The demon's tail wraps around your cock and pumps you, its smooth scales gliding up and down your shaft while a claw toys with your balls."
+        scenes << "The #{monster_name} climbs into your lap and sinks down onto your cock, its hellishly hot body clenching around you as it rides you hard."
       end
 
       if parts.include?('anus')
-        scenes << "The demon's burning cock claims your ass, the heat making your body tingle with anticipation."
-        scenes << "The #{monster_name}'s barbed tail rakes your insides with pleasure, each thrust bringing new waves of delight."
-        scenes << "Shadowy tendrils explore your depths, filling you completely with their pulsating energy."
+        scenes << "The #{monster_name} bends you over and pushes its burning cock into your ass, the soft ridges along its length tugging deliciously at your rim with every pull back."
+        scenes << "Shadowy hands hold your cheeks spread as the demon fucks your ass deep and slow, its heat spreading through your whole body."
+        scenes << "The #{monster_name} pumps its scalding-hot cum into your ass, holding you on its cock until you've felt every pulse."
+      end
+
+      if parts.include?('anus') && parts.include?('penis')
+        scenes << "The #{monster_name} angles its ridged cock to rake your prostate with every thrust, wringing thick strings of precum from your cock."
       end
 
       if parts.include?('breasts')
-        scenes << "The demon's claws trace glowing patterns on your breasts, the marks humming with magical energy."
-        scenes << "The #{monster_name}'s mouth worships your nipples, its sharp teeth providing the perfect edge of sensation."
-        scenes << "Shadowy hands cup your tits, their unnatural warmth making you moan with need."
+        scenes << "The #{monster_name} traces glowing runes around your nipples with a claw, and they throb with heat until the lightest touch makes you cry out."
+        scenes << "The demon sucks hard on your nipples, its forked tongue flicking each tip while its hands squeeze your breasts."
+        scenes << "Shadowy hands grope your tits, pinching and pulling your nipples as the #{monster_name} watches you squirm."
       end
 
       scenes
@@ -102,27 +111,31 @@ module Engine
       scenes = []
 
       if parts.include?('vagina')
-        scenes << "The slime molds perfectly to your inner walls, its gelatinous form stimulating every nerve as it fills you completely."
-        scenes << "The #{monster_name} flows into your welcoming cunt, its cool touch a delightful contrast to the heat building within."
-        scenes << "The slime's tendrils explore your depths, finding new ways to pleasure you with each movement."
+        scenes << "The #{monster_name} surges up your thighs and pours into your cunt, swelling until you're stretched full of cool, pulsing jelly."
+        scenes << "The slime forms a thick, ribbed shaft inside your pussy and pumps it in and out while a smaller bulge sucks and wobbles over your clit."
+        scenes << "The #{monster_name} churns inside you, kneading your inner walls from every direction until your cunt is spasming around it."
       end
 
       if parts.include?('penis')
-        scenes << "The slime engulfs your cock in its slick body, its pulsating rhythm bringing you to heights of pleasure."
-        scenes << "The #{monster_name} forms the perfect sheath around your shaft, its texture unlike anything you've felt before."
-        scenes << "The slime's cool tendrils wrap around your balls, squeezing gently as it pleasures you in ways you never imagined."
+        scenes << "The #{monster_name} swallows your cock in a slick, tight sheath and starts squeezing in rippling waves from base to tip."
+        scenes << "The slime wraps your balls in cool jelly and rolls them gently while its body pumps your shaft, drawing every drop of precum into itself."
+        scenes << "The #{monster_name} forms a warm, wet hole around your cock and bobs on it, getting tighter every time you twitch."
       end
 
       if parts.include?('anus')
-        scenes << "The slime flows into your eager ass, its form adapting to provide the perfect pressure against your sensitive walls."
-        scenes << "The #{monster_name} fills you completely, its cool touch making your body tingle with anticipation."
-        scenes << "The slime's tendrils explore your depths, finding spots that make you cry out with pleasure."
+        scenes << "The #{monster_name} oozes between your cheeks and pushes into your ass, flowing deeper and deeper until you feel full all the way up."
+        scenes << "The slime thickens inside your ass and pumps in slow, deep waves, stretching your hole wider each time it swells."
+        scenes << "The #{monster_name} fills your ass and throbs, a steady pulse inside you that leaves you gasping."
+      end
+
+      if parts.include?('vagina') && parts.include?('anus')
+        scenes << "The #{monster_name} floods into your cunt and your ass at once, two thick swells of slime grinding against each other through the thin wall between them."
       end
 
       if parts.include?('breasts')
-        scenes << "The slime covers your breasts, its cool body making your nipples stand erect with need."
-        scenes << "The #{monster_name}'s tendrils tease your nipples, their touch sending waves of pleasure through you."
-        scenes << "The slime molds to your tits, its surface vibrating with each pulse of its energy."
+        scenes << "The #{monster_name} engulfs your breasts in cool jelly and sucks on both nipples at once, tugging them into stiff, sensitive peaks."
+        scenes << "The slime squeezes and jiggles your tits inside its body, rolling your nipples between little gelatinous fingers."
+        scenes << "The #{monster_name} forms two tiny mouths that latch onto your nipples and flutter against them without pause."
       end
 
       scenes
@@ -132,27 +145,27 @@ module Engine
       scenes = []
 
       if parts.include?('vagina')
-        scenes << "The undead's cold member sends shivers through your body, the chill heightening your senses as it enters you."
-        scenes << "The #{monster_name}'s bony fingers trace patterns on your inner walls, their touch strangely arousing as they explore."
-        scenes << "The zombie's rigid flesh fills you perfectly, its unnatural temperature making every sensation more intense."
+        scenes << "The #{monster_name}'s ice-cold cock pushes into your hot cunt, and the shock of the chill makes you clench around it as it fucks you with tireless, steady strokes."
+        scenes << "The undead thrusts into your pussy without rhythm or rest, its cold shaft never softening no matter how many times it cums inside you."
+        scenes << "The #{monster_name} buries its face between your thighs and laps at your cunt, drinking down your warmth until you're shaking and it's flushed with stolen heat."
       end
 
       if parts.include?('penis')
-        scenes << "The undead's cold mouth engulfs your cock, its touch sending bolts of pleasure through your body."
-        scenes << "The #{monster_name}'s bony fingers wrap around your shaft, their sharp edges providing just the right amount of stimulation."
-        scenes << "The ghost's ethereal mouth takes you deep, its cold touch somehow more arousing than warmth."
+        scenes << "The #{monster_name}'s cold mouth slides down your cock, the chill making you shiver while its tongue keeps working your shaft."
+        scenes << "Bony fingers close around your cock and pump you, cold and relentless, never slowing even when you start to twitch."
+        scenes << "The #{monster_name} sinks its translucent body over your cock and squeezes you from the inside, an icy, tingling grip like nothing alive could manage."
       end
 
       if parts.include?('anus')
-        scenes << "The undead's cold cock claims your ass, the chill making every nerve ending tingle with pleasure."
-        scenes << "The #{monster_name}'s bony fingers explore your depths, their touch sending shivers of delight through you."
-        scenes << "The zombie's rigid member fills you completely, its unnatural temperature heightening every sensation."
+        scenes << "The #{monster_name} drives its cold cock into your ass and holds itself deep, letting the chill spread through you before it starts pounding."
+        scenes << "The undead fucks your ass with mindless, steady thrusts, its cold shaft filling you again and again until you're gasping."
+        scenes << "The #{monster_name}'s icy fingers slip into your ass and curl, stroking you from the inside with a cold that makes your hole twitch."
       end
 
       if parts.include?('breasts')
-        scenes << "The undead's cold hands cup your breasts, their touch making your nipples stand erect with desire."
-        scenes << "The #{monster_name}'s bony fingers trace patterns on your sensitive skin, their touch sending shivers through you."
-        scenes << "The ghost's ethereal hands pass through your flesh, their cold touch somehow arousing beyond words."
+        scenes << "The #{monster_name}'s cold hands cup your breasts and squeeze, the chill drawing your nipples into stiff, aching points."
+        scenes << "The undead sucks a nipple into its cold mouth, the icy suction making you arch off the ground."
+        scenes << "Frosty fingers pinch and roll your nipples as the #{monster_name} draws the warmth out of you through every touch."
       end
 
       scenes
@@ -162,27 +175,27 @@ module Engine
       scenes = []
 
       if parts.include?('vagina')
-        scenes << "The plant's smooth vine slides into your wet cunt, its natural ridges stimulating your inner walls perfectly."
-        scenes << "The #{monster_name}'s pollen-coated tendrils caress your inner walls, the aphrodisiac filling you with desire."
-        scenes << "The plant's stinger injects you with pleasure-enhancing nectar as it thrusts, your body responding eagerly."
+        scenes << "The #{monster_name}'s vines wrap your thighs and drag them apart, and a thick, ridged stalk slides into your cunt and starts to pump."
+        scenes << "The plant fucks your pussy with a nectar-slick vine while a soft bud presses against your clit and suckles."
+        scenes << "The #{monster_name} puffs sweet pollen in your face, and within a breath your cunt is dripping and you're grinding down on the vine inside you."
       end
 
       if parts.include?('penis')
-        scenes << "The plant's flowering sheath closes around your cock, its inner petals providing the perfect stimulation."
-        scenes << "The #{monster_name}'s smooth vine wraps around your shaft, its natural ridges driving you wild with pleasure."
-        scenes << "The plant's nectar drips onto your cock, its aphrodisiac properties making you harder than ever before."
+        scenes << "A flower as wide as your hand blooms around your cock and closes, its slick inner petals rippling and sucking along your shaft."
+        scenes << "The #{monster_name}'s vines coil around your cock from base to tip and squeeze in slow, rolling waves, nectar dripping off your balls."
+        scenes << "The plant dusts your cock with glittering pollen, and you're instantly so hard it aches, thrusting helplessly into the vine wrapped around you."
       end
 
       if parts.include?('anus')
-        scenes << "The plant's smooth vine enters your eager ass, its natural texture providing the perfect friction."
-        scenes << "The #{monster_name}'s stinger injects pleasure-enhancing nectar as it thrusts, your body responding with waves of ecstasy."
-        scenes << "The plant's roots expand inside you, filling you completely as they stimulate every sensitive spot."
+        scenes << "The #{monster_name} pushes a smooth, nectar-slick vine into your ass, and it keeps sliding deeper, coiling inside you."
+        scenes << "The plant fucks your ass with a thick ridged vine, each ridge popping past your rim as it thrusts."
+        scenes << "The #{monster_name}'s vine swells inside your ass, pumping warm nectar into you until it leaks out around the stalk."
       end
 
       if parts.include?('breasts')
-        scenes << "The plant's soft vines wrap around your breasts, their touch making your nipples ache with need."
-        scenes << "The #{monster_name}'s flowers bloom around your nipples, sucking gently as they release their nectar."
-        scenes << "The plant's pollen covers your tits, making them tingle with heightened sensitivity."
+        scenes << "The #{monster_name}'s vines coil around your breasts and squeeze them together while two little blossoms latch onto your nipples and suck."
+        scenes << "Pollen settles on your tits and they start to tingle, your nipples so sensitive that the brush of a leaf makes you moan."
+        scenes << "The plant's tendrils wrap your nipples and tug them in a slow, steady rhythm until you're squirming."
       end
 
       scenes
@@ -192,27 +205,27 @@ module Engine
       scenes = []
 
       if parts.include?('vagina')
-        scenes << "The mimic's tongue-like appendage slides into your cunt, its texture hitting all the right spots as it explores."
-        scenes << "The #{monster_name} reveals its true form, its opening transforming into a perfect match for your body as it pleasures you."
-        scenes << "The mimic's tendrils caress your inner walls, knowing exactly how to make you moan with pleasure."
+        scenes << "The #{monster_name}'s lid snaps open and a long, thick tongue shoots out, lapping up your slit before plunging deep into your cunt and curling."
+        scenes << "The mimic sprouts a smooth, polished shaft and pulls you down onto it, fucking your pussy while something inside it hums against your clit."
+        scenes << "The #{monster_name}'s soft, wet interior grips your hips and draws you in, a dozen little tongues licking your folds at once."
       end
 
       if parts.include?('penis')
-        scenes << "The mimic's warm opening engulfs your cock, its inner walls pulsating with perfect rhythm as it milks you."
-        scenes << "The #{monster_name} transforms to accommodate you perfectly, its texture driving you wild with pleasure."
-        scenes << "The mimic's tendrils wrap around your shaft, knowing exactly how to bring you to the edge and hold you there."
+        scenes << "The #{monster_name} opens wide and gulps your cock into its hot, wet interior, its walls clamping down and sucking you in rhythmic pulls."
+        scenes << "The mimic reshapes its insides into a tight, ribbed tunnel around your cock and squeezes you with every ridge."
+        scenes << "The #{monster_name}'s long tongue coils around your shaft and pumps you while smaller tongues lick at your balls."
       end
 
       if parts.include?('anus')
-        scenes << "The mimic's appendage slides into your eager ass, its form adapting to provide maximum pleasure."
-        scenes << "The #{monster_name} reveals itself, its texture transforming into the perfect stimulation as it claims you."
-        scenes << "The mimic's tendrils explore your depths, finding spots that make your whole body tremble with pleasure."
+        scenes << "The #{monster_name}'s tongue slithers between your cheeks, lapping at your hole before pushing deep inside and wriggling."
+        scenes << "The mimic sprouts a smooth shaft and drives it into your ass, its texture shifting from slick to ribbed as it pounds you."
+        scenes << "Little tongues inside the #{monster_name} hold your ass open while a thicker one fucks you in long, slow strokes."
       end
 
       if parts.include?('breasts')
-        scenes << "The mimic's soft tendrils wrap around your breasts, their touch sending waves of pleasure through you."
-        scenes << "The #{monster_name} transforms to reveal a mouth-like opening that suckles your nipples perfectly."
-        scenes << "The mimic's appendages know exactly how to tease your sensitive flesh, making you gasp with delight."
+        scenes << "The #{monster_name}'s tongues wrap your breasts and squeeze, their tips flicking over your nipples."
+        scenes << "A pair of soft, wet mouths opens inside the mimic's lid and latches onto your nipples, sucking hard."
+        scenes << "The #{monster_name} traps your chest in its padded lid and rubs your tits against its warm, slick interior."
       end
 
       scenes
@@ -220,11 +233,11 @@ module Engine
 
     def generic_assault(monster_name)
       [
-        "The #{monster_name} presses against you, its body molding to yours as it seeks pleasure in your embrace.",
-        "The #{monster_name} touches you in ways that make your body tremble with anticipation and need.",
-        "The #{monster_name} holds you close, its movements becoming more urgent as you both chase ecstasy.",
-        "The #{monster_name} explores your body with expert hands, finding places that make you cry out with pleasure.",
-        "The #{monster_name} moves against you, its rhythm perfectly matching your body's growing desire."
+        "The #{monster_name} presses you against the wall and grinds its body against yours, its hands everywhere at once.",
+        "The #{monster_name} drags you down and gropes every part of you it can reach, squeezing and rubbing until you're panting.",
+        "The #{monster_name} rubs itself against you hard and fast, using your body for its pleasure until you're as worked up as it is.",
+        "The #{monster_name} gets its hands between your legs and doesn't let go, stroking and rubbing until your hips jerk into its touch.",
+        "The #{monster_name} kisses you hard, its tongue filling your mouth as it presses you down beneath its weight."
       ]
     end
 
@@ -296,13 +309,13 @@ module Engine
         scenes << "The #{monster_name} flows into your willing cunt, its cool touch making you gasp as it fills you completely."
         scenes << "The slime forms a perfect shape to stimulate your inner walls, pulsating with pleasure as it moves."
         scenes << "The #{monster_name}'s tendrils explore your depths, finding spots that make your whole body tremble with delight."
-        scenes << "The slime changes its viscosity to perfectly match your desires, becoming more liquid as you near climax."
+        scenes << "The slime changes its viscosity to perfectly match your desires, becoming more liquid as you near orgasm."
       end
 
       if parts.include?('penis')
         scenes << "The #{monster_name} engulfs your cock in its cool body, contracting around you with perfect rhythm."
         scenes << "The slime forms additional tendrils to tease your balls while the main body pleasures your shaft."
-        scenes << "The #{monster_name} changes its texture to provide the perfect stimulation, its surface becoming more ribbed as you near climax."
+        scenes << "The #{monster_name} changes its texture to provide the perfect stimulation, its surface becoming more ribbed as you near orgasm."
       end
 
       if parts.include?('anus')
@@ -424,260 +437,339 @@ module Engine
       ]
     end
 
-  def generate_willing_scene(player, monster_name, monster_type: nil)
-    parts = Engine::ChastitySystem.scene_parts(player)
-    scenes =
-      case monster_type.to_s
-      when 'beast' then generate_beast_willing(parts, monster_name)
-      when 'demon' then generate_demon_willing(parts, monster_name)
-      when 'slime' then generate_slime_willing(parts, monster_name)
-      when 'undead' then generate_undead_willing(parts, monster_name)
-      when 'plant' then generate_plant_willing(parts, monster_name)
-      when 'mimic' then generate_mimic_willing(parts, monster_name)
-      else []
+    COMBAT_LINES = {
+      fight: {
+        'beast' => ["You shove the %<name>s's snout away from your thighs and drive your fist into its ribs, forcing it back a step.",
+                    'The %<name>s rears up to mount you, but you twist out from under it and kick it off, sending it skidding across the floor.'],
+        'demon' => ['The %<name>s purrs filthy promises in your ear, but you grit your teeth against the heat and strike it square across the jaw.',
+                    "You wrench your eyes away from the %<name>s's body and hit it hard, breaking the spell before it can take hold."],
+        'slime' => ['The %<name>s oozes up your legs, but you pull free and slam a blow into its core, splattering it across the floor.',
+                    'You scrape the clinging %<name>s off your skin before it can seep anywhere it shouldn\'t, and drive it back.'],
+        'undead' => ['Cold fingers creep toward your waistband, but you shove the %<name>s away and strike it hard enough to send it reeling.',
+                     'You fight off the chill spreading through your body and batter the %<name>s back.'],
+        'plant' => ['You hack through the vines curling between your thighs and drive the %<name>s back.',
+                    "Pollen fogs your head, but you hold your breath and strike at the %<name>s's stalk, forcing it to recoil."],
+        'mimic' => ["Its tongue slithers toward you, but you kick the %<name>s's lid shut and pound on it until it stops rattling.",
+                    "You yank your arm out of the %<name>s's sticky interior and slam a blow into its side, denting the wood."],
+        nil => ['You grit your teeth against the heat building inside you and strike the %<name>s, forcing it back.',
+                'You push its hands away from your body and land a solid blow on the %<name>s.']
+      },
+      dodge: {
+        nil => ["You twist out of the %<name>s's grip just before its hands reach between your legs.",
+                'The %<name>s lunges for you, but you slip away, leaving it grabbing at empty air and growling with frustration.']
+      },
+      flee: {
+        nil => ["You wriggle free of the %<name>s and bolt, flushed and dripping, its frustrated cries echoing behind you.",
+                "You slip out of the %<name>s's grasp and run, still feeling the ghost of its hands all over your body."]
+      },
+      flee_fail: {
+        nil => ['You make a break for it, but the %<name>s catches you and drags you back against its body, grinding against you as it holds you close.',
+                'The %<name>s grabs your ankle as you run and hauls you back into its lap. "Where do you think you\'re going?"']
+      },
+      satisfied: {
+        'beast' => ['The %<name>s howls and cums, hot and thick, then flops down beside you, panting and spent.'],
+        'demon' => ['The %<name>s throws its head back and cums with a cry, its seed spilling hot over you before it sinks back, sated.'],
+        'slime' => ['The %<name>s quivers wildly and goes limp, its whole body rippling with afterglow before it oozes contentedly away.'],
+        'undead' => ['The %<name>s shudders and spills its chilly release over you, then sighs and lets you go, a little warmer than before.'],
+        'plant' => ['The %<name>s shudders from root to petal and gushes sweet nectar all over you before its vines go slack.'],
+        'mimic' => ['The %<name>s rattles and shudders, its tongues going limp as it slumps open, completely spent.'],
+        nil => ['The %<name>s shudders and cums hard, then lets you go, utterly spent.']
+      },
+      victory: {
+        nil => ['The %<name>s staggers back and retreats into the dark, beaten. You catch your breath and fight down the lingering heat.',
+                'You land one last blow and the %<name>s collapses, defeated. Your body still aches with want, but you resisted.']
+      },
+      broken: {
+        nil => ["You cum again and again until you lose count, your body shaking and your mind melting into nothing but pleasure. You can't fight anymore. You don't want to.",
+                'Wave after wave of orgasm rolls through you until your legs give out and your thoughts dissolve. You go limp, utterly and blissfully broken.']
+      },
+      defeated: {
+        nil => ['Your last scrap of resistance gives way, and the %<name>s takes you however it likes until you black out from pleasure.',
+                'You sink to your knees, too spent to resist, and the %<name>s has its way with you for what feels like hours.']
+      }
+    }.freeze
+
+    def combat_line(player, key, monster_name, monster_type = nil)
+      spec = COMBAT_LINES[key] or return nil
+      generic = Array(spec[nil])
+      pool = Array(spec[monster_type.to_s]).then { |typed| typed.empty? ? generic : typed }
+      name = monster_name.to_s.delete_prefix('The ')
+      Engine::ContentOptions.pick(player, pool.map { |l| format(l, name: name) },
+                                  fallback: generic.map { |l| format(l, name: name) })
+    end
+
+    def generate_willing_scene(player, monster_name, monster_type: nil)
+      parts = Engine::ChastitySystem.scene_parts(player)
+      scenes =
+        case monster_type.to_s
+        when 'beast' then generate_beast_willing(parts, monster_name)
+        when 'demon' then generate_demon_willing(parts, monster_name)
+        when 'slime' then generate_slime_willing(parts, monster_name)
+        when 'undead' then generate_undead_willing(parts, monster_name)
+        when 'plant' then generate_plant_willing(parts, monster_name)
+        when 'mimic' then generate_mimic_willing(parts, monster_name)
+        else []
+        end
+      scenes += Engine::ChastitySystem.lines_for(player, :willing, actor: monster_name)
+
+      Engine::ContentOptions.pick(player, scenes, fallback: generic_willing(monster_name))
+    end
+
+    PRAISE = {
+      'beast' => [
+        'The %<name>s rumbles a deep, satisfied growl and licks the sweat from your neck, still pressed heavily against you. Good mate.',
+        'The %<name>s nuzzles between your thighs, sniffing at the mess it left on you with obvious pride.',
+        'The %<name>s flops down beside you and drags you against its warm fur, keeping you close like a prize.'
+      ],
+      'demon' => [
+        '"Such a greedy little mortal," the %<name>s purrs, smearing its cum across your lips with a claw. "You were made for this."',
+        '"Mm, look at you, still dripping with my heat," the %<name>s whispers. "I may have to keep you."',
+        'The %<name>s presses a glowing kiss to your inner thigh, leaving a warm sigil behind. "So you remember who made you feel like that."'
+      ],
+      'slime' => [
+        'The %<name>s wobbles happily, a few warm drops of it still sliding down your thighs.',
+        'The %<name>s hugs you in a warm, sticky embrace and slurps the sweat off your skin.',
+        'The %<name>s glows a satisfied pink and jiggles against you, already eager for another round.'
+      ],
+      'undead' => [
+        '"So warm... so wet," the %<name>s rasps reverently, cold fingers tracing your flushed skin. "You remind me what it was to live."',
+        'The %<name>s presses a cold kiss to your belly and sighs. "Thank you, living one."',
+        'The %<name>s holds you in its chilly embrace, savouring the heat still pouring off your body.'
+      ],
+      'plant' => [
+        'The %<name>s blooms around you, drizzling sweet nectar over your spent body in a burst of grateful perfume.',
+        'The %<name>s strokes your hair with a soft tendril while its sap dries sticky on your skin.',
+        'The %<name>s showers you with glittering pollen, leaving you flushed and tingling. Its way of saying you did beautifully.'
+      ],
+      'mimic' => [
+        'The %<name>s clacks its lid in delighted applause, a long tongue licking you clean. You are clearly its favourite treasure.',
+        'The %<name>s shivers with pleasure, its insides still wet and warm from you.',
+        'The %<name>s wraps a slick tongue around your thigh like a proud little ribbon.'
+      ]
+    }.freeze
+
+    GENERIC_PRAISE = [
+      'The %<name>s runs its hands over your flushed, sticky body with open admiration. "Good. Very good."',
+      'The %<name>s murmurs its approval, clearly delighted with how eagerly you gave yourself to it.'
+    ].freeze
+
+    DEGRADING_PRAISE = [
+      'The %<name>s pats your cheek, not gently. "Good little hole. Crawl back tomorrow."',
+      'The %<name>s wipes itself clean on your thigh and laughs. "Pathetic. You loved every second, didn\'t you?"',
+      'The %<name>s looks down at the mess it made of you and sneers. "Filthy slut. Off you go."',
+      '"That\'s all you\'re good for," the %<name>s tells you, and the worst part is how much hearing it turns you on.',
+      'The %<name>s snorts as you lie there twitching. "You didn\'t even pretend to fight. Desperate little toy."',
+      'The %<name>s leaves you sprawled where you are. "Thanks for the use, whore."'
+    ].freeze
+
+    def generate_praise(player, monster_name, monster_type)
+      if Engine::ContentOptions.enabled?(player, 'degradation') && rand < 0.6
+        return format(DEGRADING_PRAISE.sample, name: monster_name)
       end
-    scenes += Engine::ChastitySystem.lines_for(player, :willing, actor: monster_name)
-  
-    Engine::ContentOptions.pick(player, scenes, fallback: generic_willing(monster_name))
-  end
 
-  PRAISE = {
-    'beast' => [
-      'The %<name>s rumbles a deep, contented purr and nuzzles your neck — a clear sign you have pleased it.',
-      'The %<name>s licks your cheek affectionately, its tail wagging. Good pet.',
-      'The %<name>s rests its heavy head against you, huffing warm approval.'
-    ],
-    'demon' => [
-      '"Such a delicious little mortal," the %<name>s purrs, tracing a claw under your chin. "You learn so quickly."',
-      '"Mm, you were made for this," the %<name>s whispers. "I may have to keep you."',
-      'The %<name>s laughs low and pleased. "Exquisite. Hell itself would envy me."'
-    ],
-    'slime' => [
-      'The %<name>s wobbles happily, its surface rippling in bright, contented colours.',
-      'The %<name>s gives a pleased little gurgle and hugs you in a warm, squishy embrace.',
-      'The %<name>s glows softly, humming a bubbly note of approval.'
-    ],
-    'undead' => [
-      '"Warm... so warm," the %<name>s rasps reverently. "You remind me what it was to live."',
-      'The %<name>s bows its hollow head to you, cold fingers tender now. "Thank you, living one."',
-      'The %<name>s sighs a long, peaceful breath it no longer needs. "Perfect."'
-    ],
-    'plant' => [
-      'The %<name>s blooms around you, its petals unfurling in a burst of sweet, grateful perfume.',
-      'The %<name>s rustles contentedly, gently stroking your hair with a soft tendril.',
-      'The %<name>s showers you with glittering pollen — its way of saying you did beautifully.'
-    ],
-    'mimic' => [
-      'The %<name>s clacks its lid in delighted applause. You are clearly its favourite treasure.',
-      'The %<name>s shivers with pleasure, its false wood creaking a happy tune.',
-      'The %<name>s wraps a tongue around your wrist like a proud little ribbon.'
-    ]
-  }.freeze
+      lines = PRAISE.fetch(monster_type.to_s, GENERIC_PRAISE).map { |l| format(l, name: monster_name) }
+      Engine::ContentOptions.pick(player, lines, fallback: GENERIC_PRAISE.map { |l| format(l, name: monster_name) })
+    end
 
-  GENERIC_PRAISE = [
-    'The %<name>s regards you with open admiration. "Good. Very good."',
-    'The %<name>s murmurs its approval, clearly delighted with you.'
-  ].freeze
+    def generate_beast_willing(parts, monster_name)
+      scenes = []
 
-  def generate_praise(player, monster_name, monster_type)
-    lines = PRAISE.fetch(monster_type.to_s, GENERIC_PRAISE).map { |l| format(l, name: monster_name) }
-    Engine::ContentOptions.pick(player, lines, fallback: GENERIC_PRAISE.map { |l| format(l, name: monster_name) })
+      if parts.include?('vagina')
+        scenes << "You drop onto all fours for the #{monster_name} and reach back to hold your dripping cunt open, moaning as it mounts you and slams its thick cock home."
+        scenes << "You ride the beast's furry cock, grinding down as its knot swells and stretches you, until it locks inside and you cum hard around it."
+        scenes << "You pull the #{monster_name} on top of you and wrap your legs around it as it ruts into your pussy and fills you with thick, hot cum."
+        scenes << "You guide the beast's muzzle between your legs, gasping as its long, rough tongue laps your folds and sinks inside you."
+      end
+
+      if parts.include?('penis')
+        scenes << "You push your cock into the #{monster_name}'s hot mouth, gripping its fur and fucking its muzzle while its rough tongue wraps your shaft."
+        scenes << "You take the beast's paw and wrap it around your cock, thrusting into its padded grip until you're leaking all over it."
+        scenes << "You grind your cock against the #{monster_name}'s warm fur, rutting against it until you spill across its belly."
+      end
+
+      if parts.include?('anus')
+        scenes << "You bend over for the #{monster_name} and spread your cheeks, groaning as it mounts you and buries its thick cock in your ass."
+        scenes << "You push back onto the beast's cock and take its swelling knot, gasping as it stretches your rim and locks inside you."
+        scenes << "You let the #{monster_name} lick your hole slick with its rough tongue, then beg for its cock until it gives it to you."
+      end
+
+      if parts.include?('anus') && parts.include?('penis')
+        scenes << "You rock back on the #{monster_name}'s cock, angling it right onto your prostate until your own cock is dripping a steady string onto the floor."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You pull the #{monster_name}'s head to your chest, moaning as its rough tongue drags over your nipples again and again."
+        scenes << "You press the beast's paws to your breasts and make it knead them, squeezing and rolling your nipples until you're squirming."
+        scenes << "You hold your tits up to the #{monster_name}'s muzzle and gasp as it sucks one nipple, then the other."
+      end
+
+      scenes
+    end
+
+    def generate_demon_willing(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "You lie back and spread yourself open for the #{monster_name}, crying out as its burning, ridged cock sinks into your cunt and every ridge drags over your walls."
+        scenes << "You climb onto the demon and ride its scorching cock, grinding your clit against it until your pussy is clenching and gushing."
+        scenes << "You beg the #{monster_name} to cum inside you, and it does, pumping hot infernal seed into your cunt until it spills down your thighs."
+        scenes << "You let the demon's tail tease your clit while you bounce on its cock, chasing one orgasm after another."
+      end
+
+      if parts.include?('penis')
+        scenes << "You feed your cock to the #{monster_name}, groaning as its bottomless throat takes you to the root and its forked tongue coils around your shaft."
+        scenes << "You thrust into the demon's scorching body, gripping its horns as it clenches around your cock and urges you to fill it."
+        scenes << "You guide the #{monster_name}'s tail around your cock and fuck its smooth coils while a claw teases your balls."
+      end
+
+      if parts.include?('anus')
+        scenes << "You bend over and spread your cheeks for the #{monster_name}, moaning as its burning cock pushes into your ass and its ridges ripple past your rim."
+        scenes << "You sink down on the demon's cock, taking it deep in your ass and rolling your hips while its heat spreads through you."
+        scenes << "You beg the #{monster_name} to fill your ass, and it obliges, pumping scalding-hot cum deep inside you."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You offer your breasts to the #{monster_name} and gasp as it sucks hard on your nipples, its forked tongue flicking each tip."
+        scenes << "You let the demon trace glowing runes around your nipples, and moan as the magic makes them throb."
+        scenes << "You press your tits into the #{monster_name}'s clawed hands and let it squeeze and pinch them however it likes."
+      end
+
+      scenes
+    end
+
+    def generate_slime_willing(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "You lie back and spread your legs, sighing as the #{monster_name} pours into your cunt and swells until you're stuffed full of cool, pulsing jelly."
+        scenes << "You sit down into the slime and let it form a thick shaft inside your pussy, riding it while it sucks and wobbles over your clit."
+        scenes << "You spread your folds open for the #{monster_name} and moan as it churns inside you, kneading every inch of your walls."
+      end
+
+      if parts.include?('penis')
+        scenes << "You push your cock into the #{monster_name}, groaning as its body forms a tight, slick sheath and ripples from base to tip."
+        scenes << "You fuck the slime's wobbly body, thrusting into a hole that tightens every time you pull back."
+        scenes << "You let the #{monster_name} wrap your balls in cool jelly and roll them while it squeezes your shaft."
+      end
+
+      if parts.include?('anus')
+        scenes << "You spread your cheeks and let the #{monster_name} ooze into your ass, moaning as it flows deeper and deeper."
+        scenes << "You sit down into the slime and let it fill your ass, rocking your hips as it swells and throbs inside you."
+        scenes << "You reach back and spread yourself wide, begging the #{monster_name} to stretch your hole further, and it does."
+      end
+
+      if parts.include?('vagina') && parts.include?('anus')
+        scenes << "You open both your cunt and your ass for the #{monster_name}, and it fills them at once, the two swells of slime grinding together inside you."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You press your breasts into the #{monster_name}, moaning as it swallows them and sucks on both nipples at once."
+        scenes << "You guide the slime over your tits and let it squeeze and jiggle them inside its cool body."
+        scenes << "You let the #{monster_name} form two little mouths on your nipples, shivering as they flutter and suck."
+      end
+
+      scenes
+    end
+
+    def generate_undead_willing(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "You spread your legs for the #{monster_name}, gasping as its ice-cold cock slides into your hot cunt and the chill makes you clench around it."
+        scenes << "You ride the undead's cold, tireless cock, grinding down on it until your pussy is dripping and it fills you with chilly cum."
+        scenes << "You pull the #{monster_name}'s head between your thighs and let its cold tongue drink the warmth from your cunt until you're shaking."
+        scenes << "You wrap your legs around the #{monster_name} and hold it deep while it fucks you in slow, endless strokes."
+      end
+
+      if parts.include?('penis')
+        scenes << "You slide your cock into the #{monster_name}'s cold mouth, shivering as the chill makes you even harder."
+        scenes << "You let bony fingers wrap your cock and pump you, cold and relentless, until you're twitching in their grip."
+        scenes << "You thrust into the #{monster_name}'s translucent body and gasp as it squeezes your cock with an icy, tingling grip."
+      end
+
+      if parts.include?('anus')
+        scenes << "You bend over for the #{monster_name} and take its cold cock in your ass, moaning as the chill spreads through you."
+        scenes << "You push back on the undead's tireless cock, letting it fuck your ass again and again without ever slowing."
+        scenes << "You guide the #{monster_name}'s icy fingers into your ass and rock back on them as they curl inside you."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You press the #{monster_name}'s cold hands to your breasts and moan as the chill draws your nipples into stiff peaks."
+        scenes << "You offer a nipple to the undead's cold mouth and arch as the icy suction pulls at it."
+        scenes << "You let frosty fingers pinch and roll your nipples until every touch makes you shiver."
+      end
+
+      scenes
+    end
+
+    def generate_plant_willing(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "You spread your thighs and let the #{monster_name}'s vines hold them open as a thick, ridged stalk slides into your cunt and pumps."
+        scenes << "You breathe in the plant's sweet pollen on purpose, and within moments your pussy is dripping and you're riding the vine inside you hard."
+        scenes << "You guide a soft bud to your clit and moan as it suckles you while a nectar-slick vine fucks you deep."
+      end
+
+      if parts.include?('penis')
+        scenes << "You push your cock into one of the #{monster_name}'s blooms and groan as its slick inner petals close and suck along your shaft."
+        scenes << "You let the plant's vines coil around your cock and squeeze in slow waves, nectar dripping off your balls."
+        scenes << "You rub the #{monster_name}'s pollen over your cock and thrust into the vines wrapped around you, so hard it aches."
+      end
+
+      if parts.include?('anus')
+        scenes << "You spread your cheeks and invite the #{monster_name}'s nectar-slick vine into your ass, moaning as it coils deeper inside you."
+        scenes << "You sink back onto a thick, ridged vine, feeling each ridge pop past your rim."
+        scenes << "You let the #{monster_name} pump warm nectar into your ass until it drips out around the stalk."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You offer your breasts to the #{monster_name} and moan as its vines squeeze them together and two blossoms latch onto your nipples."
+        scenes << "You rub the plant's pollen into your tits and gasp as your nipples tingle until the slightest touch makes you moan."
+        scenes << "You let the #{monster_name}'s tendrils wrap your nipples and tug them in a slow rhythm while you grind against its vines."
+      end
+
+      scenes
+    end
+
+    def generate_mimic_willing(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "You sit on the #{monster_name}'s open lid and spread your legs, crying out as its long tongue laps up your slit and plunges into your cunt."
+        scenes << "You straddle the mimic's polished shaft and ride it, something deep inside it humming against your clit with every bounce."
+        scenes << "You lower yourself into the #{monster_name}'s soft, wet interior and let a dozen little tongues lick your folds at once."
+      end
+
+      if parts.include?('penis')
+        scenes << "You push your cock into the #{monster_name}'s hot, wet interior and groan as its walls clamp down and suck you in rhythmic pulls."
+        scenes << "You fuck the mimic's ribbed insides, each ridge squeezing your cock as it reshapes itself to fit you."
+        scenes << "You let the #{monster_name}'s tongue coil around your shaft and pump you while smaller tongues lick your balls."
+      end
+
+      if parts.include?('anus')
+        scenes << "You bend over the #{monster_name}'s lid and let its tongue slither between your cheeks and push deep into your ass."
+        scenes << "You sit back onto the mimic's smooth shaft and ride it, its texture shifting from slick to ribbed as it fills your ass."
+        scenes << "You let little tongues hold your ass open while a thicker one fucks you in long, slow strokes."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You lean into the #{monster_name}'s open lid and moan as soft, wet mouths inside latch onto your nipples."
+        scenes << "You let the mimic's tongues wrap your breasts and squeeze while their tips flick your nipples."
+        scenes << "You press your tits into the #{monster_name}'s warm, slick interior and rub them against its walls."
+      end
+
+      scenes
+    end
+
+    def generic_willing(monster_name)
+      [
+        "You strip for the #{monster_name} and press your naked body against it, rubbing yourself on it until you're both panting.",
+        "You kneel before the #{monster_name} and let it use you however it likes, moaning at every touch.",
+        "You drag the #{monster_name}'s hands between your legs and grind against them until you're shaking.",
+        "You kiss the #{monster_name} deeply and climb into its lap, rocking your hips against it in a slow, needy rhythm.",
+        "You beg the #{monster_name} to take you, and it does, over and over until you lose count."
+      ]
+    end
   end
-  
-  def generate_beast_willing(parts, monster_name)
-    scenes = []
-  
-    if parts.include?('vagina')
-      scenes << "You spread your legs invitingly for the #{monster_name}, presenting your wet cunt for its pleasure."
-      scenes << "You arch your back, meeting the beast's passionate thrusts with your own hips as it fills you completely."
-      scenes << "You wrap your legs around the #{monster_name}'s waist, pulling it deeper as you both chase ecstasy."
-      scenes << "You guide the beast's member to your entrance, gasping as it enters you with primal force."
-    end
-  
-    if parts.include?('penis')
-      scenes << "You present your erect cock to the #{monster_name}, moaning as its rough tongue wraps around your shaft."
-      scenes << "You thrust into the beast's hot mouth, your hands gripping its fur as it worships your length."
-      scenes << "You guide the #{monster_name}'s muzzle to your balls, groaning as it takes each one into its mouth."
-    end
-  
-    if parts.include?('anus')
-      scenes << "You bend over for the #{monster_name}, spreading your cheeks to invite its thick knot into your eager ass."
-      scenes << "You push back against the beast's thrusts, your body welcoming its invading member with pleasure."
-      scenes << "You reach back to guide the #{monster_name}'s cock to your hole, gasping as it enters you with force."
-    end
-  
-    if parts.include?('breasts')
-      scenes << "You offer your breasts to the #{monster_name}, moaning as its rough tongue laps at your nipples."
-      scenes << "You press your tits against the beast's face, encouraging it to suck and nip at your sensitive flesh."
-      scenes << "You bounce your breasts in the #{monster_name}'s face, giggling as it tries to catch your nipples with its teeth."
-    end
-  
-    scenes
-  end
-  
-  def generate_demon_willing(parts, monster_name)
-    scenes = []
-  
-    if parts.include?('vagina')
-      scenes << "You lie back, spreading your legs for the #{monster_name} as it approaches with burning desire."
-      scenes << "You meet the demon's passionate thrusts with your own, your body accepting its infernal heat."
-      scenes << "You whisper dark words of invitation, encouraging the #{monster_name} to claim you completely."
-      scenes << "You guide the demon's barbed member to your entrance, gasping as it fills you with burning pleasure."
-    end
-  
-    if parts.include?('penis')
-      scenes << "You offer your cock to the #{monster_name}, moaning as its supernatural mouth takes you deep."
-      scenes << "You thrust into the demon's hot mouth, your hands tangling in its hair as it pleasures you."
-      scenes << "You guide the #{monster_name}'s tendrils to your balls, groaning as they tease and squeeze."
-    end
-  
-    if parts.include?('anus')
-      scenes << "You present yourself to the #{monster_name}, inviting its burning cock into your eager hole."
-      scenes << "You push back against the demon's thrusts, your body welcoming its heat and roughness."
-      scenes << "You reach back to spread your cheeks, offering yourself completely to the #{monster_name}."
-    end
-  
-    if parts.include?('breasts')
-      scenes << "You offer your breasts to the #{monster_name}, gasping as its hot mouth marks your flesh."
-      scenes << "You press your tits against the demon's face, encouraging it to leave its mark on you."
-      scenes << "You trace arcane symbols on your breasts, inviting the #{monster_name} to complete the ritual."
-    end
-  
-    scenes
-  end
-  
-  def generate_slime_willing(parts, monster_name)
-    scenes = []
-  
-    if parts.include?('vagina')
-      scenes << "You lie back, spreading your legs as the #{monster_name} flows toward you with eagerness."
-      scenes << "You welcome the slime into your cunt, moaning as it fills you completely with its cool form."
-      scenes << "You reach down to guide the #{monster_name}'s tendrils, directing them to your most sensitive spots."
-      scenes << "You wrap your legs around the slime, pulling it deeper as it pulses with pleasure inside you."
-    end
-  
-    if parts.include?('penis')
-      scenes << "You present your cock to the #{monster_name}, groaning as its cool body engulfs your length."
-      scenes << "You thrust into the slime's forming sheath, your hands pressing against its gelatinous form."
-      scenes << "You guide the #{monster_name}'s tendrils to your balls, gasping as they tease and squeeze."
-    end
-  
-    if parts.include?('anus')
-      scenes << "You position yourself for the #{monster_name}, inviting its cool form into your eager ass."
-      scenes << "You push back against the slime's tendrils, your body welcoming its unusual texture."
-      scenes << "You reach back to spread your cheeks, offering yourself completely to the #{monster_name}."
-    end
-  
-    if parts.include?('breasts')
-      scenes << "You press your breasts into the #{monster_name}, moaning as it molds to your form."
-      scenes << "You guide the slime's tendrils to your nipples, gasping as they tease and suck."
-      scenes << "You bounce your tits in the slime, giggling as it forms around them with each movement."
-    end
-  
-    scenes
-  end
-  
-  def generate_undead_willing(parts, monster_name)
-    scenes = []
-  
-    if parts.include?('vagina')
-      scenes << "You lie back, spreading your legs as the #{monster_name} approaches with cold hunger."
-      scenes << "You welcome the undead's cold member, gasping as it fills you with its chilling touch."
-      scenes << "You pull the #{monster_name} closer, your body responding to its unnatural coldness."
-      scenes << "You guide the zombie's rigid cock to your entrance, shivering as it enters you."
-    end
-  
-    if parts.include?('penis')
-      scenes << "You offer your cock to the #{monster_name}, moaning as its cold mouth takes you deep."
-      scenes << "You thrust into the ghost's ethereal mouth, your hands passing through its form as it pleasures you."
-      scenes << "You guide the #{monster_name}'s bony fingers to your shaft, groaning at their unusual touch."
-    end
-  
-    if parts.include?('anus')
-      scenes << "You present yourself to the #{monster_name}, inviting its cold member into your eager hole."
-      scenes << "You push back against the zombie's thrusts, your body welcoming its unnatural coldness."
-      scenes << "You reach back to spread your cheeks, offering yourself completely to the #{monster_name}."
-    end
-  
-    if parts.include?('breasts')
-      scenes << "You offer your breasts to the #{monster_name}, gasping as its cold hands cup your flesh."
-      scenes << "You press your tits against the zombie's face, encouraging it to mark you with its cold touch."
-      scenes << "You trace patterns on your nipples, inviting the ghost to touch and tease."
-    end
-  
-    scenes
-  end
-  
-  def generate_plant_willing(parts, monster_name)
-    scenes = []
-  
-    if parts.include?('vagina')
-      scenes << "You lie back, spreading your legs as the #{monster_name}'s vines approach with eagerness."
-      scenes << "You welcome the plant's smooth tendril, moaning as it slides into your wet cunt."
-      scenes << "You guide the #{monster_name}'s tendrils to your most sensitive spots, encouraging their exploration."
-      scenes << "You wrap your legs around the plant, pulling its tendrils deeper as they pulse with nectar."
-    end
-  
-    if parts.include?('penis')
-      scenes << "You present your cock to the #{monster_name}, groaning as its flowering sheath engulfs you."
-      scenes << "You thrust into the plant's soft opening, your hands guiding its vines to tease your balls."
-      scenes << "You guide the #{monster_name}'s tendrils to your shaft, gasping as their texture drives you wild."
-    end
-  
-    if parts.include?('anus')
-      scenes << "You position yourself for the #{monster_name}, inviting its smooth vine into your eager hole."
-      scenes << "You push back against the plant's thrusts, your body welcoming its natural texture."
-      scenes << "You reach back to spread your cheeks, offering yourself completely to the #{monster_name}."
-    end
-  
-    if parts.include?('breasts')
-      scenes << "You offer your breasts to the #{monster_name}, moaning as its vines wrap around your flesh."
-      scenes << "You press your tits against the plant's flowers, gasping as they suck at your nipples."
-      scenes << "You trace patterns on your skin, inviting the #{monster_name}'s vines to follow and tease."
-    end
-  
-    scenes
-  end
-  
-  def generate_mimic_willing(parts, monster_name)
-    scenes = []
-  
-    if parts.include?('vagina')
-      scenes << "You lie back, spreading your legs as the #{monster_name} reveals its true form with eagerness."
-      scenes << "You welcome the mimic's appendage, moaning as it slides into your wet cunt."
-      scenes << "You guide the #{monster_name}'s tendrils to your most sensitive spots, encouraging their exploration."
-      scenes << "You wrap your legs around the mimic, pulling it deeper as its interior pulses with pleasure."
-    end
-  
-    if parts.include?('penis')
-      scenes << "You present your cock to the #{monster_name}, groaning as its opening transforms to welcome you."
-      scenes << "You thrust into the mimic's wet interior, your hands guiding its tendrils to tease your balls."
-      scenes << "You guide the #{monster_name}'s appendages to your shaft, gasping as their texture changes to please you."
-    end
-  
-    if parts.include?('anus')
-      scenes << "You position yourself for the #{monster_name}, inviting its appendage into your eager hole."
-      scenes << "You push back against the mimic's thrusts, your body welcoming its changing texture."
-      scenes << "You reach back to spread your cheeks, offering yourself completely to the #{monster_name}."
-    end
-  
-    if parts.include?('breasts')
-      scenes << "You offer your breasts to the #{monster_name}, moaning as its tendrils wrap around your flesh."
-      scenes << "You press your tits against the mimic's opening, gasping as it transforms to please you."
-      scenes << "You bounce your breasts in the #{monster_name}'s face, giggling as it transforms to match your desires."
-    end
-  
-    scenes
-  end
-  
-  def generic_willing(monster_name)
-    [
-      "You willingly submit to the #{monster_name}, your body responding with anticipation and desire.",
-      "You offer yourself to the #{monster_name}, eager to experience the pleasure it can provide.",
-      "You guide the #{monster_name}'s hands to your body, encouraging its exploration of your flesh.",
-      "You press against the #{monster_name}, your movements communicating your desire and willingness.",
-      "You whisper words of encouragement to the #{monster_name}, inviting it to take what it wants from you."
-    ]
-  end
-end
 end

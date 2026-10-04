@@ -14,7 +14,7 @@ module Commands
       enc = Eros.encounter_for(player)
       unless enc
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: 'You are not in combat. Use `/explore` or `!explore` first.')
+          c.text_display(content: 'You are not in combat. Use `/explore` or `e,explore` first.')
         end
         return
       end
@@ -22,7 +22,8 @@ module Commands
       result = Engine::CombatEngine.act!(player, action, enc)
 
       unless result[:ok]
-        ErosUI.reply_v2(event, ephemeral: true) do |c|
+        actions = result[:phase] ? { phase: result[:phase] } : nil
+        ErosUI.reply_v2(event, ephemeral: true, with_actions: actions) do |c|
           ErosUI.append_action_log(c, result[:log])
         end
         return
@@ -67,7 +68,8 @@ module Commands
       Eros.set_encounter!(player, result[:encounter])
       enc = result[:encounter]
       colour = enc[:color] || 0x8b1a1a
-      ErosUI.reply_v2(event, colour: colour, with_actions: :combat) do |c|
+      actions = result[:phase] ? { phase: result[:phase] } : :combat
+      ErosUI.reply_v2(event, colour: colour, with_actions: actions) do |c|
         ErosUI.append_action_log(c, result[:log])
         c.separator(divider: true, spacing: :small)
         c.text_display(
@@ -76,6 +78,13 @@ module Commands
                    "Lust `#{player.lust}`"
         )
       end
+    end
+
+    button(custom_id: /^eros:phase:(resist|give_in):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      choice = event.custom_id[/\Aeros:phase:(resist|give_in):\d+\z/, 1]
+      Commands::Combat.run_action(event, choice.to_sym)
     end
 
     application_command(:fight) { |event| Commands::Combat.run_action(event, :fight) }

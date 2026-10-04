@@ -70,7 +70,8 @@ class Player < Sequel::Model(:players)
     player
   end
 
-  RUN_TRACKERS = %w[run_flee_attempts run_submissions run_floors_cleared run_climaxes climax_addicted floors_since_climax].freeze
+  RUN_TRACKERS = %w[run_flee_attempts run_submissions run_floors_cleared run_climaxes climax_addicted floors_since_climax
+                    corruption].freeze
 
   def save_legacy!
     row = {
@@ -107,6 +108,7 @@ class Player < Sequel::Model(:players)
       restored[:active_transformation] = row[:active_transformation]
     end
     update(restored)
+    Engine::NPCSystem.reset_finished!(self)
     DB[:legacy_progress].where(discord_id: discord_id).delete
     true
   rescue JSON::ParserError
@@ -192,6 +194,7 @@ class Player < Sequel::Model(:players)
       (Array(tracker_hash['bosses_seen']) & ['Succubus Queen', 'Incubus King']).size
     when :mimics_removed_count then cursed_shop_unlocks.size
     when :current_floor then current_floor.to_i
+    when :marks_owned then Engine::Marks.owned(self).size
     when :is_developer then Engine::Dev.owner?(discord_id) ? 1 : 0
     when :is_bug_tester then Engine::Dev.bug_tester?(discord_id) ? 1 : 0
     when :pure_title then earned_titles.include?('pure') ? 1 : 0
@@ -354,6 +357,7 @@ class Player < Sequel::Model(:players)
       active_event: nil
     )
     note_floor_reached!(1)
+    Engine::NPCSystem.reset_finished!(self)
     { cleared_cycle: cleared, new_cycle: cleared + 1, lp: reward, conditions_expired: expired }
   end
 
@@ -394,7 +398,21 @@ class Player < Sequel::Model(:players)
       Hash(cond['effects']).each { |key, value| bags[key.to_s] << value }
     end
     Engine::TransformationSystem.effects(self).each { |key, value| bags[key.to_s] << value }
+    Engine::Weekly.effects.each { |key, value| bags[key.to_s] << value }
+    Engine::Marks.effects(self).each { |key, value| bags[key.to_s] << value }
+    equipped_items.each do |item|
+      item.stat_modifiers.each { |key, value| bags[key.to_s] << value if gear_bag_key?(key) }
+    end
     bags
+  end
+
+  # Gear keys not already read through equipment_effect_sum/product.
+  GEAR_BAG_KEYS = %w[crit_chance lifesteal dodge_bonus satisfy_bonus victory_lp_bonus explore_lp treasure_lp
+                     trap_avoid_bonus intimidate_chance hit_lp submit_lp_bonus].freeze
+  GEAR_TYPED_KEY = /\A(beast|demon|slime|undead|plant|mimic)_(thorns|lust_mult|dodge_bonus)\z/
+
+  def gear_bag_key?(key)
+    GEAR_BAG_KEYS.include?(key.to_s) || GEAR_TYPED_KEY.match?(key.to_s)
   end
 
   def condition_list
@@ -407,7 +425,8 @@ class Player < Sequel::Model(:players)
     condition_list.any? { |c| c['key'] == key.to_s }
   end
 
-  EXCLUSIVE_CONDITIONS = [%w[towering pocket_sized], %w[climax_exhaustion climax_high]].freeze
+  EXCLUSIVE_CONDITIONS = [%w[towering pocket_sized], %w[climax_exhaustion climax_high],
+                          %w[slime_touched demon_touched blooming]].freeze
 
   def add_condition!(key, name:, floors:, effects:, summary:, parts: [], remove_parts: [])
     rivals = EXCLUSIVE_CONDITIONS.select { |group| group.include?(key.to_s) }.flatten - [key.to_s]
@@ -585,6 +604,7 @@ class Player < Sequel::Model(:players)
       trackers: tracker_hash.merge(RUN_TRACKERS.to_h { |k| [k, 0] })
     )
     update(defiance: starting_defiance)
+    Engine::NPCSystem.reset_finished!(self)
 
     {
       level_lost: [old_level - 1, 0].max,
@@ -803,34 +823,41 @@ class Player < Sequel::Model(:players)
     update(lust: lust + amount)
   end
 
-  def try_climax!(monster_type: nil)
+  def try_climax!(monster_type: nil, brief: false)
     return nil if lust < CLIMAX_THRESHOLD
 
     lines = []
     type = monster_type&.to_s
 
     if climax_denied?
-      lines.concat(Engine::ChastitySystem.denial_lines(self))
       update(lust: CLIMAX_THRESHOLD - 5)
       adjust_defiance!(-DENIAL_DEFIANCE_LOSS)
       gain_lp!(Engine::ChastitySystem::DENIAL_LP)
       bump_tracker!('denied_climaxes')
-      lines << "Your climax is **denied**. The frustration costs **#{DENIAL_DEFIANCE_LOSS}** defiance " \
-               "(now #{defiance}/#{max_defiance}), but your devotion earns **+#{Engine::ChastitySystem::DENIAL_LP} LP**. " \
-               "Lust held at the edge (#{lust})."
+      if brief
+        lines << "_Denied again, right at the edge._ **-#{DENIAL_DEFIANCE_LOSS}** defiance (now #{defiance}/#{max_defiance}) · " \
+                 "**+#{Engine::ChastitySystem::DENIAL_LP} LP** · lust held at #{lust}."
+      else
+        lines.concat(Engine::ChastitySystem.denial_lines(self))
+        lines << "Your orgasm is **denied**. The frustration costs **#{DENIAL_DEFIANCE_LOSS}** defiance " \
+                 "(now #{defiance}/#{max_defiance}), but your devotion earns **+#{Engine::ChastitySystem::DENIAL_LP} LP**. " \
+                 "Lust held at the edge (#{lust})."
+      end
     else
       overflow = lust - CLIMAX_THRESHOLD
-      lines.concat(climax_flavour(overflow))
+      lines.concat(brief ? ['_You cum again, oversensitive and shaking._'] : climax_flavour(overflow))
       update(lust: base_lust)
       climax_lp = type ? curse_effect_sum("#{type}_climax_lp").round : 0
       if climax_lp.positive?
         gain_lp!(climax_lp)
-        lines << "You gain **#{climax_lp}** Lust Points from climaxing!"
+        lines << "You gain **#{climax_lp}** Lust Points from orgasming!"
       end
 
       adjust_defiance!(-CLIMAX_DEFIANCE_LOSS)
-      lines << "You climax! Your defiance drops by **#{CLIMAX_DEFIANCE_LOSS}**! (now #{defiance}/#{max_defiance})"
-      record_climax!(overflow, lines)
+      lines << "You orgasm! Your defiance drops by **#{CLIMAX_DEFIANCE_LOSS}**! (now #{defiance}/#{max_defiance})"
+      aftermath = []
+      record_climax!(overflow, aftermath)
+      lines.concat(brief ? aftermath.reject { |l| l.start_with?('_') } : aftermath)
     end
 
     broken = defiance <= 0
@@ -849,23 +876,48 @@ class Player < Sequel::Model(:players)
   end
 
   def climax_flavour(overflow)
-    text =
+    opening, aftermath =
       if overflow >= 30
-        ['Your body convulses with overwhelming pleasure as wave after wave of ecstasy crashes through you. ' \
-         'Your cry echoes through the chamber as you climax harder than ever before.',
-         'The sheer intensity leaves you trembling and gasping, your vision whited out by pleasure.']
+        ['Your orgasm slams through you so hard your legs give out, your body convulsing with wave after wave of pleasure ' \
+         'as your cry echoes down the corridor.',
+         'You lie twitching in a sticky puddle of your own release, vision still white at the edges, ' \
+         'aftershocks rolling through you every few breaths.']
       elsif overflow >= 15
-        ['Pleasure erupts through your body in a torrent. You arch your back as your orgasm takes hold, ' \
-         'every muscle tensing then releasing with each pulse.',
-         'Your mind goes blank as sensation drowns out thought, leaving you panting as the waves slowly subside.']
+        ['Pleasure erupts through you. Your back arches, your toes curl, and every muscle clenches and releases with each hard pulse.',
+         'You slump against the wall panting, sweat-slick and sticky, your mind blank and your body still twitching.']
       elsif overflow >= 5
-        ['Heat builds in your core until it breaks. You gasp as pleasure spills through you, your body shuddering with release.',
-         'It leaves you breathless but satisfied, warmth spreading through your limbs as your heartbeat slows.']
+        ['The heat finally breaks and you cum with a gasp, hips bucking as pleasure spills through you.',
+         'You come down slowly, flushed and damp, the warmth lingering between your legs.']
       else
-        ['A gentle warmth spreads through you as you climax, a soft release that eases your need without overwhelming you.',
-         'The brief moment of bliss leaves you calmer — though still craving more.']
+        ['A quick, sharp orgasm shivers through you, just enough to take the edge off.',
+         'It leaves you sticky and calmer, though your body is already aching for more.']
       end
-    text.map { |t| "_#{t}_" }
+    [opening, climax_body_line(overflow >= 15), aftermath].compact.map { |t| "_#{t}_" }
+  end
+
+  ORGASM_LINES = {
+    both: ['Your cock jerks and spurts thick ropes of cum while your cunt clenches and gushes beneath it, both of them throbbing in time until you are dripping and spent.',
+           'Your cock erupts in thick, heavy ropes across your belly while your pussy convulses and squirts beneath it, both of them pulsing together until you are soaked.'],
+    vagina: ['Your cunt clenches and spasms around nothing, wetness gushing down your thighs as your clit throbs with every pulse.',
+             'Your pussy convulses so hard you squirt, slick spraying down your thighs as your clit pulses again and again.'],
+    penis: ['Your cock jerks and spurts thick ropes of cum, pulse after pulse, until you are dripping and spent.',
+            'Your cock erupts, cum shooting in thick, heavy ropes across your belly and chest until your balls ache from emptying.'],
+    caged_penis: ['Your locked cock strains against its cage, cum dribbling out through the tip in a slow, ruined trickle while it throbs uselessly.'],
+    caged_vagina: ['Your pussy spasms beneath the locked shield, slick seeping out around the metal while you cannot so much as touch yourself.']
+  }.freeze
+
+  def climax_body_line(intense)
+    parts = Engine::ChastitySystem.scene_parts(self)
+    caged = Engine::ChastitySystem.caged_parts(self)
+    pick = ->(key) { ORGASM_LINES[key][intense ? -1 : 0] }
+    keys =
+      if parts.include?('vagina') && parts.include?('penis') then [:both]
+      else
+        [(:vagina if parts.include?('vagina')), (:penis if parts.include?('penis')),
+         (:caged_penis if caged.include?('penis')), (:caged_vagina if caged.include?('vagina'))].compact
+      end
+    lines = keys.map(&pick).select { |l| Engine::ContentOptions.allowed_text?(self, l) }
+    lines.empty? ? nil : lines.join(' ')
   end
 
   def record_climax!(overflow, lines)
@@ -878,14 +930,14 @@ class Player < Sequel::Model(:players)
       set_tracker!('climax_addicted', 1)
       bump_tracker!('climax_addictions')
       lines << '**Orgasm Addict** — your body has grown used to constant release, and now it *craves* it. ' \
-               'From now until your next defeat, climaxing leaves you stronger instead of drained.'
+               'From now until your next defeat, orgasming leaves you stronger instead of drained.'
     end
 
     if climax_addicted?
-      add_condition!('climax_high', name: 'Climax High', floors: CLIMAX_AFTERMATH_FLOORS,
+      add_condition!('climax_high', name: 'Orgasm High', floors: CLIMAX_AFTERMATH_FLOORS,
                                     effects: { 'strength' => 1, 'satisfy_bonus' => 0.05, 'submit_lp_bonus' => 2 },
                                     summary: 'STR +1, satisfy +5%, +2 LP on submit')
-      lines << "_The rush of release sharpens you — **Climax High** (STR +1, satisfy +5%, +2 LP on submit) for #{CLIMAX_AFTERMATH_FLOORS} floors._"
+      lines << "_The rush of release sharpens you — **Orgasm High** (STR +1, satisfy +5%, +2 LP on submit) for #{CLIMAX_AFTERMATH_FLOORS} floors._"
     else
       add_condition!('climax_exhaustion', name: 'Afterglow Exhaustion', floors: CLIMAX_AFTERMATH_FLOORS,
                                           effects: { 'strength' => -1, 'agility' => -1 },
@@ -1086,7 +1138,7 @@ class Player < Sequel::Model(:players)
         return {
           ok: false,
           error: :cursed_slot,
-          message: "Your **#{current.name}** won't come off normally. Use `!remove #{current.name}` (costs LP)."
+          message: "Your **#{current.name}** won't come off normally. Use `e,remove #{current.name}` (costs LP)."
         }
       end
       DB[:player_equipment]
@@ -1110,7 +1162,7 @@ class Player < Sequel::Model(:players)
       return {
         ok: false,
         error: :cursed,
-        message: "**#{item.name}** is living gear — spend LP with `!remove #{item.name}` to destroy it."
+        message: "**#{item.name}** is living gear — spend LP with `e,remove #{item.name}` to destroy it."
       }
     end
 
@@ -1125,7 +1177,7 @@ class Player < Sequel::Model(:players)
   def remove_cursed_equipment!(equipment_id)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
-    return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `!unequip`." } unless item.cursed
+    return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `e,unequip`." } unless item.cursed
 
     cost = item.removal_cost.to_i
     unless spend_lp!(cost)
@@ -1169,20 +1221,27 @@ class Player < Sequel::Model(:players)
     names
   end
 
+  MIMIC_CHORUS = [
+    'The rest of your cursed gear joins in, squeezing, rubbing and teasing every inch of you at once until your knees shake.',
+    'Everything else you are wearing comes alive with it, groping and grinding against you from every side until you can barely think.',
+    'Your other cursed pieces follow its lead, a dozen greedy touches working you over together until you are panting and dripping.'
+  ].freeze
+
   def check_mimic_violations!(log)
-    equipped_mimics.each do |item|
-      chance = 0.1 + (current_floor * 0.02)
-      chance = [[chance, 0.35].min, 0.1].max
-      next if rand > chance
+    chance = ((0.1 + (current_floor * 0.02)).clamp(0.1, 0.35) * Engine::Weekly.special('mimic_chance')).clamp(0.1, 0.5)
+    triggered = equipped_mimics.reject { rand > chance }
+    return if triggered.empty?
 
-      log << "Your **#{item.name}** suddenly comes to life!"
-      scene = Engine::MimicScenes.generate(item.violation_type, self, item.name)
-      log << { scene: scene }
+    lust_hit = (5 + current_floor).round * triggered.size
+    gain_lust!(lust_hit)
+    lead = triggered.sample
+    names = triggered.map { |i| "**#{i.name}**" }
+    names = names.size > 1 ? "#{names[0..-2].join(', ')} and #{names[-1]}" : names.first
+    verb = triggered.size > 1 ? 'come to life at once' : 'comes to life'
 
-      lust_hit = (5 + current_floor).round
-      gain_lust!(lust_hit)
-      log << "Its attentions raise your lust by **#{lust_hit}**. (now #{lust})"
-    end
+    log << "Your #{names} #{verb}! _(lust +#{lust_hit}, now #{lust})_"
+    log << { scene: Engine::MimicScenes.generate(lead.violation_type, self, lead.name) }
+    log << { scene: MIMIC_CHORUS.sample } if triggered.size > 1
   end
 
   def equipped_items

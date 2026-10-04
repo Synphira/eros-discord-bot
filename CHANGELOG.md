@@ -6,6 +6,92 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-04
+
+### Added
+
+- **New `/help` menu**: commands are split into six pages (Getting Started, Exploring & Combat, Curses, Gear & Shops, Progress, Content Options). Switch pages with a dropdown. A **Tutorial** button explains the basics, and a **Support** button links to the support server. If you press someone else's help menu, you get your own private copy instead of changing theirs.
+
+- **14 new fetish events**, each behind its own toggle and with its own title (at 3 uses) and achievement:
+  - **Overstimulation Engine** (Overstimulation): a machine forces two orgasms back to back (costs defiance for both) and leaves you **Oversensitive**
+  - **Tickle Trap** (Tickling): imps with feathers; you can try to dash past
+  - **Sissy Boutique** (Sissification): lace, lipstick and curtsy lessons, leaving you **Sissified**
+  - **Corrupting Font** (Corruption): drink for +3 Corruption, or purge 3 at a defiance cost
+  - **Scribe Imps** (Body Writing): filthy words inked on you; you're **Marked** for a few floors (+LP on submit and per hit taken)
+  - **Musk Den** (Musk): leaves you **Musk-Drunk**, so beasts hit harder but pay more when you submit
+  - **Fire and Ice** (Temperature Play): ice cubes or warm wax, each with its own condition
+  - **Colossus Lair** (Size Difference): a huge ogre; leaves you **Stretched**, or fight it
+  - **Cum Fountain** (Cum Play): bathe in it, or drink from it if Oral is on
+  - **Jeering Gallery** (Degradation): kneel and take the names for **Broken Pride**, or beg for praise and become a **Good Pet**
+  - **Pool of Becoming** (Monster Transformation): become part slime, demon or plant for 4 floors, so that type's lust hits you softer and submitting to it pays more
+  - **Monster Manor** (Maid Service): serve the house as a **Dutiful Maid** (+LP per floor)
+  - **The Stables** (Pony Play): harness, bit and tail, leaving you **Bridled** (+AGI, easier escapes)
+  - **Gagmaker's Workshop** (Gags & Hoods): gagged and hooded, so you can't flee next floor but earn more for submitting; or a ring gag if Oral is on
+- **Corruption** (opt-in): every time you submit to a monster you gain 1 Corruption (max 20). At 5, 10, 15 and 20 you reach **Tainted**, **Lewd**, **Depraved** and **Fully Corrupted**, each with an explicit line and a stronger condition (more Submission and LP on submit, less Resistance, more lust taken). It shows in `/status` and resets on defeat
+- **Degradation** (opt-in) also changes what monsters say after you submit: most of the time you get sneering name-calling instead of praise
+- **Cum Play** is a new core toggle (on by default). Turning it off hides creampie, "filled with cum" and cum-dripping lines across the game, along with the Cum Fountain
+- `/options` has a fourth menu, **Opt-in fetishes**, for the new toggles (Monster Transformation sits under Opt-in bodies). There are now 57 toggles; `!sluttify` covers them all, so the Depraved One requirement now includes them too
+- **111 more random events**: every content toggle now has at least three events of its own (172 random events in total, up from 61). That includes Oral, Vaginal, Anal, Breast Play, Knotting and Breath Play, which had none before. Some examples: a kneeling shrine and a wall of lips (Oral), a hellhound kennel (Knotting), a giantess garden and a hall of hand-sized worshippers (Size Difference), a collector's cabinet of shrunken delvers (Shrinking), a kitten parlour (Petplay) and a frost queen (Temperature Play). Each has its own explicit scenes for your body, rewards and a condition, and many add an alternate choice or a fight. Events tied to a body part (Vaginal, some Breast Play) only appear if you have it
+- With the default settings (core themes only), core-theme events now make up most of the random rooms, so the Glory Hole and the original trap rooms come up less often than before
+- **Elite monsters**: from floor 3, some monsters spawn as elites (about 1 in 10 by floor 15) with one of five affixes: **Rutting** (hits harder), **Slick** (much harder to hit), **Towering** (more HP and strength), **Insatiable** (harder to satisfy, but pays double when you submit) and **Alluring** (hits harder, easier to satisfy). Beating an elite pays **double LP**, and satisfying one pays **+10 LP**. New achievements: **Elite Hunter** and **Elite Pleaser** (10 each)
+- **Weekly tower modifiers**: each week (resetting Monday) the tower runs one modifier that everyone shares, shown on `/status` with a countdown: **Heat Week**, **Hunting Season** (3× elites), **Full Moon** (more beasts, and they hit harder but pay more), **Mimic Season** (richer chests, more mimics), **Temptation Week** (more random events), **Generous Tower** (more LP from victories and exploring), **Slime Tide** and **Spring Bloom**
+- **Boss phases**: the first time a boss drops below half HP, the fight pauses with a scene written for that boss and two buttons. **Resist** costs 10% of your defiance and deals a heavy blow (15% of its HP), but the boss hits 20% harder for the rest of the fight. **Give in** gives +20 lust, +10 LP and one step toward satisfying it, but it recovers 10% HP. Other actions wait until you choose
+- **`/parlour` (Madame Vex's Parlour)**: buy up to 5 permanent tattoos and piercings with LP (40–60 each), each with a small perk such as +1 agility, +2 LP when you submit, or a better chance to satisfy monsters. Marks are kept through defeat, restarts and new cycles, show on `/profile`, and can be removed for free. Some designs only appear with a content toggle (Exhibitionism, Body Writing, Degradation, Breast Play, Oral, Vaginal) or a matching body part. Also reachable from a **Parlour** button on your profile. New achievements: **Inked** (3 marks) and **Walking Masterpiece** (5). **Operators:** run `bundle exec rake commands:register` to add `/parlour`
+- **Treasure chests are now a choice**: when you find a chest you can **Open it** as before, or **Leave it** to resist the temptation and recover a little defiance (4% of your max, at least 3). Opening is still the gamble: a Defiance Tonic restores far more, but the chest might be a mimic. Sharp-eyed delvers sometimes spot a mimic's tell before deciding (more likely with high AGI); there are no false tells. New achievement: **Iron Will** (walk away from 25 chests)
+- **18 new shop items**, filling every slot (weapons, chest, legs, feet, head, accessory) with gear that does more than add a point of a stat: surprise-hit chance (Silvered Rapier), defiance drained from your hits (Soul-Draining Blade), bonus damage and less lust from specific monster types (Beastbane Spear, Exorcist's Censer), dodge (Silent Slippers), trap avoidance (Warded Greaves), fewer monster rooms (Hood of the Unseen), less lust taken (Chaste Plate, Sacred Rosary), a chance for monsters to back off (Crown of Defiance), extra LP from victories, rooms and chests (Trophy Hunter's Charm, Wayfinder Boots, Lucky Coin), and a heavy hitter in the Sinbreaker Maul. Prices run from 30 to 160 LP
+- **Two new consumables**: **Defiance Draught** (30 LP, restores 40% of max defiance) and **Cooling Elixir** (25 LP, −40 lust)
+- **Rare chest finds**: from floor 8, chests that roll gear can hold one of five better pieces not sold in the shop (Old Champion's Sword, Ghostsilk Gloves, Sister's Veil, Delver's Lucky Boots, Moonlit Mail)
+- Dev: `!dev elite [affix]` starts a fight with an elite, and `!dev week [key|auto]` shows or overrides the weekly modifier until restart
+
+### Changed
+
+- **Prefix is now `e,` instead of `!`**, so `!explore` becomes `e,explore`. `E,` also works for phones that auto-capitalise, and a space after the comma (`e, explore`) is fine too. All in-game hints, help pages and usage messages show the new prefix. Operators can still override it with `BOT_PREFIX` in `.env`.
+- **Existing shop gear buffed**: Enchanted Whip adds +5% surprise-hit chance, Soul-Draining Blade now returns 20% of its damage as defiance, Leather Harness adds −1 lust per hit, Abyssal Plate gives +15 max defiance (was +10), Lust Ward Amulet blocks 3 lust per hit (was 2), and Talisman of Escape gives +25% flee (was +20%)
+- **Gear stats read in plain words** in the shop, equipment and Cursed Shop screens (e.g. "+12% surprise-hit chance (double damage)", "−1 lust per hit") instead of internal names
+- Gear can now carry the same kinds of bonuses as curses and conditions (surprise hits, dodge, satisfy chance, LP bonuses, trap avoidance, per-monster damage and lust)
+
+### Fixed
+
+- **Combat turns no longer turn into text walls when you're locked or wearing lots of cursed gear**: cursed gear now acts once per turn (after the monster's move) instead of twice. If you orgasm or get denied more than once in the same turn, only the first one plays the full scene and the rest are a single line. Defiance lost, LP gained and lust are exactly the same as before
+- **Corruption now shows on the main `/status` page** when the Corruption toggle is on: your stage, your level out of 20 and its current effects. Before, it only appeared in the Conditions view
+- **Turning off Oral no longer hides scenes about sitting in someone's lap**: the filter treated the word "lap" as oral. It now only catches licking ("laps at", "lapping")
+- **Combat no longer says "the The Tower Lord"** when a monster's name already starts with "The"
+
+## 2026-10-03
+
+### Changed
+
+- **Rewritten event scenes** for the Milking Shrine, Swelling Fountain, Bloating Slime, Egg Chamber, Paddle Golem, Foot Idol and Edging Altar: longer and far more explicit. The Swelling Fountain now has its own scene for each body part it grows, and the Edging Altar describes your actual body (and your chastity, if you're locked)
+- **Rewritten fetish event scenes**: all 33 fetish events (Bimbo Transformation, Living Clothing, Beast Taming, Rubber Chamber, Glory Room, Breeding Chamber, Public Shame and the rest) has new, much more explicit text. Lines about breasts, cocks, pussies, wombs and prostates only appear for bodies that have them, and locked parts are still replaced by chastity lines. Rewards, conditions and choices are unchanged
+- **Rewritten monster scenes**: the lines you see when a monster gets its hands on you in combat, and when you submit to one, are rewritten and much more explicit for all six monster types (beasts, demons, slimes, undead, plants and mimics), along with the praise after submitting. New scenes include prostate lines for bodies with a cock and two-hole slime scenes for bodies with both. Body-part and chastity filtering work as before
+- **Rewritten core event scenes**: the Glory Hole, Tentacle Pit, Dildo Trap, Aphrodisiac Mist, Bonding Vines, Spirit Possession and mirror room (Public Humiliation) are rewritten and much more explicit. Every glory hole choice now plays out to the finish. Hermaphrodites now get both their cock and pussy scenes in the Tentacle Pit, Bonding Vines, Spirit Possession and Dildo Trap instead of only the pussy one. Rewards, lust and turn counts are unchanged
+- **Climaxes describe your body**: when your lust boils over, the climax is now explicit and matches your body (your pussy squirting or your cock spurting, harder the further past the limit you went). If you're locked in chastity, you get a ruined orgasm inside your cage or shield instead. Pussy lines respect the Vaginal content toggle
+- **Bosses have their own scenes**: the Mimic Broodmother, Succubus Queen, Incubus King, Ancient Treant, Lich Lord, Alpha Beast and Tower Lord no longer borrow ordinary monster lines. Each has its own explicit scenes for when it gets its hands on you and when you submit, with reactions as you build satisfaction (or fail to impress it), its own climax when fully satisfied, and a line when you beat it in a fight. Boss introductions and special-ability messages (the Queen's gaze, the King's command, the Alpha's rut and so on) are rewritten too. Stats, rewards and abilities are unchanged
+- **Explicit combat moments**: fighting back now describes you resisting: shoving a beast's snout away from your thighs, hacking through vines curling between your legs, gritting your teeth against a demon's promises and striking it. Beating a monster or boss is written as you fighting off the tower's pull. Dodging, escaping, getting dragged back when an escape fails, a monster cumming when it's satisfied, beating a monster, being broken by pleasure and being defeated all have their own explicit lines too. All numbers are unchanged
+- **Climaxes are now orgasms**: every message, achievement, title description and profile stat says "orgasm" instead of "climax" (the aftermath buff is now **Orgasm High**). The orgasm itself matches your genitals: your cock spurting cum, your pussy squirting, or both going off together if you have both. Locked parts get a ruined orgasm inside the cage or shield instead. Achievement progress and stats carry over untouched
+- **Cursed gear no longer floods the log**: when several pieces of living gear act at once, you get one line naming them all with the combined lust, one explicit scene from one of them, and a short line for the rest joining in, instead of three lines per item. A single piece triggering now takes two lines instead of three. Lust gained is unchanged
+
+### Fixed
+
+- **`!dev npc <id>` no longer repeats the first scene**: without a stage number it now continues from your progress with that NPC (so testing Mira walks through stages 1, 2 and 3 based on your choices) and restarts the story once it's finished. It also tells you which stage you're on
+
+### Added
+
+- **NPC encounters**: other delvers and strange characters now turn up while exploring (roughly 1 room in 20 when someone is around). Each one offers choices with their own scenes, rewards, conditions, and sometimes a fight
+  - **Story NPCs** you can meet again deeper in the tower, depending on what you chose last time. Unfinished story progress is kept through defeats and `/restart`:
+    - **Mira** (floors 8–27, needs Lactation): a delver turning into a HuCow. Help her and her milk eventually grants **Mira's Blessing**; refuse her too often and she attacks
+    - **Lillia** (floors 3–14, needs Bimbofication): an adventurer being reshaped by living armour. Push her in and you fight her as a Living Doll
+    - **Sister Elara** (floors 10–23, needs Latex & Rubber): a priestess swallowed by latex. Letting her change you **unlocks the Latexdoll hybrid form**
+    - **Marcus** (floors 9–12): a man desperate for a succubus. Fund him, travel with him for a **Charming Amulet** (+1 Submission, +1 AGI), or charm him if you're a Succubus or Incubus
+    - **Thomas** (floors 16–20): a delver drowning in living gear he can't afford to remove
+    - **Alex** (floors 21–35): a newbie who slowly falls in love with the tower's traps
+  - **Repeatable encounters**: the **Milking Station** (floors 15–25, needs Lactation; four milks with different effects, or be milked yourself if you have breasts) and **Trapped Delvers** (floors 4–25: the stocks, a glory hole wall, a mirror gazer, and a mimic chest victim)
+  - Scenes follow your body (what you have, and what your chastity locks away). "Walk away" leaves a story NPC's path open for later; refusing them outright usually ends it
+- Dev: `!dev npc <id> [stage]` starts any NPC encounter, and `!dev npc reset` wipes your NPC progress
+- **NPC storylines can be replayed**: once a story reaches an ending (good, bad, or a fight), the encounter tells you it's over for this run. It starts fresh on your next run: after a defeat, a `/restart`, or clearing a cycle. Stories you haven't finished keep their progress. How many times you've finished each story is tracked for the future
+
+---
+
 ## 2026-10-02
 
 ### Fixed

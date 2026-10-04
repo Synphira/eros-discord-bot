@@ -2,105 +2,99 @@
 
 module Engine
   module Shop
+    def self.item(name, type, slot, cost, rarity, description, mods = nil)
+      { name: name, type: type, slot: slot, description: description, stat_modifiers: mods, cost: cost, rarity: rarity }
+    end
+
     INVENTORY = [
-      {
-        name: 'Rusty Dagger',
-        type: 'weapon',
-        slot: 'weapon',
-        description: 'A slightly rusty but still sharp dagger.',
-        stat_modifiers: { 'strength' => 2 },
-        cost: 20,
-        rarity: 1
-      },
-      {
-        name: 'Enchanted Whip',
-        type: 'weapon',
-        slot: 'weapon',
-        description: 'A whip that glows with faint magical energy.',
-        stat_modifiers: { 'agility' => 3 },
-        cost: 35,
-        rarity: 2
-      },
-      {
-        name: 'Soul-Draining Blade',
-        type: 'weapon',
-        slot: 'weapon',
-        description: 'A dark blade that feeds on the life force of its victims. +2 damage on every hit.',
-        stat_modifiers: { 'strength' => 4, 'damage' => 2 },
-        cost: 60,
-        rarity: 3
-      },
-      {
-        name: 'Leather Harness',
-        type: 'armor',
-        slot: 'chest',
-        description: 'Minimal leather protection that allows for maximum mobility.',
-        stat_modifiers: { 'resistance' => 2 },
-        cost: 25,
-        rarity: 1
-      },
-      {
-        name: 'Enchanted Loincloth',
-        type: 'armor',
-        slot: 'legs',
-        description: 'A magically reinforced loincloth that provides surprising protection.',
-        stat_modifiers: { 'resistance' => 3, 'lust_resist' => 1 },
-        cost: 40,
-        rarity: 2
-      },
-      {
-        name: 'Abyssal Plate',
-        type: 'armor',
-        slot: 'chest',
-        description: 'Armor forged in the deepest parts of the abyss. +10 max Defiance.',
-        stat_modifiers: { 'resistance' => 5, 'max_hp' => 10 },
-        cost: 80,
-        rarity: 4
-      },
-      {
-        name: 'Lust Ward Amulet',
-        type: 'accessory',
-        slot: 'accessory',
-        description: 'An amulet that helps ward off unwanted arousal.',
-        stat_modifiers: { 'lust_resist' => 2 },
-        cost: 30,
-        rarity: 2
-      },
-      {
-        name: 'Talisman of Escape',
-        type: 'accessory',
-        slot: 'accessory',
-        description: 'A talisman that improves your chances of fleeing by 20%.',
-        stat_modifiers: { 'flee_bonus' => 0.2 },
-        cost: 35,
-        rarity: 2
-      },
-      {
-        name: 'Ring of Sustenance',
-        type: 'accessory',
-        slot: 'accessory',
-        description: 'A ring that slowly restores your vitality. +3 Defiance each combat round.',
-        stat_modifiers: { 'defiance_regen' => 3 },
-        cost: 45,
-        rarity: 3
-      },
-      {
-        name: 'Curse Purification Scroll',
-        type: 'special',
-        slot: 'consumable',
-        description: 'Burns away one random curse on the spot (no extra removal fee).',
-        cost: 100,
-        rarity: 4
-      },
-      {
-        name: 'Bottled Sanctuary',
-        type: 'special',
-        slot: 'consumable',
-        description: 'Your next exploration is safe: no monsters, traps, or events.',
-        cost: 75,
-        rarity: 3
-      }
+      # Weapons
+      item('Rusty Dagger', 'weapon', 'weapon', 20, 1,
+           'A slightly rusty but still sharp dagger.', { 'strength' => 2 }),
+      item('Enchanted Whip', 'weapon', 'weapon', 35, 2,
+           'A whip that glows with faint magical energy. Quick hands land the odd surprise hit.',
+           { 'agility' => 3, 'crit_chance' => 0.05 }),
+      item("Delver's Shortsword", 'weapon', 'weapon', 45, 2,
+           'Honest steel, well balanced. Nothing fancy, nothing missing.', { 'strength' => 3, 'damage' => 1 }),
+      item('Riding Crop of Mastery', 'weapon', 'weapon', 55, 2,
+           'Every flick reminds a monster who is in charge, and leaves it eager to be satisfied.',
+           { 'damage' => 2, 'satisfy_bonus' => 0.05 }),
+      item('Soul-Draining Blade', 'weapon', 'weapon', 60, 3,
+           'A dark blade that drinks the will of whatever it cuts and pours it into you.',
+           { 'strength' => 4, 'damage' => 2, 'lifesteal' => 0.2 }),
+      item('Silvered Rapier', 'weapon', 'weapon', 75, 3,
+           'A needle-thin blade that finds every gap. Often lands a double-damage surprise hit.',
+           { 'agility' => 2, 'damage' => 1, 'crit_chance' => 0.12 }),
+      item('Beastbane Spear', 'weapon', 'weapon', 75, 3,
+           'A long hunting spear. Keeps snouts and claws at arm\'s length.',
+           { 'strength' => 3, 'beast_thorns' => 4, 'beast_lust_mult' => 0.85 }),
+      item("Exorcist's Censer", 'weapon', 'weapon', 85, 3,
+           'A swinging censer of holy smoke. Demons and the dead recoil from it.',
+           { 'damage' => 2, 'demon_thorns' => 3, 'undead_thorns' => 3, 'demon_lust_mult' => 0.9, 'undead_lust_mult' => 0.9 }),
+      item('Sinbreaker Maul', 'weapon', 'weapon', 150, 4,
+           'A huge two-handed hammer. Slow, but whatever it hits stays hit.',
+           { 'strength' => 6, 'damage' => 4, 'agility' => -1 }),
+
+      # Armour
+      item('Leather Harness', 'armor', 'chest', 25, 1,
+           'Minimal leather protection that allows for maximum mobility.', { 'resistance' => 2, 'lust_resist' => 1 }),
+      item('Iron Circlet', 'armor', 'head', 30, 1,
+           'A plain band of cold iron that keeps your head clear.', { 'resistance' => 2, 'lust_resist' => 1 }),
+      item('Reinforced Chaps', 'armor', 'legs', 35, 1,
+           'Thick leather leggings that are hard to grab hold of.', { 'resistance' => 2, 'flee_bonus' => 0.1 }),
+      item('Enchanted Loincloth', 'armor', 'legs', 40, 2,
+           'A magically reinforced loincloth that provides surprising protection.',
+           { 'resistance' => 3, 'lust_resist' => 1 }),
+      item('Brigandine Vest', 'armor', 'chest', 45, 2,
+           'Steel plates riveted inside a padded vest.', { 'resistance' => 3, 'max_hp' => 8 }),
+      item('Silent Slippers', 'armor', 'feet', 45, 2,
+           'Soft-soled slippers that let you twist away at the last moment.', { 'agility' => 2, 'dodge_bonus' => 0.05 }),
+      item('Warded Greaves', 'armor', 'legs', 60, 3,
+           'Rune-etched shin guards that tingle a warning before you step on a trap.',
+           { 'resistance' => 3, 'trap_avoid_bonus' => 0.12 }),
+      item('Wayfinder Boots', 'armor', 'feet', 65, 3,
+           'Boots that always seem to find something worth picking up.',
+           { 'agility' => 1, 'explore_lp' => 2, 'trap_avoid_bonus' => 0.05 }),
+      item('Hood of the Unseen', 'armor', 'head', 90, 3,
+           'A shadowy hood. Monsters have a harder time noticing you at all.',
+           { 'agility' => 1, 'encounter_rate' => 0.85 }),
+      item('Abyssal Plate', 'armor', 'chest', 80, 4,
+           'Armor forged in the deepest parts of the abyss.', { 'resistance' => 5, 'max_hp' => 15 }),
+      item('Chaste Plate', 'armor', 'chest', 120, 4,
+           'Cold, heavy steel that dulls every touch that reaches you.',
+           { 'resistance' => 4, 'lust_mult' => 0.88, 'agility' => -1 }),
+      item('Crown of Defiance', 'armor', 'head', 160, 4,
+           'A crown of black iron. Some monsters lose their nerve and back off without touching you.',
+           { 'max_hp' => 10, 'resistance' => 2, 'intimidate_chance' => 0.1 }),
+
+      # Accessories
+      item('Lust Ward Amulet', 'accessory', 'accessory', 30, 2,
+           'An amulet that helps ward off unwanted arousal.', { 'lust_resist' => 3 }),
+      item('Talisman of Escape', 'accessory', 'accessory', 35, 2,
+           'A talisman that makes it much easier to slip away.', { 'flee_bonus' => 0.25 }),
+      item('Lucky Coin', 'accessory', 'accessory', 50, 2,
+           'Flip it before you open anything. It is never wrong.', { 'treasure_lp' => 5, 'victory_lp_bonus' => 1 }),
+      item('Ring of Sustenance', 'accessory', 'accessory', 45, 3,
+           'A ring that slowly restores your vitality every combat round.', { 'defiance_regen' => 3 }),
+      item('Sacred Rosary', 'accessory', 'accessory', 90, 3,
+           'Prayer beads that cool your blood whenever a monster touches you.',
+           { 'lust_resist' => 2, 'lust_mult' => 0.92 }),
+      item("Trophy Hunter's Charm", 'accessory', 'accessory', 110, 3,
+           'A string of claws and fangs. The tower pays well for every kill you add to it.',
+           { 'victory_lp_bonus' => 4, 'crit_chance' => 0.05 }),
+
+      # Consumables
+      { name: 'Defiance Draught', type: 'special', slot: 'consumable', cost: 30, rarity: 1,
+        description: 'Drink on the spot: restores 40% of your max defiance.' },
+      { name: 'Cooling Elixir', type: 'special', slot: 'consumable', cost: 25, rarity: 1,
+        description: 'Drink on the spot: −40 lust.' },
+      { name: 'Curse Purification Scroll', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
+        description: 'Purges one random curse on the spot (no extra removal fee).' },
+      { name: 'Bottled Sanctuary', type: 'special', slot: 'consumable', cost: 75, rarity: 3,
+        description: 'Your next exploration is safe: no monsters, traps, or events.' }
     ].freeze
+
+    DRAUGHT_PCT = 0.4
+    ELIXIR_LUST = 40
 
     CATEGORIES = %w[weapon armor accessory special].freeze
 
@@ -210,6 +204,23 @@ module Engine
           player.spend_lp!(item.cost)
           player.update(sanctuary: true)
           return { ok: true, message: 'You drink from the bottled sanctuary. Your next exploration will be safe!' }
+        when 'Defiance Draught'
+          if player.defiance >= player.max_defiance
+            return { ok: false, error: :full, message: 'Your defiance is already full.' }
+          end
+
+          player.spend_lp!(item.cost)
+          gained = player.heal_defiance!((player.max_defiance * DRAUGHT_PCT).round)
+          return { ok: true, message: "You down the draught. **+#{gained} Defiance** " \
+                                      "(now `#{player.defiance}/#{player.max_defiance}`)." }
+        when 'Cooling Elixir'
+          return { ok: false, error: :calm, message: "You're not aroused enough to need it." } if player.lust <= 0
+
+          player.spend_lp!(item.cost)
+          before = player.lust
+          player.update(lust: [player.lust - ELIXIR_LUST, 0].max)
+          return { ok: true, message: "The elixir spreads through you like cool water. **−#{before - player.lust} Lust** " \
+                                      "(now `#{player.lust}`)." }
         end
       end
 
@@ -220,7 +231,7 @@ module Engine
         return grant
       end
 
-      { ok: true, message: "You purchased **#{item.name}**! Check your inventory with `!equipment`." }
+      { ok: true, message: "You purchased **#{item.name}**! Check your inventory with `e,equipment`." }
     end
 
     def sell_item(player, equipment_id)
@@ -236,7 +247,7 @@ module Engine
         return {
           ok: false,
           error: :cursed,
-          message: "Living gear can't be sold — use `!remove #{equipment.name}` (costs LP)."
+          message: "Living gear can't be sold — use `e,remove #{equipment.name}` (costs LP)."
         }
       end
 

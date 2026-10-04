@@ -18,23 +18,26 @@ module Commands
 
     HELP = <<~TXT.strip
       **Dev commands** (prefix only, developer + bug testers)
-      `!dev debug` — toggle debug mode (one-hit kills, monsters never act, guaranteed flee/satisfy, traps avoided)
-      `!dev info` — raw player + tracker dump
-      `!dev set <level|lp|lust|defiance|str|agi|res|sub|floor|cycle> <n>`
-      `!dev heal` — full defiance, base lust
-      `!dev curse <name>` · `!dev uncurse <name|all>`
-      `!dev item <name>` · `!dev unitem <name|all>` — grant / delete gear (cursed auto-binds)
-      `!dev tracker <key> <n>` — set any tracker
-      `!dev title <key|all>` · `!dev achievement <id|all>` · `!dev wipeprogress`
-      `!dev hybrid <key|all|none>` — unlock hybrid forms (none = lock them all)
-      `!dev unlockcursed` — unlock every Cursed Shop item
-      `!dev win` — kill the current monster (runs the normal victory path)
-      `!dev boss` — jump to the next boss floor and start the fight
-      `!dev finalboss` — jump to the Tower Lord
-      `!dev cycle` — complete the current cycle instantly
-      `!dev reset` — run a defeat reset (keeps progression)
-      `!dev event <key|list>` — start a specific random event (ignores content toggles)
-      `!dev conditions [clear]` — show or clear temporary conditions
+      `e,dev debug` — toggle debug mode (one-hit kills, monsters never act, guaranteed flee/satisfy, traps avoided)
+      `e,dev info` — raw player + tracker dump
+      `e,dev set <level|lp|lust|defiance|str|agi|res|sub|floor|cycle> <n>`
+      `e,dev heal` — full defiance, base lust
+      `e,dev curse <name>` · `e,dev uncurse <name|all>`
+      `e,dev item <name>` · `e,dev unitem <name|all>` — grant / delete gear (cursed auto-binds)
+      `e,dev tracker <key> <n>` — set any tracker
+      `e,dev title <key|all>` · `e,dev achievement <id|all>` · `e,dev wipeprogress`
+      `e,dev hybrid <key|all|none>` — unlock hybrid forms (none = lock them all)
+      `e,dev unlockcursed` — unlock every Cursed Shop item
+      `e,dev win` — kill the current monster (runs the normal victory path)
+      `e,dev boss` — jump to the next boss floor and start the fight
+      `e,dev finalboss` — jump to the Tower Lord
+      `e,dev cycle` — complete the current cycle instantly
+      `e,dev reset` — run a defeat reset (keeps progression)
+      `e,dev event <key|list>` — start a specific random event (ignores content toggles)
+      `e,dev npc <id> [stage]` · `e,dev npc reset` — start an NPC encounter (ignores floor; without a stage it continues from your progress), or wipe NPC progress
+      `e,dev conditions [clear]` — show or clear temporary conditions
+      `e,dev elite [rutting|slick|towering|insatiable|alluring]` — start a fight with an elite monster
+      `e,dev week [key|auto]` — show or override this week's tower modifier (until restart)
     TXT
 
     module_function
@@ -45,7 +48,7 @@ module Commands
 
     def find_player(event)
       player = Player[event.user.id]
-      reply(event, 'No delver — `!create` first.') unless player
+      reply(event, 'No delver — `e,create` first.') unless player
       player
     end
 
@@ -95,6 +98,9 @@ module Commands
         loss = player.reset_run!
         reply(event, "Run reset. Lost: #{loss.inspect}")
       when 'event' then force_event(event, player, args[0].to_s.downcase)
+      when 'npc' then force_npc(event, player, args[0].to_s.downcase, args[1])
+      when 'elite' then force_elite(event, player, args[0].to_s.downcase)
+      when 'week' then set_week(event, args[0].to_s.downcase)
       when 'conditions', 'condition'
         player.clear_conditions! if args[0].to_s.casecmp?('clear')
         list = player.condition_list.map { |c| "• **#{c['name']}** (#{c['floors']} floors) — #{c['summary']}" }
@@ -245,12 +251,73 @@ module Commands
       Commands::Explore.render_event(event, player, result)
     end
 
+    def force_npc(event, player, id, stage)
+      if id == 'reset'
+        player.set_tracker!(Engine::NPCSystem::PROGRESS_KEY, {})
+        return reply(event, 'NPC progress wiped.')
+      end
+      spec = Engine::NPCSystem.npc(id)
+      unless spec
+        list = Engine::NPCSystem::NPCS.map { |k, s| "`#{k}` (#{s[:stages].size} stage#{'s' unless s[:stages].size == 1})" }
+        progress = Engine::NPCSystem.progress(player).map { |k, v| "#{k}: #{v}" }
+        finished = Engine::NPCSystem.finished_counts(player).map { |k, v| "#{k} ×#{v}" }
+        return reply(event, "NPC ids:\n#{list.join(' ')}\n\nYour progress: #{progress.empty? ? 'none' : progress.join(', ')}\n" \
+                            "Stories finished: #{finished.empty? ? 'none' : finished.join(', ')}")
+      end
+
+      note = nil
+      if stage
+        index = stage.to_i.clamp(1, spec[:stages].size) - 1
+      else
+        index = Engine::NPCSystem.next_stage_index(player, id)
+        if index.nil?
+          Engine::NPCSystem.set_progress!(player, id, nil)
+          index = 0
+          note = "#{spec[:name]}'s story was finished — restarting from stage 1."
+        end
+      end
+      note ||= "#{spec[:name]}: stage #{index + 1}/#{spec[:stages].size}" \
+               " _(progress: #{Engine::NPCSystem.progress(player)[id] || 'none'})_"
+      reply(event, note)
+      Eros.clear_encounter!(player)
+      player.clear_event!
+      result = Engine::NPCSystem.start!(player, id, index)
+      Commands::Explore.render_event(event, player, result)
+    end
+
     def next_boss_floor(player)
       floor = player.current_floor
       boss = ((floor + 4) / 5) * 5
       boss = [boss, 5].max
       boss += 5 if boss <= player.highest_boss_defeated.to_i
       [boss, Engine::Tower::FINAL_BOSS_FLOOR].min
+    end
+
+    def force_elite(event, player, key)
+      key = Engine::Elites::AFFIXES.keys.sample if key.empty?
+      unless Engine::Elites::AFFIXES.key?(key)
+        return reply(event, "Elites: #{Engine::Elites::AFFIXES.keys.map { |k| "`#{k}`" }.join(', ')}")
+      end
+
+      Eros.clear_encounter!(player)
+      player.clear_event!
+      monster = Engine::MonsterTypes.generate_monster(player.current_floor, player: player, elite: false)
+      Engine::Elites.apply!(monster, key)
+      started = Engine::CombatEngine.start_encounter(player, monster: monster)
+      Eros.set_encounter!(player, started[:encounter])
+      ErosUI.reply_v2(event, colour: monster[:color], with_actions: :combat) do |c|
+        c.text_display(content: started[:message])
+      end
+    end
+
+    def set_week(event, key)
+      if key.empty?
+        list = Engine::Weekly::MODIFIERS.map { |m| "`#{m[:key]}`" }.join(', ')
+        return reply(event, "#{Engine::Weekly.status_line}\n\nOverride with `e,dev week <key>` (or `e,dev week auto`): #{list}")
+      end
+
+      Engine::Weekly.override!(key == 'auto' ? nil : key)
+      reply(event, "#{Engine::Weekly.status_line}\n-# Override lasts until the bot restarts.")
     end
 
     def jump_to_boss(event, player, floor)

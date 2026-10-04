@@ -10,3 +10,7 @@ vendor/bundle/
 .idea/
 .vscode/
 logs/
+
+# Web build outputs (re-created by webapp/tools/vendor_ruby.rb and build_itch.rb)
+webapp/vendor/
+webapp/dist/

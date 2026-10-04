@@ -12,10 +12,17 @@ module Engine
     VICTORY_LP = 15
     BOSS_SATISFY_NEEDED = 3
     BOSS_SATISFY_LP_MULT = 1.75
+    PHASE_ACTIONS = %i[resist give_in].freeze
+    PHASE_RESIST_COST = 0.1
+    PHASE_RESIST_DAMAGE = 0.15
+    PHASE_RAGE_MULT = 1.2
+    PHASE_GIVE_LUST = 20
+    PHASE_GIVE_LP = 10
+    PHASE_GIVE_HEAL = 0.1
 
     Encounter = Struct.new(
       :name, :type, :type_name, :color, :strength, :agility, :lust_damage, :hp, :max_hp,
-      :special, :enraged, :is_boss,
+      :special, :enraged, :is_boss, :elite,
       keyword_init: true
     )
 
@@ -42,6 +49,9 @@ module Engine
         special: h[:special] || h['special'],
         enraged: h[:enraged] || h['enraged'],
         is_boss: h[:is_boss] || h['is_boss'],
+        elite: h[:elite] || h['elite'],
+        phase: h[:phase] || h['phase'],
+        satisfaction: (h[:satisfaction] || h['satisfaction']).to_i,
         negation_used: h[:negation_used] || h['negation_used'],
         pliant: (h[:pliant] || h['pliant']).to_f
       }
@@ -66,7 +76,8 @@ module Engine
         agility: template[:agility].to_i,
         lust_damage: template[:lust_damage].to_i,
         hp: hp,
-        max_hp: max_hp
+        max_hp: max_hp,
+        elite: template[:elite]
       )
 
       snapshot = self.class.encounter_snapshot(encounter)
@@ -90,7 +101,8 @@ module Engine
       end
       @player.update(in_combat: true) unless @player.in_combat
       log = []
-      
+      @climaxed_this_turn = false
+
       if action.to_sym == :flee
         @player.bump_tracker!('flee_attempts')
         @player.bump_tracker!('run_flee_attempts')
@@ -98,7 +110,16 @@ module Engine
 
       is_boss = enc[:is_boss] || (@player.current_floor % 5).zero?
 
-      if is_boss
+      phase_choice = PHASE_ACTIONS.include?(action.to_sym)
+      if enc[:phase] == 'pending' && !phase_choice
+        return { ok: false, error: :phase, phase: phase_labels(enc), encounter: enc,
+                 log: ["The #{enc[:name]} is waiting for your answer. Choose one of the two options."] }
+      end
+      if phase_choice && enc[:phase] != 'pending'
+        return { ok: false, error: :no_phase, log: ['There is nothing to answer right now.'] }
+      end
+
+      if is_boss && !phase_choice
         special_result = Engine::BossFights.apply_boss_special(@player, enc, action, log)
         if special_result == :blocked
           action = :blocked
@@ -109,6 +130,11 @@ module Engine
       when :fight
         broken = apply_fight!(enc, log)
         return finish_broken!(enc, log) if broken == true
+        return start_phase!(enc, log) if phase_ready?(enc)
+      when :resist, :give_in
+        outcome = apply_phase!(enc, log, action.to_sym)
+        return finish_broken!(enc, log) if outcome == :broken
+        return finish_victory!(enc, log, satisfied: true) if outcome == :satisfied
       when :flee
         flee_result = apply_flee!(enc, log)
         return finish_flee!(enc, log) if flee_result == :fled
@@ -124,10 +150,6 @@ module Engine
       else
         return { ok: false, error: :unknown_action, log: ['Unknown action.'] }
       end
-
-      @player.check_mimic_violations!(log)
-      broken = climax_from_mimics?(enc, log)
-      return finish_broken!(enc, log) if broken
 
       return finish_victory!(enc, log) if enc[:hp] <= 0
 
@@ -174,6 +196,8 @@ module Engine
         special: encounter[:special] || encounter['special'],
         enraged: encounter[:enraged] || encounter['enraged'],
         is_boss: encounter[:is_boss] || encounter['is_boss'],
+        elite: encounter[:elite] || encounter['elite'],
+        phase: encounter[:phase] || encounter['phase'],
         negation_used: encounter[:negation_used] || encounter['negation_used'],
         satisfaction: (encounter[:satisfaction] || encounter['satisfaction']).to_i,
         pliant: (encounter[:pliant] || encounter['pliant']).to_f
@@ -207,17 +231,18 @@ module Engine
       damage *= 2 if surprise
       enc[:hp] = [enc[:hp] - damage, 0].max
       log << "**Surprise attack!** You catch the #{enc[:name]} off guard." if surprise
+      log << { scene: MonsterScenes.combat_line(@player, :fight, enc[:name], enc[:type]) }
       log << "You deal **#{damage}** damage to the #{enc[:name]}! " \
              "(HP `#{enc[:hp]}/#{enc[:max_hp]}`)"
 
       lifesteal = @player.curse_effect_sum('lifesteal')
       if lifesteal.positive?
         drunk = @player.heal_defiance!([(damage * lifesteal).round, 1].max)
-        log << "_You drink in **#{drunk}** defiance from the wound._" if drunk.positive?
+        log << "_You drink in **#{drunk}** defiance from the blow._" if drunk.positive?
       end
       Engine::Treasure.weapon_proc!(@player, enc, log)
 
-      climax = @player.try_climax!(monster_type: enc[:type])
+      climax = climax!(enc)
       if climax
         log.concat(climax[:lines])
         if climax[:broken]
@@ -264,9 +289,11 @@ module Engine
       flee_chance = 100 if Engine::Dev.debug?(@player)
 
       if rand(100) < flee_chance
+        log << { scene: MonsterScenes.combat_line(@player, :flee, enc[:name], enc[:type]) }
         log << 'You successfully flee from combat!'
         :fled
       else
+        log << { scene: MonsterScenes.combat_line(@player, :flee_fail, enc[:name], enc[:type]) }
         log << 'You failed to escape!'
         :failed
       end
@@ -281,7 +308,8 @@ module Engine
       lp_reward = 1 + (enc[:strength].to_i / 2)
       lp_reward += (@player.curse_effect_sum('submit_lp_bonus') +
                     @player.curse_effect_sum("#{enc[:type]}_submit_lp")).round
-      lp_reward = (lp_reward * @player.curse_effect_product('submit_lp_mult', default: 1.0)).round
+      lp_reward = (lp_reward * @player.curse_effect_product('submit_lp_mult', default: 1.0) *
+                   Engine::Elites.submit_lp_mult(enc)).round
       lp_reward = [lp_reward, 1].max
       @player.gain_lp!(lp_reward)
       @player.bump_tracker!('submissions')
@@ -291,15 +319,20 @@ module Engine
       @player.bump_tracker!("#{demon_kind}_submissions") if demon_kind
       log << "You submit to the #{enc[:name]}, gaining **#{lp_reward}** Lust Points for your willingness."
 
-      scene = MonsterScenes.generate_willing_scene(@player, enc[:name], monster_type: enc[:type])
-      log << { scene: scene }
-      log << { scene: MonsterScenes.generate_praise(@player, enc[:name], enc[:type]) }
+      boss_scene = enc[:is_boss] && Engine::BossFights.scene(@player, enc[:name], :willing)
+      if boss_scene
+        log << { scene: boss_scene }
+      else
+        log << { scene: MonsterScenes.generate_willing_scene(@player, enc[:name], monster_type: enc[:type]) }
+        log << { scene: MonsterScenes.generate_praise(@player, enc[:name], enc[:type]) }
+      end
 
       lust_increase = (monster_lust_hit(enc) * 0.5).round
       @player.gain_lust!(lust_increase)
       log << "Your lust increases by **#{lust_increase}** from the passionate encounter! (now #{@player.lust})"
+      Engine::Corruption.add!(@player, 1, log)
 
-      climax = @player.try_climax!(monster_type: enc[:type])
+      climax = climax!(enc)
       if climax
         log.concat(climax[:lines])
         if climax[:broken]
@@ -317,6 +350,7 @@ module Engine
       return boss_submit_roll!(enc, log, chance) if enc[:is_boss]
 
       if rand < chance
+        log << { scene: MonsterScenes.combat_line(@player, :satisfied, enc[:name], enc[:type]) }
         log << "The #{enc[:name]} shudders with pleasure, completely satisfied by your submission!"
         log << 'The monster, now spent, lets you slip away without further incident.'
         return :satisfied
@@ -330,22 +364,93 @@ module Engine
       if rand < chance
         enc[:satisfaction] = enc[:satisfaction].to_i + 1
         if enc[:satisfaction] >= BOSS_SATISFY_NEEDED
+          boss_line!(enc, :sated, log)
           log << "The #{enc[:name]} arches and cries out, **completely satisfied**!"
           log << 'Spent and sated, it lets you pass deeper into the tower.'
           return :satisfied
         end
+        boss_line!(enc, :wanting, log)
         log << "The #{enc[:name]} moans, clearly enjoying you — **satisfaction #{enc[:satisfaction]}/#{BOSS_SATISFY_NEEDED}** " \
                "_(#{(chance * 100).round}% per submit)_. It wants more…"
       else
+        boss_line!(enc, :unimpressed, log)
         log << "The #{enc[:name]} is unimpressed — satisfaction stays at **#{enc[:satisfaction]}/#{BOSS_SATISFY_NEEDED}** " \
                "_(#{(chance * 100).round}% per submit)_."
       end
       nil
     end
 
+    def phase_ready?(enc)
+      enc[:is_boss] && enc[:phase].nil? && enc[:hp].positive? && enc[:hp] <= enc[:max_hp] / 2 &&
+        Engine::BossFights.phase(enc[:name])
+    end
+
+    def phase_labels(enc)
+      spec = Engine::BossFights.phase(enc[:name]) or return nil
+      { resist: spec[:resist_label], give_in: spec[:give_label] }
+    end
+
+    def start_phase!(enc, log)
+      enc[:phase] = 'pending'
+      spec = Engine::BossFights.phase(enc[:name])
+      log << { scene: Engine::BossFights.phase_line(@player, enc[:name], :intro) }
+      cost = [(@player.max_defiance * PHASE_RESIST_COST).round, 1].max
+      lp = (PHASE_GIVE_LP * @player.cycle_multiplier).round
+      log << "**The #{enc[:name].delete_prefix('The ')} changes tactics!** " \
+             "**#{spec[:resist_label]}** _(−#{cost} defiance, a heavy blow, but it fights harder after)_ or " \
+             "**#{spec[:give_label]}** _(+#{PHASE_GIVE_LUST} lust, +#{lp} LP, +1 satisfaction, it recovers a little)_?"
+      @player.store_encounter!(enc)
+      { ok: true, ongoing: true, phase: phase_labels(enc), encounter: enc, log: log }
+    end
+
+    def apply_phase!(enc, log, choice)
+      enc[:phase] = 'done'
+      if choice == :resist
+        cost = [(@player.max_defiance * PHASE_RESIST_COST).round, 1].max
+        damage = [(enc[:max_hp] * PHASE_RESIST_DAMAGE).round, 1].max
+        @player.adjust_defiance!(-cost)
+        enc[:hp] = [enc[:hp] - damage, 0].max
+        enc[:lust_damage] = (enc[:lust_damage] * PHASE_RAGE_MULT).round
+        log << { scene: Engine::BossFights.phase_line(@player, enc[:name], :resist) }
+        log << "You resist! **−#{cost}** defiance (now #{@player.defiance}/#{@player.max_defiance}) · " \
+               "**#{damage}** damage (HP `#{enc[:hp]}/#{enc[:max_hp]}`). It fights back harder: lust hits ×#{PHASE_RAGE_MULT}."
+        return nil
+      end
+
+      lp = (PHASE_GIVE_LP * @player.cycle_multiplier).round
+      heal = [(enc[:max_hp] * PHASE_GIVE_HEAL).round, 1].max
+      @player.gain_lust!(PHASE_GIVE_LUST)
+      @player.gain_lp!(lp)
+      enc[:hp] = [enc[:hp] + heal, enc[:max_hp]].min
+      enc[:satisfaction] = enc[:satisfaction].to_i + 1
+      log << { scene: Engine::BossFights.phase_line(@player, enc[:name], :give) }
+      log << "You give in. Lust **+#{PHASE_GIVE_LUST}** (now #{@player.lust}) · **+#{lp} LP** · " \
+             "satisfaction **#{enc[:satisfaction]}/#{BOSS_SATISFY_NEEDED}** · it recovers **#{heal}** HP."
+      climax = climax!(enc)
+      if climax
+        log.concat(climax[:lines])
+        if climax[:broken]
+          return :broken unless immortal_vs?(enc[:type])
+
+          @player.update(defiance: 1)
+          log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
+        end
+      end
+      return nil if enc[:satisfaction] < BOSS_SATISFY_NEEDED
+
+      boss_line!(enc, :sated, log)
+      log << "The #{enc[:name]} arches and cries out, **completely satisfied**!"
+      :satisfied
+    end
+
+    def boss_line!(enc, key, log)
+      text = Engine::BossFights.line(@player, enc[:name], key)
+      log << { scene: text } if text
+    end
+
     def monster_satisfy_chance(enc = {})
       chance = (0.2 + (@player.effective_submission * 0.1) + @player.curse_effect_sum('satisfy_bonus') +
-                enc[:pliant].to_f).clamp(0.05, 0.8)
+                enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc)).clamp(0.05, 0.8)
       chance = 1.0 if Engine::Dev.debug?(@player)
       chance
     end
@@ -368,12 +473,23 @@ module Engine
 
     def finish_satisfied!(enc, log)
       award_combat_end_bonus!(log)
+      if Engine::Elites.elite?(enc)
+        @player.gain_lp!(Engine::Elites::SATISFY_LP_BONUS)
+        @player.bump_tracker!('elites_satisfied')
+        log << "_Satisfying an elite earns you **+#{Engine::Elites::SATISFY_LP_BONUS} LP**._"
+      end
       @player.clear_encounter!
       { ok: true, satisfied: true, encounter: enc, log: log }
     end
 
+    def climax!(enc)
+      climax = @player.try_climax!(monster_type: enc[:type], brief: @climaxed_this_turn)
+      @climaxed_this_turn = true if climax
+      climax
+    end
+
     def climax_from_mimics?(enc, log)
-      climax = @player.try_climax!(monster_type: enc[:type])
+      climax = climax!(enc)
       return false unless climax
 
       log.concat(climax[:lines])
@@ -420,7 +536,8 @@ module Engine
       end
 
       if action != :submit && rand < dodge_chance(enc)
-        log << "You twist aside — the #{enc[:name]} grabs only air! _(dodged · #{(dodge_chance(enc) * 100).round}%)_"
+        log << { scene: MonsterScenes.combat_line(@player, :dodge, enc[:name], enc[:type]) }
+        log << "You dodge the #{enc[:name]}! _(#{(dodge_chance(enc) * 100).round}% dodge chance)_"
         return false
       end
 
@@ -428,7 +545,8 @@ module Engine
       @player.gain_lust!(lust_hit)
 
       log << "The #{enc[:name]} closes in and gets its hands on you!"
-      assault_scene = MonsterScenes.generate_assault(@player, enc[:name], monster_type: enc[:type])
+      assault_scene = (enc[:is_boss] && Engine::BossFights.scene(@player, enc[:name], :assault)) ||
+                      MonsterScenes.generate_assault(@player, enc[:name], monster_type: enc[:type])
       log << { scene: assault_scene }
       log << "Your lust rises by **#{lust_hit}**. (now #{@player.lust})"
       hit_lp = @player.curse_effect_sum('hit_lp').round
@@ -437,7 +555,7 @@ module Engine
         log << "_Being handled like this earns you **+#{hit_lp} LP**._"
       end
 
-      climax = @player.try_climax!(monster_type: enc[:type])
+      climax = climax!(enc)
       return false unless climax
 
       log.concat(climax[:lines])
@@ -466,6 +584,7 @@ module Engine
         @player.bump_tracker!('bosses_defeated')
         @player.bump_tracker!('bosses_satisfied') if satisfied
         @player.remember!('bosses_seen', enc[:name].to_s)
+        boss_line!(enc, :beaten, log) unless satisfied
         note_broodmother_feat!(enc, log, satisfied: satisfied)
         reward = Engine::BossFights.boss_defeat_reward(@player, enc)
         return finish_tower_clear!(enc, log) if reward[:tower_clear]
@@ -509,15 +628,19 @@ module Engine
         lp_gain += @player.curse_effect_sum("#{enc[:type]}_lp_bonus").round
 
         @player.bump_tracker!('monsters_killed')
+        log << { scene: MonsterScenes.combat_line(@player, :victory, enc[:name], enc[:type]) }
         if @player.curse_effect_flag?("#{enc[:type]}_no_lp")
           log << "You defeated the #{enc[:name]}! You gain no Lust Points due to your curse."
           return { ok: true, victory: true, encounter: enc, log: log, lp_gained: 0 }
         end
 
         lp_gain = (lp_gain * @player.cycle_multiplier).round
+        lp_gain *= Engine::Elites::VICTORY_LP_MULT if Engine::Elites.elite?(enc)
         lp_gain = 1 if lp_gain < 1
         @player.gain_lp!(lp_gain)
-        log << "You defeated the #{enc[:name]}! You gain **#{lp_gain}** Lust Points!"
+        @player.bump_tracker!('elites_defeated') if Engine::Elites.elite?(enc)
+        elite_note = Engine::Elites.elite?(enc) ? " _(×#{Engine::Elites::VICTORY_LP_MULT} for an elite)_" : ''
+        log << "You defeated the #{enc[:name]}! You gain **#{lp_gain}** Lust Points!#{elite_note}"
       end
       
       { ok: true, victory: true, encounter: enc, log: log }
@@ -554,6 +677,7 @@ module Engine
     end
 
     def finish_defeat!(enc, log)
+      log << { scene: MonsterScenes.combat_line(@player, :defeated, enc[:name], enc[:type]) }
       result = @player.apply_defeat_curse!(monster_type: enc[:type])
       loss = @player.reset_run!
       @player.clear_encounter!
@@ -578,6 +702,7 @@ module Engine
     end
 
     def finish_broken!(enc, log)
+      log << { scene: MonsterScenes.combat_line(@player, :broken, enc[:name], enc[:type]) }
       result = @player.apply_defeat_curse!(monster_type: enc[:type])
       loss = @player.reset_run!
       @player.clear_encounter!
@@ -611,13 +736,14 @@ module Engine
     end
 
     def build_start_message(encounter)
+      elite = Engine::Elites.intro(encounter)
       <<~MSG.strip
-        **Combat!** What do you want to do?
+        **Combat!** What do you want to do?#{elite ? "\n\n#{elite}" : ''}
 
         **#{encounter.name}** _(#{encounter.type_name})_ — HP `#{encounter.hp}/#{encounter.max_hp}` · STR `#{encounter.strength}` · AGI `#{encounter.agility}` · Lust hit `#{encounter.lust_damage}`
         Your Defiance `#{@player.defiance}/#{@player.max_defiance}` · Lust `#{@player.lust}` · STR #{@player.effective_strength} · AGI #{@player.effective_agility} · RES #{@player.effective_resistance}
 
-        This monster wants you whatever you choose. Choose **Fight**, **Flee**, or **Submit** — or type `!fight` / `!flee` / `!submit`.
+        This monster wants you whatever you choose. Choose **Fight**, **Flee**, or **Submit** — or type `e,fight` / `e,flee` / `e,submit`.
       MSG
     end
   end

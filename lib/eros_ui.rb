@@ -126,6 +126,7 @@ module ErosUI
       elsif with_actions[:event_continue]
         attach_event_continue_button(container, owner_id)
       end
+      attach_phase_buttons(container, with_actions[:phase], owner_id) if with_actions[:phase]
       if with_actions[:removecurse]
         attach_removecurse_buttons(container, with_actions[:removecurse], owner_id)
       end
@@ -236,6 +237,13 @@ module ErosUI
     end
   end
 
+  def attach_phase_buttons(container, labels, owner_id)
+    container.row do |row|
+      row.button(label: labels[:resist], style: :danger, custom_id: "eros:phase:resist:#{owner_id}")
+      row.button(label: labels[:give_in], style: :primary, custom_id: "eros:phase:give_in:#{owner_id}")
+    end
+  end
+
   def attach_combat_buttons(container, owner_id)
     container.row do |row|
       row.button(label: 'Fight', style: :danger, custom_id: "eros:fight:#{owner_id}")
@@ -300,7 +308,7 @@ module ErosUI
     if with_cost
       lines << "_**Remove** (#{Player::CURSE_REMOVE_COST} LP) deletes a curse for good. " \
                "**Suppress** (#{Player::CURSE_SUPPRESS_COST} LP) silences it until your next defeat._"
-      lines << '_Use the menus, or `!removecurse [number]` / `!suppresscurse [number]`._'
+      lines << '_Use the menus, or `e,removecurse [number]` / `e,suppresscurse [number]`._'
       lines << "-# LP: `#{player.lp}`"
     end
     lines.join("\n")
@@ -352,10 +360,16 @@ module ErosUI
   LOG_COMPONENT_BUDGET = 22
   LOG_CHAR_BUDGET = 3300
 
+  def dedupe_article(text)
+    text.gsub(/\b([Tt]he) the\b/i, '\1')
+  end
+
   def append_action_log(container, log)
     segments = []
     Array(log).each do |entry|
       scene = entry.is_a?(Hash) ? (entry[:scene] || entry['scene']) : nil
+      scene = dedupe_article(scene) if scene
+      entry = dedupe_article(entry.to_s) unless scene
       if scene
         segments << [:scene, "_#{scene}_"]
       elsif segments.last&.first == :text
@@ -410,7 +424,7 @@ module ErosUI
     name_line += " — _#{title}_" if title
     container.text_display(content: name_line)
     if player.character_name.to_s.empty?
-      container.text_display(content: '-# No character name yet — use `/profile` → **Rename**, or `!name Your Name`.')
+      container.text_display(content: '-# No character name yet — use `/profile` → **Rename**, or `e,name Your Name`.')
     end
     hybrid = player.active_transformation_name
     container.text_display(
@@ -438,6 +452,10 @@ module ErosUI
     if (chastity = Engine::ChastitySystem.description(player))
       container.text_display(content: "🔒 #{chastity}")
     end
+    if (corruption = Engine::Corruption.status_line(player))
+      container.text_display(content: corruption)
+    end
+    container.text_display(content: Engine::Weekly.status_line)
     container.separator(divider: true, spacing: :small)
     combat_line = player.reconcile_encounter! ? 'Engaged' : 'Quiet for now'
     event = player.event_data
@@ -471,7 +489,8 @@ module ErosUI
     else
       lines = conditions.map do |c|
         floors = c['floors'].to_i
-        "• **#{c['name']}** — #{c['summary']} _(#{floors} floor#{'s' unless floors == 1})_"
+        duration = c['key'] == Engine::Corruption::KEY ? 'until defeat' : "#{floors} floor#{'s' unless floors == 1}"
+        "• **#{c['name']}** — #{c['summary']} _(#{duration})_"
       end
       container.text_display(content: lines.join("\n"))
     end

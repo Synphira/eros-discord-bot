@@ -12,7 +12,7 @@ module Commands
     def show_menu(event)
       if Player[event.user.id]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: 'You already have a character! Use `/status` or `!status`.')
+          c.text_display(content: 'You already have a character! Use `/status` or `e,status`.')
         end
         return
       end
@@ -22,7 +22,7 @@ module Commands
       ErosUI.reply_v2(event, colour: 0xff00ff) do |c|
         c.text_display(content: CharacterArchetypes.menu_text)
         c.separator(divider: true, spacing: :small)
-        c.text_display(content: '_Pick a button below, or type `!create 1`–`!create 5`._')
+        c.text_display(content: '_Pick a button below, or type `e,create 1`–`e,create 5`._')
         ErosUI.attach_create_buttons(c, event.user.id)
       end
     end
@@ -51,7 +51,7 @@ module Commands
                    "#{CharacterArchetypes.submission_menu_text}"
         )
         c.separator(divider: true, spacing: :small)
-        c.text_display(content: '_Choose a button, or `!create eager|curious|neutral|reluctant|resistant`._')
+        c.text_display(content: '_Choose a button, or `e,create eager|curious|neutral|reluctant|resistant`._')
         ErosUI.attach_submission_buttons(c, event.user.id)
       end
     end
@@ -117,9 +117,9 @@ module Commands
         c.text_display(
           content: 'Seek the **Seal of the Abyss** — or be remade by what finds you first.'
         )
-        c.text_display(content: '-# Next: `/explore` or `!explore`')
+        c.text_display(content: '-# Next: `/explore` or `e,explore`')
         if player.character_name.to_s.empty?
-          c.text_display(content: '-# You have no character name yet — press **Choose Name** or type `!name Your Name`.')
+          c.text_display(content: '-# You have no character name yet — press **Choose Name** or type `e,name Your Name`.')
           c.row do |row|
             row.button(label: 'Choose Name', style: :primary, custom_id: "eros:profile:rename:#{player.discord_id}")
           end
@@ -130,7 +130,7 @@ module Commands
     application_command(:create) { |event| Commands::Create.show_menu(event) }
     application_command(:start) { |event| Commands::Create.show_menu(event) }
 
-    command(:create, description: 'Create your Endless Ruins of Sin delver (!create or !create 1-5)') do |event, choice|
+    command(:create, description: 'Create your Endless Ruins of Sin delver (e,create or e,create 1-5)') do |event, choice|
       if choice && !choice.empty?
         if choice.match?(/\A[1-5]\z/)
           Commands::Create.show_submission_menu(event, choice.to_i)
@@ -140,8 +140,8 @@ module Commands
         else
           ErosUI.reply_v2(event, ephemeral: true) do |c|
             c.text_display(
-              content: 'Use `!create 1`–`5` for body type, then ' \
-                       '`!create eager|curious|neutral|reluctant|resistant`.'
+              content: 'Use `e,create 1`–`5` for body type, then ' \
+                       '`e,create eager|curious|neutral|reluctant|resistant`.'
             )
           end
         end

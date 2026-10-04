@@ -19,6 +19,7 @@ module SlashCommands
     { name: 'status', description: 'Show character sheet, curses, and Threat' },
     { name: 'explore', description: 'Step deeper into the endless dungeon' },
     { name: 'rest', description: 'Clear all lust and fully restore defiance (5-minute cooldown)' },
+    { name: 'parlour', description: "Madame Vex's parlour: permanent tattoos and piercings with small perks" },
     { name: 'fight', description: 'Attack the monster you are fighting' },
     { name: 'flee', description: 'Try to escape combat (AGI helps)' },
     { name: 'submit', description: 'Submit to the monster you are fighting' },

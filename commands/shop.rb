@@ -60,7 +60,7 @@ module Commands
         end
 
         c.separator(divider: false, spacing: :small)
-        c.text_display(content: '-# Category tabs · Buy buttons · Prev/Next · or `!buy` / `!sell` by name')
+        c.text_display(content: '-# Category tabs · Buy buttons · Prev/Next · or `e,buy` / `e,sell` by name')
       end
     end
 
@@ -125,7 +125,7 @@ module Commands
 
     def missing_name(event, verb)
       ErosUI.reply_v2(event, ephemeral: true) do |c|
-        c.text_display(content: "Usage: `!#{verb} [item name]`")
+        c.text_display(content: "Usage: `e,#{verb} [item name]`")
       end
     end
 

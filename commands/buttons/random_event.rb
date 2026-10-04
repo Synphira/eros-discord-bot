@@ -11,7 +11,7 @@ module Commands
         player = Player[event.user.id]
         unless player
           ErosUI.reply_v2(event, ephemeral: true) do |c|
-            c.text_display(content: 'No profile. `/create` or `!create` first.')
+            c.text_display(content: 'No profile. `/create` or `e,create` first.')
           end
           next
         end
@@ -27,7 +27,7 @@ module Commands
         player = Player[event.user.id]
         unless player
           ErosUI.reply_v2(event, ephemeral: true) do |c|
-            c.text_display(content: 'No profile. `/create` or `!create` first.')
+            c.text_display(content: 'No profile. `/create` or `e,create` first.')
           end
           next
         end

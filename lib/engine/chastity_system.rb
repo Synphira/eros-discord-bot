@@ -21,7 +21,7 @@ module Engine
                      'The energy pulses in time with your arousal.',
         reminder: 'The runes across your groin hum softly, warding off any touch before it can land.',
         arousal_multiplier: 1.4,
-        denial: ['The runes flare white-hot as you reach the brink. The barrier drinks in your climax before it can happen ' \
+        denial: ['The runes flare white-hot as you reach the brink. The barrier drinks in your orgasm before it can happen ' \
                  'and pours it straight back into you as raw, frustrated arousal.',
                  'You are left shaking at the edge, the magic humming smugly, your release denied.']
       }
@@ -41,6 +41,12 @@ module Engine
                     'You offer yourself to the %<actor>s, your cock throbbing against its cage as it uses every part of you the belt leaves free.'],
         'vagina' => ['You spread your legs for the %<actor>s, but the shield over your pussy turns it away — so you offer it everything else instead.',
                      'You guide the %<actor>s to your locked belt, moaning as it teases the steel your pussy aches behind.']
+      },
+      partner: {
+        'penis' => ['%<actor>s runs a fingertip over your cage and smiles. "Locked up? Then I\'ll just have to enjoy everything else..."',
+                    '%<actor>s notices your caged cock straining against the steel and teases it mercilessly, knowing you can\'t feel enough to finish.'],
+        'vagina' => ['%<actor>s taps the steel shield between your legs and pouts — then finds every other way to make you squirm.',
+                     '%<actor>s strokes the edges of your chastity shield while your locked pussy aches uselessly behind it.']
       },
       tease: {
         'penis' => ['The %<actor>s creeps under your belt and tightens around your cage, squeezing your trapped cock until you whimper.'],

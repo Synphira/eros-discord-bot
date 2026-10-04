@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Endless Ruins of Sin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="gate" class="gate">
+    <h1>Endless Ruins of Sin</h1>
+    <p>This game contains explicit sexual content and is for adults only.</p>
+    <button id="gate-yes" class="btn primary">I am 18 or older — enter</button>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside id="status" class="status"></aside>
+    <main class="main">
+      <h2 id="title" class="title">Loading…</h2>
+      <div id="enemy" class="enemy hidden"><div class="bar"><div id="enemy-fill" class="fill"></div></div></div>
+      <div id="log" class="log"></div>
+      <div id="sections" class="sections"></div>
+      <form id="input-form" class="input-form hidden">
+        <input id="input-field" type="text" maxlength="24" autocomplete="off">
+        <button id="input-submit" class="btn primary" type="submit">OK</button>
+      </form>
+      <div id="actions" class="actions"></div>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <h2 id="modal-title"></h2>
+      <p id="modal-text" class="small"></p>
+      <textarea id="modal-code" rows="6" spellcheck="false"></textarea>
+      <input id="modal-file" type="file" accept=".txt,text/plain" class="hidden">
+      <div id="modal-buttons" class="row"></div>
+    </div>
+  </div>
+
+  <div id="loading" class="loading hidden">Waking the tower (loading Ruby)…</div>
+  <pre id="error" class="error hidden"></pre>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

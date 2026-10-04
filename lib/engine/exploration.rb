@@ -68,6 +68,10 @@ module Engine
 
       return sanctuary_room if @player.sanctuary
 
+      if (npc = Engine::NPCSystem.maybe_start!(@player))
+        return event_room(npc)
+      end
+
       if Engine::RandomEvents.should_trigger?(@player)
         return event_room(Engine::RandomEvents.start!(@player))
       end
@@ -104,7 +108,9 @@ module Engine
              when 35...65 then stairs_room
              else empty_room
              end
-      room.message = "_The bottled sanctuary shields you — this room is safe._\n\n#{room.message}"
+      note = '_The bottled sanctuary shields you — this room is safe._'
+      room.message = "#{note}\n\n#{room.message}"
+      room.event_result[:log] = [note] + Array(room.event_result[:log]) if room.event_result
       room
     end
 
@@ -218,16 +224,7 @@ module Engine
     end
 
     def treasure_room
-      result = Engine::Treasure.open_chest(@player)
-      broken = result[:broken]
-
-      RoomResult.new(
-        kind: :treasure,
-        broken: broken,
-        colour: COLOURS[:treasure],
-        with_actions: !broken,
-        message: result[:lines].join("\n")
-      )
+      event_room(Engine::Treasure.present_chest!(@player))
     end
 
     def stairs_room

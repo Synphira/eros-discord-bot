@@ -46,7 +46,7 @@ module Commands
 
       unless Player[event.user.id]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: 'You have no delver to erase. Use `/create` or `!create`.')
+          c.text_display(content: 'You have no delver to erase. Use `/create` or `e,create`.')
         end
         next
       end

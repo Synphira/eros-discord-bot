@@ -10,7 +10,15 @@ module Commands
     def run(event)
       player = ErosHelpers.require_player(event) or return
 
-      if Eros.encounter_for(player)
+      if (enc = Eros.encounter_for(player))
+        spec = (enc[:phase] || enc['phase']).to_s == 'pending' && Engine::BossFights.phase(enc[:name] || enc['name'])
+        if spec
+          ErosUI.reply_v2(event, ephemeral: true,
+                                 with_actions: { phase: { resist: spec[:resist_label], give_in: spec[:give_label] } }) do |c|
+            c.text_display(content: "The #{enc[:name] || enc['name']} is waiting for your answer.")
+          end
+          return
+        end
         ErosUI.reply_v2(event, ephemeral: true, with_actions: :combat) do |c|
           c.text_display(
             content: 'You are already in combat. Choose **Fight**, **Flee**, or **Submit**.'

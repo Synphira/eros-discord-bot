@@ -1,0 +1,622 @@
+# frozen_string_literal: true
+
+module Engine
+  module EventPacks
+    BODY = {
+      'ripening_orchard' => {
+        name: 'Ripening Orchard', tag: 'growth', tracker: 'part_growth_events',
+        blurb: 'heavy golden fruit hangs low.',
+        intro: 'A sunlit orchard blooms impossibly deep inside the tower, its branches sagging under plump golden fruit. ' \
+               'Every one is warm to the touch, and the juice smells like honey and sex.',
+        accept: {
+          label: 'Take a bite', text: 'Let the fruit ripen you',
+          scenes: ['Sweet juice runs down your chin, and a swelling warmth spreads through your chest and hips. You moan as ' \
+                   'your body grows heavier and riper, your curves pushing out against your clothes.',
+                   'You pick a second fruit without thinking, then a third, each bite making you fuller, softer, more sensitive.'],
+          parts: { 'breasts' => 'Your breasts swell round and heavy as the fruit itself, nipples stiff and aching under the strain.',
+                   'vagina' => 'Your pussy plumps and slickens, the swollen folds rubbing together deliciously with every step.',
+                   'penis' => 'Your cock thickens and hangs heavier, throbbing in time with the warmth spreading through you.',
+                   'anus' => 'Your ass rounds out into two ripe, bouncing cheeks that strain at your clothes.' },
+          lp: 6, lust: 12, special: :bimbo,
+          condition: { key: 'ripened', name: 'Ripened', floors: 3,
+                       effects: { 'max_hp_bonus' => 8, 'lust_mult' => 1.1, 'agility' => -1 } }
+        },
+        alt: {
+          label: 'Eat the long gourd', text: 'Grow where it counts', needs_part: 'penis',
+          scenes: ['A long, curving gourd hangs from the lowest branch. You eat it slowly, and a deep, pulsing warmth sinks ' \
+                   'between your legs.'],
+          parts: { 'penis' => 'Your cock swells inch by heavy inch until it hangs thick and proud, your balls full and aching to empty.' },
+          lp: 6, lust: 14,
+          condition: { key: 'orchard_endowed', name: 'Orchard-Endowed', floors: 3,
+                       effects: { 'strength' => 1, 'victory_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Leave it', text: 'Resist the fruit', lust: 2,
+                   scene: 'You leave the fruit hanging and walk on, the honeyed smell clinging to you.' }
+      },
+      'sculptors_studio' => {
+        name: 'Sculptor\'s Studio', tag: 'growth', tracker: 'part_growth_events',
+        blurb: 'a clay golem sculpts by lamplight.',
+        intro: 'Half-finished statues of impossibly curvy bodies fill this studio. A gentle clay golem looks up from its work, ' \
+               'wets its huge hands, and beckons you onto the pedestal.',
+        accept: {
+          label: 'Step up', text: 'Let it reshape you',
+          scenes: ['Warm, wet hands smooth over your body, kneading and coaxing. Wherever they linger you swell, the golem adding ' \
+                   'curve after curve with the patience of an artist who knows exactly what you want.',
+                   'It steps back to admire its work, and you catch your reflection in a polished shield: lush, exaggerated, perfect.'],
+          parts: { 'breasts' => 'It cups your breasts and draws them out fuller and heavier, rolling your nipples until they stand proud.',
+                   'penis' => 'It strokes your cock with slick clay fingers, lengthening it with every stroke until you are leaking.',
+                   'vagina' => 'Its thumb traces your folds and clit, plumping them swollen and sensitive until you drip onto the stone.',
+                   'anus' => 'It moulds your ass rounder and fuller, giving each cheek an appreciative squeeze.' },
+          lp: 6, lust: 12,
+          condition: { key: 'sculpted_curves', name: 'Sculpted Curves', floors: 3,
+                       effects: { 'strength' => 1, 'agility' => -1, 'satisfy_bonus' => 0.05 } }
+        },
+        decline: { label: 'Decline', text: 'Stay as you are', lust: 2,
+                   scene: 'You shake your head. The golem shrugs its heavy shoulders and goes back to its clay.' },
+        fight: { label: 'Topple it', type: :mimic, text: 'The pedestal sprouts teeth — the whole studio was a mimic\'s lure!' }
+      },
+      'fertility_grove' => {
+        name: 'Fertility Grove', tag: 'breeding', tracker: 'impregnation_events',
+        blurb: 'a stag-horned figure waits beneath the moon.',
+        intro: 'Moonlight pools in a grove of silver trees, where a towering stag-horned forest lord rests on a bed of moss. ' \
+               'His eyes glow with ancient, patient hunger. *"Let me make you fruitful."*',
+        accept: {
+          label: 'Lie in the moss', text: 'Let the forest lord breed you',
+          scenes: ['He lays you down in the soft moss and covers you with his great body, his thick cock sinking into you slow ' \
+                   'and deep. Each powerful stroke shakes pollen loose from the branches like drifting stars.',
+                   'He groans and spills inside you, pumping you full until your belly swells warm and round and begins to glow ' \
+                   'with a soft green light.'],
+          parts: { 'vagina' => 'His seed floods your womb, and you feel it take root there, warm and blissful and certain.',
+                   'anus' => 'Even when he takes your ass, the glow settles low in your belly all the same, his magic finding a way.' },
+          lp: 7, lust: 14,
+          condition: { key: 'grove_blessed', name: 'Grove-Blessed', floors: 3,
+                       effects: { 'healing_mult' => 1.2, 'plant_submit_lp' => 2, 'agility' => -1 } }
+        },
+        decline: { label: 'Bow out', text: 'Leave the grove', lust: 3,
+                   scene: 'You bow politely and back away. The forest lord closes his eyes, content to wait for another.' },
+        fight: { label: 'Fight', type: :plant, text: 'The silver trees creak to life to defend their lord!' }
+      },
+      'incubus_bower' => {
+        name: 'Incubus Bower', tag: 'breeding', tracker: 'impregnation_events',
+        blurb: 'a silk-draped bed glows with red runes.',
+        intro: 'Crimson silk drapes a vast round bed carved with fertility runes. A lounging incubus props himself up on one ' \
+               'elbow and pats the sheets beside him. *"I\'ve been waiting for someone worth breeding."*',
+        accept: {
+          label: 'Join him', text: 'Be bred by the incubus',
+          scenes: ['He pulls you into the silk and takes you slow, whispering filthy promises in your ear as he moves. A rune ' \
+                   'blooms on your lower belly, glowing brighter with every thrust.',
+                   'When he finally spills inside you, the rune flares hot pink and settles into a warm, contented glow. You feel ' \
+                   'heavy, fertile, and utterly satisfied.'],
+          parts: { 'vagina' => 'He grinds deep as he cums, flooding your womb until the rune pulses in time with your heartbeat.',
+                   'penis' => 'He strokes your cock in rhythm until you spill across the runes, and they drink it in greedily.' },
+          lp: 7, lust: 14,
+          condition: { key: 'heat_rune', name: 'Heat Rune', floors: 3,
+                       effects: { 'demon_lust_mult' => 0.9, 'submit_lp_bonus' => 2, 'healing_mult' => 1.15 } }
+        },
+        alt: {
+          label: 'Breed his consort', text: 'Fill the succubus instead', needs_part: 'penis',
+          scenes: ['A succubus slinks out from behind the curtains, sprawls across the silk and begs you to put a brood in her.'],
+          parts: { 'penis' => 'You fuck her deep and hard and cum inside her again and again, until her belly swells and glows ' \
+                              'with your seed.' },
+          lp: 7, lust: 12,
+          condition: { key: 'sires_mark', name: 'Sire\'s Mark', floors: 3,
+                       effects: { 'strength' => 1, 'victory_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Decline', text: 'Leave the bower', lust: 3,
+                   scene: 'You slip back through the curtains. His laughter follows you, warm and unbothered.' }
+      },
+      'glitter_salon' => {
+        name: 'Glitter Salon', tag: 'bimbofication', tracker: 'bimbo_transformations',
+        blurb: 'a pink salon chair sparkles under bright lights.',
+        intro: 'A salon bathed in pink light, all mirrors and glitter and the smell of candy. A giggling fairy stylist pats ' \
+               'the chair. *"Ooh, babe, you have so much potential. Sit, sit!"*',
+        accept: {
+          label: 'Sit down', text: 'Get the full makeover',
+          scenes: ['Glitter showers over you as the fairy works, and every sparkle sinks warm into your skin. Your hair spills ' \
+                   'long and glossy, your lips plump into a pout, and your hips round out into a bouncy sway.',
+                   'By the time she spins the chair around, your head is full of fizz and the only thought left in it is how ' \
+                   'badly you want to be fucked in this outfit.'],
+          parts: { 'breasts' => 'Your tits swell up and out, perky and enormous, nipples poking hard through a tiny pink top.',
+                   'vagina' => 'Your pussy is already soaking through your new pink thong, and you giggle about it.',
+                   'penis' => 'Your cock strains against a tiny pink thong, and you giggle at the wet spot spreading over it.' },
+          lp: 6, lust: 14, special: :bimbo,
+          condition: { key: 'salon_fresh', name: 'Salon-Fresh', floors: 3,
+                       effects: { 'submission' => 1, 'satisfy_bonus' => 0.1, 'resistance' => -1 } }
+        },
+        alt: {
+          label: 'Just the lips', text: 'Lip plumper and nothing more', needs_tag: 'oral',
+          scenes: ['She glosses your lips until they swell into a plump, kissable pout. Before long you catch yourself sucking ' \
+                   'on a finger, thinking about nothing but wrapping them around a cock.'],
+          lp: 5, lust: 10,
+          condition: { key: 'pillow_lips', name: 'Pillow Lips', floors: 3,
+                       effects: { 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } }
+        },
+        decline: { label: 'Leave', text: 'Keep your look', lust: 2,
+                   scene: 'You back out of the salon. The fairy blows you a glittery kiss anyway.' }
+      },
+      'bubblegum_spring' => {
+        name: 'Bubblegum Spring', tag: 'bimbofication', tracker: 'bimbo_transformations',
+        blurb: 'a hot spring fizzes bright pink.',
+        intro: 'Steam curls off a hot spring that fizzes like soda and smells of strawberry gum. Bubbles pop against the ' \
+               'surface with tiny giggles, and you could swear one of them just said *"come play."*',
+        accept: {
+          label: 'Slip in', text: 'Soak in the fizz',
+          scenes: ['The bubbles tickle over every inch of you, popping and sparkling against your skin and fizzing straight into ' \
+                   'your head. Thoughts drift away one by one, and you just giggle as they go.',
+                   'You climb out dripping and swaying your hips, totally sure that being hot and horny is the smartest thing ' \
+                   'you could possibly be.'],
+          parts: { 'breasts' => 'Your breasts bob on the surface, swelling bigger and bouncier the longer you soak, nipples tingling.',
+                   'vagina' => 'The fizz streams right over your clit until you are squirming and giggling and cumming in the water.',
+                   'penis' => 'The bubbles swirl around your cock until it throbs, and you giggle as you cum into the pink water.',
+                   'anus' => 'Your ass plumps up round and bouncy, perfect for showing off with every swaying step.' },
+          lp: 6, lust: 12, special: :bimbo,
+          condition: { key: 'fizzy_headed', name: 'Fizzy-Headed', floors: 3,
+                       effects: { 'agility' => 1, 'submit_lp_bonus' => 2, 'resistance' => -1 } }
+        },
+        decline: { label: 'Stay dry', text: 'Hurry past the steam (AGI)', lust: 2, escape: true,
+                   scene: 'You hold your breath and skirt the spring before the fizz can get into your head.' }
+      },
+      'idol_of_plenty' => {
+        name: 'Idol of Plenty', tag: 'futanari', tracker: 'futanari_events',
+        blurb: 'a jade idol holds out a glowing charm.',
+        intro: 'A smiling jade idol of a lush, many-armed goddess sits in an alcove of incense. One of her hands offers a warm, ' \
+               'glowing charm shaped exactly like the generous cock carved between her own thighs.',
+        accept: {
+          label: 'Take the charm', text: 'Accept the goddess\'s blessing',
+          scenes: ['The charm melts into your palm and its warmth rushes straight between your legs. You gasp as a new weight ' \
+                   'swells there, thick and heavy and throbbing, a full pair of balls drawing tight beneath it.',
+                   'Every brush of fabric over your new cock makes it twitch, and the incense smoke curls around it like a ' \
+                   'caress until a bead of precum glistens at the tip.'],
+          parts: { 'vagina' => 'Your pussy stays right where it was beneath your new balls, aching and wet, doubling every throb.' },
+          lp: 6, lust: 14, special: :futa
+        },
+        decline: { label: 'Leave it', text: 'Leave the charm', lust: 2,
+                   scene: 'You bow to the idol and leave the charm in her hand. Her jade smile never changes.' }
+      },
+      'succubus_boudoir' => {
+        name: 'Succubus Boudoir', tag: 'futanari', tracker: 'futanari_events',
+        blurb: 'a succubus lounges with a knowing smile.',
+        intro: 'A succubus lounges on a velvet chaise, a thick cock of her own resting heavy on her thigh. She looks you over ' \
+               'and grins. *"You look like you\'d enjoy having one. Or would you rather have mine?"*',
+        accept: {
+          label: 'Ask for one', text: 'Let her kiss one onto you',
+          scenes: ['She kneels and presses a slow, wet kiss low on your belly. Heat pools under her lips and pushes outward, and ' \
+                   'you moan as a fat, aching cock grows into her waiting hand.',
+                   'She strokes it to full hardness, admiring her work, and leaves you throbbing and leaking.'],
+          parts: { 'vagina' => 'Her fingers slip lower to tease your soaked pussy, and both your new shaft and your clit throb at once.' },
+          lp: 6, lust: 14, special: :futa
+        },
+        alt: {
+          label: 'Take hers', text: 'Let her fuck you',
+          scenes: ['She bends you over the chaise and slides her cock into you, gripping your hips and taking you hard and deep.'],
+          parts: { 'vagina' => 'She fills your pussy with long, heavy strokes and cums so much it runs down your thighs.',
+                   'anus' => 'She takes your ass slow and deep, then floods it with her hot cum.' },
+          lp: 7, lust: 14,
+          condition: { key: 'futa_claimed', name: 'Futa-Claimed', floors: 2,
+                       effects: { 'demon_submit_lp' => 3, 'lust_mult' => 1.1 } }
+        },
+        decline: { label: 'Decline', text: 'Neither, thanks', lust: 3,
+                   scene: 'You decline. She shrugs, gives herself a lazy stroke, and waves you on.' },
+        fight: { label: 'Resist her', type: :demon, text: 'Her smile sharpens. *"Oh, you want to play rough?"*' }
+      },
+      'moon_tide_pool' => {
+        name: 'Moon Tide Pool', tag: 'gender_bending', tracker: 'gender_bending_events',
+        blurb: 'a silver pool ebbs and flows on its own.',
+        intro: 'A silver pool ebbs and swells as though pulled by a moon you cannot see. Where the tide touches the stone, ' \
+               'carvings shift between curvy and broad-shouldered figures, never settling.',
+        requires: :swappable,
+        accept: {
+          label: 'Wade in', text: 'Let the tide turn you (temporary)',
+          scenes: ['The silver water rises to your waist and pulls at you like a tide, and your body flows with it. Your chest, ' \
+                   'your hips and everything between your legs ebb away and wash back in as their opposite.',
+                   'You stagger out onto the stone, gasping at how *different* every step feels, your hands going straight to ' \
+                   'exploring every new curve and swell.'],
+          lp: 6, lust: 12, special: :gender_swap
+        },
+        decline: { label: 'Stay ashore', text: 'Keep your body', lust: 1,
+                   scene: 'You keep your feet dry. The tide sighs back into the pool.' }
+      },
+      'changeling_court' => {
+        name: 'Changeling Court', tag: 'gender_bending', tracker: 'gender_bending_events',
+        blurb: 'fae nobles bow from mushroom thrones.',
+        intro: 'A court of fae lounges on mushroom thrones, swapping bodies with each other as idly as partners at a dance. ' \
+               'Their queen smiles at you. *"Trade with us, mortal. Just for a while."*',
+        requires: :swappable,
+        accept: {
+          label: 'Join the dance', text: 'Trade your body (temporary)',
+          scenes: ['They whirl you into the dance, and with every partner you give something of yourself away and take something ' \
+                   'new. By the last turn your body has been traded wholesale for its opposite.',
+                   'The queen kisses you and runs her hands down your new shape, and the whole court applauds as you shiver ' \
+                   'and moan at the touch.'],
+          lp: 6, lust: 12, special: :gender_swap
+        },
+        alt: {
+          label: 'Bed the queen', text: 'Stay as you are and please her',
+          scenes: ['She draws you onto her throne and rides you slow, her body shifting under your hands from one shape to ' \
+                   'another between kisses, until you cum together to the court\'s delighted cheers.'],
+          lp: 6, lust: 12,
+          condition: { key: 'fae_favour', name: 'Fae Favour', floors: 3,
+                       effects: { 'agility' => 1, 'treasure_lp' => 2 } }
+        },
+        decline: { label: 'Bow out', text: 'Politely refuse', lust: 2,
+                   scene: 'You bow and decline. The queen pouts prettily, and the court goes back to its dance.' }
+      },
+      'titan_forge' => {
+        name: 'Titan Forge', tag: 'giant', tracker: 'body_growth_events',
+        blurb: 'great bellows breathe beside an anvil.',
+        intro: 'A forge built for titans: an anvil the size of a cart, bellows taller than a house, and a shimmer of golden ' \
+               'heat that makes your skin prickle. Runes on the bellows promise *strength beyond measure*.',
+        accept: {
+          label: 'Work the bellows', text: 'Breathe in the titan-heat',
+          scenes: ['You pump the bellows and breathe deep, and golden heat floods your lungs and pours outward. Your body ' \
+                   'stretches up and out, shoulders broadening, thighs thickening, until your head brushes the rafters.',
+                   'Every inch of your enormous new body tingles, and the sheer *power* of it makes you shudder with arousal.'],
+          parts: { 'breasts' => 'Your breasts swell to match, huge and heavy, each nipple twice as sensitive as before.',
+                   'penis' => 'Your cock grows in proportion, a massive, throbbing column that sways heavily between your thighs.',
+                   'vagina' => 'Your pussy swells along with you, slick and hungry and ready to take anything in the tower.' },
+          lp: 5, lust: 10,
+          condition: { key: 'towering', name: 'Towering', floors: 3,
+                       effects: { 'strength' => 2, 'agility' => -2, 'max_hp_bonus' => 10 } }
+        },
+        decline: { label: 'Leave it', text: 'Stay your size', lust: 1,
+                   scene: 'You leave the bellows still. The forge-glow dims with a disappointed hiss.' },
+        fight: { label: 'Fight', type: :mimic, text: 'The anvil yawns open into a ring of teeth — a mimic!' }
+      },
+      'colossal_bloom' => {
+        name: 'Colossal Bloom', tag: 'giant', tracker: 'body_growth_events',
+        blurb: 'a flower the size of a house sheds golden pollen.',
+        intro: 'A single flower fills the chamber, petals as big as sails, its heart dusted with glittering golden pollen. ' \
+               'Lounging among the petals is a smiling giantess, who blows a puff of it your way.',
+        accept: {
+          label: 'Breathe it in', text: 'Grow to match her',
+          scenes: ['The pollen fizzes through you and you surge upward, petals that once dwarfed you shrinking to cushions under ' \
+                   'your hands, until you are eye to eye with the giantess.',
+                   'She pulls you down into the flower with her, and you spend a long, lazy while tangled together, two giants ' \
+                   'kissing and grinding until the whole bloom shakes.'],
+          parts: { 'breasts' => 'Her enormous breasts press against yours, nipples rubbing stiff and slick with pollen.',
+                   'vagina' => 'She grinds her thigh between yours until your swollen pussy drips nectar-sweet onto the petals.',
+                   'penis' => 'She wraps a hand around your giant cock and strokes until you cum across the flower\'s heart.' },
+          lp: 6, lust: 12,
+          condition: { key: 'towering', name: 'Towering', floors: 3,
+                       effects: { 'strength' => 2, 'agility' => -2, 'satisfy_bonus' => 0.05 } }
+        },
+        alt: {
+          label: 'Stay small', text: 'Let her play with you as you are', needs_tag: 'size_difference',
+          scenes: ['She scoops you into her palm and lifts you to her lips for a kiss that covers half your body, then sets you ' \
+                   'down on the soft, warm landscape of her skin to explore however you please.'],
+          parts: { 'vagina' => 'She lays you between her vast thighs and rocks you against her, and you cum grinding on her clit.',
+                   'penis' => 'She rubs your whole cock against one huge fingertip until you spill across her skin.' },
+          lp: 6, lust: 12,
+          condition: { key: 'giantess_pet', name: 'Giantess\'s Pet', floors: 2,
+                       effects: { 'resistance' => 1, 'satisfy_bonus' => 0.05 } }
+        },
+        decline: { label: 'Leave', text: 'Hold your breath and go', lust: 2,
+                   scene: 'You cover your face and slip out. The giantess waves a huge hand in farewell.' }
+      },
+      'collectors_cabinet' => {
+        name: 'Collector\'s Cabinet', tag: 'shrinking', tracker: 'body_reduction_events',
+        blurb: 'a curio cabinet with an empty velvet shelf.',
+        intro: 'A sultry demoness reclines beside a towering curio cabinet full of tiny figures — living ones, grown adults ' \
+               'shrunk down and blissfully content. One shelf is empty. *"That one,"* she purrs, *"would suit you perfectly."*',
+        accept: {
+          label: 'Let her shrink you', text: 'Join her collection',
+          scenes: ['She blows you a kiss and you shrink down and down, every curve of your adult body staying perfectly in ' \
+                   'proportion, until you could stand on her palm. She lifts you to her face with huge, hungry eyes.',
+                   'She strokes your whole body with a single fingertip, rolling you over on her palm and teasing every ' \
+                   'sensitive spot at once until you are writhing and moaning against her skin.'],
+          parts: { 'breasts' => 'Her fingertip rolls over your breasts, rubbing both nipples at once until you are gasping.',
+                   'vagina' => 'She presses her fingertip between your thighs and rubs, and your whole pussy throbs beneath it.',
+                   'penis' => 'She pinches your cock between finger and thumb and strokes until you cum across her palm.' },
+          lp: 5, lust: 12,
+          condition: { key: 'pocket_sized', name: 'Pocket-Sized', floors: 3,
+                       effects: { 'agility' => 2, 'strength' => -2, 'dodge_bonus' => 0.1 } }
+        },
+        decline: { label: 'Decline', text: 'Stay full-sized', lust: 2,
+                   scene: 'You decline. She sighs and dusts the empty shelf, still watching you hungrily as you go.' },
+        fight: { label: 'Fight her', type: :demon, text: 'Her eyes flash. *"If you won\'t shelve yourself, I\'ll do it for you."*' }
+      },
+      'pixie_revel' => {
+        name: 'Pixie Revel', tag: 'shrinking', tracker: 'body_reduction_events',
+        blurb: 'tiny lights dance around a ring of toadstools.',
+        intro: 'A ring of toadstools glows in the dark, and inside it a crowd of pixies — curvy, fully grown, and very drunk on ' \
+               'nectar — dance and kiss and tumble together. One flutters up and offers you a dewdrop to drink.',
+        accept: {
+          label: 'Drink the dewdrop', text: 'Shrink down and join the revel',
+          scenes: ['The dew tastes of honey and moonlight, and the world swells up around you as you shrink to pixie size, your ' \
+                   'body every bit as grown and curvy as before.',
+                   'The revellers pull you into the ring at once, and you spend hours tangled with them in the petals of a great ' \
+                   'white flower, kissing and stroking and cumming until you are drunk on nectar and each other.'],
+          parts: { 'vagina' => 'A pixie nuzzles between your thighs and laps at your clit until you squeal and cum on her face.',
+                   'penis' => 'Two pixies wrap themselves around your cock and grind on it together until you spill over them both.' },
+          lp: 5, lust: 12,
+          condition: { key: 'pocket_sized', name: 'Pocket-Sized', floors: 3,
+                       effects: { 'agility' => 2, 'strength' => -1, 'flee_bonus' => 0.1, 'treasure_lp' => 1 } }
+        },
+        decline: { label: 'Slip away', text: 'Back off before they grab you (AGI)', lust: 2, escape: true,
+                   scene: 'You step back out of the toadstool ring before the pixies can press the dewdrop to your lips.' }
+      },
+      'royal_hive' => {
+        name: 'Royal Hive', tag: 'weight_gain', tracker: 'weight_gain_events',
+        blurb: 'golden honey oozes from waxen combs.',
+        intro: 'Waxen combs drip golden honey down the walls of a humming hive. A plush bee-queen, soft and round and gorgeous, ' \
+               'beckons you onto her cushions with a dripping spoon.',
+        accept: {
+          label: 'Be fed', text: 'Let the queen fatten you on royal honey',
+          scenes: ['She feeds you spoon after spoon of thick golden honey, and every swallow settles warm and heavy in your body. ' \
+                   'Your belly rounds out, your thighs press soft together, and your hips spread wide and plush.',
+                   'She rubs your swollen, sticky belly and purrs at how soft you have become, and the praise makes you moan and ' \
+                   'open wide for more.'],
+          parts: { 'breasts' => 'Your breasts grow soft and heavy, spilling over her hands as she kneads them.',
+                   'anus' => 'Your ass swells heavy and jiggling, so plush that you sink deep into the cushions.' },
+          lp: 5, lust: 10, special: :weight_gain,
+          condition: { key: 'honey_plump', name: 'Honey-Plump', floors: 3,
+                       effects: { 'max_hp_bonus' => 12, 'agility' => -1, 'healing_mult' => 1.15 } }
+        },
+        decline: { label: 'Decline', text: 'Skip the honey', lust: 1,
+                   scene: 'You decline the spoon. The queen licks it clean herself with a lazy, sticky smile.' },
+        fight: { label: 'Fight', type: :beast, text: 'The hive\'s drones swarm to defend their queen!' }
+      },
+      'ogres_kitchen' => {
+        name: 'Ogre\'s Kitchen', tag: 'weight_gain', tracker: 'weight_gain_events',
+        blurb: 'a bubbling cauldron smells divine.',
+        intro: 'A jolly ogress stirs a cauldron of rich, bubbling stew in a warm, cluttered kitchen. She looks you up and down ' \
+               'and tuts. *"Far too skinny. Sit. Eat."*',
+        accept: {
+          label: 'Sit and eat', text: 'Let her feed you up',
+          scenes: ['Bowl after bowl after bowl, and she never lets you stop. Your belly swells round and tight, then softens as ' \
+                   'the magic in the stew settles in, and your whole body grows thick and heavy and plush.',
+                   'She pulls you onto her lap and kneads your soft new belly with big, strong hands, and you sigh and squirm ' \
+                   'with how good it feels to be so full.'],
+          lp: 5, lust: 8, special: :weight_gain,
+          condition: { key: 'hearth_fed', name: 'Hearth-Fed', floors: 3,
+                       effects: { 'max_hp_bonus' => 15, 'agility' => -2, 'resistance' => 1 } }
+        },
+        alt: {
+          label: 'Earn dessert', text: 'Thank the cook properly',
+          scenes: ['You thank her the way she clearly hopes you will, and she rewards every moan with another sweet, sticky ' \
+                   'pastry until you are stuffed and glowing.'],
+          parts: { 'vagina' => 'She spreads you over the floury table and fucks you with thick fingers until you cum on the dough.',
+                   'penis' => 'She rides your cock right there on her stool, bouncing heavily until you cum inside her.' },
+          lp: 6, lust: 12, special: :weight_gain,
+          condition: { key: 'cooks_darling', name: 'Cook\'s Darling', floors: 2,
+                       effects: { 'max_hp_bonus' => 8, 'satisfy_bonus' => 0.1 } }
+        },
+        decline: { label: 'Decline', text: 'Not hungry', lust: 1,
+                   scene: 'You beg off. She clucks and ladles herself another bowl instead.' }
+      },
+      'howling_cliff' => {
+        name: 'Howling Cliff', tag: 'furry', tracker: 'furry_events',
+        blurb: 'a full moon hangs over a rocky ledge.',
+        intro: 'Somehow the tower opens onto a moonlit ledge, where a pack of werewolves howl at a huge silver moon. Their ' \
+               'leader turns, yellow eyes gleaming, and offers you a place in the pack.',
+        accept: {
+          label: 'Howl with them', text: 'Let the moon change you',
+          scenes: ['You lift your head and howl, and the moonlight answers. Thick fur ripples across your skin, your ears grow ' \
+                   'tall and pointed, a bushy tail sweeps out behind you, and a wild, rutting heat floods your whole body.',
+                   'The pack welcomes you with nuzzles and nips and grinding bodies, and you lose the rest of the night in a ' \
+                   'heap of fur and heat under the moon.'],
+          parts: { 'vagina' => 'The leader mounts you from behind and fucks your pussy like a wolf in season, and you howl as you cum.',
+                   'penis' => 'Your cock throbs thick and ready, and the she-wolves of the pack take turns riding it.' },
+          lp: 6, lust: 12, special: :beastkin,
+          condition: { key: 'moon_pelt', name: 'Moon Pelt', floors: 4,
+                       effects: { 'strength' => 1, 'flee_bonus' => 0.1, 'beast_lust_mult' => 1.1 } }
+        },
+        decline: { label: 'Back away', text: 'Stay human', lust: 2,
+                   scene: 'You step back from the ledge. The pack\'s howls follow you all the way down the stairs.' }
+      },
+      'kitsune_shrine' => {
+        name: 'Kitsune Shrine', tag: 'furry', tracker: 'furry_events',
+        blurb: 'foxfire flickers around a red shrine gate.',
+        intro: 'Blue foxfire dances around a red shrine gate. A nine-tailed fox spirit sits on the steps, tails fanned out ' \
+               'like a silken crown, and smiles at you with sharp, amused eyes.',
+        accept: {
+          label: 'Step through the gate', text: 'Accept her blessing',
+          scenes: ['Foxfire swirls around you as you step through, and your body softens and sharpens at once. Silky russet fur ' \
+                   'spreads down your limbs, fox ears twitch atop your head, and a fluffy tail curls around your hips.',
+                   'The spirit runs her fingers through your new fur and down your spine to the root of your tail, and the touch ' \
+                   'makes you arch and whine with sudden, desperate heat.'],
+          lp: 6, lust: 12, special: :beastkin,
+          condition: { key: 'vixen_grace', name: 'Vixen\'s Grace', floors: 4,
+                       effects: { 'agility' => 2, 'dodge_bonus' => 0.05, 'lust_mult' => 1.1 } }
+        },
+        alt: {
+          label: 'Mate with her', text: 'Keep your shape and share her bed',
+          scenes: ['She leads you behind the shrine, and her nine tails curl around you, stroking everywhere at once while she ' \
+                   'kisses you breathless.'],
+          parts: { 'vagina' => 'One tail slips between your thighs and strokes your pussy until you cum shaking in her arms.',
+                   'penis' => 'She climbs into your lap and rides your cock slow and deep, tails curling around you as you cum.' },
+          lp: 6, lust: 12,
+          condition: { key: 'spirit_mated', name: 'Spirit-Mated', floors: 3,
+                       effects: { 'treasure_lp' => 2, 'satisfy_bonus' => 0.1 } }
+        },
+        decline: { label: 'Bow and leave', text: 'Decline her blessing', lust: 2,
+                   scene: 'You bow respectfully and leave. The foxfire winks out behind you, one flame at a time.' }
+      },
+      'vacuum_frame' => {
+        name: 'Vacuum Frame', tag: 'latex', tracker: 'latex_events',
+        blurb: 'a sheet of black rubber stretched on a frame.',
+        intro: 'A glossy black latex sheet is stretched across a standing frame, a soft hiss coming from a pump at its base. ' \
+               'The rubber ripples as you approach, as if inviting you to step between its layers.',
+        accept: {
+          label: 'Step inside', text: 'Be sealed in rubber',
+          scenes: ['You slip between the sheets and the pump hisses to life. The latex draws down tight over every inch of you ' \
+                   'until you are sealed in a gleaming, skin-tight cocoon, unable to move anything but your fingertips.',
+                   'Every breath makes the rubber creak, and every brush of a hand over the glossy surface feels like it is ' \
+                   'touching you everywhere at once. You hang there, helpless and shining, shivering with need.'],
+          parts: { 'breasts' => 'The latex moulds so tightly around your breasts that every ridge of your stiff nipples shows.',
+                   'penis' => 'Your cock is pressed flat beneath the rubber, its outline obscene, twitching with every breath.',
+                   'vagina' => 'The rubber clings to your pussy so tightly that every throb of your clit shows through the gloss.' },
+          lp: 6, lust: 12,
+          condition: { key: 'vacuum_sealed', name: 'Vacuum-Sealed', floors: 2,
+                       effects: { 'resistance' => 2, 'agility' => -1, 'lust_mult' => 1.1 } }
+        },
+        decline: { label: 'Step back', text: 'Avoid the frame (AGI)', lust: 2, escape: true,
+                   scene: 'The rubber reaches for you, but you twist away and leave it rippling on its frame.' }
+      },
+      'gloss_atelier' => {
+        name: 'Gloss Atelier', tag: 'latex', tracker: 'latex_events',
+        blurb: 'a faceless tailor gleams in shining rubber.',
+        intro: 'Bolts of shining latex hang in every colour in this atelier. A gleaming rubber-skinned tailor, faceless and ' \
+               'graceful, glides over with a measuring tape and a bucket of liquid gloss.',
+        accept: {
+          label: 'Get fitted', text: 'Wear a full latex catsuit',
+          scenes: ['The tailor brushes warm liquid latex over you in long strokes, and it sets into a seamless, glossy catsuit ' \
+                   'that squeezes every curve. A matching hood smooths over your head, leaving only your eyes and lips bare.',
+                   'It polishes you to a mirror shine with slow, firm strokes, until you squeak with every movement and your ' \
+                   'whole body hums with the snug, endless embrace.'],
+          parts: { 'breasts' => 'The suit squeezes your breasts high and round, two glossy peaks with your nipples standing out stiff.',
+                   'vagina' => 'A slick seam of rubber runs right between your folds and rubs your clit with every step.',
+                   'penis' => 'A tight latex sheath grips your cock, squeezing gently in time with your heartbeat.' },
+          lp: 6, lust: 12,
+          condition: { key: 'gloss_skin', name: 'Gloss Skin', floors: 3,
+                       effects: { 'resistance' => 1, 'submission' => 1, 'submit_lp_bonus' => 2 } }
+        },
+        alt: {
+          label: 'Gloves and stockings', text: 'Something lighter',
+          scenes: ['The tailor rolls glossy opera gloves up your arms and thigh-high latex stockings up your legs, smoothing out ' \
+                   'every wrinkle with lingering, appreciative hands.'],
+          lp: 4, lust: 8,
+          condition: { key: 'rubber_gloved', name: 'Rubber-Gloved', floors: 3,
+                       effects: { 'dodge_bonus' => 0.05, 'resistance' => 1 } }
+        },
+        decline: { label: 'Decline', text: 'No fitting today', lust: 1,
+                   scene: 'You decline. The tailor inclines its smooth, featureless head and returns to its bolts.' }
+      },
+      'weavers_loom' => {
+        name: 'Weaver\'s Loom', tag: 'living_clothing', tracker: 'living_clothing_events',
+        blurb: 'a great loom weaves shimmering silk by itself.',
+        intro: 'A huge loom clacks away by itself, weaving silk so fine it shimmers like moonlight. A garment drifts off the ' \
+               'end of it — sheer, delicate, and very clearly *alive* — and floats toward you.',
+        accept: {
+          label: 'Put it on', text: 'Wear the living silk (cursed gear)',
+          scenes: ['The silk slides over your skin like cool water and knits itself snug around you, a sheer slip of living ' \
+                   'lingerie that hides nothing. It shivers happily as it settles in.',
+                   'It never really stops moving. Threads trail and caress and tease across your skin with every step, keeping ' \
+                   'you flushed and breathless.'],
+          parts: { 'breasts' => 'Sheer silk cups your breasts and tugs at your nipples with delicate, teasing threads.',
+                   'vagina' => 'A ribbon of silk slides between your folds and strokes your clit in slow, maddening sweeps.',
+                   'penis' => 'Silk spirals around your cock like a sheer stocking and ripples up and down its length.' },
+          lp: 4, lust: 10, special: :living_clothing
+        },
+        decline: { label: 'Leave it', text: 'Let it drift by', lust: 2,
+                   scene: 'You step aside. The garment drifts sadly back to the loom to be rewoven.' },
+        fight: { label: 'Cut it down', type: :beast, text: 'A huge spider drops from the loom to defend its work!' }
+      },
+      'phantom_wardrobe' => {
+        name: 'Phantom Wardrobe', tag: 'living_clothing', tracker: 'living_clothing_events',
+        blurb: 'ghostly gowns waltz in an empty ballroom.',
+        intro: 'In a dusty ballroom, empty gowns and suits waltz to music no one is playing. One breaks from the dance, bows ' \
+               'deeply, and holds out an empty sleeve for you to take.',
+        accept: {
+          label: 'Take its hand', text: 'Dance, and let it wear you (cursed gear)',
+          scenes: ['You take the sleeve and the outfit swirls around you, slipping over your body and fastening itself snug. It ' \
+                   'leads the waltz, guiding your hips, and you realise it has no intention of letting go.',
+                   'By the final turn it has made itself at home, hugging and stroking you through every step, its ghostly ' \
+                   'touch cool and tingling against your heated skin.'],
+          parts: { 'vagina' => 'Its cool lining presses between your thighs and rubs your clit in time with the music.',
+                   'penis' => 'Its silken lining wraps your cock and strokes it to the rhythm of the waltz.',
+                   'anus' => 'A silken seam tucks itself between your cheeks and teases you with every sway of your hips.' },
+          lp: 4, lust: 10, special: :living_clothing
+        },
+        alt: {
+          label: 'Just dance', text: 'Dance with it, then step away',
+          scenes: ['You waltz with the empty outfit, its invisible hands roaming boldly over you as you spin, and when the music ' \
+                   'ends it lets you go with a lingering, ghostly caress.'],
+          lp: 4, lust: 8,
+          condition: { key: 'ghost_waltz', name: 'Ghost Waltz', floors: 2,
+                       effects: { 'agility' => 1, 'undead_dodge_bonus' => 0.1 } }
+        },
+        decline: { label: 'Decline', text: 'Sit this one out', lust: 2,
+                   scene: 'You decline with a curtsy of your own. The empty outfit bows and waltzes away.' },
+        fight: { label: 'Break the spell', type: :undead, text: 'The dancers stop. The spirit wearing them all turns toward you!' }
+      },
+      'alchemists_vat' => {
+        name: 'Alchemist\'s Vat', tag: 'monster_transformation', tracker: 'monster_form_events',
+        blurb: 'a bubbling vat glows a dozen colours.',
+        intro: 'An abandoned laboratory, its centrepiece a huge crystal vat bubbling with a shimmering, ever-shifting brew. ' \
+               'A label in shaky handwriting reads: *ESSENCE OF THE TOWER — DO NOT BATHE IN.*',
+        accept: {
+          label: 'Bathe in it', text: 'Ignore the label (monster form for a few floors)',
+          scenes: ['You sink into the warm, tingling brew, and it seeps into every pore. Your body shivers, softens and shifts as ' \
+                   'the tower\'s essence rewrites you from the skin inward, and it feels *incredible*.'],
+          lp: 6, lust: 12, special: :monster_form
+        },
+        alt: {
+          label: 'Just a taste', text: 'All of the lust, none of the changes',
+          scenes: ['You dip a finger and taste it. Your body stays your own, but a hot, hungry ache floods through you and ' \
+                   'refuses to fade.'],
+          lp: 4, lust: 16,
+          condition: { key: 'essence_drunk', name: 'Essence-Drunk', floors: 2,
+                       effects: { 'lust_mult' => 1.15, 'hit_lp' => 2 } }
+        },
+        decline: { label: 'Obey the label', text: 'Leave it alone', lust: 1,
+                   scene: 'You decide the label is probably right and leave the vat bubbling to itself.' }
+      },
+      'dryads_gift' => {
+        name: 'Dryad\'s Gift', tag: 'monster_transformation', tracker: 'monster_form_events',
+        blurb: 'a dryad offers a pulsing seed.',
+        intro: 'Roots twist through the walls into a mossy bower, where a dryad with leaves for hair cradles a softly pulsing ' \
+               'seed. *"Swallow it,"* she whispers, *"and become something more."*',
+        accept: {
+          label: 'Swallow the seed', text: 'Become something more (monster form for a few floors)',
+          scenes: ['The seed slides down warm and sweet, and something blooms inside you at once, spreading through your body ' \
+                   'in waves of tingling, shivering pleasure as you begin to change.'],
+          lp: 6, lust: 12, special: :monster_form
+        },
+        decline: { label: 'Refuse', text: 'Keep your own body', lust: 2,
+                   scene: 'You shake your head. The dryad tucks the seed away and sinks back into the roots.' },
+        fight: { label: 'Fight', type: :plant, text: 'The roots lash out — the bower itself is hungry!' }
+      },
+      'zephyr_chamber' => {
+        name: 'Zephyr Chamber', tag: 'inflation', tracker: 'inflation_events',
+        blurb: 'warm wind whirls around a giggling sylph.',
+        intro: 'Warm breezes swirl through this airy chamber, and in the middle of them floats a giggling sylph made of cloud ' \
+               'and wind. She puffs her cheeks at you playfully. *"Want to float?"*',
+        accept: {
+          label: 'Let her in', text: 'Get puffed up with warm air',
+          scenes: ['She presses a kiss to your lips and breathes, and warm wind pours into you, swelling your belly round and ' \
+                   'tight. She keeps going, giggling, until you are taut as a drum and your toes lift off the floor.',
+                   'You bob gently in the air, every shift of the pressure inside you sending warm, fluttering pleasure through ' \
+                   'your stretched body, while she spins you slowly and strokes your swollen curves.'],
+          parts: { 'breasts' => 'Your breasts puff up full and round too, nipples stretched stiff and tingling.',
+                   'anus' => 'Another breeze slips into your ass from behind, filling you deeper until you squirm and moan.' },
+          lp: 5, lust: 12,
+          condition: { key: 'airy_swell', name: 'Airy Swell', floors: 2,
+                       effects: { 'agility' => -1, 'max_hp_bonus' => 10, 'dodge_bonus' => 0.05 } }
+        },
+        alt: {
+          label: 'Something thicker', text: 'Get pumped full of cum instead', needs_tag: 'cum_play',
+          scenes: ['She whistles, and a broad-chested storm spirit drifts down to join her, already hard and grinning.'],
+          parts: { 'vagina' => 'He pumps your womb so full of hot cum that your belly swells round and sloshing.',
+                   'anus' => 'He fucks your ass and cums and cums until your belly bulges round and heavy.' },
+          lp: 6, lust: 14,
+          condition: { key: 'cum_swollen', name: 'Cum-Swollen', floors: 2,
+                       effects: { 'agility' => -2, 'max_hp_bonus' => 12, 'submit_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Duck out', text: 'Slip past the winds (AGI)', lust: 2, escape: true,
+                   scene: 'You lean into the wind and push through before the sylph can catch you.' }
+      },
+      'spawning_pool' => {
+        name: 'Spawning Pool', tag: 'oviposition', tracker: 'oviposition_events',
+        blurb: 'soft glowing eggs drift in a warm pool.',
+        intro: 'Bioluminescent light ripples through a warm, shallow pool where clusters of soft, glowing eggs drift. A ' \
+               'graceful jellyfish queen rises from the water, trailing silky, shimmering fronds.',
+        accept: {
+          label: 'Float with her', text: 'Carry her glowing eggs',
+          scenes: ['She draws you into the warm water and wraps you in her silky fronds, and a long, smooth ovipositor eases ' \
+                   'into you. One by one, soft eggs slip inside, each one cool and squishy and glowing faintly through your skin.',
+                   'You drift out of the pool round and heavy, your belly lit from within by a soft blue glow, every egg ' \
+                   'shifting and nudging inside you with each step.'],
+          parts: { 'vagina' => 'She fills your womb first, packing it with glowing eggs until your pussy clenches around the last one.',
+                   'anus' => 'When there is no more room, she fills your ass as well, the eggs nestling deep and snug.' },
+          lp: 6, lust: 14,
+          condition: { key: 'spawn_laden', name: 'Spawn-Laden', floors: 2,
+                       effects: { 'agility' => -1, 'slime_submit_lp' => 3, 'explore_lp' => 1 } }
+        },
+        decline: { label: 'Stay ashore', text: 'Keep out of the water', lust: 2,
+                   scene: 'You stay at the edge. The queen sinks back beneath the glowing eggs with a soft ripple.' },
+        fight: { label: 'Fight', type: :slime, text: 'The water itself surges up — the pool is a slime guarding its spawn!' }
+      }
+    }.freeze
+  end
+end

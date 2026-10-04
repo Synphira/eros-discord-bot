@@ -11,7 +11,7 @@ module Commands
         player = Player[event.user.id]
         unless player
           ErosUI.reply_v2(event, ephemeral: true) do |c|
-            c.text_display(content: 'No profile. `/create` or `!create` first.')
+            c.text_display(content: 'No profile. `/create` or `e,create` first.')
           end
           next
         end
@@ -20,7 +20,7 @@ module Commands
           ErosUI.reply_v2(event, ephemeral: true) do |c|
             c.text_display(
               content: 'You are in combat! Choose **Fight**, **Flee**, or **Submit** ' \
-                       '(or `!fight` / `!flee` / `!submit`).'
+                       '(or `e,fight` / `e,flee` / `e,submit`).'
             )
           end
           next

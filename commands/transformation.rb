@@ -127,7 +127,7 @@ module Commands
     end
 
     command(:transformation, aliases: %i[hybrid transform],
-                             description: 'View hybrid forms, or take one: !transformation <name|clear>') do |event, *parts|
+                             description: 'View hybrid forms, or take one: e,transformation <name|clear>') do |event, *parts|
       Commands::Transformation.set_by_name(event, parts.join(' '))
       nil
     end

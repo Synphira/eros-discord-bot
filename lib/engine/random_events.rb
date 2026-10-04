@@ -59,7 +59,8 @@ module Engine
       return false if player.active_event?
       return false if player.in_combat || player.encounter_data
 
-      chance = trigger_chance(player.current_floor) * Engine::TransformationSystem.event_rate(player)
+      chance = trigger_chance(player.current_floor) * Engine::TransformationSystem.event_rate(player) *
+               Engine::Weekly.special('event_rate')
       rand <= [chance, 0.6].min
     end
 
@@ -124,7 +125,7 @@ module Engine
         colour: COLOUR,
         log: [
           "**Floor #{level}** — a peculiar alcove.",
-          { scene: 'You discover a strange hole in the wall at waist height. From the other side, you hear eager breathing. Someone seems to be waiting...' },
+          { scene: 'You find a hole in the wall at waist height, its edges worn smooth. A thick cock slides through it, already hard and drooling precum, and from the other side you hear heavy, eager breathing...' },
           'What do you want to do?'
         ],
         choices: choices
@@ -134,6 +135,8 @@ module Engine
     def choices_for(player, data)
       type = data && data[:type].to_s
       return Engine::FetishEvents.choices(player, type) if Engine::FetishEvents.event?(type)
+      return Engine::NPCSystem.choices(player, data[:npc], data[:stage]) if type == 'npc'
+      return Engine::Treasure.chest_choices(player) if type == 'chest'
 
       glory_hole_choices(player)
     end
@@ -230,6 +233,8 @@ module Engine
       level = data[:level].to_i
       log = []
       return choose_fetish!(player, data, choice_key.to_s, level, log) if Engine::FetishEvents.event?(data[:type])
+      return choose_npc!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'npc'
+      return Engine::Treasure.choose_chest!(player, data, choice_key.to_s) if data[:type].to_s == 'chest'
 
       ok = apply_glory_choice!(player, choice_key.to_s, level, log)
       unless ok
@@ -267,6 +272,25 @@ module Engine
 
       finish = finalize_lust!(player, log)
       colour = finish[:broken] ? 0x444444 : Engine::FetishEvents::COLOUR
+      finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
+    end
+
+    def choose_npc!(player, data, choice, level, log)
+      outcome = Engine::NPCSystem.resolve!(player, data, choice, log)
+      unless outcome[:ok]
+        return { ok: true, mode: :choice, name: data[:name], colour: Engine::NPCSystem::COLOUR,
+                 log: [outcome[:message] || 'That option is not available — pick another.'],
+                 choices: Engine::NPCSystem.choices(player, data[:npc], data[:stage]) }
+      end
+
+      player.clear_event!
+      if outcome[:fight]
+        monster = Engine::NPCSystem.monster_for(player, outcome[:fight], level)
+        return { ok: true, mode: :combat, name: data[:name], colour: 0x8b0000, log: log, monster: monster, choices: [] }
+      end
+
+      finish = finalize_lust!(player, log)
+      colour = finish[:broken] ? 0x444444 : Engine::NPCSystem::COLOUR
       finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
     end
 
@@ -349,37 +373,37 @@ module Engine
         {
           name: 'Tentacle Pit',
           blurb: 'the floor betrays you.',
-          description: "The floor suddenly gives way beneath you! You find yourself trapped up to your waist in a tight pit. You can't see below, but you feel something warm and slippery wrapping around your legs..."
+          description: "The floor gives way and you drop into a tight pit, stuck fast up to your waist. You can't see below, but something warm and slippery wraps around your ankles and starts sliding up your legs..."
         }
       when 'dildo_trap'
         {
           name: 'Dildo Trap',
           blurb: 'a cruel mechanism clicks.',
-          description: 'You trigger a strange mechanism and a dildo suddenly emerges from the wall, positioned perfectly to penetrate you. It begins to move with a will of its own...'
+          description: 'You step on a hidden plate and the wall clicks open. A lube-slick dildo slides out on a jointed arm, angling itself between your legs as it starts to move on its own...'
         }
       when 'aphrodisiac_mist'
         {
           name: 'Aphrodisiac Mist',
           blurb: 'the air sweetens.',
-          description: 'A strange sweet-smelling mist suddenly fills the area. Your body begins to tingle with growing heat...'
+          description: 'A sweet, heavy mist rolls in around you. With every breath your skin grows hotter, and an insistent throb builds between your legs...'
         }
       when 'bonding_vines'
         {
           name: 'Bonding Vines',
           blurb: 'the stone sprouts life.',
-          description: 'Suddenly, living vines erupt from the ground, wrapping around your limbs and lifting you into the air. They seem particularly interested in your most sensitive areas...'
+          description: 'Living vines burst from the floor and wrap your wrists and ankles, hoisting you into the air. Thinner tendrils are already creeping toward your most sensitive places...'
         }
       when 'public_humiliation'
         {
           name: 'Public Humiliation',
           blurb: 'mirrors that lie.',
-          description: "You stumble into a room filled with magical mirrors that don't reflect your image, but instead show you in compromising positions with various creatures. The images feel so real that your body responds as if they were actually happening..."
+          description: "You stumble into a room of mirrors that don't show your reflection. Instead they show you being fucked by every creature in the tower, and the images feel so real that your body responds as if it were all happening..."
         }
       when 'spirit_possession'
         {
           name: 'Spirit Possession',
           blurb: 'something slips under your skin.',
-          description: 'As you move through the dungeon, a lustful spirit suddenly invades your body! It wants to use your form to experience physical pleasure...'
+          description: "A lustful spirit slips under your skin and takes the reins. It hasn't felt flesh in centuries, and it wants to feel everything your body can..."
         }
       else
         { name: 'Strange Event', blurb: 'something stirs.', description: 'The dungeon toys with you.' }
@@ -394,11 +418,12 @@ module Engine
         lust_gain = 8 + level
         player.gain_lp!(lp_gain)
         player.gain_lust!(lust_gain)
-        log << { scene: 'You kneel and take the waiting member into your mouth, pleasuring them with practiced skill. They moan from the other side, clearly enjoying your attentions.' }
+        log << { scene: 'You kneel and wrap your lips around the cock, swirling your tongue over its leaking tip before taking it deep, bobbing on it until it\'s slick and throbbing in your mouth.' }
+        log << { scene: 'They grip the edge of the hole and fuck your mouth in short, desperate thrusts until their cock pulses and fills your mouth with thick, salty cum, and you swallow every drop.' }
         log << "You gain **#{lp_gain}** Lust Points for your service."
         log << "Your lust increases by **#{lust_gain}**. (now #{player.lust})"
         if parts.include?('vagina')
-          log << { scene: 'As you pleasure them, your own body responds with growing heat between your legs.' }
+          log << { scene: 'Your cunt clenches around nothing while you suck, and by the time you\'re done your thighs are slick with your own wetness.' }
           player.gain_lust!(3)
         elsif (caged = Engine::ChastitySystem.line(player, :glory))
           log << { scene: caged }
@@ -410,7 +435,8 @@ module Engine
         lust_gain = 5 + level
         player.gain_lp!(lp_gain)
         player.gain_lust!(lust_gain)
-        log << { scene: 'You reach through the hole and take them in your hands, stroking with practiced movements. They buck against the wall, clearly enjoying your touch.' }
+        log << { scene: 'You wrap both hands around the cock and stroke it slick with its own precum, twisting your palm over the swollen head until it bucks against the wall.' }
+        log << { scene: 'It throbs in your grip and spurts thick ropes of cum over your fingers and wrists, twitching until you\'ve milked out every last drop.' }
         log << "You gain **#{lp_gain}** Lust Points for your service."
         log << "Your lust increases by **#{lust_gain}**. (now #{player.lust})"
         true
@@ -423,7 +449,8 @@ module Engine
         lust_gain = 6 + level
         player.gain_lp!(lp_gain)
         player.gain_lust!(lust_gain)
-        log << { scene: 'You press your breasts against the hole, trapping the member between them. They thrust against you, enjoying the soft pressure of your flesh.' }
+        log << { scene: 'You press your breasts to the hole and trap the cock between them, squeezing them together as it fucks your cleavage, its slick head poking up between your tits with every thrust.' }
+        log << { scene: 'It pulses between your breasts and paints your chest and nipples with hot, sticky cum.' }
         log << "You gain **#{lp_gain}** Lust Points for your service."
         log << "Your lust increases by **#{lust_gain}**. (now #{player.lust})"
         true
@@ -440,10 +467,10 @@ module Engine
         lust_gain = 10 + level
         player.gain_lp!(lp_gain)
         player.gain_lust!(lust_gain)
-        log << { scene: 'You position yourself and press back against the hole, taking them deep inside you. They thrust with abandon, movements growing frantic.' }
+        log << { scene: 'You back up against the wall and guide the cock into your cunt, gasping as it stretches you open and starts pounding you, their hips slamming the wall with every thrust.' }
         log << "You gain **#{lp_gain}** Lust Points for your service."
         log << "Your lust increases by **#{lust_gain}**. (now #{player.lust})"
-        log << { scene: 'Their seed spills inside you, leaving you filled and aching for more.' }
+        log << { scene: 'Their cock throbs deep inside you and floods your cunt with hot cum, and it drips down your thighs as they slide out.' }
         player.gain_lust!(5)
         true
       when 'ignore'
@@ -481,13 +508,16 @@ module Engine
       dildo = dildos.sample
       player.bump_tracker!('dildo_traps_encountered')
       player.bump_tracker!('traps_triggered')
-      log << { scene: "A #{dildo[:name]} dildo suddenly appears, its #{dildo[:material]} surface pressing against you." }
+      log << { scene: "A #{dildo[:name]} dildo slides out of the wall, glistening with lube, its #{dildo[:material]} head pressing against you." }
 
       if parts.include?('vagina')
-        log << { scene: "It thrusts into your wet cunt, its #{dildo[:shape]} form hitting all the right spots." }
+        log << { scene: "It spreads your lips and pushes into your cunt, its #{dildo[:shape]} length fucking you in deep, steady strokes." }
+        if parts.include?('penis')
+          log << { scene: 'A slick sleeve slides down over your cock and pumps you in time with every thrust.' }
+        end
         player.gain_lust!(12)
       elsif parts.include?('penis')
-        log << { scene: 'It positions itself under you, pressing against your perineum and sending vibrations through your body.' }
+        log << { scene: 'It grinds up against your perineum while a slick sleeve slides down over your cock and starts to pump you.' }
         player.gain_lust!(10)
       elsif (caged = Engine::ChastitySystem.line(player, :dildo))
         log << { scene: caged }
@@ -495,38 +525,38 @@ module Engine
       end
 
       if parts.include?('anus')
-        log << { scene: 'Another smaller dildo emerges and slides into your ass, making you gasp at the sudden fullness.' }
+        log << { scene: 'A second, slimmer dildo slides between your cheeks and pushes into your ass, stretching you full as it starts to thrust.' }
         player.gain_lust!(8)
       end
 
       case dildo[:name]
       when 'smooth glass'
-        log << { scene: 'The glass warms to your body temperature, becoming more comfortable as it moves.' }
+        log << { scene: 'The glass warms against you until it feels like part of you, gliding in and out with slick, wet sounds.' }
         player.gain_lust!(5)
       when 'ribbed silicone'
-        log << { scene: 'The silicone seems to move with a will of its own, its ridges stimulating you perfectly.' }
+        log << { scene: 'The silicone flexes and twists as it thrusts, its ridges dragging over every sensitive spot it can reach.' }
         player.gain_lust!(7)
       when 'stone phallus'
-        log << { scene: 'The stone begins to vibrate with low intensity, sending deep waves of pleasure through you.' }
+        log << { scene: 'The stone starts to hum with a deep, steady thrum that you feel all the way through your body.' }
         player.gain_lust!(6)
       when 'metallic tentacle'
-        log << { scene: 'The metallic tentacle electrocutes you with low-level current, making every nerve tingle.' }
+        log << { scene: 'The metal tentacle crackles with a faint, tingling current that makes every nerve it touches light up with pleasure.' }
         player.gain_lust!(9)
       end
 
-      log << { scene: 'After several minutes of intense stimulation, the dildos suddenly retreat, leaving you aching and wanting more.' }
+      log << { scene: 'The dildos fuck you right up to the edge, then retract into the wall all at once, leaving you dripping, empty and aching for more.' }
       player.gain_lust!(5)
       log << "Lust now `#{player.lust}`."
     end
 
     def apply_humiliation!(player, parts, log)
-      log << { scene: 'The mirrors show images of you being taken by monsters in every way imaginable. Though you know they are not real, your body responds with intense arousal.' }
+      log << { scene: 'The mirrors show you being taken by monsters in every way imaginable. You know none of it is real, but your body reacts as if it is, flushing and aching with every image.' }
       if parts.include?('vagina')
-        log << { scene: 'You see yourself being bred by beasts, your cunt filled with their seed. You can almost feel it happening.' }
+        log << { scene: 'In one mirror a beast has you on all fours, its cock pounding your cunt until cum spills down your thighs. You swear you can feel every thrust.' }
         player.gain_lust!(12)
       end
       if parts.include?('penis')
-        log << { scene: 'You watch yourself being milked by demonic mouths, your seed willingly given.' }
+        log << { scene: 'In another, demonic mouths take turns on your cock, sucking you dry again and again while you moan for more.' }
         player.gain_lust!(10)
       end
       if (caged = Engine::ChastitySystem.line(player, :mirror))
@@ -534,10 +564,10 @@ module Engine
         player.gain_lust!(10)
       end
       if parts.include?('anus')
-        log << { scene: 'The mirrors show tentacled creatures enjoying your ass, your body eagerly welcoming every inch.' }
+        log << { scene: 'A third shows tentacles stretching your ass wide while you push back on them, begging for more.' }
         player.gain_lust!(8)
       end
-      log << { scene: 'After several minutes, the mirrors return to normal, but the memory lingers in your mind and body.' }
+      log << { scene: "The mirrors finally go dark, but the images keep replaying behind your eyes, and your body hasn't forgotten them either." }
       player.gain_lust!(5)
       log << "Lust now `#{player.lust}`."
     end
@@ -559,35 +589,39 @@ module Engine
     def tentacle_pit_turn!(player, parts, turn, log)
       case turn
       when 1
-        log << { scene: "Slimy tentacles wrap around your legs, easing them apart and exposing you completely. The pit holds you snugly as the tentacles begin to explore your body." }
+        log << { scene: 'Slimy tentacles coil around your thighs and pull them wide, holding you spread open in the pit while dozens more slither over your skin, smearing you with warm slime.' }
         player.gain_lust!(8)
-        if parts.include?('vagina')
-          log << { scene: 'A thick tentacle presses against your entrance, slowly sliding its way inside.' }
-        elsif parts.include?('penis')
-          log << { scene: 'A tentacle coils around your cock, its pulsating length already bringing you to hardness.' }
-        else
-          log.concat(Engine::ChastitySystem.scenes(player, :tentacles))
-        end
+        lines = []
+        lines << { scene: 'A thick, knobbly tentacle rubs up and down your slit until you\'re slick, then pushes into your cunt, every bump popping past your lips as it sinks deep and starts to pump.' } if parts.include?('vagina')
+        lines << { scene: 'A tentacle coils around your cock from root to tip and squeezes, its slimy suckers kissing along your shaft as it strokes you to full, throbbing hardness.' } if parts.include?('penis')
+        lines = Engine::ChastitySystem.scenes(player, :tentacles) if lines.empty?
+        log.concat(lines)
         player.gain_lust!(7)
       when 2
-        log << { scene: "The tentacles grow bolder, working you with rhythmic thrusts. You can't see what's happening, but you feel every slimy touch." }
+        log << { scene: "The tentacles find their rhythm, working you in wet, slapping strokes that echo off the pit walls. You can't see below, but you feel every slick inch." }
+        log << { scene: 'Another tentacle pushes past your lips and fills your mouth, pumping warm slime across your tongue as it slides in and out.' }
         player.gain_lust!(10)
         if parts.include?('anus')
-          log << { scene: 'Another tentacle slips into your ass, stretching you deliciously around its girth.' }
+          log << { scene: 'A thick tentacle squirms between your cheeks and works its way into your ass, stretching you wide around its girth as it starts to thrust.' }
+          if parts.include?('vagina')
+            log << { scene: 'The tentacles in your cunt and ass take turns, one sliding in as the other pulls out, rubbing against each other through the thin wall inside you.' }
+          elsif parts.include?('penis')
+            log << { scene: 'It curls inside you and presses on your prostate, squeezing a steady drip of precum from your cock.' }
+          end
         end
         player.gain_lust!(8)
       when 3
-        log << { scene: 'The tentacles move faster, their grip tightening as they bring you closer to climax. Your body betrays you with growing pleasure.' }
+        log << { scene: "The tentacles speed up, squeezing and thrusting faster and faster, dragging you toward the edge whether you're ready or not." }
         player.gain_lust!(12)
         if parts.include?('breasts')
-          log << { scene: 'Smaller tentacles wrap around your breasts, teasing your nipples to sensitive hardness.' }
+          log << { scene: 'Thin tentacles wind around your breasts and squeeze, their tips curling around your nipples and tugging them stiff.' }
         end
         player.gain_lust!(6)
       when 4
-        log << { scene: 'The tentacles pulse inside you, their movements becoming more erratic as they approach their own release. You cry out as they hit a particularly sensitive spot.' }
+        log << { scene: 'The tentacles swell and throb inside you, their thrusts turning erratic as they near their own release, and one grinds right against your sweet spot until you cry out.' }
         player.gain_lust!(15)
       else
-        log << { scene: 'With one final thrust, the tentacles fill you with their seed before suddenly withdrawing. As suddenly as they appeared, they retreat. The pit loosens, allowing you to escape.' }
+        log << { scene: 'The tentacles bury themselves deep and pulse, pumping you full of hot slime until it gushes out around them, then slither away all at once. The pit loosens and you crawl free, dripping.' }
         player.gain_lust!(10)
       end
       log << "Lust now `#{player.lust}`."
@@ -597,13 +631,13 @@ module Engine
       case turn
       when 1
         log << { scene: Engine::ChastitySystem.line(player, :mist) ||
-                        'The aphrodisiac mist makes your skin flush with heat, your senses heightening with every breath. You feel a growing ache between your legs.' }
+                        'The sweet mist sinks into your lungs and heat floods straight between your legs, your skin flushing and every nerve lighting up until you\'re squirming where you stand.' }
         player.gain_lust!(8)
       when 2
-        log << { scene: "The mist's effects intensify, making your clothes feel rough against your sensitized skin. Your mind fills with carnal thoughts." }
+        log << { scene: 'The mist thickens. Your clothes feel like hands dragging over your sensitive skin, and your mind fills with nothing but filthy images of being touched, filled and fucked.' }
         player.gain_lust!(10)
       else
-        log << { scene: 'Your body trembles with need, every touch sending jolts of pleasure through you. The mist has you completely in its grip.' }
+        log << { scene: "You're shaking with need, grinding against the wall and squeezing your thighs together just for friction, every brush of air sending a jolt through you. The mist owns you now." }
         player.gain_lust!(12)
       end
       log << "Lust now `#{player.lust}`."
@@ -612,25 +646,23 @@ module Engine
     def vines_turn!(player, parts, turn, log)
       case turn
       when 1
-        log << { scene: 'The vines lift you, spreading your legs and exposing you completely. Thinner vines begin to explore your body, their rough texture stimulating your skin.' }
+        log << { scene: 'The vines hoist you into the air and pull your legs wide, thin tendrils slithering under your clothes and over every inch of your skin.' }
         player.gain_lust!(7)
-        if parts.include?('vagina')
-          log << { scene: 'A vine coated in sweet nectar presses against your clit, sending jolts of pleasure through you.' }
-        elsif parts.include?('penis')
-          log << { scene: 'A vine wraps around your cock, its rough texture stimulating you to hardness.' }
-        else
-          log.concat(Engine::ChastitySystem.scenes(player, :vines))
-        end
+        lines = []
+        lines << { scene: 'A nectar-slick vine strokes up and down your slit, then circles your clit and rubs it in slow, wet circles until you\'re dripping.' } if parts.include?('vagina')
+        lines << { scene: 'A vine coils tight around your cock and pumps you, its ridges dragging along your shaft until you\'re rock hard and leaking.' } if parts.include?('penis')
+        lines = Engine::ChastitySystem.scenes(player, :vines) if lines.empty?
+        log.concat(lines)
         player.gain_lust!(8)
       when 2
-        log << { scene: 'The vines grow bolder, thicker ones slipping into your most intimate areas while the rest cradle you in place.' }
+        log << { scene: 'Thicker vines push into you, filling every hole they can find while the rest hold you suspended and helpless, rocking you back and forth onto them.' }
         player.gain_lust!(10)
         if parts.include?('breasts')
-          log << { scene: 'Vines with flower-like mouths attach to your nipples, sucking and nipping with gentle pressure.' }
+          log << { scene: 'Little flower-mouths latch onto your nipples and suckle, tugging and fluttering until your breasts ache.' }
         end
         player.gain_lust!(6)
       else
-        log << { scene: 'The vines pulse inside you, their nectar filling you with warmth and pleasure. With one final thrust, they release their seed before going limp, dropping you to the ground.' }
+        log << { scene: 'The vines throb inside you and pump you full of warm nectar until it runs down your thighs, then go limp and lower you to the ground, sticky and trembling.' }
         player.gain_lust!(12)
       end
       log << "Lust now `#{player.lust}`."
@@ -639,22 +671,20 @@ module Engine
     def spirit_turn!(player, parts, turn, log)
       case turn
       when 1
-        log << { scene: "The spirit takes control of your hands, guiding them over your body. Its curiosity is infectious, and soon you're not sure whose desire is whose." }
-        if parts.include?('vagina')
-          log << { scene: 'Your hands drift to your wet folds, spreading them open as the spirit explores your most intimate areas.' }
-        elsif parts.include?('penis')
-          log << { scene: 'Your hands wrap around your cock and stroke it, bringing it to full hardness as the spirit savours every sensation.' }
-        else
-          log.concat(Engine::ChastitySystem.scenes(player, :spirit))
-        end
+        log << { scene: "The spirit seizes your hands and runs them all over your body, greedy for every sensation. Soon you can't tell whose desire is whose." }
+        lines = []
+        lines << { scene: 'Your fingers slide between your wet folds and spread them wide, then push inside, the spirit fucking you with your own hand and moaning with your voice.' } if parts.include?('vagina')
+        lines << { scene: 'Your hand wraps around your cock and strokes it hard and slow, the spirit savouring every throb as it smears your precum along your shaft.' } if parts.include?('penis')
+        lines = Engine::ChastitySystem.scenes(player, :spirit) if lines.empty?
+        log.concat(lines)
         player.gain_lust!(10)
       else
-        log << { scene: 'The spirit poses you in an alcove, putting you on display for any who pass by. Every sound it pulls from your throat comes out as a moan.' }
+        log << { scene: 'The spirit spreads you out in an alcove like a display piece, legs wide, your body on show for anyone who wanders by. Every sound it pulls from your throat is a moan.' }
         if parts.include?('breasts')
-          log << { scene: 'Your hands knead your breasts, pinching your nipples to hardness.' }
+          log << { scene: 'Your hands knead your breasts and pinch your nipples, rolling and tugging them until you\'re arching into your own touch.' }
         end
         player.gain_lust!(12)
-        log << { scene: 'After what feels like an eternity, the spirit drifts out of your body with a satisfied sigh, leaving a warm afterglow behind.' }
+        log << { scene: 'Your fingers work you right to the edge before the spirit finally drifts out with a satisfied sigh, leaving you flushed, sticky and aching.' }
         player.gain_lust!(6)
       end
       log << "Lust now `#{player.lust}`."

@@ -12,7 +12,7 @@ module ErosHelpers
     return player if player
 
     ErosUI.reply_v2(event, ephemeral: true) do |c|
-      c.text_display(content: 'No profile yet. Use `/create` or `!create` to descend into the Abyss.')
+      c.text_display(content: 'No profile yet. Use `/create` or `e,create` to descend into the Abyss.')
     end
     nil
   end

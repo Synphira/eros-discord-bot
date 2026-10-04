@@ -34,7 +34,7 @@ module Commands
 
         c.separator(divider: false, spacing: :small)
         c.text_display(
-          content: '-# `!equip` / `!unequip` for normal gear · `!remove [name]` to destroy cursed gear with LP · ' \
+          content: '-# `e,equip` / `e,unequip` for normal gear · `e,remove [name]` to destroy cursed gear with LP · ' \
                    'one trophy at a time; trophies are lost on defeat.'
         )
       end
@@ -152,7 +152,7 @@ module Commands
       player = ErosHelpers.require_player(event) or return
       if item_name.nil? || item_name.strip.empty?
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: 'Specify which cursed item to remove. Use `!equipment` to list gear.')
+          c.text_display(content: 'Specify which cursed item to remove. Use `e,equipment` to list gear.')
         end
         return
       end
@@ -189,7 +189,7 @@ module Commands
 
     def missing_name(event, verb)
       ErosUI.reply_v2(event, ephemeral: true) do |c|
-        c.text_display(content: "Usage: `!#{verb} [item name]`")
+        c.text_display(content: "Usage: `e,#{verb} [item name]`")
       end
     end
 

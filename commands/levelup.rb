@@ -34,7 +34,7 @@ module Commands
                    "3. **Resistance** (#{player.stat_upgrade_cost(:resistance)} LP) — cuts lust from every hit by a percentage\n" \
                    "4. **Level** (#{player.level_upgrade_cost} LP) — +1 to all stats, **+#{next_max} max defiance**, and a full defiance restore\n\n" \
                    "-# Each stat costs 5 + its current value, and a level costs 80% of all three combined.\n" \
-                   '_Use the buttons, or `!levelup strength|agility|resistance|level`._'
+                   '_Use the buttons, or `e,levelup strength|agility|resistance|level`._'
         )
       end
     end

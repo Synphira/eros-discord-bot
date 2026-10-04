@@ -36,6 +36,8 @@ module Commands
         identity = title ? "_#{title}_ · #{target.gender}" : target.gender.to_s
         identity += " · **Hybrid:** #{hybrid}" if hybrid
         c.text_display(content: identity)
+        marks = Engine::Marks.profile_line(target)
+        c.text_display(content: marks) if marks
         c.separator(divider: true, spacing: :small)
         c.text_display(
           content: "**Current** Cycle #{target.current_cycle} · Floor #{target.current_floor} · Lv #{target.level}\n" \
@@ -218,7 +220,7 @@ module Commands
       player = ErosHelpers.require_player(event) or return
       if raw.nil? || raw.strip.empty?
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: 'Usage: `!name Your Character Name` — or `/profile` → **Rename**.')
+          c.text_display(content: 'Usage: `e,name Your Character Name` — or `/profile` → **Rename**.')
         end
         return
       end
@@ -270,6 +272,7 @@ module Commands
 
       container.row do |row|
         row.button(label: 'Rename', style: :success, custom_id: "eros:profile:rename:#{owner_id}")
+        row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
       end
     end
 

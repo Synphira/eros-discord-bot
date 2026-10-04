@@ -213,8 +213,29 @@ module Engine
       }
     ].freeze
 
+    CHEST_FIND_FLOOR = 8
+    CHEST_FIND_CHANCE = 0.45
+
+    CHEST_FINDS = [
+      { name: "Old Champion's Sword", type: 'weapon', slot: 'weapon', cost: 60, rarity: 3,
+        description: 'A notched blade from a delver who made it further than most.',
+        stat_modifiers: { 'strength' => 4, 'damage' => 2, 'crit_chance' => 0.05 } },
+      { name: 'Ghostsilk Gloves', type: 'accessory', slot: 'accessory', cost: 60, rarity: 3,
+        description: 'Gloves so light they seem to move a moment before you do.',
+        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.06 } },
+      { name: "Sister's Veil", type: 'armor', slot: 'head', cost: 60, rarity: 3,
+        description: 'A blessed veil left behind by some devout delver. Touches feel distant through it.',
+        stat_modifiers: { 'resistance' => 2, 'lust_resist' => 2 } },
+      { name: "Delver's Lucky Boots", type: 'armor', slot: 'feet', cost: 60, rarity: 3,
+        description: 'Scuffed boots with a knack for kicking open loose floorboards.',
+        stat_modifiers: { 'agility' => 2, 'treasure_lp' => 3, 'explore_lp' => 1 } },
+      { name: 'Moonlit Mail', type: 'armor', slot: 'chest', cost: 60, rarity: 3,
+        description: 'Fine silvered mail that stays cool no matter how hot things get.',
+        stat_modifiers: { 'resistance' => 4, 'max_hp' => 10, 'lust_resist' => 1 } }
+    ].freeze
+
     def sync_to_db!
-      (MIMIC_TEMPLATES + EVENT_MIMICS + BASIC_GEAR).each do |tpl|
+      (MIMIC_TEMPLATES + EVENT_MIMICS + BASIC_GEAR + CHEST_FINDS).each do |tpl|
         item = ::Equipment.find_or_create(name: tpl[:name]) do |e|
           apply_template!(e, tpl)
         end
@@ -236,14 +257,79 @@ module Engine
     end
     module_function :apply_template!
 
-    def open_chest(player)
+    CHEST_NAME = 'Treasure Chest'
+    CHEST_INTROS = [
+      'A chest sits alone in an alcove, its lid open just a crack. Something inside glints and seems to whisper your name.',
+      'An ornate chest waits in the middle of the room, gold trim catching the light. It looks far too inviting.',
+      'A battered old chest is half-buried in rubble. The lock has already been broken. Someone left in a hurry.',
+      'A velvet-lined chest rests on a pedestal, the lid propped open on a single golden hinge. You can almost hear it breathing.'
+    ].freeze
+    MIMIC_TELLS = [
+      'The lock is warm to the touch, and you could swear the keyhole just *licked its lips*.',
+      'A thin string of drool runs from under the lid.',
+      'The wood grain shifts when you look away, as if the chest is leaning toward you.'
+    ].freeze
+    LEAVE_LINES = [
+      'You turn your back on the chest and walk away. Its whispers fade behind you, and a quiet pride settles in your chest.',
+      'Not today. You leave the chest unopened, and the tower\'s pull loosens its grip on you a little.',
+      'You step past the chest without a second look. Denying the tower feels better than you expected.'
+    ].freeze
+
+    def mimic_chance(level)
+      [[0.1 + (level * 0.02), 0.45].min, 0.1].max
+    end
+
+    def leave_defiance(player)
+      [(player.max_defiance * 0.04).round, 3].max
+    end
+
+    def chest_choices(player)
+      [
+        { key: 'open', label: 'Open it', text: 'Gold, tonics, gear, or something alive', style: :success },
+        { key: 'leave', label: 'Leave it', text: "Resist the temptation (+#{leave_defiance(player)} defiance)",
+          style: :secondary }
+      ]
+    end
+
+    def present_chest!(player)
+      level = [player.current_floor, 1].max
+      mimic = rand <= mimic_chance(level)
+      player.store_event!(type: 'chest', level: level, mode: 'choice', name: CHEST_NAME, mimic: mimic)
+      log = ["**Floor #{level}** — a glint in the dark.", { scene: CHEST_INTROS.sample }]
+      tell_chance = (0.25 + (player.effective_agility * 0.01)).clamp(0.25, 0.6)
+      log << "_#{MIMIC_TELLS.sample}_" if mimic && rand < tell_chance
+      log << 'Do you open it?'
+      { ok: true, mode: :choice, name: CHEST_NAME, colour: 0xb8860b, log: log, choices: chest_choices(player) }
+    end
+
+    def choose_chest!(player, data, choice)
+      return { ok: true, mode: :choice, name: CHEST_NAME, colour: 0xb8860b, log: ['Open it or leave it?'],
+               choices: chest_choices(player) } unless %w[open leave].include?(choice)
+
+      player.clear_event!
+      if choice == 'leave'
+        before = player.defiance
+        gained = player.heal_defiance!(leave_defiance(player))
+        player.bump_tracker!('chests_ignored')
+        detail = gained.positive? ? "**+#{gained} Defiance** (`#{before}` → `#{player.defiance}/#{player.max_defiance}`)." :
+                                    '_Your defiance is already full._'
+        return { ok: true, mode: :done, name: CHEST_NAME, colour: 0x4a7c59, choices: [],
+                 log: [LEAVE_LINES.sample, detail] }
+      end
+
+      result = open_chest(player, mimic: data[:mimic])
+      { ok: true, mode: :done, name: CHEST_NAME, colour: 0xb8860b, choices: [], log: result[:lines],
+        broken: result[:broken] }
+    end
+
+    def open_chest(player, mimic: nil)
       sync_to_db!
       level = [player.current_floor, 1].max
-      lines = ["**Floor #{level}** — a glint in the dark.", 'You pry open a treasure chest and find:']
+      lines = ['You pry open the chest and find:']
 
-      mimic_chance = [[0.1 + (level * 0.02), 0.45].min, 0.1].max
+      mimic = rand <= mimic_chance(level) if mimic.nil?
       loot =
-        if rand <= mimic_chance
+        if mimic
           generate_mimic_loot(player, level)
         else
           generate_normal_loot(player, level)
@@ -304,7 +390,7 @@ module Engine
       lines = [
         "A suspicious **#{item.name}** — _#{item.description}_",
         "Stat bonus: #{stats}",
-        "Removal cost: **#{item.removal_cost}** LP _(use `!remove #{item.name}`)_",
+        "Removal cost: **#{item.removal_cost}** LP _(use `e,remove #{item.name}`)_",
         'The item writhes as you touch it — it binds itself to you!',
         grant[:message]
       ]
@@ -351,6 +437,12 @@ module Engine
     TREASURE_LP_BASE = 10
 
     def grant_random_basic_gear(player)
+      if player.current_floor >= CHEST_FIND_FLOOR && rand < CHEST_FIND_CHANCE
+        finds = CHEST_FINDS.map { |t| ::Equipment.first(name: t[:name]) }.compact
+        find = finds.reject { |item| player.owns_equipment?(item.id) }.sample
+        return describe_found_gear(player, find, rare: true) if find
+      end
+
       candidates = BASIC_GEAR.map { |t| ::Equipment.first(name: t[:name]) }.compact
       candidates.reject! { |item| player.owns_equipment?(item.id) }
       if candidates.empty?
@@ -359,28 +451,60 @@ module Engine
         return ["You already own every scrap of common gear here — the chest yields **+#{amount} LP** instead."]
       end
 
-      item = candidates.sample
+      describe_found_gear(player, candidates.sample)
+    end
+
+    def describe_found_gear(player, item, rare: false)
       result = player.grant_equipment!(item, auto_equip: false)
-      stats = format_stat_changes(item.stat_modifiers)
       [
-        "You find **#{item.name}** — _#{item.description}_",
-        "Stats: #{stats}",
+        "#{rare ? 'A rare find! ' : ''}You find **#{item.name}** — _#{item.description}_",
+        "Stats: #{format_stat_changes(item.stat_modifiers)}",
         result[:message],
-        '_Equip it with `!equip` when ready._'
+        '_Equip it with `e,equip` when ready._'
       ]
     end
+
+    FLAT_LABELS = {
+      'strength' => 'STR', 'agility' => 'AGI', 'resistance' => 'RES', 'submission' => 'Submission',
+      'damage' => 'damage', 'max_hp' => 'max defiance', 'defiance_regen' => 'defiance per combat round',
+      'victory_lp_bonus' => 'LP per victory', 'explore_lp' => 'LP per room explored', 'treasure_lp' => 'LP from chests',
+      'hit_lp' => 'LP when a monster gets its hands on you', 'submit_lp_bonus' => 'LP when you submit'
+    }.freeze
+    PERCENT_LABELS = {
+      'flee_bonus' => 'flee chance', 'crit_chance' => 'surprise-hit chance (double damage)',
+      'lifesteal' => 'of damage dealt returned as defiance', 'dodge_bonus' => 'dodge chance',
+      'satisfy_bonus' => 'satisfy chance', 'trap_avoid_bonus' => 'trap avoidance',
+      'intimidate_chance' => 'chance a monster backs off without touching you'
+    }.freeze
+    FLAG_LABELS = { 'deny_climax' => 'orgasms denied', 'cheat_death' => 'survive one defeat per run' }.freeze
+    TYPE_NAMES = { 'beast' => 'beasts', 'demon' => 'demons', 'slime' => 'slimes', 'undead' => 'undead',
+                   'plant' => 'plants', 'mimic' => 'mimics' }.freeze
 
     def format_stat_changes(stats)
       return '_none_' if stats.nil? || stats.empty?
 
-      stats.map do |stat, amount|
-        next "`#{stat}`" if amount == true
-        next "`#{stat}` #{amount}" unless amount.is_a?(Numeric)
-        next "`#{stat}` ×#{amount}" if stat.to_s.end_with?('_mult', '_rate')
+      stats.map { |stat, amount| format_stat(stat.to_s, amount) }.join(', ')
+    end
 
-        sign = amount.positive? ? '+' : ''
-        "`#{stat}` #{sign}#{amount}"
-      end.join(', ')
+    def format_stat(stat, amount)
+      return FLAG_LABELS.fetch(stat, stat.tr('_', ' ')) if amount == true
+      return "#{stat.tr('_', ' ')} #{amount}" unless amount.is_a?(Numeric)
+
+      sign = ->(n) { n.negative? ? "−#{n.abs}" : "+#{n}" }
+      pct = ->(n) { sign.call((n * 100).round) + '%' }
+      type, kind = stat.match(/\A(beast|demon|slime|undead|plant|mimic)_(thorns|lust_mult|dodge_bonus)\z/)&.captures
+      case
+      when FLAT_LABELS.key?(stat) then "#{sign.call(amount)} #{FLAT_LABELS[stat]}"
+      when PERCENT_LABELS.key?(stat) then "#{pct.call(amount)} #{PERCENT_LABELS[stat]}"
+      when stat == 'lust_resist' then "#{sign.call(-amount)} lust per hit"
+      when stat == 'lust_mult' then "#{pct.call(amount - 1)} lust taken"
+      when stat == 'encounter_rate' then "#{pct.call(amount - 1)} monster rooms"
+      when kind == 'thorns' then "#{sign.call(amount)} damage vs #{TYPE_NAMES[type]}"
+      when kind == 'lust_mult' then "#{pct.call(amount - 1)} lust from #{TYPE_NAMES[type]}"
+      when kind == 'dodge_bonus' then "#{pct.call(amount)} dodge vs #{TYPE_NAMES[type]}"
+      when stat.end_with?('_mult', '_rate') then "#{stat.tr('_', ' ')} ×#{amount}"
+      else "#{sign.call(amount)} #{stat.tr('_', ' ')}"
+      end
     end
   end
 

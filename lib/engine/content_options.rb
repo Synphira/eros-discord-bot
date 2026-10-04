@@ -17,6 +17,7 @@ module Engine
       'aphrodisiacs' => { label: 'Aphrodisiacs', group: :core, default: true, description: 'Mists, drugs, and heat.' },
       'possession' => { label: 'Possession', group: :core, default: true, description: 'Spirits controlling your body.' },
       'toys' => { label: 'Toys', group: :core, default: true, description: 'Dildos, vibrators, and devices.' },
+      'cum_play' => { label: 'Cum Play', group: :core, default: true, description: 'Creampies, being filled, and cum dripping out.' },
       'lactation' => { label: 'Lactation & Milking', group: :body, default: false, description: 'Milking shrines, nectar, and leaking breasts.' },
       'growth' => { label: 'Part Growth', group: :body, default: false, description: 'Fountains that enlarge body parts (capped).' },
       'inflation' => { label: 'Inflation', group: :body, default: false, description: 'Being pumped full until your belly swells.' },
@@ -31,6 +32,7 @@ module Engine
       'furry' => { label: 'Furry', group: :body, default: false, description: 'Growing fur, ears, and tails.' },
       'latex' => { label: 'Latex & Rubber', group: :body, default: false, description: 'Glossy rubber encasement.' },
       'living_clothing' => { label: 'Living Clothing', group: :body, default: false, description: 'Outfits that move — and bind to you.' },
+      'monster_transformation' => { label: 'Monster Transformation', group: :body, default: false, description: 'Becoming part slime, demon, or plant for a while.' },
       'spanking' => { label: 'Spanking & Discipline', group: :kink, default: false, description: 'Paddles, punishments, and rules.' },
       'denial' => { label: 'Orgasm Denial', group: :kink, default: false, description: 'Edging and being kept on the brink.' },
       'chastity' => { label: 'Chastity', group: :kink, default: false, description: 'Locked-up devices and teasing.' },
@@ -47,16 +49,29 @@ module Engine
       'bukkake' => { label: 'Bukkake', group: :kink, default: false, description: 'Many partners finishing on you.' },
       'facials' => { label: 'Facials', group: :kink, default: false, description: 'Finishing on your face.' },
       'pegging' => { label: 'Strap-ons', group: :kink, default: false, description: 'Strap-on play, giving or receiving.' },
-      'watersports' => { label: 'Watersports', group: :kink, default: false, description: 'Golden showers (always opt-in).' }
+      'watersports' => { label: 'Watersports', group: :kink, default: false, description: 'Golden showers (always opt-in).' },
+      'overstimulation' => { label: 'Overstimulation', group: :fetish, default: false, description: 'Forced orgasms, one after another.' },
+      'tickling' => { label: 'Tickling', group: :fetish, default: false, description: 'Feathers, giggles, and squirming.' },
+      'sissification' => { label: 'Sissification', group: :fetish, default: false, description: 'Frills, lace, makeup, and curtsies.' },
+      'corruption' => { label: 'Corruption', group: :fetish, default: false, description: 'Taint that builds each time you give in.' },
+      'body_writing' => { label: 'Body Writing', group: :fetish, default: false, description: 'Filthy words and tally marks inked on you.' },
+      'musk' => { label: 'Musk', group: :fetish, default: false, description: 'Heady scents that make you ache.' },
+      'temperature' => { label: 'Temperature Play', group: :fetish, default: false, description: 'Ice cubes and warm wax.' },
+      'size_difference' => { label: 'Size Difference', group: :fetish, default: false, description: 'Huge partners stretching you.' },
+      'degradation' => { label: 'Degradation', group: :fetish, default: false, description: 'Name-calling instead of praise.' },
+      'maid_service' => { label: 'Maid Service', group: :fetish, default: false, description: 'Uniforms and serving the house.' },
+      'pony_play' => { label: 'Pony Play', group: :fetish, default: false, description: 'Harnesses, bits, tails, and trotting.' },
+      'gags_hoods' => { label: 'Gags & Hoods', group: :fetish, default: false, description: 'Ball gags, ring gags, and leather hoods.' }
     }.freeze
 
     CORE_KEYS = PREFERENCES.select { |_, v| v[:group] == :core }.keys.freeze
     BODY_KEYS = PREFERENCES.select { |_, v| v[:group] == :body }.keys.freeze
     KINK_KEYS = PREFERENCES.select { |_, v| v[:group] == :kink }.keys.freeze
-    EXTRA_KEYS = (BODY_KEYS + KINK_KEYS).freeze
+    FETISH_KEYS = PREFERENCES.select { |_, v| v[:group] == :fetish }.keys.freeze
+    EXTRA_KEYS = (BODY_KEYS + KINK_KEYS + FETISH_KEYS).freeze
 
     KEYWORDS = {
-      'oral' => /\b(mouth|throat|suck\w*|lick\w*|laps?|lapping|tongue\w*|swallow\w*|blowjob|lips around)\b/i,
+      'oral' => /\b(mouth|throat|suck\w*|lick\w*|tongue\w*|swallow\w*|blowjob|lips around)\b|\blaps? (at|up)\b|\blapp(ed|ing)\b/i,
       'vaginal' => /\b(pussy|cunt|vagina\w*|womb|clit\w*|folds)\b/i,
       'anal' => /\b(ass|asses|anus|anal|asshole|backdoor)\b/i,
       'breast_play' => /\b(breasts?|nipples?|tits|bust)\b/i,
@@ -67,7 +82,8 @@ module Engine
       'exhibitionism' => /\b(public\w*|audience|onlookers|crowd|passersby|pass by|watching you|humiliat\w*)\b/i,
       'aphrodisiacs' => /\b(aphrodisiac\w*|drugg\w*)\b/i,
       'possession' => /\b(possess\w*|takes control|controls your)\b/i,
-      'toys' => /\b(dildo\w*|vibrat\w*|toys?)\b/i
+      'toys' => /\b(dildo\w*|vibrat\w*|toys?)\b/i,
+      'cum_play' => /\b(creampie\w*|(cum|seed) (inside|into) (you|your)|fill\w* (you|your \w+)( up)? with ([a-z]+ )?(cum|seed)|(fill|pump)\w* you full|(cum|seed) (spill|drip|leak|flood|pour|run|ooz|trickl)\w*|(drenched|plastered|coated|covered|dripping) (in|with) (cum|seed))\b/i
     }.freeze
 
     NEUTRAL_SCENES = [

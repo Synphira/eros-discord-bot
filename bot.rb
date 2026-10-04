@@ -9,9 +9,13 @@ require_relative 'lib/error_reporter'
 require_relative 'lib/presence'
 require_relative 'config/database'
 require_relative 'lib/engine/tower'
+require_relative 'lib/engine/weekly'
+require_relative 'lib/engine/elites'
 require_relative 'lib/engine/title_system'
 require_relative 'lib/engine/transformation_system'
 require_relative 'lib/engine/chastity_system'
+require_relative 'lib/engine/corruption'
+require_relative 'lib/engine/marks'
 require_relative 'lib/engine/profile_system'
 require_relative 'lib/engine/threat_calculator'
 require_relative 'lib/engine/monster_types'
@@ -23,6 +27,7 @@ require_relative 'lib/engine/shop'
 require_relative 'lib/engine/treasure'
 require_relative 'lib/engine/fetish_events'
 require_relative 'lib/engine/random_events'
+require_relative 'lib/engine/npc_system'
 require_relative 'lib/engine/content_options'
 require_relative 'lib/engine/extra_events'
 require_relative 'lib/engine/dev'
@@ -43,7 +48,7 @@ intents << :server_members if Presence.members_intent?
 bot = Discordrb::Commands::CommandBot.new(
   token: TOKEN,
   client_id: CLIENT_ID,
-  prefix: ENV.fetch('BOT_PREFIX', '!'),
+  prefix: ENV.fetch('BOT_PREFIX', 'e,').then { |p| [p, p.upcase].uniq },
   intents: intents
 )
 ErrorReporter.attach(bot)
@@ -65,6 +70,7 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::Profile,
   Commands::Transformation,
   Commands::Rest,
+  Commands::Parlour,
   Commands::Options,
   Commands::CursedShop,
   Commands::Dev,

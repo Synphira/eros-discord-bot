@@ -1,0 +1,188 @@
+:root {
+  --bg: #120b12;
+  --panel: #1d121d;
+  --panel-2: #26172a;
+  --text: #ecdfe9;
+  --muted: #a892a3;
+  --accent: #d0457a;
+  --good: #3fa66b;
+  --bad: #c0392b;
+  --lust: #e0558f;
+  --defiance: #5b8dd6;
+}
+
+* { box-sizing: border-box; }
+
+/* Body is its own scroll container: itch.io embeds the game in an iframe
+   with scrolling="no", which blocks normal page scrolling on phones. */
+html { height: 100%; overflow: hidden; }
+
+body {
+  margin: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  background: radial-gradient(circle at top, #2a1028 0%, var(--bg) 60%) fixed;
+  color: var(--text);
+  font: 16px/1.5 Georgia, 'Times New Roman', serif;
+}
+
+.hidden { display: none !important; }
+
+.gate, .loading {
+  max-width: 520px;
+  margin: 18vh auto;
+  text-align: center;
+  padding: 2rem;
+  background: var(--panel);
+  border: 1px solid #3a2238;
+  border-radius: 12px;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; padding: .75rem; gap: .75rem; }
+  .log { max-height: none; overflow-y: visible; }
+  .gate, .loading { margin: 8vh 1rem; }
+}
+
+.status, .main {
+  background: var(--panel);
+  border: 1px solid #3a2238;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.status h3 { margin: 0 0 .25rem; }
+.status .sub { color: var(--muted); font-size: .9rem; margin-bottom: .75rem; }
+.status .row { display: flex; justify-content: space-between; font-size: .95rem; }
+.status .meter { margin: .5rem 0; }
+.status .meter label { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); }
+
+.side-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .5rem 0 .75rem; }
+.side-nav .btn { padding: .4rem .5rem; font-size: .9rem; }
+.side-nav .btn:last-child:nth-child(odd) { grid-column: span 2; }
+
+.bar { height: 10px; background: #0c070c; border-radius: 5px; overflow: hidden; }
+.fill { height: 100%; transition: width .25s ease; }
+.fill.defiance { background: var(--defiance); }
+.fill.lust { background: var(--lust); }
+
+.title { margin: 0 0 .75rem; color: var(--accent); }
+
+.enemy { margin-bottom: .75rem; }
+.enemy .fill { background: var(--bad); }
+
+.log {
+  max-height: 46vh;
+  overflow-y: auto;
+  padding-right: .25rem;
+  margin-bottom: .75rem;
+}
+.log p { margin: .35rem 0; }
+.log .scene {
+  font-style: italic;
+  border-left: 3px solid var(--accent);
+  padding-left: .75rem;
+  color: #f3d6e6;
+}
+.log h2 { color: var(--accent); margin: .5rem 0; font-size: 1.2rem; }
+
+.sections .section {
+  background: var(--panel-2);
+  border-radius: 8px;
+  padding: .6rem .8rem;
+  margin: .5rem 0;
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.sections .section .text { white-space: pre-line; }
+.small { color: var(--muted); font-size: .85rem; }
+div.small p { margin: .15rem 0; }
+code { background: rgba(255, 255, 255, .08); border-radius: 4px; padding: 0 .3rem; font-size: .9em; }
+
+.actions .row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+
+.btn {
+  font: inherit;
+  border: 0;
+  border-radius: 8px;
+  padding: .5rem .9rem;
+  cursor: pointer;
+  color: #fff;
+  background: #4a3a4c;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.15); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--accent); }
+.btn.success { background: var(--good); }
+.btn.danger { background: var(--bad); }
+
+.input-form { display: flex; gap: .5rem; margin: .75rem 0; }
+.input-form input {
+  flex: 1;
+  font: inherit;
+  padding: .5rem .75rem;
+  border-radius: 8px;
+  border: 1px solid #4a3a4c;
+  background: #0c070c;
+  color: var(--text);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+  overflow-y: auto;
+}
+.modal-box {
+  width: min(560px, 100%);
+  background: var(--panel);
+  border: 1px solid #3a2238;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+.modal-box h2 { margin: 0 0 .5rem; color: var(--accent); }
+.modal-box textarea {
+  width: 100%;
+  font: .85rem/1.4 Consolas, monospace;
+  background: #0c070c;
+  color: var(--text);
+  border: 1px solid #4a3a4c;
+  border-radius: 8px;
+  padding: .5rem;
+  resize: vertical;
+  word-break: break-all;
+}
+.modal-box .row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+
+.error {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+  background: #3a0f12;
+  color: #ffd7d7;
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  max-height: 40vh;
+  overflow: auto;
+}

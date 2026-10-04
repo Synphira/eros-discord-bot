@@ -1,0 +1,786 @@
+# frozen_string_literal: true
+
+module Engine
+  module EventPacks
+    KINK = {
+      'hourglass_tease' => {
+        name: 'Hourglass Tease', tag: 'denial', tracker: 'denial_events',
+        blurb: 'a succubus lounges beside a giant hourglass.',
+        intro: 'A languid succubus lounges beside a hourglass taller than she is, its sand glowing pink. She pats the cushion ' \
+               'beside her. *"You may cum when the sand runs out, darling. Probably."*',
+        accept: {
+          label: 'Lie down', text: 'Play her game (orgasms denied next floor)',
+          scenes: ['She strokes you with slow, knowing hands, bringing you right to the brink every time the last grains fall — ' \
+                   'and then she flips the hourglass and lets go, smiling as you whine.',
+                   'Again and again she walks you to the edge and leaves you shaking there, until begging is the only word you know.'],
+          parts: { 'penis' => 'Her fingers ring the base of your cock and squeeze just as it starts to pulse, stopping you cold.',
+                   'vagina' => 'She circles your clit until your thighs quake, then lifts her finger away and blows on it, giggling.',
+                   'breasts' => 'She rolls your nipples between her fingertips, keeping you humming while the sand trickles down.' },
+          lp: 7, lust: 16,
+          condition: { key: 'hourglass_ache', name: 'Hourglass Ache', floors: 1,
+                       effects: { 'deny_climax' => true, 'lust_mult' => 1.1, 'satisfy_bonus' => 0.1 } }
+        },
+        alt: {
+          label: 'Hand her the wand', text: 'Let her tease you with a toy', needs_tag: 'toys',
+          scenes: ['She picks up a humming wand and presses it against you on its lowest setting, then clicks it off the instant ' \
+                   'you start to tense. On. Off. On. Off. Your hips chase it shamelessly.'],
+          parts: { 'penis' => 'The vibrator buzzes along the underside of your cock and vanishes just as you start to leak.',
+                   'vagina' => 'The vibrator hums against your clit, then pulls away, leaving you dripping and clenching on nothing.' },
+          lp: 8, lust: 18,
+          condition: { key: 'wand_tormented', name: 'Wand-Teased', floors: 2,
+                       effects: { 'deny_climax' => true, 'submit_lp_bonus' => 3 } }
+        },
+        decline: { label: 'Leave', text: 'Keep your release', lust: 4,
+                   scene: 'You back away. She turns the hourglass over anyway, just to watch you glance back at it.' }
+      },
+      'ruined_bloom' => {
+        name: 'Ruined Bloom', tag: 'denial', tracker: 'denial_events',
+        blurb: 'a crimson flower opens as you pass.',
+        intro: 'A huge crimson flower unfurls as you approach, its pollen sweet and heady. Soft vines reach out, and you get the ' \
+               'distinct sense it wants to drink your pleasure — right before you get to enjoy it.',
+        accept: {
+          label: 'Let it bloom', text: 'Give it your orgasms (denied next floor)',
+          scenes: ['The vines caress you with patient skill, building you higher and higher, until your whole body is singing. ' \
+                   'At the very last moment the flower inhales, and your orgasm slips out of you as a faint, unsatisfying shiver.',
+                   'It does it again. And again. You leave flushed, frantic, and hornier than you have ever been in your life.'],
+          parts: { 'penis' => 'A velvety petal wraps your cock and drinks every pulse, leaving you hard and aching for more.',
+                   'vagina' => 'A slender stamen flutters against your clit, sipping each spasm before it can crest.' },
+          lp: 6, lust: 15,
+          condition: { key: 'petal_tease', name: 'Petal-Teased', floors: 1,
+                       effects: { 'deny_climax' => true, 'plant_lust_mult' => 1.1, 'submit_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Step around', text: 'Avoid the vines (AGI)', lust: 3, escape: true,
+                   scene: 'You duck the reaching vines and hurry past. The flower closes with a sulky rustle.' },
+        fight: { label: 'Uproot it', type: :plant, text: 'The flower rears up on a thick, writhing stalk!' }
+      },
+      'keyholder_vault' => {
+        name: 'Keyholder\'s Vault', tag: 'chastity', tracker: 'chastity_events',
+        blurb: 'a demon locksmith polishes a golden key.',
+        intro: 'A dapper demon locksmith sits among shelves of glittering locks, a single golden key on a chain at his throat. ' \
+               '*"Everything precious deserves a lock,"* he purrs, lifting a gilded device from its velvet case.',
+        accept: {
+          label: 'Let him lock you', text: 'Wear his device (cursed gear: orgasms denied)',
+          scenes: ['He fits the gilded device with a craftsman\'s care, adjusting every strap until it sits snug and perfect, ' \
+                   'then turns the key with a soft, final *click* and tucks it back against his chest.',
+                   'He pats the warm metal fondly. *"There. Now you\'re mine to open."* The thought makes you throb against it.'],
+          parts: { 'penis' => 'Your cock is tucked into a sleek golden cage that leaves no room to swell, only to strain and drip.',
+                   'vagina' => 'A smooth golden shield covers your folds, and every step rubs it teasingly against your clit.' },
+          lp: 8, lust: 12, special: :chastity
+        },
+        decline: { label: 'Back away', text: 'Keep yourself unlocked (AGI)', lust: 2, escape: true,
+                   scene: 'You slip out before he can measure you. He chuckles and goes back to polishing his key.' }
+      },
+      'crystal_cage_slime' => {
+        name: 'Crystal Cage Slime', tag: 'chastity', tracker: 'chastity_events',
+        blurb: 'a glittering slime pools on a pedestal.',
+        intro: 'A clear, glittering slime oozes off a pedestal toward you. Where it touches stone, it hardens into flawless crystal — ' \
+               'and it is clearly eyeing your hips.',
+        accept: {
+          label: 'Let it settle', text: 'Let it harden over you (cursed gear: orgasms denied)',
+          scenes: ['The slime flows up your thighs, warm and wobbling, and settles over your most sensitive places. Then it sets, ' \
+                   'cool and hard and gleaming, sealing you away beneath a shell of living crystal.',
+                   'You can see everything through it and touch none of it. The slime hums contentedly against you whenever you squirm.'],
+          parts: { 'penis' => 'Your cock is sealed in a perfect crystal mould, visibly twitching inside it with nowhere to go.',
+                   'vagina' => 'Your pussy is sealed under clear crystal, every slick, needy clench on full display.' },
+          lp: 8, lust: 12, special: :chastity
+        },
+        decline: { label: 'Step back', text: 'Stay out of its reach', lust: 2,
+                   scene: 'You keep your distance. The slime hardens into a sulky lump on the floor.' },
+        fight: { label: 'Shatter it', type: :slime, text: 'The slime surges up, half liquid and half razor-bright crystal!' }
+      },
+      'kennel_mistress' => {
+        name: 'Kennel Mistress', tag: 'petplay', tracker: 'petplay_events',
+        blurb: 'a werewolf handler jingles a bag of treats.',
+        intro: 'A broad-shouldered werewolf woman leans on the gate of a cosy kennel lined with cushions and brushes. She jingles ' \
+               'a pouch of treats and whistles. *"Who\'s a good pup? Come here and find out."*',
+        accept: {
+          label: 'Crawl to her', text: 'Be her pup for a while',
+          scenes: ['You drop to all fours and pad over, and she buckles a soft leather collar on you and scratches behind your ears ' \
+                   'until you are leaning into her hand. She brushes you, feeds you treats, and teaches you to sit, beg and roll over.',
+                   'When you have earned it, she rewards her pup properly, mounting you right there on the cushions and growling ' \
+                   'praise into your ear.'],
+          parts: { 'vagina' => 'Her thick cock spreads your pussy wide as she ruts into you from behind.',
+                   'anus' => 'She takes your ass slow and deep, one hand on your collar, calling you a good pup with every thrust.',
+                   'penis' => 'She reaches under you and strokes your cock in time with her thrusts until you whimper.' },
+          lp: 6, lust: 12,
+          condition: { key: 'kennel_trained', name: 'Kennel-Trained', floors: 3,
+                       effects: { 'beast_submit_lp' => 3, 'agility' => 1, 'flee_bonus' => -0.05 } }
+        },
+        alt: {
+          label: 'Take her knot', text: 'Let her tie you like a real pup', needs_tag: 'knotting',
+          scenes: ['She grins all teeth and mounts you hard, rutting until her knot swells and locks you together. You stay ' \
+                   'tied on the cushions for a long, blissful while, panting as she strokes your back.'],
+          lp: 8, lust: 15,
+          condition: { key: 'knotted_pup', name: 'Knotted Pup', floors: 2,
+                       effects: { 'beast_lust_mult' => 0.85, 'beast_submit_lp' => 4 } }
+        },
+        decline: { label: 'Decline', text: 'Stay on two legs', lust: 2,
+                   scene: 'You shake your head. She tosses you a treat anyway. *"Door\'s open, pup."*' }
+      },
+      'kitten_parlour' => {
+        name: 'Kitten Parlour', tag: 'petplay', tracker: 'petplay_events',
+        blurb: 'a bell tinkles in a room full of cushions.',
+        intro: 'A sunny parlour full of scratching posts, yarn and plush beds. A sleek catfolk matron lounges on a chaise, ' \
+               'twirling a collar with a tiny silver bell. *"You look like you need someone to pet you."*',
+        accept: {
+          label: 'Purr', text: 'Become her kitten',
+          scenes: ['The bell jingles as she fastens the collar on, and a pair of soft ears are fitted into your hair. She has you ' \
+                   'chase ribbons across the rug, curl up in her lap, and nuzzle her hand until she is cooing at you.',
+                   'Then her strokes drift lower and lower, and her kitten ends up stretched across her lap, mewling and arching ' \
+                   'into every touch.'],
+          parts: { 'anus' => 'She slides a fluffy tail plug into your ass, and it swishes every time you wiggle.',
+                   'breasts' => 'She scratches lazy circles around your nipples until you are purring for real.',
+                   'vagina' => 'Her clever fingers slip between your folds and play with you like a toy until you squirm.',
+                   'penis' => 'She bats at your cock with a velvet paw, then wraps her hand around it and strokes until you yowl.' },
+          lp: 5, lust: 11,
+          condition: { key: 'belled_kitten', name: 'Belled Kitten', floors: 3,
+                       effects: { 'agility' => 1, 'dodge_bonus' => 0.05, 'submission' => 1 } }
+        },
+        alt: {
+          label: 'Nap in her lap', text: 'Just be petted',
+          scenes: ['You curl up in her lap and she strokes you from head to hip, slow and soothing, until you are purring and ' \
+                   'drowsy and utterly melted.'],
+          lp: 4, lust: 7,
+          condition: { key: 'lap_warmed', name: 'Lap-Warmed', floors: 2,
+                       effects: { 'healing_mult' => 1.15, 'resistance' => 1 } }
+        },
+        decline: { label: 'Decline', text: 'Not today, kitty', lust: 2,
+                   scene: 'You decline. She flicks her tail and goes back to her nap, unbothered.' }
+      },
+      'pendulum_sage' => {
+        name: 'Pendulum Sage', tag: 'mind_control', tracker: 'mind_control_events',
+        blurb: 'a silver amulet swings in the dark.',
+        intro: 'A robed lich sits cross-legged on a dais, a silver amulet swinging from one bony finger. Its voice is silk. ' \
+               '*"Watch it swing. Back and forth. You don\'t need to think anymore..."*',
+        accept: {
+          label: 'Watch', text: 'Follow the amulet',
+          scenes: ['Back and forth. Back and forth. Your eyelids grow heavy, your arms go loose, and your thoughts sink like ' \
+                   'stones into warm water. *Deeper,* it whispers, and you go deeper.',
+                   'At its word you strip, kneel, and spread yourself open, smiling dreamily. Every command lands like a caress, ' \
+                   'and obeying feels better than anything you have ever chosen for yourself.'],
+          parts: { 'vagina' => '*"You\'re soaking wet,"* it tells you, and suddenly you are, slick running down your thighs.',
+                   'penis' => '*"You\'re rock hard,"* it tells you, and your cock leaps to attention on command.',
+                   'breasts' => '*"Your nipples are so sensitive,"* it murmurs, and a brush of cold air makes you moan.' },
+          lp: 6, lust: 12,
+          condition: { key: 'swaying_thoughts', name: 'Swaying Thoughts', floors: 2,
+                       effects: { 'submission' => 2, 'resistance' => -1, 'undead_submit_lp' => 3 } }
+        },
+        decline: { label: 'Look away', text: 'Break eye contact', lust: 2,
+                   scene: 'You wrench your gaze from the amulet. The lich sighs and lets it go still.' },
+        fight: { label: 'Snatch the amulet', type: :undead, text: 'The lich rises, eyes flaring, and reaches for you!' }
+      },
+      'trigger_word' => {
+        name: 'Trigger Word', tag: 'mind_control', tracker: 'mind_control_events',
+        blurb: 'a demoness hums a single, sweet word.',
+        intro: 'A violet-skinned demoness reclines on a velvet couch, humming one word under her breath. Every time she says it ' \
+               'your knees go weak. *"Shall I teach it to you properly?"*',
+        accept: {
+          label: 'Learn the word', text: 'Let her plant it deep',
+          scenes: ['She whispers it again and again as she strokes your hair, pairing it with pleasure every single time. Soon ' \
+                   'the word alone sends a warm shiver through you; a few more repetitions and it drops you to your knees, moaning.',
+                   'By the end, one soft murmur of it melts you into a dazed, smiling puddle of want. She sends you off with a ' \
+                   'kiss — and warns you that every demon in the tower knows it now.'],
+          parts: { 'vagina' => 'She says it once more and your pussy clenches hard, a gush of slick soaking your thighs.',
+                   'penis' => 'She says it once more and your cock jerks, a bead of precum welling at the tip.' },
+          lp: 6, lust: 13,
+          condition: { key: 'implanted_trigger', name: 'Implanted Trigger', floors: 3,
+                       effects: { 'demon_lust_mult' => 1.15, 'demon_submit_lp' => 3, 'submission' => 1 } }
+        },
+        alt: {
+          label: 'Hear it once', text: 'Just a taste of the word',
+          scenes: ['She leans in and breathes it once against your ear. Your whole body flushes and sways, and you have to grab ' \
+                   'the couch to stay upright while she laughs softly.'],
+          lp: 4, lust: 8,
+          condition: { key: 'word_echo', name: 'Word Echo', floors: 1,
+                       effects: { 'submission' => 1, 'satisfy_bonus' => 0.05 } }
+        },
+        decline: { label: 'Cover your ears', text: 'Don\'t let her finish', lust: 2,
+                   scene: 'You clap your hands over your ears and walk out. Her soft laughter follows you anyway.' }
+      },
+      'honey_drip_throne' => {
+        name: 'Honey-Drip Throne', tag: 'mindbreak', tracker: 'mindbreak_events',
+        blurb: 'golden honey drips onto a waiting throne.',
+        intro: 'Warm, glowing honey drips from the ceiling onto a soft throne below. The smell is so sweet your thoughts start ' \
+               'to stick together, and a dreamy voice hums: *sit, and let it all go sticky and soft.*',
+        accept: {
+          label: 'Sit', text: 'Let your mind melt into honey',
+          scenes: ['Honey drips onto your head and seeps into your thoughts, warm and golden. Each drop dissolves another worry, ' \
+                   'another plan, another word, until all that is left in your head is *good... good... so good...*',
+                   'Your body takes over completely, rocking and moaning on the throne as wave after wave of syrupy bliss rolls ' \
+                   'through you. When you stand, you drift off with a slack, happy smile and not one single thought.'],
+          parts: { 'vagina' => 'Honey trickles down between your folds, and every slow drop makes your pussy flutter and cum.',
+                   'penis' => 'Honey glazes your cock, and it twitches and spurts again and again without you touching it.',
+                   'breasts' => 'Sticky honey coats your nipples, and they tingle so sweetly that you whimper.' },
+          lp: 8, lust: 14,
+          condition: { key: 'syrup_brained', name: 'Syrup-Brained', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.15, 'resistance' => -2, 'submit_lp_bonus' => 3 } }
+        },
+        decline: { label: 'Keep thinking', text: 'Hold onto your thoughts', lust: 3,
+                   scene: 'You shake the sweet fog from your head and walk on, a sweet golden haze still clinging to you.' }
+      },
+      'bliss_engine' => {
+        name: 'Bliss Engine', tag: 'mindbreak', tracker: 'mindbreak_events',
+        blurb: 'a crystal halo spins above a reclining couch.',
+        intro: 'A crystal halo spins slowly above a padded couch, humming a chord you can feel in your teeth. A plaque reads: ' \
+               '*PLEASURE, DIRECT. NO THINKING REQUIRED.*',
+        accept: {
+          label: 'Lie back', text: 'Let it play pleasure straight into your mind',
+          scenes: ['The halo lowers over your head and the world turns pink. Pleasure pours straight into your mind — no touch, ' \
+                   'no build-up, just orgasm after orgasm blooming behind your eyes until you forget your own name.',
+                   'Somewhere far away your body arches and shakes and drools. Up here there is only bright, pink, endless static, ' \
+                   'and you never want to leave it.'],
+          parts: { 'penis' => 'Your cock pulses with phantom orgasms, leaking steadily onto your stomach.',
+                   'vagina' => 'Your pussy spasms in time with the hum, soaking the couch beneath you.' },
+          lp: 9, lust: 16,
+          condition: { key: 'pink_static', name: 'Pink Static', floors: 2,
+                       effects: { 'lust_mult' => 1.15, 'submission' => 2, 'healing_mult' => 1.1 } }
+        },
+        decline: { label: 'Walk away', text: 'Keep your mind your own', lust: 3,
+                   scene: 'You resist the hum and leave. Your head tingles pinkly for a few minutes afterwards.' },
+        fight: { label: 'Smash the halo', type: :mimic, text: 'The couch snaps upright on spindly legs — a mimic!' }
+      },
+      'velvet_cocoon' => {
+        name: 'Velvet Cocoon', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
+        blurb: 'a giant silken moth spins in the corner.',
+        intro: 'A great moth with fur like velvet hangs from the ceiling, spinning thick, warm silk. Its feathery antennae ' \
+               'twitch toward you, and it chirrs an invitation to be wrapped up snug.',
+        accept: {
+          label: 'Be wrapped', text: 'Let the silk take your senses',
+          scenes: ['Layer by layer the silk winds around you, over your eyes, over your ears, until the world is dark and silent ' \
+                   'and impossibly warm. You can\'t see, can\'t hear — you can only *feel*.',
+                   'Then the moth\'s soft legs begin to explore you through gaps in the silk, every feathery stroke magnified until ' \
+                   'you are shaking in your cocoon.'],
+          parts: { 'breasts' => 'Feathery antennae flick across your nipples through the silk, and you gasp into the darkness.',
+                   'vagina' => 'Something soft and fuzzy strokes your clit in slow circles until your hips buck in the silk.',
+                   'penis' => 'A velvety limb curls around your cock and strokes, unseen, unheard, overwhelming.' },
+          lp: 6, lust: 13,
+          condition: { key: 'cocooned_senses', name: 'Cocooned Senses', floors: 2,
+                       effects: { 'lust_mult' => 1.1, 'resistance' => 1, 'hit_lp' => 1 } }
+        },
+        decline: { label: 'Back off', text: 'Keep your senses', lust: 1,
+                   scene: 'You back away. The moth folds its wings and goes back to spinning.' },
+        fight: { label: 'Fight it', type: :beast, text: 'The moth dives, wings beating up a storm of glittering dust!' }
+      },
+      'floating_tank' => {
+        name: 'Floating Tank', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
+        blurb: 'a dark, warm pool of salt water.',
+        intro: 'A pitch-black chamber holds a shallow pool of body-warm salt water. Lie back, and you would float in perfect ' \
+               'silence with nothing to feel but the water — and whatever lives in it.',
+        accept: {
+          label: 'Float', text: 'Drift in the dark',
+          scenes: ['You lie back and float. The dark and silence are total; you lose track of where your body ends and the water ' \
+                   'begins, drifting in perfect, weightless calm.',
+                   'Then something warm and gelatinous rises beneath you and begins to caress you, so gently at first that you ' \
+                   'can\'t tell if it is real. It isn\'t gentle for long.'],
+          parts: { 'vagina' => 'The slime slips between your folds and fills you, pulsing slowly in the dark.',
+                   'anus' => 'The slime eases into your ass, warm and wobbling, until you feel full in the weightless dark.',
+                   'penis' => 'The slime cups your cock and ripples around it until you cum into the water with a soundless cry.' },
+          lp: 6, lust: 13,
+          condition: { key: 'adrift', name: 'Adrift', floors: 2,
+                       effects: { 'dodge_bonus' => 0.05, 'slime_lust_mult' => 1.1, 'explore_lp' => 1 } }
+        },
+        alt: {
+          label: 'Earplugs only', text: 'Float with your eyes open',
+          scenes: ['You keep your eyes open and drift in silence, watching faint glowing shapes swirl beneath you. They brush ' \
+                   'your skin like curious fingertips, and you sigh and let them.'],
+          lp: 4, lust: 8,
+          condition: { key: 'salt_calm', name: 'Salt Calm', floors: 2, effects: { 'healing_mult' => 1.15 } }
+        },
+        decline: { label: 'Stay dry', text: 'Skip the pool', lust: 1,
+                   scene: 'You leave the dark water undisturbed. Something beneath it ripples, disappointed.' }
+      },
+      'gallery_pedestal' => {
+        name: 'Gallery Pedestal', tag: 'objectification', tracker: 'objectification_events',
+        blurb: 'a sculpture gallery with one empty plinth.',
+        intro: 'A marble gallery full of nude statues in lewd poses, every one of them a little *too* lifelike. One plinth ' \
+               'stands empty, and a curator spirit gestures to it. *"We have been missing a centrepiece."*',
+        accept: {
+          label: 'Pose', text: 'Become the centrepiece',
+          scenes: ['You strike a pose, and cool marble creeps up your skin until you are frozen — fully aware, utterly still, ' \
+                   'displayed like a work of art. Visitors drift by and admire your curves, running appreciative hands over you.',
+                   'Some touch more than others. You can\'t move, can\'t react, can only feel, and the helplessness makes you ache.'],
+          parts: { 'breasts' => 'A visitor cups your marble breasts and thumbs your nipples, murmuring about the craftsmanship.',
+                   'vagina' => 'Someone traces your marble folds with a fingertip, and you would moan if you had a voice.',
+                   'penis' => 'Someone strokes your stone cock admiringly, testing how hard the sculptor made it.' },
+          lp: 6, lust: 10,
+          condition: { key: 'marble_poise', name: 'Marble Poise', floors: 3,
+                       effects: { 'resistance' => 2, 'agility' => -1, 'max_hp_bonus' => 5 } }
+        },
+        decline: { label: 'Keep moving', text: 'Stay warm and moving', lust: 1,
+                   scene: 'You decline the plinth. The curator sighs and puts up a *Coming Soon* sign.' },
+        fight: { label: 'Fight it', type: :mimic, text: 'The empty plinth cracks open, revealing rows of teeth!' }
+      },
+      'banquet_platter' => {
+        name: 'Banquet Platter', tag: 'objectification', tracker: 'objectification_events',
+        blurb: 'a long feast table with a body-shaped gap.',
+        intro: 'A long banquet table is set for a feast, but the centrepiece is missing: a body-shaped space surrounded by bowls ' \
+               'of fruit, cream and chocolate. Hungry guests are already taking their seats.',
+        accept: {
+          label: 'Lie down', text: 'Be the serving platter',
+          scenes: ['You lie still as servants arrange fruit along your belly, drizzle chocolate over your hips and pipe cream ' \
+                   'wherever it will look prettiest. You are no longer a guest; you are tableware.',
+                   'The guests eat from you with slow, greedy relish, nibbling and kissing every morsel off your skin while you ' \
+                   'tremble and try very hard not to move.'],
+          parts: { 'breasts' => 'A strawberry sits on each nipple, and a demon plucks them off with his teeth one at a time.',
+                   'vagina' => 'Someone dips a finger into the cream between your thighs and finds your clit hiding underneath.',
+                   'penis' => 'Your cock is glazed in chocolate, and an eager guest takes their time cleaning every inch.' },
+          lp: 7, lust: 12,
+          condition: { key: 'platter_glaze', name: 'Platter Glaze', floors: 2,
+                       effects: { 'satisfy_bonus' => 0.1, 'submit_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Decline', text: 'Stay a guest', lust: 2,
+                   scene: 'You pull up a chair instead and eat a grape. The guests look very disappointed.' }
+      },
+      'confession_stage' => {
+        name: 'Confession Stage', tag: 'humiliation', tracker: 'humiliation_events',
+        blurb: 'a mirror on a stage reads minds aloud.',
+        intro: 'A gilded mirror stands on a small stage before a gallery of giggling imps. It promises to recite every filthy ' \
+               'fantasy you have ever had — out loud, in perfect detail — for a very generous fee.',
+        accept: {
+          label: 'Step up', text: 'Let it read you aloud',
+          scenes: ['The mirror clears its throat and begins. Every secret wish, every late-night daydream, every embarrassing ' \
+                   'kink is announced in a ringing voice while the imps howl and point. Your face goes scarlet.',
+                   'Worst of all, hearing them said out loud makes you want them more. By the end you are squirming, flushed ' \
+                   'and breathless, and the imps are chanting for an encore.'],
+          parts: { 'vagina' => '*"And look — just hearing it has made this one soaking wet,"* the mirror adds helpfully.',
+                   'penis' => '*"And look — this one is hard as a rock just hearing it,"* the mirror adds helpfully.' },
+          lp: 7, lust: 12,
+          condition: { key: 'cheeks_aflame', name: 'Scarlet Cheeks', floors: 2,
+                       effects: { 'lust_mult' => 1.1, 'victory_lp_bonus' => 2 } }
+        },
+        alt: {
+          label: 'Confess it yourself', text: 'Say it all with your own lips',
+          scenes: ['You take the stage and confess it all yourself, stammering every dirty secret while the imps hang on every ' \
+                   'word. Saying it in your own voice is somehow so much worse — and so much hotter.'],
+          lp: 8, lust: 14, defiance: -5,
+          condition: { key: 'spoken_secrets', name: 'Spoken Secrets', floors: 2,
+                       effects: { 'submission' => 1, 'submit_lp_bonus' => 3 } }
+        },
+        decline: { label: 'Walk off', text: 'Keep your secrets', lust: 2,
+                   scene: 'You walk off the stage. The mirror calls something embarrassing after you anyway.' }
+      },
+      'pantsing_imps' => {
+        name: 'Pantsing Imps', tag: 'humiliation', tracker: 'humiliation_events',
+        blurb: 'a gang of imps snickers behind a curtain.',
+        intro: 'A gang of grinning imps darts out from behind a curtain, already tugging at your clothes. *"Ooh, let\'s see ' \
+               'what it\'s hiding! You want your things back? You\'ll have to do tricks!"*',
+        accept: {
+          label: 'Play along', text: 'Earn your clothes back',
+          scenes: ['They strip you in seconds and scatter, each one waving a piece of your gear. To win it back you must twirl, ' \
+                   'bend, wiggle and present yourself on command while they critique every jiggle.',
+                   'Each trick is more shameless than the last, and each one leaves you hotter and more flustered. By the time ' \
+                   'you are dressed again you are giggling and shaking, aching all over.'],
+          parts: { 'anus' => 'For your boots, they make you bend over and spread your ass for a very long, very thorough look.',
+                   'breasts' => 'For your shirt, you must bounce your breasts for them while they count out loud.',
+                   'penis' => 'For your trousers, you must stroke your cock in front of them until they say stop.',
+                   'vagina' => 'For your underwear, you must spread your pussy open and describe how wet it is.' },
+          lp: 6, lust: 12,
+          condition: { key: 'bare_and_blushing', name: 'Bare and Blushing', floors: 2,
+                       effects: { 'agility' => 1, 'encounter_rate' => 1.1, 'submit_lp_bonus' => 1 } }
+        },
+        decline: { label: 'Grab your gear', text: 'Snatch it back fast (AGI)', lust: 2, escape: true,
+                   scene: 'You grab your clothes back before they get far and stalk off. The imps boo.' },
+        fight: { label: 'Chase them down', type: :demon, text: 'The ringleader imp cackles and pounces!' }
+      },
+      'gilded_contract' => {
+        name: 'Gilded Contract', tag: 'slavery', tracker: 'slavery_events',
+        blurb: 'a contract glows on a lectern.',
+        intro: 'A demon noblewoman in black silk waits beside a lectern, a glowing contract unrolled upon it. *"One night as my ' \
+               'pleasure-slave,"* she says. *"Owned completely. Rewarded handsomely. Sign, and kneel."*',
+        accept: {
+          label: 'Sign', text: 'Belong to her for a night',
+          scenes: ['Your name flares on the page and twin golden cuffs snap shut on your wrists. She leads you by a fine chain ' \
+                   'through her chambers, showing you off, ordering you to kneel, crawl, and wait — and you obey every word.',
+                   'She uses her property thoroughly and lovingly through the long night. At dawn she strokes your hair and tells ' \
+                   'you that you were worth every coin, and you glow with pride.'],
+          parts: { 'vagina' => 'She rides your face, then bends you over her bed and takes your pussy with a thick, enchanted strap.',
+                   'penis' => 'She mounts your cock at her leisure, using you like a toy and forbidding you to cum until she does.',
+                   'anus' => 'She plugs your ass with a jewelled stopper, a reminder of exactly whose you are.' },
+          lp: 9, lust: 12,
+          condition: { key: 'gilded_cuffs', name: 'Gilded Cuffs', floors: 3,
+                       effects: { 'submission' => 1, 'demon_submit_lp' => 3, 'treasure_lp' => 2 } }
+        },
+        decline: { label: 'Refuse', text: 'Leave the pen untouched', lust: 2,
+                   scene: 'You set the pen down. She rolls up the contract with an amused smile. *"Another time."*' },
+        fight: { label: 'Tear it up', type: :demon, text: 'You rip the contract — and her eyes flash with fury!' }
+      },
+      'harem_quarters' => {
+        name: 'Harem Quarters', tag: 'slavery', tracker: 'slavery_events',
+        blurb: 'silk curtains and the scent of incense.',
+        intro: 'Behind silk curtains, a coiled naga lord lounges on cushions amid his harem. His golden eyes settle on you. ' \
+               '*"A new acquisition? Take an anklet, my jewel, and learn your place among my treasures."*',
+        accept: {
+          label: 'Take the anklet', text: 'Join his harem for a while',
+          scenes: ['The harem bathes you, oils you, and dresses you in sheer silk and a jingling slave anklet. You learn to ' \
+                   'kneel prettily by his coils, to fan him, and to wait to be chosen.',
+                   'When he summons you, his coils wrap you close and he takes you slowly, adoringly, while the rest of the ' \
+                   'harem watches with envy. Being prized property feels like being adored.'],
+          parts: { 'vagina' => 'One of his twin cocks fills your pussy, rolling deep with every slow undulation of his coils.',
+                   'anus' => 'His second cock slides into your ass at the same time, stretching you full from both sides.',
+                   'penis' => 'His harem attends your cock with oiled hands while he takes you, keeping you hard and leaking.' },
+          lp: 8, lust: 14,
+          condition: { key: 'harem_favourite', name: 'Harem Favourite', floors: 3,
+                       effects: { 'healing_mult' => 1.2, 'submission' => 1 } }
+        },
+        alt: {
+          label: 'Serve the harem', text: 'Attend his other treasures instead',
+          scenes: ['You are given to the harem itself, and they keep you busy for hours, passing you between silk cushions, ' \
+                   'teaching you exactly how the master likes things done.'],
+          lp: 6, lust: 12,
+          condition: { key: 'harem_handmaid', name: 'Harem Handmaid', floors: 2,
+                       effects: { 'satisfy_bonus' => 0.1, 'explore_lp' => 1 } }
+        },
+        decline: { label: 'Decline', text: 'Belong to no one', lust: 2,
+                   scene: 'You bow out. The naga lord shrugs his coils. *"Your loss, jewel."*' }
+      },
+      'keyhole_corridor' => {
+        name: 'Keyhole Corridor', tag: 'voyeurism', tracker: 'voyeurism_events',
+        blurb: 'a long hall of locked doors with glowing keyholes.',
+        intro: 'A long hallway lined with locked doors, each keyhole spilling warm light and muffled moans. Every single one ' \
+               'is just the right height to kneel and peek through.',
+        accept: {
+          label: 'Peek', text: 'Look through the keyholes',
+          scenes: ['Behind the first door, a minotaur and a dryad are tangled together on a bed of moss. Behind the second, two ' \
+                   'succubi take turns with a moaning knight. You move from keyhole to keyhole, unable to stop.',
+                   'Your hand drifts between your legs as you watch, and you touch yourself in rhythm with whatever coupling is ' \
+                   'on the other side, holding your breath so they won\'t hear.'],
+          parts: { 'vagina' => 'You rub your clit faster as the knight cries out, biting your lip to stay quiet.',
+                   'penis' => 'You stroke your cock in time with the minotaur\'s thrusts, cumming against the door with a hush.' },
+          lp: 5, lust: 12,
+          condition: { key: 'peepers_flush', name: 'Peeper\'s Flush', floors: 2,
+                       effects: { 'treasure_lp' => 2, 'dodge_bonus' => 0.05 } }
+        },
+        decline: { label: 'Walk on', text: 'Give them their privacy', lust: 3,
+                   scene: 'You walk the whole hall without peeking once. It is the hardest thing you have done all day.' }
+      },
+      'scrying_pool' => {
+        name: 'Scrying Pool', tag: 'voyeurism', tracker: 'voyeurism_events',
+        blurb: 'a still pool shimmers with moving images.',
+        intro: 'A silver pool shows visions from all over the tower: adventurers caught, seduced and ravished in a dozen ' \
+               'different rooms. A ripple invites you to sit at the edge and watch as long as you like.',
+        accept: {
+          label: 'Gaze in', text: 'Watch the tower at play',
+          scenes: ['You sit and watch. An elf is sprawled beneath a lusty orc; a mage writhes in a nest of vines; a paladin moans ' \
+                   'helplessly between two incubi. The pool shifts to each new scene the instant you want it to.',
+                   'You learn a great deal about the floors ahead — and more about yourself, judging by how flushed and restless ' \
+                   'you are when you finally tear yourself away.'],
+          lp: 5, lust: 12,
+          condition: { key: 'scryers_insight', name: 'Scryer\'s Insight', floors: 3,
+                       effects: { 'explore_lp' => 2, 'flee_bonus' => 0.1 } }
+        },
+        alt: {
+          label: 'Find yourself', text: 'Ask the pool to show you',
+          scenes: ['The pool shows you yourself — every encounter you have had in the tower, replayed in loving detail. Watching ' \
+                   'your own moans and surrenders from the outside makes your whole body flush.'],
+          lp: 6, lust: 14,
+          condition: { key: 'self_seen', name: 'Self-Seen', floors: 2,
+                       effects: { 'lust_mult' => 1.1, 'victory_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Look away', text: 'Leave the pool', lust: 2,
+                   scene: 'You turn your back on the pool. The sounds coming from it follow you for a while.' }
+      },
+      'satyr_revel' => {
+        name: 'Satyr Revel', tag: 'group_sex', tracker: 'group_sex_events',
+        blurb: 'pipes and laughter drift from a moonlit grove.',
+        intro: 'A grove grows impossibly inside the tower, lit by moonlight and lanterns. Satyrs and nymphs dance and tumble ' \
+               'together around a fountain of wine, and a goat-legged reveller offers you a brimming cup.',
+        accept: {
+          label: 'Drink and dance', text: 'Join the revel',
+          scenes: ['The wine is sweet and strong, and within moments you are dancing, laughing, kissing whoever is closest. ' \
+                   'Hands pull you down into the soft grass and a tangle of eager bodies engulfs you.',
+                   'You lose count of partners, of positions, of orgasms. When you finally stagger out at dawn you are flushed, ' \
+                   'sticky, crowned with flowers and grinning like a fool.'],
+          parts: { 'vagina' => 'A satyr takes your pussy while a nymph rides your face, and you cum between them with a wild cry.',
+                   'anus' => 'Two satyrs share you, one buried in your ass while the other holds your hips and laughs.',
+                   'penis' => 'A pair of nymphs take turns bouncing on your cock while a third kisses you breathless.',
+                   'breasts' => 'Wine is poured over your breasts and lapped from your nipples by eager tongues.' },
+          lp: 8, lust: 16,
+          condition: { key: 'revel_wine', name: 'Revel Wine', floors: 2,
+                       effects: { 'lust_mult' => 1.1, 'strength' => 1, 'healing_mult' => 1.1 } }
+        },
+        decline: { label: 'Decline the cup', text: 'Stay sober', lust: 4,
+                   scene: 'You decline the cup and slip away. The music follows you, tempting, for a long time.' },
+        fight: { label: 'Break it up', type: :beast, text: 'A drunken satyr takes offence and lowers his horns!' }
+      },
+      'succubus_coven' => {
+        name: 'Succubus Coven', tag: 'group_sex', tracker: 'group_sex_events',
+        blurb: 'a circle of demons around a glowing sigil.',
+        intro: 'A coven of succubi and incubi kneels in a circle around a glowing sigil, chanting softly. They part to make room ' \
+               'in the centre, and a dozen pairs of hungry eyes turn to you. *"We share everything here."*',
+        accept: {
+          label: 'Step into the circle', text: 'Let the coven share you',
+          scenes: ['The sigil flares as you step into it, and the coven closes in. Soft hands, warm lips, curling tails and ' \
+                   'eager bodies surround you, passing you from lover to lover around the circle in a slow, endless rite.',
+                   'Every orgasm makes the sigil glow brighter and the chanting louder. By the end you are floating, glowing, ' \
+                   'and thoroughly blessed.'],
+          parts: { 'vagina' => 'An incubus takes your pussy while a succubus kisses you, their rhythm matching the chant.',
+                   'anus' => 'Another incubus slides into your ass from behind, and you are filled from both sides at once.',
+                   'penis' => 'A succubus sinks onto your cock and rides you in time with the chant, milking you again and again.',
+                   'breasts' => 'Two succubi tease your nipples with their tails until you arch off the floor.' },
+          lp: 8, lust: 16,
+          condition: { key: 'coven_shared', name: 'Coven-Shared', floors: 3,
+                       effects: { 'demon_lust_mult' => 0.9, 'demon_submit_lp' => 3, 'satisfy_bonus' => 0.05 } }
+        },
+        alt: {
+          label: 'Lead the rite', text: 'Take the high priest\'s place',
+          scenes: ['You take the place of honour, and the coven worships *you* — kneeling, kissing, offering themselves one by one ' \
+                   'until you have had your fill of every last one of them.'],
+          lp: 7, lust: 14,
+          condition: { key: 'coven_high_priest', name: 'Coven High Priest', floors: 2,
+                       effects: { 'strength' => 1, 'victory_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Back away', text: 'Leave the circle', lust: 4,
+                   scene: 'You back away from the sigil. The chant falters, then resumes, sounding faintly sulky.' }
+      },
+      'minotaur_circle' => {
+        name: 'Minotaur Circle', tag: 'bukkake', tracker: 'bukkake_events',
+        blurb: 'a ring of snorting minotaurs stamps the floor.',
+        intro: 'A ring of huge, snorting minotaurs stands around a straw-covered pit, stroking their enormous cocks. They stamp ' \
+               'their hooves in unison as you appear, beckoning you into the middle.',
+        accept: {
+          label: 'Kneel in the pit', text: 'Let the herd glaze you',
+          scenes: ['You kneel in the straw as the herd closes in, a forest of thick, throbbing shafts all aimed at you. One by ' \
+                   'one they bellow and unload, heavy ropes of hot seed splashing across your face, hair and shoulders.',
+                   'There is so much of it, so thick and warm, that you are glazed head to toe before the last bull finishes. They ' \
+                   'snort approvingly as you wobble to your feet, sticky and glowing.'],
+          parts: { 'breasts' => 'A bull aims squarely at your chest, coating your breasts until it runs off your nipples in strings.',
+                   'anus' => 'The last one bends you over and finishes all over your ass, slapping it for good measure.' },
+          lp: 8, lust: 14,
+          condition: { key: 'minotaur_glaze', name: 'Minotaur Glaze', floors: 2,
+                       effects: { 'beast_lust_mult' => 0.9, 'hit_lp' => 1 } }
+        },
+        decline: { label: 'Back out', text: 'Leave the herd', lust: 3,
+                   scene: 'You back out of the pit. The herd lows in disappointment.' },
+        fight: { label: 'Fight the bull', type: :beast, text: 'The lead bull lowers his horns and charges!' }
+      },
+      'incubus_choir' => {
+        name: 'Incubus Choir', tag: 'bukkake', tracker: 'bukkake_events',
+        blurb: 'a choir of incubi sings in a vaulted hall.',
+        intro: 'A dozen incubi in open choir robes stand on tiered steps, singing in gorgeous harmony. Their conductor taps his ' \
+               'baton and points to a kneeling cushion at the front. *"The finale needs a soloist."*',
+        accept: {
+          label: 'Take the cushion', text: 'Be the finale',
+          scenes: ['You kneel on the cushion as the song swells. Robes fall open and the choir strokes themselves in time, rising ' \
+                   'through each verse until the final, soaring note.',
+                   'On the crescendo they finish together, one after another, glazing your face and chest in warm, thick ropes as ' \
+                   'their voices ring through the hall. The conductor bows. You get a standing ovation.'],
+          parts: { 'breasts' => 'The basses aim low, and your breasts are left slick and glistening under the candlelight.' },
+          lp: 7, lust: 13,
+          condition: { key: 'choir_frosted', name: 'Choir-Frosted', floors: 2,
+                       effects: { 'submit_lp_bonus' => 2, 'lust_mult' => 1.05 } }
+        },
+        alt: {
+          label: 'Sing along', text: 'Hold the last note with your mouth', needs_tag: 'oral',
+          scenes: ['You keep your mouth open on the final note, and the choir fills it one after another until you are ' \
+                   'swallowing between gasps, warm and salty and humming along.'],
+          lp: 8, lust: 14,
+          condition: { key: 'choir_soloist', name: 'Choir Soloist', floors: 2,
+                       effects: { 'max_hp_bonus' => 10, 'submit_lp_bonus' => 1 } }
+        },
+        decline: { label: 'Leave', text: 'Skip the concert', lust: 2,
+                   scene: 'You slip out of the hall. The choir carries on without its soloist, a touch flat.' }
+      },
+      'portrait_studio' => {
+        name: 'Portrait Studio', tag: 'facials', tracker: 'facial_events',
+        blurb: 'an easel stands before a velvet stool.',
+        intro: 'An eccentric demon artist fusses at an easel, charcoal in hand. *"Ah! That face! My masterpiece needs a muse,"* ' \
+               'he declares, waving at a row of hulking orcs waiting by the wall. *"Sit, sit — and tilt your chin up."*',
+        accept: {
+          label: 'Sit for him', text: 'Be his glazed muse',
+          scenes: ['You sit on the velvet stool and tilt your face up. The orcs step forward one at a time, and each one finishes ' \
+                   'across your cheeks, nose and lashes while the artist sketches furiously, muttering about light and texture.',
+                   'By the last one your face is a glistening work of art. He holds up the finished sketch with tears in his eyes, ' \
+                   'and you have to admit — you look *radiant*.'],
+          lp: 6, lust: 11,
+          condition: { key: 'masterpiece_glow', name: 'Masterpiece Glow', floors: 2,
+                       effects: { 'victory_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } }
+        },
+        decline: { label: 'Decline', text: 'No portraits today', lust: 2,
+                   scene: 'You decline. The artist sighs dramatically and sketches a sad self-portrait instead.' }
+      },
+      'tavern_tribute' => {
+        name: 'Tavern Tribute', tag: 'facials', tracker: 'facial_events',
+        blurb: 'rowdy laughter spills from a hidden tavern.',
+        intro: 'A rowdy tavern full of off-duty orc mercenaries is tucked into the ruins. A kneeling cushion sits beside the ' \
+               'bar under a chalkboard that reads: *FACE OF THE NIGHT — DRINKS ON THE HOUSE.*',
+        accept: {
+          label: 'Kneel by the bar', text: 'Be the face of the night',
+          scenes: ['You kneel on the cushion and the tavern erupts in cheers. The mercenaries line up, cocks in hand, and one by ' \
+                   'one they finish on your upturned face, thick and warm, as the barkeep chalks up the tally.',
+                   'By closing time your face is glazed and dripping, and the whole tavern is toasting your name.'],
+          lp: 7, lust: 12,
+          condition: { key: 'tavern_frosting', name: 'Tavern Frosting', floors: 2,
+                       effects: { 'max_hp_bonus' => 5, 'submit_lp_bonus' => 2 } }
+        },
+        alt: {
+          label: 'Open wide', text: 'Catch it on your tongue', needs_tag: 'oral',
+          scenes: ['You kneel with your mouth open and your tongue out, and the mercenaries take careful aim. You swallow every ' \
+                   'load you catch, and the tavern roars its approval with each one.'],
+          lp: 8, lust: 14,
+          condition: { key: 'tavern_swallower', name: 'Tavern Favourite', floors: 2,
+                       effects: { 'max_hp_bonus' => 10, 'submission' => 1 } }
+        },
+        decline: { label: 'Leave', text: 'Just grab a drink and go', lust: 2,
+                   scene: 'You buy a drink, wave off the chalkboard, and leave to good-natured groans.' }
+      },
+      'harness_duel' => {
+        name: 'Harness Duel', tag: 'pegging', tracker: 'strap_on_events',
+        blurb: 'an amazon warrior tosses a harness at your feet.',
+        intro: 'A towering amazon warrior grins at you across a sparring ring, a thick strap-on harness dangling from her fist. ' \
+               '*"Winner wears it, loser takes it. Or you could just bend over and save us both the trouble."*',
+        accept: {
+          label: 'Bend over', text: 'Let her claim you',
+          scenes: ['She buckles the harness around her hips with a wolfish grin and bends you over the sparring rail, one strong ' \
+                   'hand pressing between your shoulders. She takes you slowly at first, then hard and deep and relentless.',
+                   'By the end you are gasping her name and pushing back against every thrust, thoroughly and happily conquered.'],
+          parts: { 'anus' => 'The thick strap stretches your ass wide, and she grinds it deep until you see stars.',
+                   'penis' => 'Every stroke drags across your prostate, and your cock bounces and drips untouched beneath you.',
+                   'vagina' => 'She switches holes on a whim, plunging the strap into your pussy until you are clenching around it.' },
+          lp: 7, lust: 14,
+          condition: { key: 'amazon_claimed', name: 'Amazon-Claimed', floors: 3,
+                       effects: { 'submission' => 1, 'submit_lp_bonus' => 3 } }
+        },
+        alt: {
+          label: 'Wear it', text: 'Strap on and take her instead',
+          scenes: ['You snatch the harness and buckle it on, and to your delight she drops to her knees, laughing. You take her ' \
+                   'right there in the ring, pounding into her while she moans and digs her nails into the sand.'],
+          parts: { 'anus' => 'When she begs for it, you flip her over and work the strap into her ass until she howls.' },
+          lp: 7, lust: 12,
+          condition: { key: 'amazon_tamer', name: 'Amazon Tamer', floors: 3,
+                       effects: { 'strength' => 2, 'victory_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Decline', text: 'Not today', lust: 2,
+                   scene: 'You decline the duel. She shrugs and swings the harness over her shoulder. *"Coward. Cute coward."*' },
+        fight: { label: 'Duel her', type: :demon, text: 'She laughs, tosses the harness aside, and lunges — her demon eyes blazing!' }
+      },
+      'jelly_harness' => {
+        name: 'Jelly Harness', tag: 'pegging', tracker: 'strap_on_events',
+        blurb: 'a wobbling slime shapes itself into a harness.',
+        intro: 'A friendly pink slime wobbles over and reshapes itself into a glistening harness and a thick, curved shaft. ' \
+               'Nearby, a dryad lounges on a mossy log, watching hopefully.',
+        accept: {
+          label: 'Wear the slime', text: 'Strap it on and please the dryad',
+          scenes: ['The slime wraps snugly around your hips and the shaft pulses as if it were your own. You *feel* everything ' \
+                   'through it, every squeeze and every flutter.',
+                   'The dryad pulls you onto the moss and wraps her legs around you, and you take her until she is babbling. When ' \
+                   'you cum, the slime does too, flooding her with warm jelly while she squeals.'],
+          parts: { 'penis' => 'Your own cock is cradled inside the slime, stroked with every thrust you give her.',
+                   'vagina' => 'Inside the harness, a slick nub of slime grinds against your clit with every stroke.' },
+          lp: 6, lust: 12,
+          condition: { key: 'jelly_strapped', name: 'Jelly-Strapped', floors: 3,
+                       effects: { 'strength' => 1, 'slime_dodge_bonus' => 0.05, 'victory_lp_bonus' => 1 } }
+        },
+        alt: {
+          label: 'Let her wear it', text: 'Let the dryad peg you', needs_tag: 'anal',
+          scenes: ['The slime hops over to the dryad, who buckles it on with a delighted grin and bends you over the log.'],
+          parts: { 'anus' => 'The slime shaft wriggles into your ass and swells to fit you perfectly while the dryad rides you hard.',
+                   'penis' => 'The slime throbs against your prostate until your cock spurts across the moss.' },
+          lp: 7, lust: 14,
+          condition: { key: 'moss_pegged', name: 'Moss-Pegged', floors: 2,
+                       effects: { 'plant_submit_lp' => 3, 'submission' => 1 } }
+        },
+        decline: { label: 'Decline', text: 'Leave them to it', lust: 2,
+                   scene: 'You wave politely and move on. The slime wobbles over to the dryad on its own.' }
+      },
+      'fox_spring' => {
+        name: 'Fox Spring', tag: 'watersports', tracker: 'watersports_events',
+        blurb: 'steam curls off a secluded hot spring.',
+        intro: 'A secluded hot spring steams in a mossy cavern. A many-tailed fox spirit lounges at the edge, sake cup in hand, ' \
+               'and grins at you. *"Everything here belongs to me. Want to belong too? I\'ll mark you."*',
+        accept: {
+          label: 'Be marked', text: 'Let her mark you as hers',
+          scenes: ['She rises from the water, stands over you as you kneel on the warm stones, and lets go. A hot golden stream ' \
+                   'splashes over your chest and belly, steaming in the cool air, her scent soaking into your skin.',
+                   'She laughs and pulls you into the spring afterwards, nuzzling your neck. *"There. Now every fox in the tower ' \
+                   'will know whose you are."*'],
+          parts: { 'breasts' => 'She aims for your breasts, and warm streams trickle over your stiff nipples and down your belly.',
+                   'vagina' => 'She aims lower, the hot stream splashing directly over your pussy until you moan.',
+                   'penis' => 'She aims lower, the hot stream splashing over your cock until it throbs and twitches.' },
+          lp: 6, lust: 10,
+          condition: { key: 'fox_scented', name: 'Fox-Scented', floors: 3,
+                       effects: { 'beast_lust_mult' => 0.9, 'treasure_lp' => 1 } }
+        },
+        decline: { label: 'Decline', text: 'Just enjoy the steam', lust: 1,
+                   scene: 'You decline with a smile. She shrugs and sips her sake. *"Suit yourself."*' }
+      },
+      'troll_tribute' => {
+        name: 'Troll Tribute', tag: 'watersports', tracker: 'watersports_events',
+        blurb: 'a troll chieftain grunts from a fur-lined throne.',
+        intro: 'A massive troll chieftain sprawls on a fur-draped throne, surrounded by his tribe. He grunts and points at the ' \
+               'floor before him. Every member of the tribe, you notice, carries his scent — and they all look very content.',
+        accept: {
+          label: 'Kneel', text: 'Be marked into the tribe',
+          scenes: ['You kneel before the throne. The chieftain stands, towering over you, and a thick, hot golden stream splashes ' \
+                   'over your shoulders and back, his musky scent soaking into you while the tribe cheers.',
+                   'When he finishes, he pats your head with one enormous hand. You belong to the tribe now, and the feeling is ' \
+                   'warm, primal and strangely wonderful.'],
+          parts: { 'breasts' => 'The warm stream runs over your breasts and drips from your nipples onto the furs.' },
+          lp: 7, lust: 10,
+          condition: { key: 'tribe_marked', name: 'Tribe-Marked', floors: 3,
+                       effects: { 'strength' => 1, 'beast_submit_lp' => 2 } }
+        },
+        alt: {
+          label: 'Drink the tribute', text: 'Take it the traditional way', needs_tag: 'oral',
+          scenes: ['You kneel and open your mouth, and the chieftain fills it with his hot, salty stream. You swallow as much as ' \
+                   'you can while the rest runs down your chin and chest, and the whole tribe roars its approval.'],
+          lp: 8, lust: 12,
+          condition: { key: 'tribe_honoured', name: 'Tribe-Honoured', floors: 3,
+                       effects: { 'max_hp_bonus' => 10, 'beast_submit_lp' => 3 } }
+        },
+        decline: { label: 'Decline', text: 'Bow and leave', lust: 1,
+                   scene: 'You bow respectfully and back away. The chieftain grunts and waves you off.' },
+        fight: { label: 'Challenge him', type: :beast, text: 'The chieftain roars and heaves himself off his throne!' }
+      },
+      'brat_tamer' => {
+        name: 'Brat Tamer', tag: 'spanking', tracker: 'discipline_events',
+        blurb: 'a grinning oni barmaid cracks her knuckles.',
+        intro: 'A cheerful, broad-hipped oni barmaid wipes down a tavern table and eyes you knowingly. She sits down and pats her ' \
+               'lap. *"You\'ve got brat written all over you, sweetheart. Over my knee."*',
+        accept: {
+          label: 'Over her knee', text: 'Get a playful spanking',
+          scenes: ['You drape yourself over her lap and she tugs your clothes down with a hum of approval. Her big palm comes down ' \
+                   'in brisk, ringing smacks, each one a bright sting that melts into spreading warmth.',
+                   'She keeps a steady rhythm until your cheeks glow rosy pink and your whole body tingles. Then she rubs the warmth ' \
+                   'in slowly, chuckling at how you squirm and push back into her hand.'],
+          parts: { 'anus' => 'She gives your rosy ass one last squeeze and a pat. *"Much better. Now you\'re sweet."*',
+                   'vagina' => 'Her fingers brush between your thighs and come away slick. *"Oh, you liked that, didn\'t you?"*',
+                   'penis' => 'Your cock is trapped hard against her thigh, twitching with every smack.' },
+          lp: 6, lust: 10, defiance: -5,
+          condition: { key: 'rosy_cheeks', name: 'Rosy Cheeks', floors: 3,
+                       effects: { 'resistance' => 1, 'submission' => 1, 'satisfy_bonus' => 0.05 } }
+        },
+        alt: {
+          label: 'Fetch the paddle', text: 'Ask for her leather paddle',
+          scenes: ['She beams and fetches a soft leather paddle from behind the bar. Each playful swat lands with a loud, ' \
+                   'satisfying *thwap* and a bloom of tingling heat, and the whole tavern counts along until you are glowing pink.'],
+          lp: 7, lust: 12, defiance: -5,
+          condition: { key: 'paddle_glow', name: 'Paddle Glow', floors: 2,
+                       effects: { 'strength' => 1, 'submit_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Decline', text: 'Behave yourself', lust: 2,
+                   scene: 'You decline politely. She laughs. *"Good behaviour? That\'s even cuter."*' },
+        fight: { label: 'Be a brat', type: :demon, text: 'You blow a raspberry. She grins and rolls up her sleeves.' }
+      },
+      'dryad_throne' => {
+        name: 'Dryad Throne', tag: 'feet', tracker: 'foot_fetish_events',
+        blurb: 'bare feet dangle from a throne of roots.',
+        intro: 'A regal dryad queen lounges on a throne of living roots, bare feet resting on a cushion of moss. She wiggles her ' \
+               'toes at you. *"My attendants are away. Kneel, and see to my feet."*',
+        accept: {
+          label: 'Kneel and worship', text: 'Worship her feet',
+          scenes: ['You kneel and take her soft, petal-scented feet in your hands, massaging her arches and kissing each toe in ' \
+                   'turn while she sighs approvingly. She presses her sole to your cheek, then your chest, claiming you with it.',
+                   'She rewards your devotion by stroking you with her feet, slow and teasing, toes curling as you moan for her.'],
+          parts: { 'penis' => 'She cradles your cock between her soles and strokes it until you spill across her toes.',
+                   'vagina' => 'She rubs her toes between your folds, pressing against your clit until you cum on her foot.',
+                   'breasts' => 'She drags her toes across your breasts, pinching your nipples between them with a giggle.' },
+          lp: 5, lust: 10,
+          condition: { key: 'sole_devotee', name: 'Sole Devotee', floors: 3,
+                       effects: { 'agility' => 1, 'plant_submit_lp' => 2 } }
+        },
+        decline: { label: 'Decline', text: 'Keep your dignity', lust: 1,
+                   scene: 'You bow and walk away. The queen wiggles her toes at your back, unbothered.' }
+      }
+    }.freeze
+  end
+end

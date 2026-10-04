@@ -59,7 +59,7 @@ module Engine
       TYPES.keys
     end
 
-    def generate_monster(floor, player: nil, type: nil)
+    def generate_monster(floor, player: nil, type: nil, elite: true)
       f = [floor.to_i, 1].max
       type = type && TYPES.key?(type.to_sym) ? type.to_sym : weighted_type(player)
       info = TYPES.fetch(type)
@@ -78,7 +78,7 @@ module Engine
         lust_damage = [(lust_damage * threat.lust_mult * cycle).round, 1].max
       end
 
-      {
+      monster = {
         name: info[:common_monsters].sample,
         type: type.to_s,
         type_name: info[:name],
@@ -90,6 +90,7 @@ module Engine
         hp: hp,
         max_hp: hp
       }
+      player && elite ? Engine::Elites.roll!(monster, f) : monster
     end
 
     def weighted_type(player)
@@ -101,6 +102,7 @@ module Engine
           end
           weight *= Engine::TransformationSystem.monster_weight(player, type)
         end
+        weight *= Engine::Weekly.monster_weight(type)
         [type, [weight, 0.01].max]
       end
       total = weights.sum { |(_, w)| w }

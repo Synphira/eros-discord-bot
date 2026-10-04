@@ -12,7 +12,9 @@ module Commands
       'body' => { keys: Engine::ContentOptions::BODY_KEYS, title: 'Opt-in bodies',
                   placeholder: 'Body & transformation events (opt-in)' },
       'kink' => { keys: Engine::ContentOptions::KINK_KEYS, title: 'Opt-in kinks',
-                  placeholder: 'Kink & scenario events (opt-in)' }
+                  placeholder: 'Kink & scenario events (opt-in)' },
+      'fetish' => { keys: Engine::ContentOptions::FETISH_KEYS, title: 'Opt-in fetishes',
+                    placeholder: 'More fetish events (opt-in)' }
     }.freeze
 
     module_function
@@ -71,7 +73,7 @@ module Commands
         end
         c.text_display(
           content: '-# Changes save instantly. Sizes appear in scenes and some opt-in events. ' \
-                   'Quick toggle: `!fetish_options <option> <on/off>`.'
+                   'Quick toggle: `e,fetish_options <option> <on/off>`.'
         )
       end
     end
@@ -105,9 +107,9 @@ module Commands
           GROUPS.map do |_, spec|
             items = spec[:keys].map { |k| "#{prefs[k] ? '✅' : '⬜'} `#{k}`" }
             "**#{spec[:title]}**\n#{items.join(' · ')}"
-          end.join("\n\n") + "\n\n-# Usage: `!fetish_options <option> <on/off>` — or use `/options` for menus."
+          end.join("\n\n") + "\n\n-# Usage: `e,fetish_options <option> <on/off>` — or use `/options` for menus."
         elsif key.nil?
-          "Unknown option **#{option}**. Use `!fetish_options` to list them."
+          "Unknown option **#{option}**. Use `e,fetish_options` to list them."
         elsif value.nil?
           "**#{Engine::ContentOptions.preference(key)[:label]}** is currently **#{prefs[key] ? 'on' : 'off'}**. " \
             "Add `on` or `off` to change it."
@@ -121,13 +123,13 @@ module Commands
       end
     end
 
-    string_select(custom_id: /^eros:opts:(core|body|kink):\d+$/) do |event|
+    string_select(custom_id: /^eros:opts:(core|body|kink|fetish):\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
       player = Player[event.user.id]
       next unless player
 
-      group = event.custom_id[/\Aeros:opts:(core|body|kink):\d+\z/, 1]
+      group = event.custom_id[/\Aeros:opts:(core|body|kink|fetish):\d+\z/, 1]
       Commands::Options.set_group!(player, group, Array(event.values))
       Commands::Options.show(event, notice: '_Preferences saved._')
     end
@@ -173,11 +175,11 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: '## Sluttify')
         c.text_display(content: message)
-        c.text_display(content: '-# Run `!sluttify` again to flip back, or fine-tune in `/options`.')
+        c.text_display(content: '-# Run `e,sluttify` again to flip back, or fine-tune in `/options`.')
       end
     end
 
-    command(:sluttify, description: 'Enable or disable every content toggle at once: !sluttify [on/off]') do |event, state|
+    command(:sluttify, description: 'Enable or disable every content toggle at once: e,sluttify [on/off]') do |event, state|
       Commands::Options.sluttify(event, state)
       nil
     end
@@ -186,7 +188,7 @@ module Commands
       Commands::Options.toggle(event, event.options['option'], event.options['state'])
     end
 
-    command(:fetish_options, aliases: [:fetish], description: 'Toggle a content theme: !fetish_options <option> <on/off>') do |event, *args|
+    command(:fetish_options, aliases: [:fetish], description: 'Toggle a content theme: e,fetish_options <option> <on/off>') do |event, *args|
       state = args.size > 1 ? args.pop : nil
       Commands::Options.toggle(event, args.join(' '), state)
       nil
