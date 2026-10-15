@@ -82,10 +82,14 @@ module Engine
         special: 'primal_rage'
       },
       Tower::FINAL_BOSS_FLOOR => {
-        name: 'The Tower Lord',
+        name: 'Eros',
+        title: 'Eros, Goddess of Lust',
         type: 'demon',
-        type_name: 'Archdemon',
-        description: 'The ancient sovereign of the Endless Ruins. Every sin committed in the tower flows up into its throne, and it can become anything you have ever wanted to be fucked by.',
+        type_name: 'Goddess of Lust',
+        description: 'The goddess who built this tower as her temple lounges on a throne of gold and silk, naked but for a crown and a ' \
+                     'sheer veil that hides nothing. Every sin committed below flows up into her, and every delver who ' \
+                     'climbs this far was always climbing towards her lap. She smiles at you like she has been waiting. ' \
+                     '"There you are, pet. Did you really think you were escaping?"',
         color: 0x5c0a2e,
         strength: 28,
         agility: 16,
@@ -247,28 +251,30 @@ module Engine
         unimpressed: ['The Alpha Beast huffs and turns its head away, unimpressed.'],
         beaten: ['The Alpha Beast whimpers and rolls onto its back, baring its belly to you.']
       },
-      'The Tower Lord' => {
+      'Eros' => {
         assault: {
-          'vagina' => ['The Tower Lord reshapes itself into exactly what you crave and fills your cunt with it, every thrust timed perfectly to the pounding of your heart.',
-                       'A dozen shadowy hands hold you open on the throne while the Tower Lord fucks your pussy deep and slow, its eyes never leaving yours.'],
-          'penis' => ["The Tower Lord's hand closes around your cock and every sin in the tower pours through its touch, each stroke like a hundred tongues at once.",
-                      'It pulls you onto the throne and sinks down on your cock, its body impossibly hot and tight as it rides you.'],
-          'anus' => ['The Tower Lord bends you over its throne and fills your ass with a cock that grows thicker every time you moan.'],
-          'breasts' => ["Shadowy mouths open on the Tower Lord's palms, and it cups your breasts so they can suck your nipples."],
-          'any' => ['The Tower Lord pulls you into its lap, and every desire you have ever had floods your mind at once as its hands roam your body.',
-                    'The throne comes alive beneath you, its carved figures reaching out to stroke and grope you while the Tower Lord watches.']
+          'vagina' => ['Eros pulls you into her lap and slides two fingers into your cunt, curling them lazily while she purrs in your ear. "So wet already. You climbed thirty-five floors just for this, didn\'t you, pet?"',
+                       'A cock of rosy, glowing light blooms between Eros\'s thighs, shaped exactly the way you have always craved. She lays you back across her throne and fucks your pussy slow and deep, smiling down at every helpless moan.'],
+          'penis' => ['Eros wraps one perfect hand around your cock and strokes you with maddening slowness, every sin in the tower flowing through her touch. "Don\'t you dare finish until I say so."',
+                      'Eros pushes you down onto her throne and sinks onto your cock, her divine pussy hot and impossibly tight, riding you with a smirk while you squirm beneath her.'],
+          'anus' => ['Eros bends you over the arm of her throne and fills your ass with a cock of glowing rose light, thrusting deeper every time you gasp. "Good pet. Take all of your goddess."'],
+          'breasts' => ['Eros cups your breasts and rolls your nipples between her fingertips, teasing them stiff until you whimper and arch into her hands.'],
+          'any' => ['Eros catches your chin and kisses you, and every desire you have ever hidden pours out of you and into her. When she lets go, you are trembling and leaning after her lips.',
+                    'Silk ribbons slither from Eros\'s throne and bind your wrists while her hands roam every inch of you, unhurried and possessive, teasing until you beg.']
         },
         willing: {
-          'vagina' => ["You climb into the Tower Lord's lap and sink down on its cock, moaning as it reshapes itself to fill your cunt perfectly."],
-          'penis' => ['You let the Tower Lord take your cock in its hand, and the sins of the whole tower pour through you as it strokes.'],
-          'anus' => ['You bend over the throne and offer yourself, crying out as the Tower Lord fills your ass.'],
-          'breasts' => ['You offer your breasts to the shadowy mouths in its palms and moan as they suck.'],
-          'any' => ['You kneel before the throne and give yourself to the Tower Lord completely, and it takes everything you offer.']
+          'vagina' => ['You climb into Eros\'s lap and sink down onto the glowing cock she conjures for you, moaning as she holds your hips and makes you ride it at her pace.',
+                       'You kneel between Eros\'s thighs and worship her pussy with your tongue, and she rewards you by sliding her toes between your legs and rubbing your cunt until you shake.'],
+          'penis' => ['You offer your cock to Eros and she takes it in her mouth, sucking you slow and deep while her eyes stay locked on yours, daring you to last.'],
+          'anus' => ['You bend over her throne and spread yourself for her, crying out as Eros fills your ass with her glowing cock and calls you her good little slut.'],
+          'breasts' => ['You press your breasts into Eros\'s hands and let her squeeze and suck your nipples until they ache, sighing as she praises how eagerly you offer them.'],
+          'any' => ['You kneel at the foot of her throne, kiss her feet, and give yourself to Eros completely. She strokes your hair and takes everything you offer.']
         },
-        wanting: ['The Tower Lord smiles. "Every sin in this tower is mine. Show me yours."'],
-        sated: ['The Tower Lord shudders, and the whole tower shudders with it. It sinks back into its throne, utterly sated.'],
-        unimpressed: ['The Tower Lord barely stirs. "I have tasted every sin in this tower. Yours bore me."'],
-        beaten: ['The Tower Lord reels back into its throne under your final blow, its shadows retreating into the walls. For once, the tower failed to claim you.']
+        wanting: ['Eros smirks and tilts your chin up with one finger. "Did I say we were finished, pet? Again."',
+                  '"Mmm, better," Eros purrs. "But my temple expects devotion, not effort. Show me more."'],
+        sated: ['Eros arches on her throne and cums with a cry that echoes down every floor of the tower, the walls shuddering with her pleasure. She sinks back, flushed and glowing, and laughs softly. "Good pet. Go on, then. I\'ll be waiting for you to climb back to me."'],
+        unimpressed: ['Eros barely glances at you, examining her nails. "Is that all? I have had better devotion from the slimes on floor one."'],
+        beaten: ['Your final blow drives Eros back into her throne. She stares at you, then laughs, low and delighted. "Defiant to the very top. How delicious." She waves you past. "Run along, pet. The tower will bring you back to me."']
       }
     }.freeze
 
@@ -280,9 +286,11 @@ module Engine
       'root_grasp' => ["The %<name>s's roots burst up and coil around your ankles, sliding up your thighs and slowing you down!"],
       'soul_drain' => ['As you submit, the %<name>s kisses you and draws the warmth right out of you, leaving you shivering and weaker!'],
       'primal_rage' => ['The %<name>s goes into rut! Its cock swells, its musk thickens, and its attacks grow more ferocious!'],
-      'dominion_block' => ['%<name>s raises a hand and the chamber doors slam shut. "Leaving so soon?"'],
-      'dominion_heat' => ["The tower pulses with %<name>s's will, and every sin in its walls floods into you as heat!"],
-      'dominion_rage' => ['%<name>s rises from its throne, and its touch burns hotter than ever!']
+      'dominion_block' => ['%<name>s crooks one finger and the chamber doors slam shut. "Leaving so soon, pet? I didn\'t give you permission."',
+                           '%<name>s laughs as you turn to run. "Sit." Your body obeys before your mind does, and you stay right where she wants you.'],
+      'dominion_heat' => ["The tower pulses with %<name>s's will, and every sin in its walls floods into you as heat!",
+                          '%<name>s blows you a kiss, and it lands between your legs like a hot, wet tongue!'],
+      'dominion_rage' => ['%<name>s rises from her throne, eyes blazing pink. "Enough playing. Kneel for your goddess." Her touch burns hotter than ever!']
     }.freeze
 
     TROPHIES = {
@@ -377,13 +385,13 @@ module Engine
 
       intro =
         if boss[:final]
-          "**Floor #{floor} — The Tower Lord's Chamber.** Treasure glitters in the dark around an ancient throne."
+          "**Floor #{floor} — The Temple of Eros.** Silk, gold and candlelight surround a throne at the very top of the tower."
         else
           "**Floor #{floor}** — the air grows heavy."
         end
       warning =
         if boss[:final]
-          'This is the final guardian. Defeat it to conquer the tower and begin the next cycle.'
+          'This is the goddess herself. Defeat or satisfy her to conquer her tower and begin the next cycle.'
         else
           "This foe is far more dangerous than any you've faced before."
         end
@@ -392,7 +400,7 @@ module Engine
       message = <<~MSG.strip
         #{intro}
 
-        You stand before **#{boss[:name]}**!
+        You stand before **#{boss[:title] || boss[:name]}**!
         _#{boss[:description]}_
 
         #{warning}
@@ -463,20 +471,30 @@ module Engine
         give: 'You drop to all fours and offer yourself. It mounts you at once with a rumbling growl, its weight pressing you ' \
               'into the furs as it ruts into you, slow and deep and possessive.'
       },
-      'The Tower Lord' => {
-        intro: 'The Tower Lord rises from the throne, and the walls themselves begin to breathe. Every carving in the chamber ' \
-               'turns to watch you. *"You have fought well,"* it says. *"Now stop. Belong to me, and the tower will love ' \
-               'you forever."*',
-        resist_label: 'Refuse', give_label: 'Belong to it',
-        resist: 'You refuse. The word rings through the chamber and the carvings flinch. The Tower Lord\'s composure cracks, and ' \
-                'your next blow lands true.',
-        give: 'You say yes. The tower itself embraces you: warm stone, soft hands and slick heat from every direction at once, ' \
-              'and the Tower Lord\'s voice purring your name while it all takes you apart.'
+      'Eros' => {
+        intro: 'Eros stops fighting and simply opens her arms. The veil slips from her shoulders, and the whole chamber fills ' \
+               'with warm, rose-scented heat. *"You have fought so hard, pet,"* she purrs. *"Aren\'t you tired? Kneel. Say ' \
+               'you\'re mine, and I will never let you go."*',
+        resist_label: 'Refuse her', give_label: 'Kneel and be hers',
+        resist: 'You refuse her. The word echoes up through the tower and, for one heartbeat, the goddess looks surprised. ' \
+                'Her smile slips, and your next blow lands true.',
+        give: 'You kneel. Eros cradles your face, whispers *good pet*, and draws you up into her lap, where her hands, her ' \
+              'mouth and her whole temple of silk and heat take you apart while she murmurs your name.'
       }
     }.freeze
 
+    # Fights saved before the final boss became Eros still carry the old name.
+    LEGACY_NAMES = { 'The Tower Lord' => 'Eros' }.freeze
+
+    # Names that never take "the" in combat text.
+    PROPER_NAMES = %w[Eros].freeze
+
+    def canonical_name(boss_name)
+      LEGACY_NAMES.fetch(boss_name.to_s, boss_name.to_s)
+    end
+
     def phase(boss_name)
-      PHASES[boss_name.to_s]
+      PHASES[canonical_name(boss_name)]
     end
 
     def phase_line(player, boss_name, key)
@@ -485,7 +503,8 @@ module Engine
     end
 
     def scene(player, boss_name, kind)
-      spec = SCENES.dig(boss_name.to_s, kind) or return nil
+      boss_name = canonical_name(boss_name)
+      spec = SCENES.dig(boss_name, kind) or return nil
 
       parts = Engine::ChastitySystem.scene_parts(player)
       pool = parts.flat_map { |part| Array(spec[part]) } + Array(spec['any'])
@@ -495,7 +514,7 @@ module Engine
     end
 
     def line(player, boss_name, key)
-      lines = Array(SCENES.dig(boss_name.to_s, key))
+      lines = Array(SCENES.dig(canonical_name(boss_name), key))
       lines.empty? ? nil : Engine::ContentOptions.pick(player, lines)
     end
 
@@ -549,7 +568,7 @@ module Engine
 
       when 'tower_dominion'
         if action == :flee && rand(100) < 50
-          log << special_line(player, 'dominion_block', name, "#{name} raises a hand — the chamber doors slam shut!")
+          log << special_line(player, 'dominion_block', name, "#{name} crooks a finger — the chamber doors slam shut!")
           return :blocked
         end
         if rand(100) < 30
@@ -558,7 +577,7 @@ module Engine
           log << "Lust +12! (now #{player.lust})"
         end
         if encounter[:hp] < (encounter[:max_hp] * 0.3) && !encounter[:enraged]
-          log << special_line(player, 'dominion_rage', name, "#{name} rises from its throne — its touch burns hotter!")
+          log << special_line(player, 'dominion_rage', name, "#{name} rises from her throne — her touch burns hotter!")
           encounter[:lust_damage] = (encounter[:lust_damage] * 1.3).round
           encounter[:enraged] = true
         end

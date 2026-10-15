@@ -83,7 +83,7 @@ module Engine
       'depraved_one' => {
         name: 'Depraved One',
         requirement: { depraved_tower_clears: 7 },
-        description: 'You conquered the Tower Lord seven times with every desire laid bare'
+        description: 'You conquered Eros seven times with every desire laid bare'
       },
       'mimic_seedbed' => {
         name: 'Mimic Seedbed',
@@ -383,7 +383,7 @@ module Engine
       { id: 'no_escape', category: 'challenges', name: 'No Escape', description: 'Reach floor 20 in a single run without trying to flee',
         requirement: { current_floor: 20, run_flee_attempts: { max: 0 } }, reward: { lp: 75 } },
       { id: 'depraved_one', category: 'challenges', name: 'Depraved One',
-        description: 'Clear the Tower Lord 7 times with every content theme enabled',
+        description: 'Clear Eros, Goddess of Lust 7 times with every content theme enabled',
         requirement: { depraved_tower_clears: 7 }, reward: { lp: 1000 } },
       { id: 'royal_court', category: 'challenges', name: 'Royal Court', description: 'Clear both the Succubus Queen and the Incubus King',
         requirement: { royal_demons_cleared: 2 }, reward: { lp: 100 } }
@@ -416,7 +416,7 @@ module Engine
       incubus_submissions: 'incubus submissions',
       royal_demons_cleared: 'demon royals cleared',
       mimic_broodmother_cursed: 'Broodmother cleared while wearing 5 cursed items',
-      depraved_tower_clears: 'Tower Lord clears with every content theme on',
+      depraved_tower_clears: 'Eros clears with every content theme on',
       mimics_removed_count: 'living items torn free',
       tentacle_pit_survived: 'tentacle pits survived',
       glory_hole_encounters: 'glory hole uses',

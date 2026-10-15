@@ -356,7 +356,9 @@ module Eros
 
     # Discord-only bits in shared engine text: slash commands and timestamps.
     def clean(text)
+      @proper_name_article ||= /\b[Tt]he (?=(?:#{Engine::BossFights::PROPER_NAMES.join('|')})\b)/
       text.gsub(/\b([Tt]he) the\b/, '\1')
+          .gsub(@proper_name_article, '')
           .gsub(%r{`[/!]([a-z_]+)[^`]*`}) { "**#{SCREEN_FOR_COMMAND.fetch(::Regexp.last_match(1), ::Regexp.last_match(1))}**" }
           .gsub(/<t:\d+:[a-zA-Z]>/, 'soon')
     end

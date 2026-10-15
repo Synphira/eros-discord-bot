@@ -75,7 +75,7 @@ Elites are normal monsters with one affix. Easiest as a colour/aura overlay on t
 - **Ancient Treant (floor 20)** — A colossal living tree dripping amber sap, roots carpeting the room, branches that cradle delvers. Thick ridged root-cocks and branch-tendrils oozing sap.
 - **Lich Lord (floor 25)** — Robed sorcerer of cold bone and blue fire, crown of frost, many spectral hands floating around him. Spectral blue cock of cold fire; the hands touch everywhere at once.
 - **Alpha Beast (floor 30)** — The biggest beast in the tower: a mountain of fur and muscle (wolf/bear/bull hybrid), musk haze, in rut. A massive knotted cock to match, huge heavy balls.
-- **The Tower Lord (floor 35)** — The ancient archdemon on a throne of gold and sin; can become anything you desire. Suggest a towering androgynous demon with multiple horns, gold-veined skin, a halo of mirrors showing other shapes, and both a ridged cock and a pussy. Final-boss scale and gravitas.
+- **Eros, Goddess of Lust (floor 35)** — The goddess who built the tower as her temple, lounging on a throne of gold and silk at the top. Divine, voluptuous and utterly confident: glowing rose-pink eyes, a delicate gold crown, a sheer veil that hides nothing, gold jewellery on throat, wrists and ankles, a smirk that says she owns you. Bare pussy and full breasts; she conjures a cock of glowing rose light when she wants one (draw it as luminous pink, clearly magical). Silk ribbons coil from the throne like living restraints. Candlelight, silk drapes and rose petals; final-boss scale and gravitas, but seductive rather than monstrous.
 
 ---
 

@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-14
+
+### Changed
+
+- **The final boss is now Eros, Goddess of Lust.** The Tower Lord on floor 35 has been replaced by the goddess who built the tower as her temple. She has a new entrance, new explicit scenes for every body part (forced and willing), new reactions as you satisfy her (or bore her), her own orgasm and defeat lines, a new half-HP choice (**Refuse her** or **Kneel and be hers**) and new flavour for her door-slamming, heat and enraged abilities. Her stats, abilities and rewards are unchanged. The Depraved One title and achievement, the `/help` tutorial and `e,dev finalboss` now name her. Fights against the Tower Lord that were already in progress carry on with her new scenes
+
 ## 2026-10-04
 
 ### Added

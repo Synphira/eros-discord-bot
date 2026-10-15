@@ -361,7 +361,8 @@ module ErosUI
   LOG_CHAR_BUDGET = 3300
 
   def dedupe_article(text)
-    text.gsub(/\b([Tt]he) the\b/i, '\1')
+    @proper_name_article ||= /\b[Tt]he (?=(?:#{Engine::BossFights::PROPER_NAMES.join('|')})\b)/
+    text.gsub(/\b([Tt]he) the\b/i, '\1').gsub(@proper_name_article, '')
   end
 
   def append_action_log(container, log)

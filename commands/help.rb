@@ -76,7 +76,7 @@ module Commands
       **4. Watch your Defiance.** Defiance is your will to resist. Lust builds with every hit, and an orgasm at 100 lust drains Defiance. At 0 you are **broken**: back to floor 1 at level 1, with a new curse.
       **5. Spend your LP.** Grow stronger in `/levelup`, buy gear in `/shop`, remove curses, or get marks in `/parlour`.
       **6. Rest.** `/rest` clears your lust and restores Defiance once every 5 minutes.
-      **7. Go deeper.** A boss waits every 5 floors, and the Tower Lord rules floor 35. Clear the tower to start a harder cycle with bigger rewards.
+      **7. Go deeper.** A boss waits every 5 floors, and Eros, Goddess of Lust, waits on floor 35. Clear the tower to start a harder cycle with bigger rewards.
       **8. Make it yours.** Turn themes on or off any time in `/options`.
     TEXT
 

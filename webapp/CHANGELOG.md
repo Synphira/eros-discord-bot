@@ -7,6 +7,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-14
+
+### Changed
+
+- Combat text names the new final boss as just "Eros", never "the Eros".
+
 ## 2026-10-04
 
 ### Added

@@ -30,7 +30,7 @@ module Commands
       `e,dev unlockcursed` — unlock every Cursed Shop item
       `e,dev win` — kill the current monster (runs the normal victory path)
       `e,dev boss` — jump to the next boss floor and start the fight
-      `e,dev finalboss` — jump to the Tower Lord
+      `e,dev finalboss` — jump to Eros (final boss)
       `e,dev cycle` — complete the current cycle instantly
       `e,dev reset` — run a defeat reset (keeps progression)
       `e,dev event <key|list>` — start a specific random event (ignores content toggles)

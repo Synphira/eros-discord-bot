@@ -660,7 +660,7 @@ module Engine
     def finish_tower_clear!(enc, log)
       @player.bump_tracker!('depraved_tower_clears') if Engine::ContentOptions.preferences_for(@player).values.all?
       clear = @player.complete_cycle!
-      log << "**#{enc[:name]} falls!** The Endless Ruins shudder — you have conquered the tower!"
+      log << "**#{enc[:name]} yields!** The Endless Ruins shudder — you have conquered the goddess's tower!"
       log << "Tower clear reward: **+#{clear[:lp]} LP**."
       log << "The ruins twist and reset around you. You awaken on **Floor 1** of **Cycle #{clear[:new_cycle]}** — " \
              'your level, stats, LP, and every piece of gear come with you.'
