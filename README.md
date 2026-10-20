@@ -50,13 +50,12 @@ Slash and prefix share the same handlers (prefix defaults to `e,`, and `E,` also
 | `/suppresscurse` | `e,suppresscurse N` | Silence a curse for **25 LP**; it reactivates when you are defeated |
 | `/restart` | `e,restart` | New delver + body type (confirm button); titles, achievements, progress, Cursed Shop unlocks, and options are kept |
 | `/profile` · `/name` | `e,profile [name]` · `e,name [name]` | Character profile, lifetime stats, rename; look up others by character name |
-| `/parlour` | `e,parlour` | Madame Vex's parlour: up to 5 permanent tattoos/piercings with small perks, shown on your profile (also a Profile button) |
-| `/titles` · `/title` | `e,titles` · `e,title [name\|auto]` | Paged title list with a dropdown to equip |
+| `/parlour` | `e,parlour` | Syn & Berry's: Syn's permanent tattoos/piercings (small perks, shown on your profile) and Berry's quest board (also a Profile button) || `/titles` · `/title` | `e,titles` · `e,title [name\|auto]` | Paged title list with a dropdown to equip |
 | `/transformation` | `e,transformation [name\|clear]` (`e,hybrid`) | Hybrid forms: unlock progress, switch forms, or return to human |
 | `/achievements` | `e,achievements [category]` | Achievements by category (combat, submission, exploration, curses, lust, events, challenges) |
 | `/leaderboard` | `e,leaderboard [cycles\|depth\|kills\|lp]` | Top delvers (character names only) |
 | `/levelup` | `e,levelup [stat\|level]` | Stats cost 5 + current value; a Level costs 80% of all three, raises max defiance, and fully heals |
-| `/shop` | `e,shop [category]` | Browse shop by category — buy buttons, Prev/Next pages |
+| `/shop` | `e,shop [category]` | Berry's shop counter: browse by category — buy buttons, Prev/Next pages, and a button through to Berry's quests and Syn's parlour |
 | `/cursedshop` | `e,cursedshop` | Free living gear you have previously worn and torn free |
 | `/buy` · `/sell` | `e,buy` · `e,sell` | Buy / sell by name (cursed gear cannot be sold) |
 | `/equipment` | `e,equipment` | View gear, your trophy, and inventory |
@@ -91,7 +90,8 @@ Buttons are locked to the player who opened the panel. Button presses **edit** t
 - **Rest** (`/rest` or button) — clears all lust and fully restores defiance; 5-minute cooldown, blocked in combat and events.
 - **Weekly modifiers** — Each week (from Monday) the tower runs one modifier, e.g. Heat Week, Hunting Season (3× elites), Full Moon (more beasts), Mimic Season or Generous Tower. It shows on `/status` with a countdown.
 - **Elites** — From floor 3, some monsters spawn with an affix (Rutting, Slick, Towering, Insatiable, Alluring) that buffs them. Beating one pays ×2 LP; satisfying one pays +10 LP.
-- **Marks** — Permanent tattoos and piercings from `/parlour`. Each costs LP and gives a small perk; they survive defeat, restarts and cycles. Some designs need a content toggle or body part.
+- **Marks** — Permanent tattoos and piercings from Syn's bench at **Syn & Berry's** (`/parlour`). Each costs LP and gives a small perk; they survive defeat, restarts and cycles. Some designs need a content toggle or body part.
+- **Quests** — Berry, who runs the shop counter, posts a quest board at `/parlour` (and a button on `/shop` leads there). She offers 3 errands at a time; hold up to 3, progress counts from your lifetime stats the moment you accept, and claiming pays bonus LP (50–150). Quests are repeatable, survive defeat, and completing 10 earns the **Berry's Favourite** achievement (25 for the title).
 - **Monster types** — Beast, Demon, Slime, Undead, Plant, Mimic (each with roster, color, and assault/submit flavor).
 - **Curses** — Defeat always brands you with a curse from the foe's type pool, and the tower can also curse you when you orgasm in combat, satisfy a monster, or win a fight (bosses and elites brand you more often, and every extra cycle raises the odds). New curses are always ones you don't already bear. Effects include lust/damage multipliers, encounter weighting, no-flee/no-death, climax LP, defiance start penalties, and flat STR/AGI/RES. Curses feed Threat, so the more you carry, the stronger and hornier everything gets.
 - **Combat** — **Fight** chips monster **HP**. **Flee** (AGI-based). **Submit** / monster hits raise **lust** with assault scenes; climax at 100 costs 20 defiance and leaves you exhausted (STR/AGI -1 for 2 floors) until 10 climaxes in a run make you addicted, after which climaxes buff you instead. Victory grants LP (no automatic floor advance). Defeat applies a curse and resets floor, level, base stats, defiance, and lust. **Non-cursed gear is lost**; living (cursed) mimic gear persists.

@@ -127,6 +127,9 @@ module Eros
       when 'hybrid' then say(@player.select_transformation!(arg.to_s.empty? ? nil : arg.to_s)[:message])
       when 'mark_buy' then mark!(Engine::Marks.buy!(@player, arg.to_s))
       when 'mark_remove' then mark!(Engine::Marks.remove!(@player, arg.to_s))
+      when 'quest_accept' then quest!(Engine::Quests.accept!(@player, arg.to_s))
+      when 'quest_claim' then quest!(Engine::Quests.claim!(@player, arg.to_s))
+      when 'quest_abandon' then quest!(Engine::Quests.abandon!(@player, arg.to_s))
       when 'pref' then toggle_pref!(arg.to_s)
       when 'pref_all' then set_all_prefs!(arg.to_s == 'on')
       when 'size' then set_size!(*arg.to_s.split(':', 2))
@@ -252,6 +255,11 @@ module Eros
       text = result[:message].to_s
       scene = text[/\A_(.+)_\n/m, 1]
       scene ? say({ scene: scene }, text.sub(/\A_.+_\n/m, '')) : say(text)
+    end
+
+    def quest!(result)
+      say(result[:message])
+      say(result[:news]) if result[:news]&.any?
     end
 
     def toggle_pref!(key)
@@ -484,7 +492,11 @@ module Eros
           actions: [btn(owned ? 'Owned' : "Buy (#{item.cost})", 'buy', arg: item.id, style: 'success',
                                                                 disabled: owned || @player.lp < item.cost.to_i)] }
       end
-      { title: "Shop — #{@player.lp} LP", sections: sections, actions: [tabs, back_row] }
+      intro = { text: "_**Berry** zips between the shelves on iridescent wings, seed-freckles on her cheeks and a " \
+                      "ledger under one arm. \"Welcome in, sugar! I run the shop, my wife Syn runs the parlour bench, " \
+                      "and everything here is clean steel and soft lies.\" Berry also posts quests — find her board " \
+                      "at the **Parlour**._" }
+      { title: "Shop — #{@player.lp} LP", sections: [intro] + sections, actions: [tabs, back_row] }
     end
 
     def cursed_shop_view
@@ -624,8 +636,14 @@ module Eros
 
     def parlour_view
       owned = Engine::Marks.owned(@player)
-      intro = { text: "_Vex's parlour smells of warm ink and sweet smoke. Every mark she makes stays through every " \
-                      "run._\n-# Marks worn #{owned.size}/#{Engine::Marks::MAX_MARKS}" }
+      intro = { text: "_One half of Syn & Berry's glows with clean steel, where **Berry** — a strawberry-bright " \
+                      "fairy with a smile like sunrise and a grip like ownership — is already writing your name in " \
+                      "her ledger. The other half is velvet, ink and candle smoke, where her wife **Syn** lounges " \
+                      "over the parlour bench: a heavy-lidded fairy with waist-length platinum-blonde hair, " \
+                      "sleepless shadows under her eyes and next to nothing on but black lace scraps — her own " \
+                      "inked, pierced skin displays every mark she sells. Every mark Syn makes stays through " \
+                      "every run._\n" \
+                      "-# Marks worn #{owned.size}/#{Engine::Marks::MAX_MARKS}" }
       worn = owned.map do |key|
         mark = Engine::Marks::MARKS[key]
         { text: "#{Engine::Marks.label(key)} — #{mark[:perk]}", actions: [btn('Remove', 'mark_remove', arg: key)] }
@@ -636,7 +654,32 @@ module Eros
           actions: [btn("Get it (#{mark[:cost]})", 'mark_buy', arg: key, style: 'success',
                                                     disabled: full || @player.lp < mark[:cost])] }
       end
-      { title: "Parlour — #{@player.lp} LP", sections: [intro] + worn + offers, actions: [back_row] }
+      { title: "Parlour — #{@player.lp} LP", sections: [intro] + worn + offers + quest_sections, actions: [back_row] }
+    end
+
+    def quest_sections
+      sections = [{ text: "### 🍓 Berry's Quest Board\n" \
+                          "_\"Errands, sugar! I run the shop, Syn runs the bench, and you run your pretty legs off " \
+                          "for both of us.\"_\n#{Engine::Quests.board_lines(@player).join("\n")}\n" \
+                          "-# Quests completed for Berry: **#{Engine::Quests.completed(@player)}**" }]
+      Engine::Quests.active(@player).each do |row|
+        spec = Engine::Quests.quest(row['key'])
+        actions = []
+        if Engine::Quests.complete?(@player, row)
+          actions << btn("Claim #{spec[:reward]} LP", 'quest_claim', arg: row['key'], style: 'success')
+        end
+        actions << btn('Drop quest', 'quest_abandon', arg: row['key'])
+        sections << { text: "◆ **#{spec[:name]}** — #{Engine::Quests.objective_text(@player, row)}", actions: actions }
+      end
+      if Engine::Quests.active(@player).size < Engine::Quests::MAX_ACTIVE
+        Engine::Quests.offers(@player).each do |key|
+          spec = Engine::Quests.quest(key)
+          label = Engine::TitleSystem::TRACKER_LABELS.fetch(spec[:tracker].to_sym, spec[:tracker])
+          sections << { text: "◇ **#{spec[:name]}** — #{spec[:target]}× #{label}\n_#{spec[:ask]}_",
+                        actions: [btn("Take quest (#{spec[:reward]} LP)", 'quest_accept', arg: key, style: 'primary')] }
+        end
+      end
+      sections
     end
 
     def options_view

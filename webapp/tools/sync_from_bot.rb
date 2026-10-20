@@ -24,6 +24,7 @@ BOT_FILES = %w[
   lib/engine/chastity_system.rb
   lib/engine/corruption.rb
   lib/engine/marks.rb
+  lib/engine/quests.rb
   lib/engine/elites.rb
   lib/engine/title_system.rb
   lib/engine/transformation_system.rb

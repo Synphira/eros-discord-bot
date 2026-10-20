@@ -145,6 +145,11 @@ module Engine
         requirement: { traps_triggered: 50 },
         description: "You've experienced every trap the tower has to offer"
       },
+      'berrys_favourite' => {
+        name: "Berry's Favourite",
+        requirement: { berry_quests_completed: 25 },
+        description: "Berry has claimed you as her favourite errand-pet — Syn drew the collar, Berry picked it"
+      },
 
       'sin_sculptor' => {
         name: 'Sin Sculptor',
@@ -300,8 +305,10 @@ module Engine
         requirement: { elites_satisfied: 10 }, reward: { lp: 60 } },
       { id: 'chest_resister', category: 'exploration', name: 'Iron Will', description: 'Walk away from 25 treasure chests',
         requirement: { chests_ignored: 25 }, reward: { lp: 40 } },
-      { id: 'inked', category: 'lust', name: 'Inked', description: "Wear 3 marks from Madame Vex's parlour",
+      { id: 'inked', category: 'lust', name: 'Inked', description: "Wear 3 marks from Syn's bench at Syn & Berry's",
         requirement: { marks_owned: 3 }, reward: { lp: 40 } },
+      { id: 'berry_favourite', category: 'exploration', name: "Berry's Favourite", description: 'Complete 10 of Berry\'s quests',
+        requirement: { berry_quests_completed: 10 }, reward: { lp: 100 } },
       { id: 'masterpiece', category: 'lust', name: 'Walking Masterpiece', description: 'Wear 5 marks at once',
         requirement: { marks_owned: 5 }, reward: { lp: 80 } },
       { id: 'first_boss', category: 'combat', name: 'Boss Slayer', description: 'Defeat or satisfy your first boss',
@@ -441,6 +448,7 @@ module Engine
       elites_defeated: 'elites defeated',
       elites_satisfied: 'elites satisfied',
       marks_owned: 'marks worn',
+      berry_quests_completed: "Berry's quests completed",
       chests_ignored: 'chests left closed',
       is_developer: 'developer',
       is_bug_tester: 'bug tester',

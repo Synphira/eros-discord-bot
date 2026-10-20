@@ -33,8 +33,13 @@ module Commands
           }
         }
       ) do |c|
-        c.text_display(content: '## Endless Ruins of Sin — Shop')
-        c.text_display(content: '_Clean steel and soft lies — no living gear sold here._')
+        c.text_display(content: "## Syn & Berry's — Shop")
+        c.text_display(
+          content: '_A strawberry-bright fairy zips between the shelves on iridescent wings, seed-freckles on her ' \
+                   'cheeks and a ledger under one arm. "Welcome in, sugar!" **Berry** chirps. "I run the shop, my ' \
+                   'wife Syn runs the parlour bench through that curtain, and everything here is clean steel and ' \
+                   'soft lies — no living gear at my counter. Errands? Oh, I have errands. Press **Berry\'s Quests**."_'
+        )
         c.separator(divider: true, spacing: :small)
         c.text_display(content: "Your Lust Points: **#{player.lp}**")
         c.separator(divider: true, spacing: :small)

@@ -7,6 +7,7 @@
   "bot/engine/chastity_system.rb",
   "bot/engine/corruption.rb",
   "bot/engine/marks.rb",
+  "bot/engine/quests.rb",
   "bot/engine/elites.rb",
   "bot/engine/title_system.rb",
   "bot/engine/transformation_system.rb",

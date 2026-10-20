@@ -8,6 +8,14 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Added
+
+- **Syn & Berry have taken over the shop and parlour.** Madame Vex is gone; the establishment is now run by a married fairy couple:
+  - **Berry** runs the shop counter (`/shop` has her welcome, and a **🍓 Berry's Quests & Syn's Parlour** button): a cheerful, strawberry-bright, extremely possessive fairy who is all smiles until someone looks at her wife too long
+  - **Syn** works the parlour bench (`/parlour`): an exhausted fairy with very long platinum-blonde hair who wears next to nothing and displays every tattoo and piercing she sells on her own inked, pierced skin — and is somehow still the flirtiest person in the tower. All mark scenes, messages and achievement text now name her
+- **Berry's quest system**: Berry offers **3 quests at a time** from a board in `/parlour`; hold up to **3 active**. Twelve repeatable errands — defeat monsters, submit willingly, satisfy or defeat bosses and elites, open chests, clear floors, orgasm, collect curses, accept events, dodge traps — each paying **50–150 LP**. Progress counts from your lifetime stats the moment you accept, quests survive defeat and cycles, and completed ones can be claimed from the board (or dropped, which rotates Berry's offers). New achievement **Berry's Favourite** (10 quests, +100 LP) and title **Berry's Favourite** (25 quests). Original character designs for both fairies are in `docs/art_reference.md`
+- **Operators:** the `/parlour` slash description changed — run `bundle exec rake commands:register`
+
 ### Changed
 
 - **Chest loot rebalanced** (a player reported mostly seeing Defiance Tonics — they were 25% of normal chests, and once you owned all 10 chest-only gear pieces the 25% gear drop silently turned into LP, leaving veterans with 75% LP / 25% tonics):

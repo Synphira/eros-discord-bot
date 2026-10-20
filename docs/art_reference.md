@@ -96,6 +96,15 @@ Elites are normal monsters with one affix. Easiest as a colour/aura overlay on t
 
 ---
 
+## Shopkeepers — Syn & Berry
+
+A married fairy couple who run the tower's only shop and parlour. Both are clearly adult women with exaggerated voluptuous fairy bodies: very large soft breasts, wide hips, thick thighs, tiny waists, and delicate insect wings. They should always read as wives — touching, bickering, and possessive of each other.
+
+- **Syn (parlour: tattoos & piercings)** — The exhausted, shameless one. Very long platinum-blonde hair worn loose and messy, falling past her waist and over one eye; heavy-lidded violet eyes with permanent dark circles, smudged dark makeup and a sleepy, wicked smirk; pale skin with ink stains up her fingers and forearms; smoked-glass black wings, slightly drooping like she's too tired to fold them. She wears very little clothing — a few scraps of black lace (a barely-there lace top, a garter belt holding her needle-case and ink vials, and a thong) that lose the fight against her huge breasts, wide hips and thick thighs, leaving her plump, bare pussy on open display. Her own body is her catalogue: she is covered in the exact tattoos and piercings she sells — a heart-shaped Womb Sigil low on her belly, a Serpent Coil winding up her inner thigh, curling Lower-back Vines with an arrow pointing down at her ass, a ring of Watching Eyes across her shoulders, Tally Marks on her hip, *PROPERTY OF THE TOWER* in elegant script across her ass, gold rings through both nipples, a pink jewel through her clit hood, a silver stud in her tongue, a key-shaped charm dangling from her navel, and a sample Crown Ring worn on a chain between her breasts. Her whole posture says she'd rather be in bed — preferably not alone. She is extremely flirty even while looking half-asleep, and does her inking sprawled over a velvet bench.
+- **Berry (shop & quests)** — The cheerful, possessive one. Bouncy strawberry-red hair fading to pink, tied with a green leaf ribbon like a strawberry's calyx; seed-like freckles scattered across her nose, cheeks, shoulders and the swell of her enormous breasts; bright green eyes and a beaming smile that goes flat and dangerous the moment anyone flirts with Syn. Vivid red dress with deep purple "poison" accents — a purple sheen on the skirt's edge, a dark berry brooch, thorn-like jewellery — because she's sweet and toxic in equal measure. Fuller and softer than Syn, with a round belly curve, huge breasts straining a heart-shaped neckline, and a plump pussy under a very short skirt. Translucent wings with a pink-green shimmer. Usual pose: arms crossed proprietorially around Syn's waist or chin on her wife's shoulder, smiling at the customer like a warning.
+
+---
+
 ## Items
 
 ### Shop — Weapons

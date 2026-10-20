@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Engine
-  # Permanent tattoos and piercings from Madame Vex's parlour. Stored in the
+  # Permanent tattoos and piercings from Syn's parlour bench. Stored in the
   # player's trackers, so they survive defeats, restarts of a run, and cycles.
   module Marks
     TRACKER = 'marks_owned'
@@ -11,20 +11,20 @@ module Engine
       'womb_sigil' => {
         kind: :tattoo, name: 'Womb Sigil', place: 'low on the belly', cost: 60, part: 'vagina',
         perk: '+2 LP whenever you submit', effects: { 'submit_lp_bonus' => 2 },
-        scene: "Vex kneels between your thighs and traces a heart-shaped sigil just above your crotch with one glowing " \
+        scene: "Syn kneels between your thighs and traces a heart-shaped sigil just above your crotch with one glowing " \
                "fingernail. The ink sinks in like warm honey, and the moment it settles it pulses, a slow throb that " \
                "goes straight between your legs. \"There,\" she purrs. \"Now everything down there knows who it's for.\""
       },
       'serpent_coil' => {
         kind: :tattoo, name: 'Serpent Coil', place: 'around one thigh', cost: 50,
         perk: '+1 agility', effects: { 'agility' => 1 },
-        scene: "A serpent of black ink winds up your inner thigh under Vex's fingertip, its head resting a teasing inch " \
+        scene: "A serpent of black ink winds up your inner thigh under Syn's fingertip, its head resting a teasing inch " \
                "from your crotch. It shifts when you walk, sliding against your skin like a lover's hand."
       },
       'lower_back_vines' => {
         kind: :tattoo, name: 'Lower-back Vines', place: 'across the small of the back', cost: 40,
         perk: '+3% flee chance', effects: { 'flee_bonus' => 0.03 },
-        scene: "Vex bends you over her velvet bench and paints curling vines across the small of your back, finishing " \
+        scene: "Syn bends you over her velvet bench and paints curling vines across the small of your back, finishing " \
                "with an arrow pointing straight down at your ass. She gives it a slap for luck. \"So they know where to aim.\""
       },
       'watching_eyes' => {
@@ -36,40 +36,40 @@ module Engine
       'tally_marks' => {
         kind: :tattoo, name: 'Tally Marks', place: 'on the hip', cost: 50, requires: 'body_writing',
         perk: '+1 LP on every victory', effects: { 'victory_lp_bonus' => 1 },
-        scene: "Vex inks a neat row of tally marks on your hip, then leaves room for plenty more. \"One for every monster " \
+        scene: "Syn inks a neat row of tally marks on your hip, then leaves room for plenty more. \"One for every monster " \
                "that's had you,\" she says, \"or that you've had. The tower will keep count for you.\""
       },
       'property_mark' => {
         kind: :tattoo, name: 'Property of the Tower', place: 'across the ass', cost: 60, requires: 'degradation',
         perk: '+3% chance to satisfy monsters', effects: { 'satisfy_bonus' => 0.03 },
-        scene: "*PROPERTY OF THE TOWER* curls across your ass in elegant script while Vex hums to herself. \"Every slut " \
+        scene: "*PROPERTY OF THE TOWER* curls across your ass in elegant script while Syn hums to herself. \"Every slut " \
                "who walks these halls should be labelled,\" she says, and gives the fresh ink a proprietary squeeze."
       },
       'nipple_rings' => {
         kind: :piercing, name: 'Nipple Rings', place: 'through both nipples', cost: 50, requires: 'breast_play',
         perk: '+1 LP whenever a monster gets its hands on you', effects: { 'hit_lp' => 1 },
-        scene: "Vex rolls each nipple between her fingers until they're stiff and aching, then presses a little gold ring " \
+        scene: "Syn rolls each nipple between her fingers until they're stiff and aching, then presses a little gold ring " \
                "to each. The metal melts through with a hot, sweet tingle and closes itself. Every breath now tugs them " \
                "against your top, and every tug sends a spark straight down your spine."
       },
       'clit_hood' => {
         kind: :piercing, name: 'Clit Jewel', place: 'through the clit hood', cost: 60, requires: 'vaginal', part: 'vagina',
         perk: '+3% chance to satisfy monsters', effects: { 'satisfy_bonus' => 0.03 },
-        scene: "Vex spreads you open with two fingers and sets a tiny pink jewel against your clit. It slips into place " \
+        scene: "Syn spreads you open with two fingers and sets a tiny pink jewel against your clit. It slips into place " \
                "with a warm, fizzing rush, and from then on every step rubs it right where you're most sensitive. You're " \
                "wet before you're off her bench."
       },
       'crown_ring' => {
         kind: :piercing, name: 'Crown Ring', place: 'through the head of the cock', cost: 60, part: 'penis',
         perk: '+2% surprise-hit chance', effects: { 'crit_chance' => 0.02 },
-        scene: "Vex strokes you hard first, slowly and thoroughly, then threads a silver ring through the head of your " \
+        scene: "Syn strokes you hard first, slowly and thoroughly, then threads a silver ring through the head of your " \
                "cock with a warm, fizzing tingle. She flicks it once and you nearly come on the spot. \"Sensitive,\" she " \
                "says, delighted."
       },
       'tongue_stud' => {
         kind: :piercing, name: 'Tongue Stud', place: 'through the tongue', cost: 50, requires: 'oral',
         perk: '+2 LP whenever you submit', effects: { 'submit_lp_bonus' => 2 },
-        scene: "Vex tips your chin up, has you stick your tongue out, and sets a little silver stud in the middle. It " \
+        scene: "Syn tips your chin up, has you stick your tongue out, and sets a little silver stud in the middle. It " \
                "settles with a cool tingle. \"Monsters will feel the difference,\" she promises, \"and so will you.\""
       },
       'navel_charm' => {
@@ -107,7 +107,7 @@ module Engine
 
     def buy!(player, key)
       mark = MARKS[key.to_s]
-      return { ok: false, message: 'Vex has never heard of that design.' } unless mark
+      return { ok: false, message: 'Syn has never heard of that design.' } unless mark
       return { ok: false, message: "You already wear the **#{mark[:name]}**." } if owns?(player, key)
       return { ok: false, message: 'That design is not on offer for you.' } unless available(player).key?(key.to_s)
       if owned(player).size >= MAX_MARKS
@@ -119,7 +119,8 @@ module Engine
 
       player.update(trackers: player.tracker_hash.merge(TRACKER => owned(player) + [key.to_s]))
       { ok: true, mark: mark,
-        message: "_#{mark[:scene]}_\n**#{mark[:name]}** added (−#{mark[:cost]} LP). #{mark[:perk].sub(/\A[a-z]/, &:upcase)}." }
+        message: "_#{mark[:scene]}_\n**#{mark[:name]}** added (−#{mark[:cost]} LP). #{mark[:perk].sub(/\A[a-z]/, &:upcase)}.\n" \
+                 "_Syn taps the matching **#{mark[:name]}** displayed on her own inked, pierced skin and winks. \"Twins now, darling.\"" }
     end
 
     def remove!(player, key)
@@ -127,7 +128,7 @@ module Engine
       return { ok: false, message: "You don't wear that mark." } unless mark && owns?(player, key)
 
       player.update(trackers: player.tracker_hash.merge(TRACKER => owned(player) - [key.to_s]))
-      { ok: true, message: "Vex fades the **#{mark[:name]}** away with a slow kiss. The skin underneath is smooth again." }
+      { ok: true, message: "Syn fades the **#{mark[:name]}** away with a slow kiss. The skin underneath is smooth again." }
     end
 
     def label(key)
@@ -143,3 +144,4 @@ module Engine
     end
   end
 end
+

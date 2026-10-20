@@ -151,6 +151,10 @@ module ErosUI
       row.button(label: 'Cursed', style: :danger, custom_id: "eros:cshop:open:#{owner_id}")
     end
 
+    container.row do |row|
+      row.button(label: "🍓 Berry's Quests & Syn's Parlour", style: :primary, custom_id: "eros:parlour:view:#{owner_id}")
+    end
+
     items.each_slice(5) do |slice|
       container.row do |row|
         slice.each do |item|
