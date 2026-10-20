@@ -195,6 +195,10 @@ class Player < Sequel::Model(:players)
     when :mimics_removed_count then cursed_shop_unlocks.size
     when :current_floor then current_floor.to_i
     when :marks_owned then Engine::Marks.owned(self).size
+    when :forms_unlocked then unlocked_transformations.size
+    when :chimera_fused then Engine::TransformationSystem.chimera_combo(self) ? 1 : 0
+    when :admirer_kinds then Array(tracker_hash['admirer_types']).size
+    when :burdens_carried then Array(tracker_hash['cycle_burdens']).size
     when :is_developer then Engine::Dev.owner?(discord_id) ? 1 : 0
     when :is_bug_tester then Engine::Dev.bug_tester?(discord_id) ? 1 : 0
     when :pure_title then earned_titles.include?('pure') ? 1 : 0

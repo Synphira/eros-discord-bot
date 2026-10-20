@@ -156,6 +156,101 @@ module Engine
         requirement: { berry_story_step: 5 },
         description: "You secretly planned Syn's surprise vow renewal for Berry, and both fairies declared you family"
       },
+      'mimic_favourite' => {
+        name: "Mimic's Favourite",
+        requirement: { mimic_submissions: 15 },
+        description: 'The living furniture of the tower knows your shape by heart'
+      },
+      'throne_breaker' => {
+        name: 'Throne Breaker',
+        requirement: { bosses_defeated: 10 },
+        description: 'Bosses fall before you with satisfying regularity'
+      },
+      'boss_pet' => {
+        name: "Boss's Pet",
+        requirement: { bosses_satisfied: 5 },
+        description: 'Five bosses have left your company purring'
+      },
+      'deep_delver' => {
+        name: 'Deep Delver',
+        requirement: { highest_floor: 35 },
+        description: "You've stood at the very top of the tower"
+      },
+      'eternal' => {
+        name: 'Eternal Delver',
+        requirement: { cycles_completed: 8 },
+        description: 'Eight towers conquered. The stairs know your step by sound'
+      },
+      'trap_toy' => {
+        name: 'Trap Toy',
+        requirement: { traps_triggered: 100 },
+        description: "A hundred traps have had their way with you — some even by accident"
+      },
+      'untouchable' => {
+        name: 'Untouchable',
+        requirement: { traps_avoided: 50 },
+        description: 'Fifty traps snapped shut on empty air behind you'
+      },
+      'chest_goblin' => {
+        name: 'Chest Goblin',
+        requirement: { treasure_found: 250 },
+        description: 'Two hundred and fifty chests opened. The tower restocks in fear'
+      },
+      'hoarder' => {
+        name: 'Lust Hoarder',
+        requirement: { lp_earned: 10_000 },
+        description: "You've earned a fortune in desire and spent it all becoming worse"
+      },
+      'unbroken' => {
+        name: 'Unbroken',
+        requirement: { climaxes_survived: 50 },
+        description: 'Fifty orgasms weathered without surrendering the run'
+      },
+      'denial_royal' => {
+        name: 'Denial Royalty',
+        requirement: { denied_climaxes: 50 },
+        description: 'Denied fifty times and still begging at the lock'
+      },
+      'errand_pet' => {
+        name: "Berry's Errand Pet",
+        requirement: { berry_quests_completed: 50 },
+        description: "Fifty of Berry's errands run. She barely lets Syn lend you out anymore"
+      },
+      'adored' => {
+        name: 'Adored',
+        requirement: { admirer_kinds: 3 },
+        description: 'Three kinds of monster now fight over who adores you most'
+      },
+      'two_in_one' => {
+        name: 'Two-in-One Flesh',
+        requirement: { chimera_fused: true },
+        description: 'Two hybrid shapes, one body, no regrets'
+      },
+      'many_shaped' => {
+        name: 'Many-Shaped',
+        requirement: { forms_unlocked: 10 },
+        description: 'Ten hybrid forms sleep in your skin, waiting their turn'
+      },
+      'every_shape' => {
+        name: 'Walking Menagerie',
+        requirement: { forms_unlocked: 20 },
+        description: 'Twenty forms unlocked — the tower has made a zoo of you'
+      },
+      'devotee_of_eros' => {
+        name: "Eros's Devotee",
+        requirement: { eros_attention: 75 },
+        description: "The goddess's Attention has rested heavily on you"
+      },
+      'tower_socialite' => {
+        name: 'Tower Socialite',
+        requirement: { npc_stories_finished: 5 },
+        description: "Five of the tower's residents have shared their whole story with you"
+      },
+      'burden_bearer' => {
+        name: 'Burden Bearer',
+        requirement: { burdens_carried: 3 },
+        description: 'You carry every burden the cycle offers, and smile about it'
+      },
 
       'sin_sculptor' => {
         name: 'Sin Sculptor',
@@ -400,7 +495,117 @@ module Engine
         description: 'Clear Eros, Goddess of Lust 7 times with every content theme enabled',
         requirement: { depraved_tower_clears: 7 }, reward: { lp: 1000 } },
       { id: 'royal_court', category: 'challenges', name: 'Royal Court', description: 'Clear both the Succubus Queen and the Incubus King',
-        requirement: { royal_demons_cleared: 2 }, reward: { lp: 100 } }
+        requirement: { royal_demons_cleared: 2 }, reward: { lp: 100 } },
+
+      { id: 'giant_slayer', category: 'combat', name: 'Giant Slayer', description: 'Defeat 500 monsters',
+        requirement: { monsters_killed: 500 }, reward: { lp: 250 } },
+      { id: 'apex_predator', category: 'combat', name: 'Apex Predator', description: 'Defeat 1,000 monsters',
+        requirement: { monsters_killed: 1000 }, reward: { lp: 400 } },
+      { id: 'elite_breaker', category: 'combat', name: 'Elite Breaker', description: 'Defeat 25 elite monsters',
+        requirement: { elites_defeated: 25 }, reward: { lp: 100 } },
+      { id: 'boss_legend', category: 'combat', name: 'Boss Legend', description: 'Defeat 25 bosses',
+        requirement: { bosses_defeated: 25 }, reward: { lp: 200 } },
+      { id: 'succubus_scourge', category: 'combat', name: 'Succubus Scourge', description: 'Defeat 15 succubi',
+        requirement: { succubus_defeats: 15 }, reward: { lp: 60 } },
+      { id: 'incubus_scourge', category: 'combat', name: 'Incubus Scourge', description: 'Defeat 15 incubi',
+        requirement: { incubus_defeats: 15 }, reward: { lp: 60 } },
+
+      { id: 'elite_masseuse', category: 'submission', name: 'Elite Masseuse', description: 'Satisfy 25 elite monsters',
+        requirement: { elites_satisfied: 25 }, reward: { lp: 100 } },
+      { id: 'boss_whisperer', category: 'submission', name: 'Boss Whisperer', description: 'Satisfy 10 bosses through submission',
+        requirement: { bosses_satisfied: 10 }, reward: { lp: 150 } },
+      { id: 'mimic_mattress', category: 'submission', name: 'Mimic Mattress', description: 'Submit to 25 mimic-type monsters',
+        requirement: { mimic_submissions: 25 }, reward: { lp: 60 } },
+      { id: 'beast_royalty', category: 'submission', name: 'Beast Royalty', description: 'Submit to 30 beast-type monsters',
+        requirement: { beast_submissions: 30 }, reward: { lp: 60 } },
+      { id: 'demon_devotion', category: 'submission', name: 'Demon Devotion', description: 'Submit to 30 demon-type monsters',
+        requirement: { demon_submissions: 30 }, reward: { lp: 70 } },
+      { id: 'slime_bath', category: 'submission', name: 'Slime Bath', description: 'Submit to 30 slime-type monsters',
+        requirement: { slime_submissions: 30 }, reward: { lp: 50 } },
+      { id: 'grave_lover', category: 'submission', name: 'Grave Lover', description: 'Submit to 30 undead-type monsters',
+        requirement: { undead_submissions: 30 }, reward: { lp: 60 } },
+      { id: 'garden_party', category: 'submission', name: 'Garden Party', description: 'Submit to 30 plant-type monsters',
+        requirement: { plant_submissions: 30 }, reward: { lp: 50 } },
+      { id: 'total_surrender', category: 'submission', name: 'Total Surrender', description: 'Submit to monsters 250 times',
+        requirement: { submissions: 250 }, reward: { lp: 200 } },
+      { id: 'monster_magnet', category: 'submission', name: 'Monster Magnet',
+        description: 'Submit 100+ times, at least twice as often as you defeat monsters',
+        requirement: { submissions: 100, submission_to_defeat_ratio: 2.0 }, reward: { lp: 100 } },
+
+      { id: 'trap_ghost', category: 'exploration', name: 'Trap Ghost', description: 'Sidestep 50 traps with your agility',
+        requirement: { traps_avoided: 50 }, reward: { lp: 60 } },
+      { id: 'trap_magnet', category: 'exploration', name: 'Trap Magnet', description: 'Trigger 100 traps',
+        requirement: { traps_triggered: 100 }, reward: { lp: 75 } },
+      { id: 'chest_master', category: 'exploration', name: 'Chest Master', description: 'Open 250 treasure chests',
+        requirement: { treasure_found: 250 }, reward: { lp: 100 } },
+      { id: 'walked_away_rich', category: 'exploration', name: 'Walked Away Rich', description: 'Walk away from 50 treasure chests',
+        requirement: { chests_ignored: 50 }, reward: { lp: 60 } },
+      { id: 'cartographer', category: 'exploration', name: 'Tower Cartographer', description: 'Clear 200 floors',
+        requirement: { floors_cleared: 200 }, reward: { lp: 150 } },
+      { id: 'deep_roots', category: 'exploration', name: 'Deep Roots', description: 'Reach floor 35, the top of the tower',
+        requirement: { highest_floor: 35 }, reward: { lp: 150 } },
+      { id: 'second_home', category: 'exploration', name: 'Second Home', description: 'Complete 3 full cycles',
+        requirement: { cycles_completed: 3 }, reward: { lp: 200 } },
+      { id: 'seventh_heaven', category: 'exploration', name: 'Seventh Heaven', description: 'Complete 7 full cycles',
+        requirement: { cycles_completed: 7 }, reward: { lp: 400 } },
+      { id: 'confidant', category: 'exploration', name: 'Tower Confidant', description: "Hear out 3 of the tower's residents",
+        requirement: { npc_stories_finished: 3 }, reward: { lp: 100 } },
+
+      { id: 'curse_magnet', category: 'curses', name: 'Curse Magnet', description: 'Acquire 15 different curses',
+        requirement: { curses_acquired: 15 }, reward: { lp: 60 } },
+      { id: 'curse_connoisseur', category: 'curses', name: 'Curse Connoisseur', description: 'Acquire 25 different curses',
+        requirement: { curses_acquired: 25 }, reward: { lp: 120 } },
+      { id: 'living_wardrobe', category: 'curses', name: 'Living Wardrobe', description: 'Have 15 curses active simultaneously',
+        requirement: { max_curses_simultaneous: 15 }, reward: { lp: 150 } },
+      { id: 'mimic_liberator', category: 'curses', name: 'Mimic Liberator', description: 'Tear free 5 different living items',
+        requirement: { mimics_removed_count: 5 }, reward: { lp: 80 } },
+      { id: 'mimic_collector', category: 'curses', name: 'Mimic Collector', description: 'Tear free 10 different living items',
+        requirement: { mimics_removed_count: 10 }, reward: { lp: 150 } },
+
+      { id: 'lp_tycoon', category: 'lust', name: 'Lust Tycoon', description: 'Earn 5,000 LP total',
+        requirement: { lp_earned: 5000 }, reward: { lp: 200 } },
+      { id: 'lp_legend', category: 'lust', name: 'Lust Legend', description: 'Earn 25,000 LP total',
+        requirement: { lp_earned: 25_000 }, reward: { lp: 500 } },
+      { id: 'orgasm_veteran', category: 'lust', name: 'Release Veteran', description: 'Orgasm 100 times',
+        requirement: { total_climaxes: 100 }, reward: { lp: 150 }, hidden: true },
+      { id: 'orgasm_legend', category: 'lust', name: 'Release Legend', description: 'Orgasm 250 times',
+        requirement: { total_climaxes: 250 }, reward: { lp: 300 }, hidden: true },
+      { id: 'denied_forever', category: 'lust', name: 'Denied Forever', description: 'Have an orgasm denied by chastity 50 times',
+        requirement: { denied_climaxes: 50 }, reward: { lp: 100 } },
+      { id: 'iron_willpower', category: 'lust', name: 'Iron Willpower', description: 'Go 10 floors in a row without orgasming',
+        requirement: { best_climax_free_floors: 10 }, reward: { lp: 75 }, hidden: true },
+      { id: 'sixth_canvas', category: 'lust', name: 'Sixfold Canvas', description: 'Wear 6 marks at once',
+        requirement: { marks_owned: 6 }, reward: { lp: 120 } },
+
+      { id: 'event_veteran', category: 'events', name: 'Event Veteran', description: 'Accept 50 fetish events',
+        requirement: { fetish_events_accepted: 50 }, reward: { lp: 75 } },
+      { id: 'glory_hole_legend', category: 'events', name: 'Glory Hole Legend', description: 'Use the glory hole 30 times',
+        requirement: { glory_hole_encounters: 30 }, reward: { lp: 75 } },
+      { id: 'pit_master', category: 'events', name: 'Pit Master', description: 'Survive the tentacle pit 15 times',
+        requirement: { tentacle_pit_survived: 15 }, reward: { lp: 100 } },
+      { id: 'master_wriggler', category: 'events', name: 'Master Wriggler', description: 'Wriggle free of 15 multi-turn events early',
+        requirement: { events_escaped: 15 }, reward: { lp: 75 } },
+      { id: 'dildo_diploma', category: 'events', name: 'Dildo Diploma', description: 'Spring the dildo trap 25 times',
+        requirement: { dildo_traps_encountered: 25 }, reward: { lp: 60 } },
+      { id: 'altar_devotion', category: 'events', name: 'Altar Devotion', description: "Raise Eros's Attention to 50",
+        requirement: { eros_attention: 50 }, reward: { lp: 75 } },
+
+      { id: 'chimera_born', category: 'challenges', name: 'Chimera Born', description: 'Fuse two hybrid forms into a chimera',
+        requirement: { chimera_fused: true }, reward: { lp: 150 } },
+      { id: 'shapeshifter', category: 'challenges', name: 'Shapeshifter', description: 'Unlock 10 hybrid forms',
+        requirement: { forms_unlocked: 10 }, reward: { lp: 150 } },
+      { id: 'menagerie', category: 'challenges', name: 'Walking Menagerie', description: 'Unlock 20 hybrid forms',
+        requirement: { forms_unlocked: 20 }, reward: { lp: 300 } },
+      { id: 'full_menagerie', category: 'challenges', name: 'The Whole Zoo', description: 'Unlock all 30 hybrid forms',
+        requirement: { forms_unlocked: 30 }, reward: { lp: 500 } },
+      { id: 'adored_by_all', category: 'challenges', name: 'Adored By All', description: 'Win admirers of 3 different monster kinds',
+        requirement: { admirer_kinds: 3 }, reward: { lp: 150 } },
+      { id: 'fully_burdened', category: 'challenges', name: 'Fully Burdened', description: 'Carry all 3 cycle burdens at once',
+        requirement: { burdens_carried: 3 }, reward: { lp: 100 } },
+      { id: 'quest_machine', category: 'challenges', name: 'Quest Machine', description: "Complete 50 of Berry's quests",
+        requirement: { berry_quests_completed: 50 }, reward: { lp: 200 } },
+      { id: 'fairy_favoured', category: 'challenges', name: 'Fairy Favoured', description: "See Syn's secret through to the second wedding",
+        requirement: { berry_story_step: 5 }, reward: { lp: 250 } }
     ].concat(KINK_ACHIEVEMENTS).freeze
 
     TRACKER_LABELS = {
@@ -454,6 +659,12 @@ module Engine
       elites_defeated: 'elites defeated',
       elites_satisfied: 'elites satisfied',
       marks_owned: 'marks worn',
+      forms_unlocked: 'hybrid forms unlocked',
+      chimera_fused: 'chimera fused',
+      admirer_kinds: 'monster kinds that adore you',
+      burdens_carried: 'cycle burdens carried',
+      eros_attention: "Eros's Attention",
+      npc_stories_finished: 'resident stories finished',
       berry_quests_completed: "Berry's quests completed",
       berry_story_step: "Syn & Berry story steps",
       chests_ignored: 'chests left closed',

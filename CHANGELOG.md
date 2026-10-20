@@ -8,6 +8,11 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Added
+
+- **100 titles and 150 achievements**: 19 new titles (Mimic's Favourite, Throne Breaker, Eternal Delver, Trap Toy, Untouchable, Chest Goblin, Denial Royalty, Two-in-One Flesh, Walking Menagerie, Burden Bearer, and more) and 51 new achievements across every category — deep-cycle grinds (1,000 kills, 7 cycles, 25,000 LP), Berry's quests and story, monster admirers, altars, chimeras, burdens, and the six-mark canvas
+- **6 new hybrid forms (30 total)**: Centaur, Siren, Minotaur, Clockwork Maid, Porcelain Muse, and Bone Marionette — all fusable into chimeras like any other form
+
 ### Fixed
 
 - **The stair-search counter now resets explicitly** the moment you descend a floor (and on defeat resets and cycle clears), instead of relying on the floor stamp to invalidate it — no stale counts can carry into a new floor

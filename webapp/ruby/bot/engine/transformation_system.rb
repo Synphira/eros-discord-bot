@@ -287,6 +287,78 @@ module Engine
         special_event_description: 'Sometimes your spores intoxicate the monster, weakening it for the rest of the fight',
         special: { kind: :weaken, chance: 0.15,
                    text: 'Your spores burst sweet and thick around the %<name>s — it sways, intoxicated and weakened!' }
+      },
+      'centaur' => {
+        name: 'Centaur', group: 'Beast',
+        description: 'Below the waist you are all horse — proud, powerful, and built to be ridden',
+        requirement: { pony_events: 5, body_growth_events: 3 },
+        appearance: ['sleek equine lower body', 'a glossy tail', 'hooves that ring on stone'],
+        buff: 'Wild Gallop', buff_description: '+20% flee chance, +10% dodge chance',
+        effects: { 'flee_bonus' => 0.2, 'dodge_bonus' => 0.1 },
+        special_event: 'Thunder Kick',
+        special_event_description: 'Sometimes your hind hooves lash out and stun the monster',
+        special: { kind: :stun, chance: 0.13,
+                   text: 'Your hind hooves crack out like thunder — the %<name>s reels, stunned!' }
+      },
+      'siren' => {
+        name: 'Siren', group: 'Supernatural',
+        description: 'Your voice has learned to reach into dreams and pull them toward the rocks',
+        requirement: { mind_control_events: 5, exhibitionism_events: 5 },
+        appearance: ['iridescent scale flecks', 'hair that moves like water', 'a voice with harmonics'],
+        buff: 'Rocksong', buff_description: '+20% seduction chance',
+        effects: { 'satisfy_bonus' => 0.2 },
+        special_event: 'Dreamtide',
+        special_event_description: 'Sometimes your song drags the monster into a fantasy it never wants to leave, gaining LP',
+        special: { kind: :dream, chance: 0.15,
+                   text: 'Your song pours over the %<name>s like warm tide — it sighs into its favourite fantasy, and you drink in **+%<amount>s LP**.' }
+      },
+      'minotaur' => {
+        name: 'Minotaur', group: 'Beast',
+        description: 'Horns, muscle, and a labyrinth hunger — the maze of the tower answers to you now',
+        requirement: { being_milked_events: 5, beast_submissions: 10 },
+        appearance: ['broad curved horns', 'a heavy gold nose ring', 'corded muscle under soft hide'],
+        buff: 'Labyrinth Bulk', buff_description: '+25% damage resistance, +10% surprise-hit chance',
+        effects: { 'damage_reduction' => 0.75, 'crit_chance' => 0.1 },
+        special_event: 'Crushing Charge',
+        special_event_description: 'Sometimes you simply charge, and the monster folds',
+        special: { kind: :crush, chance: 0.13,
+                   text: 'You lower your horns and charge — the %<name>s folds around you with a crunch, taking **%<amount>s** damage and going pliant!' }
+      },
+      'clockwork_maid' => {
+        name: 'Clockwork Maid', group: 'Synthetic',
+        description: 'Wound brass, perfect posture, and a devotion to service that ticks in perfect time',
+        requirement: { maid_events: 5, objectification_events: 5 },
+        appearance: ['brass key turning slowly at your back', 'porcelain-smooth joints', 'a frilled apron worn over plate'],
+        buff: 'Perfect Service', buff_description: '+15% trap avoidance, +20% damage resistance',
+        effects: { 'trap_avoid_bonus' => 0.15, 'damage_reduction' => 0.8 },
+        special_event: 'Service Interruption',
+        special_event_description: 'Sometimes you curtsey so perfectly the monster forgets its turn',
+        special: { kind: :stun, chance: 0.13,
+                   text: 'You curtsey with clockwork grace, tea tray steady. The %<name>s hesitates, utterly disarmed, and loses its turn!' }
+      },
+      'porcelain_muse' => {
+        name: 'Porcelain Muse', group: 'Object',
+        description: 'Glazed, posed, and priceless — a work of art the tower keeps putting on display',
+        requirement: { objectification_events: 8, exhibitionism_events: 5 },
+        appearance: ['glazed porcelain skin', 'painted lashes', 'fine cracks healed with gold'],
+        buff: 'Priceless Object', buff_description: '+30% damage resistance, +10% chance monsters back off',
+        effects: { 'damage_reduction' => 0.7, 'intimidate_chance' => 0.1 },
+        special_event: 'Gallery Stillness',
+        special_event_description: 'Sometimes you hold your pose, and the monster cannot bring itself to mar the art',
+        special: { kind: :stun, chance: 0.12,
+                   text: 'You hold your pose, flawless and still. The %<name>s lowers its hands — some things are too fine to spoil — and loses its turn!' }
+      },
+      'bone_marionette' => {
+        name: 'Bone Marionette', group: 'Supernatural',
+        description: 'Strings you cannot see move limbs you only partly own, and the dead hold the other ends',
+        requirement: { undead_submissions: 10, bondage_events: 5 },
+        appearance: ['visible string-lines at your joints', 'ball-jointed wrists', 'a painted smile'],
+        buff: 'Dancing Strings', buff_description: '+25% dodge chance',
+        effects: { 'dodge_bonus' => 0.25 },
+        special_event: 'Dead Hands',
+        special_event_description: 'Sometimes the strings yank you through the monster, draining it as you pass',
+        special: { kind: :drain, chance: 0.15,
+                   text: 'Invisible strings jerk you straight through the %<name>s — cold fingers drain **%<amount>s** HP from it into your defiance!' }
       }
     }.freeze
 

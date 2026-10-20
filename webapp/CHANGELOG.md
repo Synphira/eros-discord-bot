@@ -9,6 +9,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Added
+
+- **100 titles, 150 achievements, and 30 hybrid forms** (Centaur, Siren, Minotaur, Clockwork Maid, Porcelain Muse, Bone Marionette). Synced from the bot.
+
 ### Fixed
 
 - **The stair-search counter now resets explicitly** on descending, defeat, and cycle clear. Synced from the bot.
