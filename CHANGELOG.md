@@ -8,7 +8,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Fixed
+
+- **You can no longer be trapped on a floor forever**: after 12 rooms on one floor without descending, the next `/explore` always finds the stairs. This also fixes high-cycle runs where monster spawn boosts (like the Tempting Dark burden) could crowd the stairs out entirely
+
 ### Changed
+
+- **Spotted traps are now a choice**: when your Agility lets you dodge a trap, you instead pick **Dodge** (leap clear, as before) or **Let it happen** (stay still and take the trap's full effect — it still counts as a triggered trap, lust surge and all)
 
 - **Breast sizes are now a cup scale**: Flat, A cup, B cup, C cup, D cup, E cup, F cup (in `/options`, shown with cup names everywhere sizes are displayed). Existing delvers migrate automatically (small → A, medium → C, large → E), and growth events now climb the cup ladder one rung at a time
 

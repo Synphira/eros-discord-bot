@@ -9,7 +9,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Fixed
+
+- **Stairs are now guaranteed**: after 12 rooms on one floor, the next explore always finds the way down — high monster spawn rates can no longer crowd them out. Synced from the bot.
+
 ### Changed
+
+- **Spotted traps are now a choice**: Dodge it, or Let it happen and take the full effect. Synced from the bot.
 
 - **Breast sizes are now a cup scale** (Flat → A–F cup, with automatic migration for existing saves). Synced from the bot.
 

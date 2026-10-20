@@ -141,6 +141,7 @@ module Engine
       return Engine::NPCSystem.choices(player, data[:npc], data[:stage]) if type == 'npc'
       return Engine::Treasure.chest_choices(player) if type == 'chest'
       return Engine::Altars.choices(player) if type == 'altar'
+      return Engine::Exploration.trap_choices if type == 'trap'
 
       glory_hole_choices(player)
     end
@@ -240,6 +241,7 @@ module Engine
       return choose_npc!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'npc'
       return Engine::Treasure.choose_chest!(player, data, choice_key.to_s) if data[:type].to_s == 'chest'
       return choose_altar!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'altar'
+      return choose_trap!(player, data, choice_key.to_s) if data[:type].to_s == 'trap'
 
       ok = apply_glory_choice!(player, choice_key.to_s, level, log)
       unless ok
@@ -278,6 +280,14 @@ module Engine
       finish = finalize_lust!(player, log)
       colour = finish[:broken] ? 0x444444 : Engine::FetishEvents::COLOUR
       finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
+    end
+
+    def choose_trap!(player, data, choice)
+      result = Engine::Exploration.resolve_trap_choice!(player, data, choice)
+      return result unless result[:ok]
+
+      player.clear_event!
+      result
     end
 
     def choose_altar!(player, data, choice, _level, log)

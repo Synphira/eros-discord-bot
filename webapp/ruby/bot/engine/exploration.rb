@@ -11,6 +11,9 @@ module Engine
 
     TREASURE_LP = 10
 
+    # After this many rooms on one floor without descending, the stairs are guaranteed.
+    STAIRS_AFTER = 12
+
     COLOURS = {
       monster: 0x8b1a1a,
       trap: 0xb8860b,
@@ -35,6 +38,72 @@ module Engine
         { name: 'Aphrodisiac Gas', effect: :lust, value: 20 },
         { name: 'Pleasure Seal', effect: :lust, value: 35 }
       ].sample
+    end
+
+    def self.trap_choices
+      [
+        { key: 'dodge', label: 'Dodge', text: 'Leap clear of the trap, untouched' },
+        { key: 'let_it_happen', label: 'Let it happen', text: 'Stay still and take what the trap gives you' }
+      ]
+    end
+
+    # Resolves a spotted trap the player chose not to dodge automatically.
+    # Returns [detail_line, broken].
+    def self.apply_trap_effect(player, trap)
+      case trap[:effect].to_s
+      when 'lust'
+        player.gain_lust!(trap[:value].to_i)
+        lines = ["Lust surges — **+#{trap[:value].to_i} Lust** (now #{player.lust})."]
+        climax = player.try_climax!
+        if climax
+          lines.concat(climax[:lines])
+          if climax[:broken]
+            player.reset_run!
+            curse = player.apply_defeat_curse!
+            if curse[:curse]
+              lines << "You've been cursed with **#{curse[:curse].name}**: #{curse[:entry][:description]}"
+            end
+            lines << "You've been completely broken by the trap!"
+            lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear and trophies are lost.'
+            return [lines.join("\n"), true]
+          end
+        end
+        [lines.join("\n"), false]
+      when 'agility'
+        new_agi = [player.agility + trap[:value].to_i, 1].max
+        player.update(agility: new_agi)
+        ["Vines cinch tight — **AGI #{trap[:value].to_i}** (now #{player.agility}).", false]
+      else
+        ['The trap fizzles harmlessly.', false]
+      end
+    end
+
+    def self.resolve_trap_choice!(player, data, choice)
+      trap = {
+        name: data[:trap_name].to_s,
+        effect: data[:trap_effect].to_s,
+        value: data[:trap_value].to_i
+      }
+      log = []
+
+      case choice.to_s
+      when 'dodge'
+        player.bump_tracker!('traps_avoided')
+        log << "You leap clear of the **#{trap[:name]}** at the last moment, untouched. " \
+               "_(AGI #{player.effective_agility} · #{(player.trap_avoid_chance * 100).round}% dodge chance)_"
+        { ok: true, mode: :done, name: trap[:name], colour: COLOURS[:empty], broken: false, log: log, choices: [] }
+      when 'let_it_happen'
+        player.bump_tracker!('traps_triggered')
+        detail, broken = apply_trap_effect(player, trap)
+        log << "You see the **#{trap[:name]}** coming — and stay exactly where you are."
+        log << detail
+        log << "Lust `#{player.lust}` · Defiance `#{player.defiance}/#{player.max_defiance}` · LP `#{player.lp}` · AGI `#{player.agility}`"
+        { ok: true, mode: :done, name: trap[:name], colour: broken ? 0x444444 : COLOURS[:trap], broken: broken,
+          log: log, choices: [] }
+      else
+        { ok: false, mode: :choice, name: trap[:name], colour: COLOURS[:trap], log: ['Pick another option.'],
+          choices: trap_choices }
+      end
     end
 
     def initialize(player)
@@ -63,6 +132,13 @@ module Engine
       end
 
       return sanctuary_room if @player.sanctuary
+
+      if stairs_guaranteed?
+        room = stairs_room
+        room.message = "_You've combed every corner of Floor #{floor} — the tower can hide its stairs no longer._\n\n#{room.message}"
+        return room
+      end
+      note_room_explored!
 
       return event_room(Engine::Altars.present!(@player)) if rand < 0.07
 
@@ -98,6 +174,25 @@ module Engine
     end
 
     private
+
+    def floor_stamp
+      "#{@player.current_cycle}:#{@player.current_floor}"
+    end
+
+    def rooms_on_floor
+      return 0 unless @player.tracker_hash['rooms_floor_stamp'].to_s == floor_stamp
+
+      @player.tracker('rooms_on_floor')
+    end
+
+    def stairs_guaranteed?
+      rooms_on_floor >= STAIRS_AFTER
+    end
+
+    def note_room_explored!
+      @player.set_tracker!('rooms_floor_stamp', floor_stamp)
+      @player.set_tracker!('rooms_on_floor', rooms_on_floor + 1)
+    end
 
     def sanctuary_room
       @player.update(sanctuary: false)
@@ -187,18 +282,27 @@ module Engine
     def trap_room
       trap = self.class.generate_trap
       if rand < @player.trap_avoid_chance
-        @player.bump_tracker!('traps_avoided')
-        return RoomResult.new(
-          kind: :trap,
-          trap: trap,
-          broken: false,
-          colour: COLOURS[:empty],
-          with_actions: true,
-          message: <<~MSG.strip
-            **Floor #{@player.current_floor}** — a pressure plate clicks underfoot.
-
-            You spot the **#{trap[:name]}** just in time and leap clear! _(AGI #{@player.effective_agility} · #{(@player.trap_avoid_chance * 100).round}% to avoid)_
-          MSG
+        @player.store_event!(
+          type: 'trap',
+          mode: 'choice',
+          name: trap[:name],
+          level: @player.current_floor,
+          trap_name: trap[:name],
+          trap_effect: trap[:effect].to_s,
+          trap_value: trap[:value]
+        )
+        return event_room(
+          ok: true,
+          mode: :choice,
+          name: trap[:name],
+          colour: COLOURS[:trap],
+          log: [
+            "**Floor #{@player.current_floor}** — a pressure plate clicks underfoot.",
+            "You spot the **#{trap[:name]}** just in time. You could leap clear... or stay exactly where you are " \
+            'and let it happen. ' \
+            "_(AGI #{@player.effective_agility} · #{(@player.trap_avoid_chance * 100).round}% dodge chance — the choice is yours.)_"
+          ],
+          choices: self.class.trap_choices
         )
       end
 
@@ -262,32 +366,7 @@ module Engine
     end
 
     def apply_trap!(trap)
-      case trap[:effect]
-      when :lust
-        @player.gain_lust!(trap[:value])
-        lines = ["Lust surges — **+#{trap[:value]} Lust** (now #{@player.lust})."]
-        climax = @player.try_climax!
-        if climax
-          lines.concat(climax[:lines])
-          if climax[:broken]
-            @player.reset_run!
-            curse = @player.apply_defeat_curse!
-            if curse[:curse]
-              lines << "You've been cursed with **#{curse[:curse].name}**: #{curse[:entry][:description]}"
-            end
-            lines << "You've been completely broken by the trap!"
-            lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear and trophies are lost.'
-            return [lines.join("\n"), true]
-          end
-        end
-        [lines.join("\n"), false]
-      when :agility
-        new_agi = [@player.agility + trap[:value], 1].max
-        @player.update(agility: new_agi)
-        ["Vines cinch tight — **AGI #{trap[:value]}** (now #{@player.agility}).", false]
-      else
-        ['The trap fizzles harmlessly.', false]
-      end
+      self.class.apply_trap_effect(@player, trap)
     end
   end
 end
