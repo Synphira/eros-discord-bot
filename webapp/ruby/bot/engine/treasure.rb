@@ -404,19 +404,21 @@ module Engine
       broken = false
 
       roll = rand(100)
-      if roll < 35
+      if roll < 30
         amount = TREASURE_LP_BASE + (level / 2) + player.curse_effect_sum('treasure_lp').round
         player.gain_lp!(amount)
         lines << "A pouch of lust-essence — **+#{amount} LP** (now `#{player.lp}`)."
-      elsif roll < 60
+      elsif roll < 45
         amount = 15 + (level * 2)
         before = player.defiance
         gained = player.heal_defiance!(amount)
         lines << "A **Defiance Tonic**. You drink it on the spot — **+#{gained} Defiance** " \
                  "(`#{before}` → `#{player.defiance}/#{player.max_defiance}`)."
-      elsif roll < 85
+      elsif roll < 75
         gear_lines = grant_random_basic_gear(player)
         lines.concat(gear_lines)
+      elsif roll < 85
+        lines.concat(grant_random_consumable(player))
       else
         amount = 5 + (level / 3) + player.curse_effect_sum('treasure_lp').round
         player.gain_lp!(amount)
@@ -426,7 +428,7 @@ module Engine
         end
       end
 
-      if rand < 0.08
+      if rand < 0.08 && player.defiance < player.max_defiance
         bonus = 8 + level
         gained = player.heal_defiance!(bonus)
         lines << "A cracked vial spills into your mouth — **+#{gained} Defiance** more (now `#{player.defiance}`)."
@@ -446,13 +448,52 @@ module Engine
 
       candidates = BASIC_GEAR.map { |t| ::Equipment.first(name: t[:name]) }.compact
       candidates.reject! { |item| player.owns_equipment?(item.id) }
-      if candidates.empty?
-        amount = 8 + player.current_floor
-        player.gain_lp!(amount)
-        return ["You already own every scrap of common gear here — the chest yields **+#{amount} LP** instead."]
-      end
+      return describe_found_gear(player, candidates.sample) if candidates.any?
 
-      describe_found_gear(player, candidates.sample)
+      shop_lines = grant_fallback_shop_gear(player)
+      return shop_lines if shop_lines
+
+      amount = 25 + (player.current_floor * 2)
+      player.gain_lp!(amount)
+      ["You already own every piece of gear the tower keeps in its chests — it melts into **+#{amount} LP** instead."]
+    end
+
+    # Once a delver owns all the chest-only gear, chests start coughing up
+    # unowned shop gear instead of quietly downgrading the drop to LP.
+    def grant_fallback_shop_gear(player)
+      Engine::Shop.sync_to_db!
+      names = Engine::Shop::INVENTORY.reject { |i| i[:slot] == 'consumable' }.map { |i| i[:name] }
+      items = names.map { |n| ::Equipment.first(name: n) }.compact
+      items.reject! { |item| player.owns_equipment?(item.id) }
+      return nil if items.empty?
+
+      ['_The common chest gear is all yours already — something from the shop shelves tumbles out instead!_'] +
+        describe_found_gear(player, items.sample)
+    end
+
+    def grant_random_consumable(player)
+      pool = []
+      pool << :draught if player.defiance < player.max_defiance
+      pool << :elixir if player.lust.positive?
+      pool << :sanctuary unless player.sanctuary
+      case pool.sample
+      when :draught
+        before = player.defiance
+        gained = player.heal_defiance!((player.max_defiance * Engine::Shop::DRAUGHT_PCT).round)
+        ["A **Defiance Draught**. You down it on the spot — **+#{gained} Defiance** " \
+         "(`#{before}` → `#{player.defiance}/#{player.max_defiance}`)."]
+      when :elixir
+        before = player.lust
+        player.update(lust: [player.lust - Engine::Shop::ELIXIR_LUST, 0].max)
+        ["A **Cooling Elixir**. Cool relief spreads through you — **−#{before - player.lust} Lust** (now `#{player.lust}`)."]
+      when :sanctuary
+        player.update(sanctuary: true)
+        ['A **Bottled Sanctuary**. You drink it down — your next exploration will be safe.']
+      else
+        amount = 10 + player.current_floor
+        player.gain_lp!(amount)
+        ["A bundle of supplies you can't use right now melts into **+#{amount} LP** (now `#{player.lp}`)."]
+      end
     end
 
     def describe_found_gear(player, item, rare: false)

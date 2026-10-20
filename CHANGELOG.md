@@ -8,6 +8,15 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Changed
+
+- **Chest loot rebalanced** (a player reported mostly seeing Defiance Tonics — they were 25% of normal chests, and once you owned all 10 chest-only gear pieces the 25% gear drop silently turned into LP, leaving veterans with 75% LP / 25% tonics):
+  - Defiance Tonic: **25% → 15%** of normal chests; the bonus cracked vial no longer appears at full defiance
+  - LP pouch: **35% → 30%**; gear: **25% → 30%** (plus the coins roll can still add a piece)
+  - New **10% consumable drop**: a Defiance Draught, Cooling Elixir or Bottled Sanctuary, picked from whichever you'd actually use right now (never a draught at full defiance or an elixir at 0 lust)
+  - Once you own every basic and rare chest piece, the gear drop now gives a random **unowned shop item** instead of LP; only a player who owns literally every gear piece in the game gets the LP melt (now worth more: 25 + 2 per floor)
+  - Verified by simulation: roughly LP 45%, gear 31–36%, tonic ~15%, consumable ~10% per normal chest. Mimic chances are unchanged
+
 ### Added
 
 - **New opt-in fetish: Gaping & Fisting** (toggle `gaping` in `/options` → Opt-in fetishes; there are now 58 toggles, and `e,sluttify` covers it too). Three new events, each with a gentler alternative and a lasting condition:

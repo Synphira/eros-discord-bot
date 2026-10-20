@@ -9,6 +9,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Changed
+
+- **Chest loot rebalanced**: Defiance Tonics are rarer (25% → 15%), chests can drop useful consumables (Defiance Draught, Cooling Elixir, Bottled Sanctuary — always one you can use), and once you own all the chest-only gear, gear drops become unowned shop items instead of quietly turning into LP. Synced from the bot.
+
 ### Added
 
 - **Gaping & Fisting** opt-in fetish (58 toggles total) with three fisting events — Shrine of the Open Hand, The Gauntlet and The Living Gauntlet — plus the **Wide Open** title and achievement. Synced from the bot.
