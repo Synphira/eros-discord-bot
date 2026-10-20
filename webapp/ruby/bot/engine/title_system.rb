@@ -181,6 +181,46 @@ module Engine
         requirement: { cycles_completed: 8 },
         description: 'Eight towers conquered. The stairs know your step by sound'
       },
+      'second_wind' => {
+        name: 'Second Wind',
+        requirement: { cycles_completed: 2 },
+        description: 'You beat the tower, and came back for seconds'
+      },
+      'tower_regular' => {
+        name: 'Tower Regular',
+        requirement: { cycles_completed: 4 },
+        description: 'Four towers down. The monsters save your usual seat'
+      },
+      'cycle_adept' => {
+        name: 'Cycle Adept',
+        requirement: { cycles_completed: 6 },
+        description: 'Six towers conquered, and the resets barely slow you anymore'
+      },
+      'tenfold' => {
+        name: 'Tenfold Conqueror',
+        requirement: { cycles_completed: 10 },
+        description: 'Ten towers. Eros has stopped pretending to be surprised'
+      },
+      'dozen_delver' => {
+        name: 'Twelvefold Delver',
+        requirement: { cycles_completed: 12 },
+        description: 'A dozen towers lie behind you, and still you descend'
+      },
+      'cycle_sovereign' => {
+        name: 'Sovereign of Cycles',
+        requirement: { cycles_completed: 15 },
+        description: 'Fifteen towers conquered. The cycle itself bows when you enter'
+      },
+      'endless_legend' => {
+        name: 'Endless Legend',
+        requirement: { cycles_completed: 20 },
+        description: 'Twenty towers. At this point the ruins are simply your home'
+      },
+      'silver_delver' => {
+        name: 'Twenty-Five Towers',
+        requirement: { cycles_completed: 25 },
+        description: 'Twenty-five towers conquered. Eros keeps a silver throne warm for you'
+      },
       'trap_toy' => {
         name: 'Trap Toy',
         requirement: { traps_triggered: 100 },
@@ -252,6 +292,11 @@ module Engine
         description: 'You carry every burden the cycle offers, and smile about it'
       },
 
+      'original_syn' => {
+        name: 'The Original Syn',
+        requirement: { is_developer: true },
+        description: 'Before the parlour, before the ink — Syn was you first. The fairy is the reflection; you are the source'
+      },
       'sin_sculptor' => {
         name: 'Sin Sculptor',
         requirement: { is_developer: true },
@@ -319,7 +364,7 @@ module Engine
     ).freeze
 
     TITLE_PRIORITY = %w[
-      sin_sculptor climax_checker depraved_one mythic legendary master royal_consort mimic_seedbed survivor experienced novice cursed lustful submissive rich
+      original_syn sin_sculptor climax_checker depraved_one silver_delver endless_legend cycle_sovereign tenfold eternal mythic legendary master royal_consort mimic_seedbed survivor experienced novice cursed lustful submissive rich
       broken addicted pure succubus_bane incubus_bane succubus_pet incubus_toy beast_breeder demon_consort
       slime_vessel undead_paramour plant_pollinated pit_survivor glory_hole_veteran trap_springer
     ].freeze
@@ -605,7 +650,116 @@ module Engine
       { id: 'quest_machine', category: 'challenges', name: 'Quest Machine', description: "Complete 50 of Berry's quests",
         requirement: { berry_quests_completed: 50 }, reward: { lp: 200 } },
       { id: 'fairy_favoured', category: 'challenges', name: 'Fairy Favoured', description: "See Syn's secret through to the second wedding",
-        requirement: { berry_story_step: 5 }, reward: { lp: 250 } }
+        requirement: { berry_story_step: 5 }, reward: { lp: 250 } },
+
+      { id: 'encore', category: 'exploration', name: 'Encore', description: 'Complete 2 full cycles',
+        requirement: { cycles_completed: 2 }, reward: { lp: 150 } },
+      { id: 'fourth_verse', category: 'exploration', name: 'Fourth Verse', description: 'Complete 4 full cycles',
+        requirement: { cycles_completed: 4 }, reward: { lp: 200 } },
+      { id: 'fivefold', category: 'exploration', name: 'Fivefold', description: 'Complete 5 full cycles',
+        requirement: { cycles_completed: 5 }, reward: { lp: 250 } },
+      { id: 'sixth_sense', category: 'exploration', name: 'Sixth Sense', description: 'Complete 6 full cycles',
+        requirement: { cycles_completed: 6 }, reward: { lp: 300 } },
+      { id: 'eighth_layer', category: 'exploration', name: 'Eighth Layer', description: 'Complete 8 full cycles',
+        requirement: { cycles_completed: 8 }, reward: { lp: 400 } },
+      { id: 'decade_delver', category: 'challenges', name: 'Decade of Delving', description: 'Complete 10 full cycles',
+        requirement: { cycles_completed: 10 }, reward: { lp: 500 } },
+      { id: 'twelve_towers', category: 'challenges', name: 'Twelve Towers', description: 'Complete 12 full cycles',
+        requirement: { cycles_completed: 12 }, reward: { lp: 600 } },
+      { id: 'fifteenfold', category: 'challenges', name: 'Fifteenfold', description: 'Complete 15 full cycles',
+        requirement: { cycles_completed: 15 }, reward: { lp: 800 } },
+      { id: 'endless_encore', category: 'challenges', name: 'Endless Encore', description: 'Complete 20 full cycles',
+        requirement: { cycles_completed: 20 }, reward: { lp: 1000 } },
+      { id: 'quarter_century', category: 'challenges', name: 'Quarter Century of Sin', description: 'Complete 25 full cycles',
+        requirement: { cycles_completed: 25 }, reward: { lp: 1500 } },
+
+      { id: 'first_elite', category: 'combat', name: 'Elite Encounter', description: 'Defeat your first elite monster',
+        requirement: { elites_defeated: 1 }, reward: { lp: 25 } },
+      { id: 'monster_menace', category: 'combat', name: 'Monster Menace', description: 'Defeat 750 monsters',
+        requirement: { monsters_killed: 750 }, reward: { lp: 300 } },
+      { id: 'legendary_slayer', category: 'combat', name: 'Legendary Slayer', description: 'Defeat 2,000 monsters',
+        requirement: { monsters_killed: 2000 }, reward: { lp: 750 } },
+      { id: 'elite_ender', category: 'combat', name: 'Elite Ender', description: 'Defeat 50 elite monsters',
+        requirement: { elites_defeated: 50 }, reward: { lp: 200 } },
+      { id: 'boss_executioner', category: 'combat', name: 'Boss Executioner', description: 'Defeat 50 bosses',
+        requirement: { bosses_defeated: 50 }, reward: { lp: 400 } },
+      { id: 'succubus_nightmare', category: 'combat', name: 'Succubus Nightmare', description: 'Defeat 25 succubi',
+        requirement: { succubus_defeats: 25 }, reward: { lp: 120 } },
+
+      { id: 'surrender_artist', category: 'submission', name: 'Surrender Artist', description: 'Submit to monsters 500 times',
+        requirement: { submissions: 500 }, reward: { lp: 400 } },
+      { id: 'beast_devotion', category: 'submission', name: 'Beast Devotion', description: 'Submit to 50 beast-type monsters',
+        requirement: { beast_submissions: 50 }, reward: { lp: 100 } },
+      { id: 'demon_royalty', category: 'submission', name: 'Demon Royalty', description: 'Submit to 50 demon-type monsters',
+        requirement: { demon_submissions: 50 }, reward: { lp: 120 } },
+      { id: 'slime_sovereign', category: 'submission', name: 'Slime Sovereign', description: 'Submit to 50 slime-type monsters',
+        requirement: { slime_submissions: 50 }, reward: { lp: 90 } },
+      { id: 'grave_devotion', category: 'submission', name: 'Grave Devotion', description: 'Submit to 50 undead-type monsters',
+        requirement: { undead_submissions: 50 }, reward: { lp: 100 } },
+      { id: 'garden_devotion', category: 'submission', name: 'Garden Devotion', description: 'Submit to 50 plant-type monsters',
+        requirement: { plant_submissions: 50 }, reward: { lp: 90 } },
+      { id: 'living_mattress', category: 'submission', name: 'Living Mattress', description: 'Submit to 50 mimic-type monsters',
+        requirement: { mimic_submissions: 50 }, reward: { lp: 110 } },
+
+      { id: 'hundred_floors', category: 'exploration', name: 'Hundred Floors', description: 'Clear 100 floors',
+        requirement: { floors_cleared: 100 }, reward: { lp: 100 } },
+      { id: 'thousand_floors', category: 'exploration', name: 'Thousand Floors', description: 'Clear 1,000 floors',
+        requirement: { floors_cleared: 1000 }, reward: { lp: 500 } },
+      { id: 'treasure_tracker', category: 'exploration', name: 'Treasure Tracker', description: 'Open 100 treasure chests',
+        requirement: { treasure_found: 100 }, reward: { lp: 75 } },
+      { id: 'trap_survivor', category: 'exploration', name: 'Trap Survivor', description: 'Trigger 50 traps',
+        requirement: { traps_triggered: 50 }, reward: { lp: 50 } },
+      { id: 'nimble_hands', category: 'exploration', name: 'Nimble Hands', description: 'Sidestep 25 traps with your agility',
+        requirement: { traps_avoided: 25 }, reward: { lp: 45 } },
+      { id: 'friendly_face', category: 'exploration', name: 'Friendly Face', description: "Meet 10 of the tower's residents",
+        requirement: { npc_encounters: 10 }, reward: { lp: 50 } },
+      { id: 'all_stories', category: 'exploration', name: 'Every Story', description: "Hear out all 8 of the tower's residents",
+        requirement: { npc_stories_finished: 8 }, reward: { lp: 200 } },
+
+      { id: 'every_brand', category: 'curses', name: 'Every Brand', description: 'Acquire all 30 different curses',
+        requirement: { curses_acquired: 30 }, reward: { lp: 300 } },
+      { id: 'walking_catastrophe', category: 'curses', name: 'Walking Catastrophe', description: 'Have 20 curses active simultaneously',
+        requirement: { max_curses_simultaneous: 20 }, reward: { lp: 250 } },
+      { id: 'first_tear', category: 'curses', name: 'First Tear', description: 'Tear free your first living item',
+        requirement: { mimics_removed_count: 1 }, reward: { lp: 20 } },
+
+      { id: 'lp_mountain', category: 'lust', name: 'Lust Mountain', description: 'Earn 10,000 LP total',
+        requirement: { lp_earned: 10_000 }, reward: { lp: 300 } },
+      { id: 'orgasm_myth', category: 'lust', name: 'Release Myth', description: 'Orgasm 500 times',
+        requirement: { total_climaxes: 500 }, reward: { lp: 500 }, hidden: true },
+      { id: 'unshakable', category: 'lust', name: 'Unshakable', description: 'Orgasm 100 times without breaking',
+        requirement: { climaxes_survived: 100 }, reward: { lp: 200 } },
+      { id: 'eternal_denial', category: 'lust', name: 'Eternal Denial', description: 'Have an orgasm denied by chastity 100 times',
+        requirement: { denied_climaxes: 100 }, reward: { lp: 200 } },
+      { id: 'monastic', category: 'lust', name: 'Monastic', description: 'Go 20 floors in a row without orgasming',
+        requirement: { best_climax_free_floors: 20 }, reward: { lp: 150 }, hidden: true },
+      { id: 'overflowing', category: 'lust', name: 'Overflowing', description: 'Orgasm with lust 25 or more past the limit',
+        requirement: { max_climax_overflow: 25 }, reward: { lp: 60 }, hidden: true },
+
+      { id: 'event_legend', category: 'events', name: 'Event Legend', description: 'Accept 200 fetish events',
+        requirement: { fetish_events_accepted: 200 }, reward: { lp: 300 } },
+      { id: 'glory_hole_myth', category: 'events', name: 'Glory Hole Myth', description: 'Use the glory hole 50 times',
+        requirement: { glory_hole_encounters: 50 }, reward: { lp: 125 } },
+      { id: 'pit_royalty', category: 'events', name: 'Pit Royalty', description: 'Survive the tentacle pit 30 times',
+        requirement: { tentacle_pit_survived: 30 }, reward: { lp: 200 } },
+      { id: 'escape_legend', category: 'events', name: 'Escape Legend', description: 'Wriggle free of 30 multi-turn events early',
+        requirement: { events_escaped: 30 }, reward: { lp: 150 } },
+      { id: 'noticed_by_eros', category: 'events', name: 'Noticed', description: "Raise Eros's Attention to 25",
+        requirement: { eros_attention: 25 }, reward: { lp: 40 } },
+
+      { id: 'shape_collector', category: 'challenges', name: 'Shape Collector', description: 'Unlock 15 hybrid forms',
+        requirement: { forms_unlocked: 15 }, reward: { lp: 200 } },
+      { id: 'harem_keeper', category: 'challenges', name: 'Adored By Everything', description: 'Win admirers of all 6 monster kinds',
+        requirement: { admirer_kinds: 6 }, reward: { lp: 300 } },
+      { id: 'quest_legend', category: 'challenges', name: 'Quest Legend', description: "Complete 100 of Berry's quests",
+        requirement: { berry_quests_completed: 100 }, reward: { lp: 400 } },
+      { id: 'depraved_disciple', category: 'challenges', name: 'Depraved Disciple',
+        description: 'Clear Eros, Goddess of Lust 3 times with every content theme enabled',
+        requirement: { depraved_tower_clears: 3 }, reward: { lp: 500 } },
+      { id: 'purist', category: 'challenges', name: 'Purist', description: 'Earn the Pure title',
+        requirement: { pure_title: true }, reward: { lp: 150 } },
+      { id: 'boss_magnet', category: 'challenges', name: 'Boss Magnet', description: 'Satisfy 25 bosses through submission',
+        requirement: { bosses_satisfied: 25 }, reward: { lp: 300 } }
     ].concat(KINK_ACHIEVEMENTS).freeze
 
     TRACKER_LABELS = {
@@ -664,6 +818,7 @@ module Engine
       admirer_kinds: 'monster kinds that adore you',
       burdens_carried: 'cycle burdens carried',
       eros_attention: "Eros's Attention",
+      npc_encounters: 'residents met',
       npc_stories_finished: 'resident stories finished',
       berry_quests_completed: "Berry's quests completed",
       berry_story_step: "Syn & Berry story steps",

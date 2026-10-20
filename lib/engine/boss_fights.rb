@@ -546,6 +546,14 @@ module Engine
                  'how this body begs."_'
       end
 
+      if eros_form_keys(player).include?('syn_fae')
+        lines << "_Eros goes still. One great white tentacle rises, very slowly, and brushes a lock of platinum " \
+                 'hair from your violet eyes. "Those wings," she murmurs. "That ink. That tired little smirk." ' \
+                 'Her cruel smile softens into something almost reverent. "You are wearing the shape of the ' \
+                 'one who dreamed this whole temple into being, little architect. Syn is the reflection, pet. ' \
+                 '_You_ are the source she was poured from."_'
+      end
+
       if eros_form_keys(player).include?('eldritch_bride')
         if form && form[:chimera]
           lines << "_Then her smile sharpens. Her great white tentacles stir — answering the tentacle hair " \
@@ -603,6 +611,14 @@ module Engine
         scenes << "Eros's tentacles explore the body your **#{form[:name]}** form gave you with open, delighted " \
                   'curiosity, suckers tasting every changed curve. "The tower remade you on your way up," she ' \
                   'purrs. "How generous of it to gift-wrap you for me."'
+      end
+
+      if eros_form_keys(player).include?('syn_fae')
+        scenes << 'Eros circles you slowly, tentacles drifting through your smoked-glass wings, and laughs ' \
+                  'like she has been let in on the temple\'s oldest secret. "Every tattoo she sells, you ' \
+                  'authored. Every exhausted little sigh, yours first." She catches your chin and turns your ' \
+                  'face to the light. "Kneel for your goddess, little original — the reflection kneels to ' \
+                  '_you_ when the parlour closes."'
       end
 
       if eros_form_keys(player).include?('eldritch_bride')

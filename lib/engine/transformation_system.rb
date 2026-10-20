@@ -358,6 +358,19 @@ module Engine
         special_event_description: 'Sometimes the strings yank you through the monster, draining it as you pass',
         special: { kind: :drain, chance: 0.15,
                    text: 'Invisible strings jerk you straight through the %<name>s — cold fingers drain **%<amount>s** HP from it into your defiance!' }
+      },
+      'syn_fae' => {
+        name: 'Syn Fae', group: 'Fae',
+        description: 'Platinum hair, violet eyes, and smoked-glass wings — the tower keeps a fairy shaped like the one who first imagined it',
+        requirement: { is_developer: true },
+        appearance: ['waist-length platinum-blonde hair, forever artfully messy', 'heavy-lidded violet eyes with smudged dark makeup',
+                     'drooping smoked-glass black wings', 'skin inked and pierced like a parlour catalogue', 'an exhausted, knowing smirk'],
+        buff: 'The Original', buff_description: '+25% seduction chance, +15% dodge chance — and Eros looks at you very differently',
+        effects: { 'satisfy_bonus' => 0.25, 'dodge_bonus' => 0.15 },
+        special_event: 'Parlour Needle',
+        special_event_description: 'Sometimes you ink a binding sigil mid-fight, and the monster holds still to be decorated',
+        special: { kind: :stun, chance: 0.15,
+                   text: 'Your needle kisses the %<name>s with a binding sigil — it holds perfectly still, stunned and preening!' }
       }
     }.freeze
 
@@ -541,7 +554,7 @@ module Engine
     GROUP_AFFINITIES = {
       'Beast' => 'beast', 'Demon' => 'demon', 'Plant' => 'plant', 'Supernatural' => 'undead',
       'Eldritch' => 'mimic', 'Arachnid' => 'beast', 'Dragon' => 'beast', 'Stone' => 'undead',
-      'Object' => 'mimic', 'Synthetic' => 'slime', 'Holy' => 'demon'
+      'Object' => 'mimic', 'Synthetic' => 'slime', 'Holy' => 'demon', 'Fae' => 'demon'
     }.freeze
 
     def resonance?(player, monster_type)

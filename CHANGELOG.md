@@ -8,6 +8,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Added
+
+- **A developer-only honour**: the title **The Original Syn** and a hidden hybrid form, the **Syn Fae** (platinum hair, smoked-glass wings, parlour ink and all), visible and earnable only by the developer — Syn is based on them, after all. Eros has a special greeting and scene for the form, and it fuses into chimeras like any other
+
+- **Achievements now total 200**: 50 new ones, including a full cycle ladder (2 cycles up to **Quarter Century of Sin** at 25), 2,000-kill and 1,000-floor grinds, all-30-curses **Every Brand**, all-8-residents **Every Story**, all-6-admirer-kinds, and 100 Berry quests — plus **8 new cycle titles** (Second Wind at 2 cycles through **Twenty-Five Towers** at 25)
+
 ### Fixed
 
 - **`/transformation` could fail with a Discord "Invalid Form Body" error** for players with a chimera, deepening, and several unlocks at once — the panel's text could exceed Discord's component message limit. Form cards are now trimmed and unlock news is capped at 3 lines
