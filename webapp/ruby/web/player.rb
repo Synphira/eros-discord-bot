@@ -28,6 +28,9 @@ class Player
         return "Names must be #{CHARACTER_NAME_LENGTH.min}–#{CHARACTER_NAME_LENGTH.max} characters."
       end
       return 'Names may only use letters, numbers, spaces, apostrophes, and hyphens.' unless name.match?(CHARACTER_NAME_FORMAT)
+      if reserved_character_names.include?(name.downcase)
+        return "**#{name}** belongs to one of the tower's own — pick another name."
+      end
 
       nil
     end

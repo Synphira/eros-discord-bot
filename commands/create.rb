@@ -66,7 +66,7 @@ module Commands
 
       if character_name
         character_name = Player.normalize_character_name(character_name)
-        error = Player.character_name_error(character_name)
+        error = Player.character_name_error(character_name, except_id: event.user.id)
         if error
           ErosUI.reply_v2(event, ephemeral: true) do |c|
             c.text_display(content: "#{error}\nPress your Submission button again to retry.")

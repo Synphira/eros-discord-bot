@@ -126,12 +126,33 @@ class Player < Sequel::Model(:players)
     raw.to_s.strip.gsub(/\s+/, ' ')
   end
 
+  # Specific people may wear the resident they're based on.
+  RESERVED_NAME_OWNERS = { 'berry' => 325_471_423_508_250_625 }.freeze
+
+  # Names of the tower's own — fairies, the goddess, residents, and bosses.
+  # Only the developer may wear one (Syn is based on them, after all).
+  def self.reserved_character_names
+    names = %w[syn berry eros]
+    if defined?(Engine::NPCSystem) && Engine::NPCSystem.const_defined?(:NPCS)
+      names += Engine::NPCSystem::NPCS.values.map { |n| n[:name] }
+    end
+    if defined?(Engine::BossFights) && Engine::BossFights.const_defined?(:BOSSES)
+      names += Engine::BossFights::BOSSES.values.map { |b| b[:name] }
+    end
+    names.compact.map { |n| normalize_character_name(n).downcase }.uniq
+  end
+
   def self.character_name_error(name, except_id: nil)
     unless CHARACTER_NAME_LENGTH.cover?(name.length)
       return "Names must be #{CHARACTER_NAME_LENGTH.min}–#{CHARACTER_NAME_LENGTH.max} characters."
     end
     unless name.match?(CHARACTER_NAME_FORMAT)
       return 'Names may only use letters, numbers, spaces, apostrophes, and hyphens.'
+    end
+    if reserved_character_names.include?(name.downcase) &&
+       !(defined?(Engine::Dev) && Engine::Dev.owner?(except_id)) &&
+       RESERVED_NAME_OWNERS[name.downcase] != except_id.to_i
+      return "**#{name}** belongs to one of the tower's own — pick another name."
     end
 
     taken = where(Sequel.function(:lower, :character_name) => name.downcase)

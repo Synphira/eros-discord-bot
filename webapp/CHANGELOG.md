@@ -11,6 +11,8 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Added
 
+- **Reserved character names**: Syn, Berry, Eros, the residents, and the bosses can't be used as delver names. Synced from the bot.
+
 - **Achievements now total 200**, with a full cycle-completion ladder (2–25 cycles) and 8 new cycle titles. Synced from the bot.
 
 - **100 titles, 150 achievements, and 30 hybrid forms** (Centaur, Siren, Minotaur, Clockwork Maid, Porcelain Muse, Bone Marionette). Synced from the bot.
