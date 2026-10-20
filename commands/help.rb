@@ -56,7 +56,7 @@ module Commands
           ['/profile', 'e,profile [name]', 'Your profile and lifetime stats, or look up another delver'],
           ['/titles · /title', 'e,titles · e,title [name|auto]', 'View and wear earned titles'],
           ['/achievements', 'e,achievements [category]', 'Achievements by category'],
-          ['/transformation', 'e,transformation [name|clear]', 'Hybrid forms: take one or return to human'],
+          ['/transformation', 'e,transformation [name|clear|fuse A + B]', 'Hybrid forms, or fuse two into a Chimera'],
           ['/leaderboard', 'e,leaderboard [cycles|depth|kills|lp]', 'Top delvers']
         ]
       },

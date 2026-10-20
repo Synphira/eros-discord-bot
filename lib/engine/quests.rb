@@ -197,6 +197,132 @@ module Engine
       end
     end
 
+    # --- Syn's secret: a five-step surprise vow renewal ------------------
+    # Syn is secretly planning to renew her vows with Berry in a second
+    # wedding. The quest is hidden until a delver wears 5 of Syn's marks,
+    # is accepted at her bench in /parlour, is done once, and then is gone.
+    # Finishing it unlocks a sixth mark slot and the Wedding Mark.
+
+    STORY_TRACKER = 'berry_story_step'
+    STORY_START_TRACKER = 'berry_story_start'
+    STORY_ACCEPTED_TRACKER = 'syn_story_accepted'
+    STORY_MARKS_REQUIRED = 5
+    STORY = [
+      { name: 'Keep Her Distracted', tracker: 'berry_quests_completed', target: 3, reward: 80,
+        text: 'Syn catches your wrist before you leave, voice low and wicked despite the shadows under her ' \
+              'eyes. "Don\'t look at me like that, darling — flirting\'s free, but everything else is Berry\'s. ' \
+              'Which is rather the point. I\'m renewing our vows. Second wedding, her favourite everything, ' \
+              'and she suspects *nothing*. Run her errands and keep that board busy — a distracted Berry ' \
+              'asks no questions." Complete 3 of Berry\'s quests.' },
+      { name: 'Something Sweet', tracker: 'treasure_found', target: 8, reward: 80,
+        text: '"The mimics hoard candied lust-fruit," Syn murmurs, sketching cake layers in her ledger ' \
+              'instead of skin for once. "Berry\'s favourite. Open chests until we have enough. Do this well ' \
+              'and I might even stay awake through the tasting — no promises, I\'m only flesh and temptation." ' \
+              'Open 8 chests.' },
+      { name: 'Light the Aisle', tracker: 'bosses_defeated', target: 2, reward: 120,
+        text: '"I want boss-light for the lanterns," Syn says. "Beat two bosses — down, not distracted. ' \
+              'I need the light, not the gossip." She yawns into her ink-stained hand. "Wake me when the ' \
+              'aisle glows. Or don\'t wake me and carry me down it. Berry carries me everywhere else." ' \
+              'Defeat 2 bosses.' },
+      { name: 'Ink for Two', tracker: 'elites_satisfied', target: 2, reward: 120,
+        text: 'Syn shows you the design hidden under her ledger: two tribal bands, made to match, meeting in ' \
+              'a heart. "Matching ink. She gets one on our wedding night; family gets the other." Her smirk ' \
+              'goes filthy. "I need essence with some *kick* to set it. Satisfy two elites — and darling, I ' \
+              'will be imagining every second of it. Imagining is allowed." Satisfy 2 elites.' },
+      { name: 'The Second Wedding', tracker: 'bosses_satisfied', target: 1, reward: 200,
+        text: '"Last thing," Syn says, smoothing a dress she would never admit she bought. "Satisfy a boss. ' \
+              'When the tower sings like that, even Eros looks down — and I want our goddess watching when I ' \
+              'kiss my wife and ask her to marry me all over again." Satisfy 1 boss.' }
+    ].freeze
+
+    def story_step(player)
+      player.tracker(STORY_TRACKER)
+    end
+
+    def story_done?(player)
+      story_step(player) >= STORY.size
+    end
+
+    def story_accepted?(player)
+      player.tracker(STORY_ACCEPTED_TRACKER).positive? || story_done?(player)
+    end
+
+    # The quest only exists for delvers inked enough to be family-adjacent:
+    # five of Syn's marks, not yet accepted, not yet finished.
+    def story_offered?(player)
+      !story_accepted?(player) && !story_done?(player) &&
+        Engine::Marks.owned(player).size >= STORY_MARKS_REQUIRED
+    end
+
+    def accept_story!(player)
+      return { ok: false, message: 'Syn has nothing secret for you.' } unless story_offered?(player)
+
+      player.set_tracker!(STORY_ACCEPTED_TRACKER, 1)
+      player.set_tracker!(STORY_START_TRACKER, 0)
+      { ok: true,
+        message: '🖤 Syn slides her ledger over the design she was hiding and looks up at you through her ' \
+                 'lashes, exhausted and shameless. "Five of my marks. So you\'re basically furniture in this ' \
+                 'marriage already." Her grin turns wicked. "Good. I have a secret, a wedding to plan, and ' \
+                 'exactly one wife I intend to surprise with it. Flirting\'s free, darling. Everything else ' \
+                 'is hers — that\'s rather the point." **Story begun: Keep Her Distracted.**' }
+    end
+
+    def story_current(player)
+      STORY[story_step(player)] if story_accepted?(player) && !story_done?(player)
+    end
+
+    def story_start(player, spec)
+      start = player.tracker_hash[STORY_START_TRACKER]
+      return start.to_i unless start.nil?
+
+      # The first step counts everything the delver has ever done; later
+      # steps are baselined by claim_story! when they become current.
+      now = story_step(player).zero? ? 0 : player.progress_value(spec[:tracker].to_sym)
+      player.set_tracker!(STORY_START_TRACKER, now)
+      now
+    end
+
+    def story_progress(player)
+      spec = story_current(player) or return nil
+      done = player.progress_value(spec[:tracker].to_sym) - story_start(player, spec)
+      [[done, 0].max, spec[:target]].min.then { |d| [d, spec[:target]] }
+    end
+
+    def story_complete?(player)
+      progress = story_progress(player)
+      progress && progress[0] >= progress[1]
+    end
+
+    def claim_story!(player)
+      spec = story_current(player)
+      return { ok: false, message: 'There is no secret. There was never a secret. Berry, put the ledger down.' } unless spec
+      unless story_complete?(player)
+        done, target = story_progress(player)
+        return { ok: false, message: "**#{spec[:name]}** isn't finished yet — #{done}/#{target}. Syn taps the ledger impatiently." }
+      end
+
+      step = story_step(player)
+      player.set_tracker!(STORY_TRACKER, step + 1)
+      player.set_tracker!(STORY_START_TRACKER, player.progress_value(STORY[step + 1][:tracker].to_sym)) if STORY[step + 1]
+      player.gain_lp!(spec[:reward])
+      news = player.check_progress!
+      message =
+        if story_done?(player)
+          "💍 **The Second Wedding.** Berry walks in on lanterns, cake, and her exhausted wife on one knee — " \
+          "and cries exactly as predicted, which is to say immediately and at full volume. Syn, for once, is " \
+          "wide awake: \"Marry me again,\" she says, and kisses her wife like the tower isn't watching, " \
+          "which it is. Afterwards both fairies corner you. \"Family gets the matching ink,\" Syn says, and " \
+          "designs you something no one else will ever wear — **the Wedding Mark** — making room for a " \
+          "**sixth mark** on your skin. Berry is already planning your chair at every anniversary. " \
+          "**+#{spec[:reward]} LP**."
+        else
+          "🖤 **Secret kept: #{spec[:name]}** — **+#{spec[:reward]} LP**. \"Mmm. Efficient *and* pretty,\" " \
+          "Syn purrs, looking you over like a sketch she intends to finish later. \"Next: **#{STORY[step + 1][:name]}**. " \
+          'And darling — not a word to my wife. She\'s mine to surprise."'
+        end
+      { ok: true, message: message, news: news, done: story_done?(player) }
+    end
+
     def completed(player)
       player.tracker(COMPLETED_TRACKER)
     end

@@ -281,11 +281,14 @@ class Player < Sequel::Model(:players)
     return nil unless transformations_supported?
 
     key = active_transformation.to_s
+    return Engine::TransformationSystem::CHIMERA_KEY if key == Engine::TransformationSystem::CHIMERA_KEY &&
+                                                         Engine::TransformationSystem.chimera_combo(self)
+
     unlocked_transformations.include?(key) ? key : nil
   end
 
   def active_transformation_name
-    Engine::TransformationSystem.get(active_transformation_key)&.dig(:name)
+    Engine::TransformationSystem.active(self)&.dig(:name)
   end
 
   def check_transformations!
@@ -308,6 +311,14 @@ class Player < Sequel::Model(:players)
     if key.nil?
       update(active_transformation: nil)
       return { ok: true, message: 'Your body settles back into its human shape.' }
+    end
+
+    if key.to_s == Engine::TransformationSystem::CHIMERA_KEY
+      form = Engine::TransformationSystem.chimera_form(self)
+      return { ok: false, message: 'You have no chimera fused. Fuse two unlocked forms first.' } unless form
+
+      update(active_transformation: Engine::TransformationSystem::CHIMERA_KEY)
+      return { ok: true, message: "Your fused shapes surface — you are now a **#{form[:name]}**." }
     end
 
     entry = Engine::TransformationSystem.get(key)
@@ -359,6 +370,7 @@ class Player < Sequel::Model(:players)
     )
     note_floor_reached!(1)
     Engine::NPCSystem.reset_finished!(self)
+    Engine::Burdens.apply_branded_start!(self)
     { cleared_cycle: cleared, new_cycle: cleared + 1, lp: reward, conditions_expired: expired }
   end
 
@@ -399,6 +411,7 @@ class Player < Sequel::Model(:players)
       Hash(cond['effects']).each { |key, value| bags[key.to_s] << value }
     end
     Engine::TransformationSystem.effects(self).each { |key, value| bags[key.to_s] << value }
+    Engine::Burdens.effects(self).each { |key, value| bags[key.to_s] << value }
     Engine::Weekly.effects.each { |key, value| bags[key.to_s] << value }
     Engine::Marks.effects(self).each { |key, value| bags[key.to_s] << value }
     equipped_items.each do |item|
@@ -770,6 +783,7 @@ class Player < Sequel::Model(:players)
 
   def gain_lp!(amount)
     amount = amount.to_i
+    amount = (amount * Engine::Burdens.lp_multiplier(self)).round if amount.positive?
     attrs = { lp: lp + amount }
     attrs[:trackers] = tracker_hash.merge('lp_earned' => tracker('lp_earned') + amount) if amount.positive?
     update(attrs)
@@ -988,6 +1002,13 @@ class Player < Sequel::Model(:players)
       groups[type] << { index: index, curse: curse }
     end
     groups
+  end
+
+  def drop_curse!(name)
+    curse = active_curses.find { |c| c.name == name.to_s }
+    return false unless curse
+
+    DB[:player_curses].where(player_id: discord_id, curse_id: curse.id).delete.positive?
   end
 
   def remove_curse_at!(index)

@@ -89,7 +89,10 @@ module Engine
       snapshot = self.class.encounter_snapshot(encounter)
       start_lines = @player.apply_combat_start_effects!(type)
       Engine::TransformationSystem.combat_start!(@player, snapshot, start_lines)
+      Engine::Admirers.intervene_start!(@player, snapshot, start_lines)
       encounter.agility = snapshot[:agility]
+      encounter.strength = snapshot[:strength]
+      encounter.lust_damage = snapshot[:lust_damage]
       @player.store_encounter!(snapshot)
       message = build_start_message(encounter)
       message += "\n\n#{start_lines.join("\n")}" if start_lines.any?
@@ -224,6 +227,7 @@ module Engine
 
     def monster_lust_hit(enc)
       base = (enc[:lust_damage] * resistance_factor) - @player.effective_lust_resist
+      base *= 0.9 if Engine::TransformationSystem.resonance?(@player, enc[:type])
       base = (base * @player.curse_effect_product("#{enc[:type]}_damage_mult", default: 1.0)).to_f
       base *= @player.lust_damage_multiplier(monster_type: enc[:type])
       base = base.round
@@ -476,6 +480,7 @@ module Engine
       # cycle makes the tower's creatures harder to please.
       chance = 0.15 + (@player.effective_submission * 0.055) + @player.curse_effect_sum('satisfy_bonus') +
                enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc)
+      chance += 0.08 if Engine::TransformationSystem.resonance?(@player, enc[:type])
       chance -= 0.03 * (@player.current_cycle.to_i - 1)
       chance -= 0.05 if enc[:is_boss]
       chance = chance.clamp(0.05, 0.70)
@@ -500,6 +505,9 @@ module Engine
     end
 
     def finish_satisfied!(enc, log)
+      Engine::TransformationSystem.record_deepen!(@player, log)
+      Engine::Altars.gain_attention!(@player, enc[:is_boss] ? 12 : 3, log)
+      Engine::Admirers.record_satisfaction!(@player, enc, log)
       award_combat_end_bonus!(log)
       roll_curse!(enc, log, CURSE_CHANCE_SATISFIED,
                   "Satisfied, the #{enc[:name]} leaves its mark on you")
@@ -666,6 +674,8 @@ module Engine
         lp_gain += @player.curse_effect_sum("#{enc[:type]}_lp_bonus").round
 
         @player.bump_tracker!('monsters_killed')
+        Engine::TransformationSystem.record_deepen!(@player, log)
+        Engine::Admirers.gift!(@player, log)
         log << { scene: MonsterScenes.combat_line(@player, :victory, enc[:name], enc[:type]) }
         if @player.curse_effect_flag?("#{enc[:type]}_no_lp")
           log << "You defeated the #{enc[:name]}! You gain no Lust Points due to your curse."

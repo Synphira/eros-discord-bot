@@ -29,6 +29,7 @@ module Eros
       @screen = 'hub'
       @tab = nil
       @shop_cat = 'weapon'
+      @chimera_picks = {}
       @log = []
       @confirm = nil
       @outcome = nil
@@ -125,11 +126,22 @@ module Eros
       when 'curse_suppress' then say(@player.suppress_curse_at!(arg.to_i)[:message])
       when 'title' then say(@player.select_title!(arg.to_s.empty? ? nil : arg.to_s)[:message])
       when 'hybrid' then say(@player.select_transformation!(arg.to_s.empty? ? nil : arg.to_s)[:message])
+      when 'chimera_pick'
+        which, key = arg.to_s.split(':', 2)
+        @chimera_picks[which] = key
+        say("#{which.capitalize} form chosen: **#{Engine::TransformationSystem.get(key)&.dig(:name)}**. Pick the other half, then fuse.")
+      when 'mutation' then say(Engine::TransformationSystem.choose_mutation!(@player, arg.to_s)[:message])
+      when 'burden' then say(Engine::Burdens.toggle!(@player, arg.to_s)[:message])
+      when 'chimera_fuse'
+        say(Engine::TransformationSystem.fuse!(@player, @chimera_picks['primary'].to_s,
+                                               @chimera_picks['secondary'].to_s)[:message])
       when 'mark_buy' then mark!(Engine::Marks.buy!(@player, arg.to_s))
       when 'mark_remove' then mark!(Engine::Marks.remove!(@player, arg.to_s))
       when 'quest_accept' then quest!(Engine::Quests.accept!(@player, arg.to_s))
       when 'quest_claim' then quest!(Engine::Quests.claim!(@player, arg.to_s))
       when 'quest_abandon' then quest!(Engine::Quests.abandon!(@player, arg.to_s))
+      when 'story_claim' then quest!(Engine::Quests.claim_story!(@player))
+      when 'story_accept' then quest!(Engine::Quests.accept_story!(@player))
       when 'pref' then toggle_pref!(arg.to_s)
       when 'pref_all' then set_all_prefs!(arg.to_s == 'on')
       when 'size' then set_size!(*arg.to_s.split(':', 2))
@@ -639,7 +651,59 @@ module Eros
         end
       end
       sections = [{ text: '_No hybrid forms are within reach yet._' }] if sections.empty?
+      sections += mutation_sections(active)
+      sections += chimera_sections(active, owned)
       { title: 'Hybrid Forms', sections: sections, actions: [back_row] }
+    end
+
+    def mutation_sections(active)
+      return [] if active.nil? || active.to_s.empty?
+
+      ts = Engine::TransformationSystem
+      stage = ts.deepen_stage(@player, active.to_s)
+      chosen = ts.mutations_for(@player, active.to_s)
+      sections = [{ text: "🧬 **Deepening** — Stage **#{stage}**/3" \
+                          "#{chosen.any? ? " · mutations: #{chosen.map { |m| ts::MUTATIONS[m][:name] }.join(', ')}" : ''}\n" \
+                          '-# Win fights or satisfy monsters in this form to deepen it. ' \
+                          'Kindred monsters (same type as your form’s nature) are easier to satisfy and gentler with you.' }]
+      if ts.pending_mutations(@player, active.to_s).positive?
+        choices = ts.mutation_choices(@player, active.to_s).map do |m|
+          spec = ts::MUTATIONS[m]
+          btn("#{spec[:name]} — #{spec[:description]}", 'mutation', arg: m, style: 'success')
+        end
+        sections << { text: '_Your form stirs — choose a mutation:_', actions: choices }
+      end
+      sections
+    end
+
+    def chimera_sections(active, owned)
+      ts = Engine::TransformationSystem
+      sections = []
+      if (form = ts.chimera_form(@player))
+        effects = ts.effect_lines(form).map { |l| "• #{l}" }.join("\n")
+        current = active.to_s == ts::CHIMERA_KEY
+        sections << { text: "🧬 **Your Chimera — #{form[:name]}**#{current ? ' _(your form)_' : ''}\n" \
+                            "_#{form[:description]}_\n#{effects}",
+                      actions: current ? [btn('Return to human', 'hybrid', arg: '')]
+                                       : [btn('Take your Chimera', 'hybrid', arg: ts::CHIMERA_KEY, style: 'primary')] }
+      end
+      return sections if owned.size < 2
+
+      name_of = ->(k) { ts.get(k)&.dig(:name) || '—' }
+      pick_a = @chimera_picks['primary'].to_s
+      pick_b = @chimera_picks['secondary'].to_s
+      cards = owned.map do |key|
+        t = ts.get(key)
+        { text: "**#{t[:name]}** — fuse as: primary **#{pick_a == key ? '✓' : ''}** · secondary **#{pick_b == key ? '✓' : ''}**",
+          actions: [btn('Primary', 'chimera_pick', arg: "primary:#{key}", style: pick_a == key ? 'success' : 'secondary'),
+                    btn('Secondary', 'chimera_pick', arg: "secondary:#{key}", style: pick_b == key ? 'success' : 'secondary')] }
+      end
+      header = { text: "**Fuse a Chimera** (#{ts::FUSION_COST} LP) — primary **#{name_of.call(pick_a)}** + " \
+                       "secondary **#{name_of.call(pick_b)}**\n" \
+                       '-# The primary keeps its full effects and combat special; the secondary echoes at half strength.',
+                 actions: [btn("Fuse them (#{ts::FUSION_COST} LP)", 'chimera_fuse', style: 'success',
+                               disabled: pick_a.empty? || pick_b.empty? || pick_a == pick_b || @player.lp < ts::FUSION_COST)] }
+      sections + [header] + cards
     end
 
     def parlour_view
@@ -651,18 +715,18 @@ module Eros
                       "sleepless shadows under her eyes and next to nothing on but black lace scraps — her own " \
                       "inked, pierced skin displays every mark she sells. Every mark Syn makes stays through " \
                       "every run._\n" \
-                      "-# Marks worn #{owned.size}/#{Engine::Marks::MAX_MARKS}" }
+                      "-# Marks worn #{owned.size}/#{Engine::Marks.max_marks(@player)}" }
       worn = owned.map do |key|
         mark = Engine::Marks::MARKS[key]
         { text: "#{Engine::Marks.label(key)} — #{mark[:perk]}", actions: [btn('Remove', 'mark_remove', arg: key)] }
       end
-      full = owned.size >= Engine::Marks::MAX_MARKS
+      full = owned.size >= Engine::Marks.max_marks(@player)
       offers = Engine::Marks.available(@player).map do |key, mark|
         { text: "#{Engine::Marks.label(key)} — #{mark[:cost]} LP\n#{mark[:perk]}",
           actions: [btn("Get it (#{mark[:cost]})", 'mark_buy', arg: key, style: 'success',
                                                     disabled: full || @player.lp < mark[:cost])] }
       end
-      { title: "Parlour — #{@player.lp} LP", sections: [intro] + worn + offers, actions: [back_row] }
+      { title: "Parlour — #{@player.lp} LP", sections: [intro] + worn + offers + parlour_story_sections, actions: [back_row] }
     end
 
     def quests_view
@@ -688,6 +752,25 @@ module Eros
         end
       end
       { title: "Berry's Quests — #{@player.lp} LP", sections: sections, actions: [back_row] }
+    end
+
+    # Syn's secret lives at her bench: hidden until five of her marks,
+    # gone again once the second wedding is done.
+    def parlour_story_sections
+      if Engine::Quests.story_offered?(@player)
+        return [{ text: "### 🖤 Syn Has a Secret\n_Syn has been watching you over her ledger for a while — five " \
+                        "of her marks will do that to a fairy. She crooks one ink-stained finger at you. " \
+                        "\"Closer, darling. This one's not for the board, and it's certainly not for my wife's " \
+                        'ears. Yet."_',
+                  actions: [btn("Hear Syn's secret", 'story_accept', style: 'danger')] }]
+      end
+
+      spec = Engine::Quests.story_current(@player) or return []
+      done, target = Engine::Quests.story_progress(@player)
+      actions = Engine::Quests.story_complete?(@player) ? [btn("Report to Syn: #{spec[:name]} (#{spec[:reward]} LP)", 'story_claim', style: 'success')] : []
+      [{ text: "### 🖤 Syn's Secret — #{spec[:name]} (#{done}/#{target})\n_#{spec[:text]}_\n" \
+               "-# Reward **#{spec[:reward]} LP** · Step #{Engine::Quests.story_step(@player) + 1}/#{Engine::Quests::STORY.size} · Berry suspects nothing",
+         actions: actions }]
     end
 
     def options_view
@@ -719,12 +802,21 @@ module Eros
                "Bosses beaten **#{t['bosses_defeated']}** · Floors cleared **#{t['floors_cleared']}** · " \
                "LP earned **#{t['lp_earned']}**",
                "Chests opened **#{t['treasure_found']}** · left closed **#{t['chests_ignored']}**"]
+      burdens = Engine::Burdens.active(@player)
+      burden_section = { text: "⛓️ **Cycle Burdens** — LP gains ×#{format('%.2f', Engine::Burdens.lp_multiplier(@player))}" \
+                               "#{burdens.any? ? " · carrying: #{burdens.map { |b| Engine::Burdens::BURDENS[b][:name] }.join(', ')}" : ''}\n" \
+                               "-# #{Engine::Burdens.changeable?(@player) ? 'You are at a cycle\'s start: take on or shed burdens (max 3, +25% LP each).' : 'Burdens are chosen at a cycle\'s start and set until you clear the tower.'}",
+                         actions: Engine::Burdens::BURDENS.map do |key, spec|
+                           on = burdens.include?(key)
+                           btn("#{on ? '✓ ' : ''}#{spec[:name]} — #{spec[:description]}", 'burden', arg: key,
+                               style: on ? 'danger' : 'secondary', disabled: !Engine::Burdens.changeable?(@player))
+                         end }
       restart = @confirm == :restart
       delete = @confirm == :delete_save
       notes = '-# **Restart** erases this delver but keeps titles, achievements, records and options. ' \
               '**Delete save** erases everything. Your save lives in this browser only; use **Export save** to ' \
               'back it up or move it to another device.'
-      { title: 'Settings & stats', sections: [{ text: lines.join("\n") }, { text: notes }],
+      { title: 'Settings & stats', sections: [{ text: lines.join("\n") }, burden_section, { text: notes }],
         actions: [[btn('Export save', 'export_save', style: 'primary'), btn('Import save', 'import_prompt')],
                   [btn(restart ? 'Restart (press again)' : 'Restart', 'restart', style: 'danger'),
                    btn(delete ? 'Delete save (press again)' : 'Delete save', 'delete_save', style: 'danger')],

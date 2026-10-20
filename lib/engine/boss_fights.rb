@@ -86,10 +86,16 @@ module Engine
         title: 'Eros, Goddess of Lust',
         type: 'demon',
         type_name: 'Goddess of Lust',
-        description: 'The goddess who built this tower as her temple lounges on a throne of gold and silk, naked but for a crown and a ' \
-                     'sheer veil that hides nothing. Every sin committed below flows up into her, and every delver who ' \
-                     'climbs this far was always climbing towards her lap. She smiles at you like she has been waiting. ' \
-                     '"There you are, pet. Did you really think you were escaping?"',
+        description: 'The goddess who built this tower as her temple towers over her throne of gold and silk — pale ' \
+                     'ash-grey hair in bangs marked with crimson hearts, massive pitch-black horns sweeping from her ' \
+                     'crown, and deep red eyes glowing above a cruel, confident smile. A thick black choker hugs her ' \
+                     'throat, and where a cape should fall, enormous smooth white tentacles coil and writhe behind ' \
+                     'her, their undersides a wet crimson-magenta lined with glistening suckers that move with lives ' \
+                     'of their own. She wears a glossy white high-cut bodysuit with puff sleeves, dark piping and a ' \
+                     'red heart over her chest, a split mantle flaring white outside and dark red within, heavy black ' \
+                     'cuffs on her wrists, and sheer white thigh-highs bound in tattered wraps above bare feet that ' \
+                     'fade into purplish-pink. Every sin below flows up into her. "There you are, pet. Did you really ' \
+                     'think you were escaping?"',
         color: 0x5c0a2e,
         strength: 28,
         agility: 16,
@@ -260,7 +266,9 @@ module Engine
           'anus' => ['Eros bends you over the arm of her throne and fills your ass with a cock of glowing rose light, thrusting deeper every time you gasp. "Good pet. Take all of your goddess."'],
           'breasts' => ['Eros cups your breasts and rolls your nipples between her fingertips, teasing them stiff until you whimper and arch into her hands.'],
           'any' => ['Eros catches your chin and kisses you, and every desire you have ever hidden pours out of you and into her. When she lets go, you are trembling and leaning after her lips.',
-                    'Silk ribbons slither from Eros\'s throne and bind your wrists while her hands roam every inch of you, unhurried and possessive, teasing until you beg.']
+                    'Silk ribbons slither from Eros\'s throne and bind your wrists while her hands roam every inch of you, unhurried and possessive, teasing until you beg.',
+                    'Her great white tentacles pour over the arms of the throne and coil around your limbs, crimson suckers tasting your skin as they spread you wide for her. Eros watches your face the whole time, red eyes glowing, smiling like a cat with a new toy.',
+                    'Eros stands, towering, horns sweeping black against the candlelight, and walks you backward with one finger on your chest until her tentacles catch you and hold you up for her mouth.']
         },
         willing: {
           'vagina' => ['You climb into Eros\'s lap and sink down onto the glowing cock she conjures for you, moaning as she holds your hips and makes you ride it at her pace.',
@@ -268,13 +276,14 @@ module Engine
           'penis' => ['You offer your cock to Eros and she takes it in her mouth, sucking you slow and deep while her eyes stay locked on yours, daring you to last.'],
           'anus' => ['You bend over her throne and spread yourself for her, crying out as Eros fills your ass with her glowing cock and calls you her good little slut.'],
           'breasts' => ['You press your breasts into Eros\'s hands and let her squeeze and suck your nipples until they ache, sighing as she praises how eagerly you offer them.'],
-          'any' => ['You kneel at the foot of her throne, kiss her feet, and give yourself to Eros completely. She strokes your hair and takes everything you offer.']
+          'any' => ['You kneel at the foot of her throne, kiss her bare feet where the skin fades to purplish-pink, and give yourself to Eros completely. She strokes your hair and takes everything you offer.',
+                    'You reach for Eros and her tentacles meet you halfway, winding around your arms and waist to pull you into her lap. You bury your face against the red heart on her bodysuit while her darlings hold you exactly where she wants you.']
         },
         wanting: ['Eros smirks and tilts your chin up with one finger. "Did I say we were finished, pet? Again."',
                   '"Mmm, better," Eros purrs. "But my temple expects devotion, not effort. Show me more."'],
-        sated: ['Eros arches on her throne and cums with a cry that echoes down every floor of the tower, the walls shuddering with her pleasure. She sinks back, flushed and glowing, and laughs softly. "Good pet. Go on, then. I\'ll be waiting for you to climb back to me."'],
-        unimpressed: ['Eros barely glances at you, examining her nails. "Is that all? I have had better devotion from the slimes on floor one."'],
-        beaten: ['Your final blow drives Eros back into her throne. She stares at you, then laughs, low and delighted. "Defiant to the very top. How delicious." She waves you past. "Run along, pet. The tower will bring you back to me."']
+        sated: ['Eros arches on her throne and cums with a cry that echoes down every floor of the tower, her tentacles shuddering and coiling tight around the throne, suckers flashing crimson. She sinks back, flushed and glowing, and laughs softly. "Good pet. Go on, then. I\'ll be waiting for you to climb back to me."'],
+        unimpressed: ['Eros barely glances at you, examining her nails while a tentacle idly curls and uncurls. "Is that all? I have had better devotion from the slimes on floor one."'],
+        beaten: ['Your final blow drives Eros back into her throne, her tentacles lashing once before settling. She stares at you, then laughs, low and delighted. "Defiant to the very top. How delicious." She waves you past with one black-cuffed wrist. "Run along, pet. The tower will bring you back to me."']
       }
     }.freeze
 
@@ -290,7 +299,7 @@ module Engine
                            '%<name>s laughs as you turn to run. "Sit." Your body obeys before your mind does, and you stay right where she wants you.'],
       'dominion_heat' => ["The tower pulses with %<name>s's will, and every sin in its walls floods into you as heat!",
                           '%<name>s blows you a kiss, and it lands between your legs like a hot, wet tongue!'],
-      'dominion_rage' => ['%<name>s rises from her throne, eyes blazing pink. "Enough playing. Kneel for your goddess." Her touch burns hotter than ever!']
+      'dominion_rage' => ['%<name>s rises from her throne, horns silhouetted, red eyes blazing, her tentacles lashing the air. "Enough playing. Kneel for your goddess." Her touch burns hotter than ever!']
     }.freeze
 
     TROPHIES = {
@@ -408,6 +417,10 @@ module Engine
         HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
       MSG
       message += "\n#{start_lines.join("\n")}" if start_lines.any?
+      if boss[:final]
+        regard = eros_regard_lines(player)
+        message += "\n\n#{regard.join("\n")}" if regard.any?
+      end
 
       {
         ok: true,
@@ -472,14 +485,15 @@ module Engine
               'into the furs as it ruts into you, slow and deep and possessive.'
       },
       'Eros' => {
-        intro: 'Eros stops fighting and simply opens her arms. The veil slips from her shoulders, and the whole chamber fills ' \
-               'with warm, rose-scented heat. *"You have fought so hard, pet,"* she purrs. *"Aren\'t you tired? Kneel. Say ' \
-               'you\'re mine, and I will never let you go."*',
+        intro: 'Eros stops fighting and simply opens her arms, her great white tentacles spreading wide behind her like a ' \
+               'living mantle, crimson undersides glistening. The chamber fills with warm, rose-scented heat. *"You have ' \
+               'fought so hard, pet,"* she purrs. *"Aren\'t you tired? Kneel. Say you\'re mine, and I will never let you go."*',
         resist_label: 'Refuse her', give_label: 'Kneel and be hers',
         resist: 'You refuse her. The word echoes up through the tower and, for one heartbeat, the goddess looks surprised. ' \
-                'Her smile slips, and your next blow lands true.',
-        give: 'You kneel. Eros cradles your face, whispers *good pet*, and draws you up into her lap, where her hands, her ' \
-              'mouth and her whole temple of silk and heat take you apart while she murmurs your name.'
+                'Her tentacles still, her smile slips, and your next blow lands true.',
+        give: 'You kneel. Eros cradles your face, whispers *good pet*, and her tentacles draw you up into her lap, where ' \
+              'her hands, her mouth, her suckered darlings and her whole temple of silk and heat take you apart while ' \
+              'she murmurs your name.'
       }
     }.freeze
 
@@ -510,7 +524,103 @@ module Engine
       pool = parts.flat_map { |part| Array(spec[part]) } + Array(spec['any'])
       pool += Engine::ChastitySystem.lines_for(player, kind == :willing ? :willing : :monster,
                                                actor: boss_name.to_s.delete_prefix('The '))
+      pool += eros_tailored_scenes(player) if boss_name == 'Eros'
       Engine::ContentOptions.pick(player, pool, fallback: spec['any'])
+    end
+
+    # Eros reads every delver who reaches her: the hybrid shape the tower gave
+    # them, Syn's marks on their skin, the curses they carry, and any living
+    # gear still clinging to them. These lines put her tentacles, horns and
+    # divine form into the sex as well.
+    def eros_regard_lines(player)
+      lines = []
+      if Engine::Altars.attention(player) >= 40
+        lines << '_Eros\'s smile softens — a fraction, and only for you. "My attentive little devotee. I have ' \
+                 'been watching you almost as much as you have been pleasing me."_'
+      end
+
+      form = Engine::TransformationSystem.active(player)
+      if form
+        lines << "_Eros's red eyes rake over the changed body the tower made of you, and her cruel smile widens. " \
+                 "\"A **#{form[:name]}**, climbing all this way to me? The tower marked you well, pet. Let's see " \
+                 'how this body begs."_'
+      end
+
+      marks = Engine::Marks.owned(player)
+      if marks.any?
+        names = marks.map { |k| Engine::Marks::MARKS[k][:name] }
+        lines << "_One of Eros's great white tentacles uncoils behind her, its crimson, suckered underside " \
+                 "glistening as the tip traces your **#{name_list(names)}**. \"Syn's work,\" she purrs. \"She " \
+                 'always did have a weakness for marking my pets before I got to them."_'
+      end
+
+      curses = player.active_curses
+      if curses.any?
+        names = curses.first(3).map(&:name)
+        more = curses.size > 3 ? " — and #{curses.size - 3} more besides" : ''
+        lines << "_Eros inhales slowly, horns catching the candlelight. \"I can smell the curses on you, pet. " \
+                 "**#{name_list(names)}**#{more}. You brought me quite the bouquet.\"_"
+      end
+
+      living = player.equipped_items.select(&:cursed).map(&:name)
+      if living.any?
+        lines << "_Your **#{name_list(living)}** writhes toward Eros like a pet recognising its true mistress, " \
+                 'and she laughs, low and pleased. "Even your living gear knows who it belongs to."_'
+      end
+      lines
+    end
+
+    def eros_tailored_scenes(player)
+      scenes = [
+        "Eros's massive white tentacles slide around your waist and thighs, crimson-magenta suckers kissing " \
+        'along your skin as they lift you effortlessly into her lap. "No hands," she breathes, black cuffs ' \
+        'catching the light as she folds her arms. "My darlings want to know you first."',
+        'A tentacle coils under your chin and tilts your face up to her glowing red eyes while two more wind ' \
+        'around your wrists, holding you open for her. The split mantle pools around you both, dark red ' \
+        'against white, and she takes her time with everything the tentacles present to her.',
+        "Eros rises to her full, towering height, horns sweeping above you, and her tentacles draw you up her " \
+        'body — past the heart on her glossy white bodysuit, into her arms — while her bare, gradient-fading ' \
+        'feet slide between your legs and tease you until you are begging her for more than teasing.'
+      ]
+
+      form = Engine::TransformationSystem.active(player)
+      if form
+        scenes << "Eros's tentacles explore the body your **#{form[:name]}** form gave you with open, delighted " \
+                  'curiosity, suckers tasting every changed curve. "The tower remade you on your way up," she ' \
+                  'purrs. "How generous of it to gift-wrap you for me."'
+      end
+
+      marks = Engine::Marks.owned(player)
+      marks.each do |key|
+        mark = Engine::Marks::MARKS[key]
+        scenes << "A tentacle tip finds your **#{mark[:name]}** (#{mark[:place]}) and circles it slowly, " \
+                  'suckers kissing the ink — the metal — until you shiver. "Syn signs her work," Eros murmurs, ' \
+                  '"but make no mistake, pet. The canvas is mine."'
+      end
+
+      curse_names = player.active_curses.map(&:name)
+      if curse_names.any?
+        scenes << "Eros presses one palm flat over your heart, and the **#{curse_names.first}** in you flares " \
+                  "warm beneath her touch#{curse_names.size > 1 ? ", its #{curse_names.size - 1} siblings answering in sympathy" : ''}. " \
+                  '"Every curse you carry is a love letter the tower wrote me," she says, and kisses you while ' \
+                  'they all tingle at once.'
+      end
+
+      living = player.equipped_items.select(&:cursed).map(&:name)
+      living.each do |name|
+        scenes << "Your **#{name}** pulses and writhes against you, trying to please Eros as much as you are, " \
+                  'and she rewards it with a stroke of one tentacle. "Trained so well," she laughs. "I barely ' \
+                  'have to touch you myself."'
+      end
+      scenes
+    end
+
+    def name_list(names)
+      list = Array(names).map(&:to_s)
+      return list.first.to_s if list.size <= 1
+      return "#{list[0]} and #{list[1]}" if list.size == 2
+
+      "#{list[0..-2].join(', ')} and #{list[-1]}"
     end
 
     def line(player, boss_name, key)

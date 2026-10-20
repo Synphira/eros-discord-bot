@@ -6,6 +6,7 @@ module Engine
   module Marks
     TRACKER = 'marks_owned'
     MAX_MARKS = 5
+    MASTERWORK_MAX_MARKS = 6
 
     MARKS = {
       'womb_sigil' => {
@@ -147,10 +148,26 @@ module Engine
         scene: "Syn strokes you hard and keeps you there with a practised hand while a ladder of little silver rungs " \
                "settles under your cock, each with a warm, fizzing rush. Every thrust will drag them deliciously " \
                "against tight heat. \"Now you'll hit harder,\" she says, flicking a rung, \"in every sense.\""
+      },
+      'wedding_mark' => {
+        kind: :tattoo, name: 'The Wedding Mark', place: 'a tribal collar band around the neck', cost: 150, story: true,
+        perk: '+5% chance to satisfy monsters, +3 LP whenever you submit',
+        effects: { 'satisfy_bonus' => 0.05, 'submit_lp_bonus' => 3 },
+        scene: "Both fairies work on this one. Syn tips your chin up and inks a bold tribal band around your " \
+               "neck, its sweeping black points circling your throat like a collar and meeting at the front in " \
+               "a heart — with a ripe red strawberry at its centre, Berry's colours worn right where everyone " \
+               "can see them. Berry holds your hand the whole time and cries, unrepentant. \"It's a collar " \
+               "and a wedding band,\" she sobs happily. \"So nobody gets confused.\" \"There,\" Syn adds, almost " \
+               "gentle, thumb brushing the fresh ink at your throat. \"Now you're family. It shows.\" The mark " \
+               "warms whenever either fairy is near — and glows faintly when Eros is watching, which is always."
       }
     }.freeze
 
     module_function
+
+    def max_marks(player)
+      Engine::Quests.story_done?(player) ? MASTERWORK_MAX_MARKS : MAX_MARKS
+    end
 
     def owned(player)
       Array(player.tracker_hash[TRACKER]).select { |key| MARKS.key?(key) }
@@ -165,6 +182,7 @@ module Engine
       MARKS.reject do |key, mark|
         owns?(player, key) ||
           (mark[:requires] && !Engine::ContentOptions.enabled?(player, mark[:requires])) ||
+          (mark[:story] && !Engine::Quests.story_done?(player)) ||
           (mark[:part] && !parts.include?(mark[:part]))
       end
     end
@@ -180,17 +198,20 @@ module Engine
       return { ok: false, message: 'Syn has never heard of that design.' } unless mark
       return { ok: false, message: "You already wear the **#{mark[:name]}**." } if owns?(player, key)
       return { ok: false, message: 'That design is not on offer for you.' } unless available(player).key?(key.to_s)
-      if owned(player).size >= MAX_MARKS
-        return { ok: false, message: "You have no room left for more marks (#{MAX_MARKS} max). Remove one first." }
+      if owned(player).size >= max_marks(player)
+        return { ok: false, message: "You have no room left for more marks (#{max_marks(player)} max). Remove one first." }
       end
       unless player.spend_lp!(mark[:cost])
         return { ok: false, message: "The **#{mark[:name]}** costs **#{mark[:cost]} LP** — you have #{player.lp}." }
       end
 
       player.update(trackers: player.tracker_hash.merge(TRACKER => owned(player) + [key.to_s]))
+      visit_lines = []
+      Engine::Altars.gain_attention!(player, 4, visit_lines)
       { ok: true, mark: mark,
         message: "_#{mark[:scene]}_\n**#{mark[:name]}** added (−#{mark[:cost]} LP). #{mark[:perk].sub(/\A[a-z]/, &:upcase)}.\n" \
-                 "_Syn taps the matching **#{mark[:name]}** displayed on her own inked, pierced skin and winks. \"Twins now, darling.\"" }
+                 "_Syn taps the matching **#{mark[:name]}** displayed on her own inked, pierced skin and winks. \"Twins now, darling.\"" \
+                 "#{visit_lines.empty? ? '' : "\n#{visit_lines.join("\n")}"}" }
     end
 
     def remove!(player, key)

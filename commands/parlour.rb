@@ -38,12 +38,12 @@ module Commands
         c.text_display(content: notice) if notice
         lines = owned.map { |k| "◆ #{Engine::Marks.label(k)} — _#{Engine::Marks::MARKS[k][:perk]}_" }
         c.text_display(
-          content: "**Your marks** #{owned.size}/#{Engine::Marks::MAX_MARKS} · **LP** #{player.lp}\n" \
+          content: "**Your marks** #{owned.size}/#{Engine::Marks.max_marks(player)} · **LP** #{player.lp}\n" \
                    "#{lines.empty? ? '_Your skin is still bare. Syn is already sketching on it in her head._' : lines.join("\n")}"
         )
         c.separator(divider: true, spacing: :small)
 
-        if offers.any? && owned.size < Engine::Marks::MAX_MARKS
+        if offers.any? && owned.size < Engine::Marks.max_marks(player)
           c.row do |row|
             row.string_select(custom_id: "eros:parlour:buy:#{event.user.id}", placeholder: "Choose a design from Syn…",
                               min_values: 1, max_values: 1) do |menu|
@@ -54,7 +54,7 @@ module Commands
               end
             end
           end
-        elsif owned.size >= Engine::Marks::MAX_MARKS
+        elsif owned.size >= Engine::Marks.max_marks(player)
           c.text_display(content: '-# You have no room for more marks. Remove one to make space.')
         else
           c.text_display(content: '-# Syn has nothing new for you right now. More designs unlock with themes in `/options`.')
@@ -71,6 +71,37 @@ module Commands
           end
         end
 
+        attach_story(c, player, event.user.id)
+      end
+    end
+
+    # Syn's secret only exists here, at her bench: hidden until a delver
+    # wears five of her marks, gone again once the wedding is done.
+    def attach_story(container, player, owner_id)
+      if Engine::Quests.story_offered?(player)
+        container.separator(divider: true, spacing: :small)
+        container.text_display(
+          content: "### 🖤 Syn Has a Secret\n" \
+                   "_Syn has been watching you over her ledger for a while — five of her marks will do that " \
+                   "to a fairy. She crooks one ink-stained finger at you. \"Closer, darling. This one's not " \
+                   "for the board, and it's certainly not for my wife's ears. Yet.\"_"
+        )
+        container.row do |row|
+          row.button(label: "Hear Syn's secret", style: :danger, custom_id: "eros:parlour:story_accept:#{owner_id}")
+        end
+      elsif (spec = Engine::Quests.story_current(player))
+        done, target = Engine::Quests.story_progress(player)
+        container.separator(divider: true, spacing: :small)
+        container.text_display(
+          content: "### 🖤 Syn's Secret — #{spec[:name]} (#{done}/#{target})\n_#{spec[:text]}_\n" \
+                   "-# Reward **#{spec[:reward]} LP** · Step #{Engine::Quests.story_step(player) + 1}/#{Engine::Quests::STORY.size} · Berry suspects nothing"
+        )
+        if Engine::Quests.story_complete?(player)
+          container.row do |row|
+            row.button(label: "Report to Syn: #{spec[:name]} (#{spec[:reward]} LP)", style: :success,
+                       custom_id: "eros:parlour:story_claim:#{owner_id}")
+          end
+        end
       end
     end
 
@@ -91,6 +122,27 @@ module Commands
 
       action = event.custom_id[/\Aeros:parlour:(buy|remove):\d+\z/, 1]
       Commands::Parlour.handle(event, action, Array(event.values).first.to_s)
+    end
+
+    button(custom_id: /^eros:parlour:story_accept:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      result = Engine::Quests.accept_story!(player)
+      Commands::Parlour.show(event, notice: result[:message])
+    end
+
+    button(custom_id: /^eros:parlour:story_claim:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      result = Engine::Quests.claim_story!(player)
+      lines = [result[:message]] + Array(result[:news])
+      Commands::Parlour.show(event, notice: lines.join("\n"))
     end
 
     button(custom_id: /^eros:parlour:view:\d+$/) do |event|

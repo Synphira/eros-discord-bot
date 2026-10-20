@@ -150,6 +150,11 @@ module Engine
         requirement: { berry_quests_completed: 25 },
         description: "Berry has claimed you as her favourite errand-pet — Syn drew the collar, Berry picked it"
       },
+      'fairy_family' => {
+        name: 'Fairy Family',
+        requirement: { berry_story_step: 5 },
+        description: "You secretly planned Syn's surprise vow renewal for Berry, and both fairies declared you family"
+      },
 
       'sin_sculptor' => {
         name: 'Sin Sculptor',
@@ -449,6 +454,7 @@ module Engine
       elites_satisfied: 'elites satisfied',
       marks_owned: 'marks worn',
       berry_quests_completed: "Berry's quests completed",
+      berry_story_step: "Syn & Berry story steps",
       chests_ignored: 'chests left closed',
       is_developer: 'developer',
       is_bug_tester: 'bug tester',

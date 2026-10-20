@@ -68,6 +68,8 @@ module Engine
 
       return sanctuary_room if @player.sanctuary
 
+      return event_room(Engine::Altars.present!(@player)) if rand < 0.07
+
       if (npc = Engine::NPCSystem.maybe_start!(@player))
         return event_room(npc)
       end
@@ -175,6 +177,7 @@ module Engine
         with_actions: true,
         message: <<~MSG.strip
           **Floor #{@player.current_floor}** — something stirs.
+          #{Engine::Biomes.line(@player)}
 
           You encounter a **#{monster[:name]}** _(#{monster[:type_name]})_!
           _#{monster[:type_description]}_
@@ -239,6 +242,7 @@ module Engine
           **Stairs downward** — stone steps spiral into colder dark.
 
           You descend to **Floor #{@player.current_floor}**.
+          #{Engine::Biomes.line(@player)}
           Deepest reached: **#{Player.depth_label(@player.deepest_depth)}**.
           The threats below will be stronger.#{worn ? "\n#{worn}" : ''}
         MSG
@@ -252,6 +256,7 @@ module Engine
         with_actions: true,
         message: <<~MSG.strip
           **Floor #{@player.current_floor}** — silence.
+          #{Engine::Biomes.line(@player)}
 
           You find an empty room. Nothing of interest here.
 

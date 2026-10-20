@@ -79,9 +79,12 @@ module Engine
     def sample_key(player = nil)
       keys = player ? available_keys(player) : EVENT_KEYS
       return 'glory_hole' if keys.empty?
-      return keys.sample unless player && Engine::TransformationSystem.active(player)
+      return keys.sample unless player
 
-      weights = keys.map { |k| [k, Engine::TransformationSystem.event_weight(player, EVENT_TAGS[k])] }
+      weights = keys.map do |k|
+        tag = EVENT_TAGS[k]
+        [k, Engine::TransformationSystem.event_weight(player, tag) * Engine::Biomes.event_weight(player, tag)]
+      end
       roll = rand * weights.sum { |(_, w)| w }
       weights.each do |k, w|
         roll -= w
@@ -137,6 +140,7 @@ module Engine
       return Engine::FetishEvents.choices(player, type) if Engine::FetishEvents.event?(type)
       return Engine::NPCSystem.choices(player, data[:npc], data[:stage]) if type == 'npc'
       return Engine::Treasure.chest_choices(player) if type == 'chest'
+      return Engine::Altars.choices(player) if type == 'altar'
 
       glory_hole_choices(player)
     end
@@ -235,6 +239,7 @@ module Engine
       return choose_fetish!(player, data, choice_key.to_s, level, log) if Engine::FetishEvents.event?(data[:type])
       return choose_npc!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'npc'
       return Engine::Treasure.choose_chest!(player, data, choice_key.to_s) if data[:type].to_s == 'chest'
+      return choose_altar!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'altar'
 
       ok = apply_glory_choice!(player, choice_key.to_s, level, log)
       unless ok
@@ -272,6 +277,14 @@ module Engine
 
       finish = finalize_lust!(player, log)
       colour = finish[:broken] ? 0x444444 : Engine::FetishEvents::COLOUR
+      finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
+    end
+
+    def choose_altar!(player, data, choice, _level, log)
+      player.clear_event!
+      Engine::Altars.resolve!(player, choice, log)
+      finish = finalize_lust!(player, log)
+      colour = finish[:broken] ? 0x444444 : 0x5c0a2e
       finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
     end
 

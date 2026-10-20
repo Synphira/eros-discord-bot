@@ -101,6 +101,7 @@ module Engine
             weight *= player.curse_effect_product(key, default: 1.0)
           end
           weight *= Engine::TransformationSystem.monster_weight(player, type)
+          weight *= Engine::Biomes.monster_weight(player, type)
         end
         weight *= Engine::Weekly.monster_weight(type)
         [type, [weight, 0.01].max]

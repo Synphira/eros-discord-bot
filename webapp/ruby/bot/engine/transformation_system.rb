@@ -201,6 +201,92 @@ module Engine
         special_event_description: 'When your defiance runs low, your light sometimes flares, driving the monster back and restoring you',
         special: { kind: :divine, chance: 0.35,
                    text: 'Your halo erupts in blinding light! The %<name>s recoils, and you recover **%<amount>s** defiance as your lust cools.' }
+      },
+      'eldritch_bride' => {
+        name: 'Eldritch Bride', group: 'Eldritch',
+        description: "The deep places of the tower have claimed you as theirs — and something in the dark keeps answering",
+        requirement: { tentacle_events: 8, possession_events: 3 },
+        appearance: ['tentacle hair', 'suckered fingertips', 'star-flecked eyes', 'a whispering second shadow'],
+        events: { 'tentacles' => 35 },
+        buff: 'Beloved of the Deep', buff_description: '+20% seduction chance, +15% damage resistance — and Eros looks at you differently',
+        effects: { 'satisfy_bonus' => 0.2, 'damage_reduction' => 0.85 },
+        special_event: 'Grasping Devotion',
+        special_event_description: 'Sometimes your tentacle hair lashes out on its own, weakening the monster for the rest of the fight',
+        special: { kind: :weaken, chance: 0.15,
+                   text: 'Your tentacle hair lashes around the %<name>s and squeezes — its strength ebbs as it struggles!' }
+      },
+      'weaver' => {
+        name: 'Weaver', group: 'Arachnid',
+        description: "Silk glands and eight knowing eyes — the tower's traps have started checking for *you*",
+        requirement: { bondage_events: 8, objectification_events: 3 },
+        appearance: ['silk spinnerets', 'eight dark eyes', 'chitin-kissed forearms', 'thread always on your fingertips'],
+        buff: 'Silk and Patience', buff_description: '+20% trap avoidance, +10% dodge chance',
+        effects: { 'trap_avoid_bonus' => 0.2, 'dodge_bonus' => 0.1 },
+        special_event: 'Silk Snare',
+        special_event_description: 'Sometimes you web the monster mid-lunge, costing it a turn',
+        special: { kind: :stun, chance: 0.14,
+                   text: 'Silk sprays from your fingertips and webs the %<name>s mid-lunge — it loses its turn tearing free!' }
+      },
+      'lamia' => {
+        name: 'Lamia', group: 'Beast',
+        description: 'Below the waist you are all serpent — long, scaled, and made for coiling around problems',
+        requirement: { mind_control_events: 5, size_events: 3 },
+        appearance: ['long serpent tail', 'scaled hips', 'forked tongue', 'heat-sensing gaze'],
+        buff: 'Constrictor', buff_description: '+20% seduction chance, +1 submission',
+        effects: { 'satisfy_bonus' => 0.2, 'submission' => 1 },
+        special_event: 'Coils',
+        special_event_description: 'Sometimes your tail crushes the fight out of the monster',
+        special: { kind: :crush, chance: 0.13,
+                   text: 'Your great tail coils around the %<name>s and squeezes for **%<amount>s** damage — it goes limp and pliant!' }
+      },
+      'kitsune' => {
+        name: 'Kitsune', group: 'Supernatural',
+        description: 'Fox ears, multiplying tails, and a trickster’s delight in being underestimated',
+        requirement: { furry_events: 5, mind_control_events: 5 },
+        appearance: ['fox ears', 'three flourishing tails', 'quick golden eyes'],
+        buff: 'Trickster', buff_description: '+15% dodge chance, +10% surprise-hit chance',
+        effects: { 'dodge_bonus' => 0.15, 'crit_chance' => 0.1 },
+        special_event: 'Ninefold Illusion',
+        special_event_description: 'Sometimes your illusions feed on the monster’s fantasies, gaining LP untouched',
+        special: { kind: :dream, chance: 0.15,
+                   text: 'Your illusions bloom around the %<name>s, feeding on its fantasies — **+%<amount>s LP** while it grasps at foxfire.' }
+      },
+      'hoard_dragon' => {
+        name: 'Hoard Dragon', group: 'Dragon',
+        description: 'Scales, gem-bright eyes, and a possessive certainty that every shining thing is yours',
+        requirement: { treasure_found: 25 },
+        appearance: ['scaled forearms', 'curved horns', 'gem-bright eyes', 'smoke on your breath'],
+        buff: 'Hoard Sense', buff_description: '+3 LP from treasure, +15% damage resistance',
+        effects: { 'treasure_lp' => 3, 'damage_reduction' => 0.85 },
+        special_event: 'Territorial Roar',
+        special_event_description: 'Sometimes your roar reminds the monster whose hoard this is, stunning it',
+        special: { kind: :stun, chance: 0.12,
+                   text: 'Your roar shakes the chamber and flashes your fangs — the %<name>s freezes, stunned!' }
+      },
+      'gargoyle' => {
+        name: 'Gargoyle', group: 'Stone',
+        description: 'Stone skin and statuesque patience — you were made to be looked at, and to outlast it',
+        requirement: { exhibitionism_events: 6, objectification_events: 5 },
+        appearance: ['smooth stone skin', 'small folded wings', 'chiseled features', 'a perch-worthy stillness'],
+        buff: 'Living Statue', buff_description: '+35% damage resistance, +10% chance monsters back off',
+        effects: { 'damage_reduction' => 0.65, 'intimidate_chance' => 0.1 },
+        special_event: 'Statue Stillness',
+        special_event_description: 'Sometimes you simply become a statue, and the monster loses its turn to confusion',
+        special: { kind: :stun, chance: 0.12,
+                   text: 'You go perfectly still — a statue on a plinth. The %<name>s circles you, baffled, and loses its turn!' }
+      },
+      'mycelian' => {
+        name: 'Mycelian', group: 'Plant',
+        description: 'A soft cap of mushroom hair and a cloud of sweet spores follow you through the damp dark',
+        requirement: { plant_submissions: 8, aphrodisiac_events: 5 },
+        appearance: ['mushroom-cap hair', 'spore-dusted skin', 'glowing gill patterns'],
+        events: { 'aphrodisiacs' => 30 },
+        buff: 'Spore Cloud', buff_description: '+15% seduction chance, +15% damage resistance',
+        effects: { 'satisfy_bonus' => 0.15, 'damage_reduction' => 0.85 },
+        special_event: 'Intoxicating Spores',
+        special_event_description: 'Sometimes your spores intoxicate the monster, weakening it for the rest of the fight',
+        special: { kind: :weaken, chance: 0.15,
+                   text: 'Your spores burst sweet and thick around the %<name>s — it sways, intoxicated and weakened!' }
       }
     }.freeze
 
@@ -209,6 +295,11 @@ module Engine
     }.freeze
 
     SKIP_KINDS = %i[stun thrall drain crush divine].freeze
+
+    CHIMERA_KEY = 'chimera'
+    FUSION_COST = 100
+    CHIMERA_PRIMARY_TRACKER = 'chimera_primary'
+    CHIMERA_SECONDARY_TRACKER = 'chimera_secondary'
 
     module_function
 
@@ -219,8 +310,197 @@ module Engine
     def find(query)
       q = query.to_s.strip.downcase
       return nil if q.empty?
+      return CHIMERA_KEY if q == CHIMERA_KEY
 
       TRANSFORMATIONS.find { |k, t| k == q || t[:name].downcase == q || k.tr('_', ' ') == q }&.first
+    end
+
+    # --- Chimera: two unlocked forms fused into one body -----------------
+    # The primary form keeps its full effects and its combat special; the
+    # secondary echoes at half strength. Stored in trackers, so a fused
+    # body survives defeats, restarts and cycles like everything else.
+
+    def chimera_combo(player)
+      primary = player.tracker_hash[CHIMERA_PRIMARY_TRACKER].to_s
+      secondary = player.tracker_hash[CHIMERA_SECONDARY_TRACKER].to_s
+      owned = player.unlocked_transformations
+      return nil unless TRANSFORMATIONS.key?(primary) && TRANSFORMATIONS.key?(secondary)
+      return nil if primary == secondary
+      return nil unless owned.include?(primary) && owned.include?(secondary)
+
+      [primary, secondary]
+    end
+
+    def chimera_form(player)
+      combo = chimera_combo(player) or return nil
+      primary = TRANSFORMATIONS[combo[0]]
+      secondary = TRANSFORMATIONS[combo[1]]
+
+      {
+        name: "#{primary[:name]}-#{secondary[:name]} Chimera",
+        group: 'Chimera',
+        description: "A fused hybrid: #{primary[:description]} — woven through with another shape: #{secondary[:description]}",
+        appearance: (Array(primary[:appearance]) + Array(secondary[:appearance])).uniq,
+        buff: "#{primary[:buff]} (with echoes of #{secondary[:name]})",
+        buff_description: "#{primary[:buff_description]}; at half strength: #{secondary[:buff_description]}",
+        effects: blend_effects(primary[:effects], secondary[:effects]),
+        monsters: blend_weights(primary[:monsters], secondary[:monsters]),
+        events: blend_weights(primary[:events], secondary[:events]),
+        all_events: primary[:all_events].to_i + (secondary[:all_events].to_i / 2),
+        monster_rate: ((primary[:monster_rate] || 1.0) + (secondary[:monster_rate] || 1.0)) / 2.0,
+        event_rate: ((primary[:event_rate] || 1.0) + (secondary[:event_rate] || 1.0)) / 2.0,
+        special: primary[:special],
+        special_event: primary[:special_event],
+        special_event_description: primary[:special_event_description],
+        chimera: true,
+        combo: combo
+      }
+    end
+
+    def blend_effects(primary_effects, secondary_effects)
+      merged = {}
+      Hash(primary_effects).each { |k, v| merged[k.to_s] = v }
+      Hash(secondary_effects).each do |k, v|
+        key = k.to_s
+        half = half_effect(key, v)
+        merged[key] =
+          if !merged.key?(key) then half
+          elsif mult_like?(key) then merged[key]
+          elsif merged[key].is_a?(Numeric) && half.is_a?(Numeric) then (merged[key] + half).round(3)
+          else merged[key]
+          end
+      end
+      merged
+    end
+
+    def mult_like?(key)
+      key.include?('mult') || key == 'damage_reduction'
+    end
+
+    def half_effect(key, value)
+      return value if value == true || value == false
+      return value unless value.is_a?(Numeric)
+
+      if mult_like?(key)
+        value >= 1 ? (1.0 + ((value - 1.0) / 2.0)).round(3) : (1.0 - ((1.0 - value) / 2.0)).round(3)
+      else
+        (value / 2.0).round(3)
+      end
+    end
+
+    def blend_weights(primary_weights, secondary_weights)
+      merged = {}
+      Hash(primary_weights).each { |k, v| merged[k.to_sym] = v.to_i }
+      Hash(secondary_weights).each do |k, v|
+        key = k.to_sym
+        merged[key] = merged.fetch(key, 0) + (v.to_i / 2)
+      end
+      merged
+    end
+
+    # --- Deepening: a form grows into itself -------------------------------
+    # Winning fights or satisfying monsters while wearing a form deepens it
+    # (Stage I at 3, II at 8, III at 15). Each stage lets the delver choose
+    # one of three mutations; chosen mutations apply only in that form.
+
+    DEEPEN_THRESHOLDS = [3, 8, 15].freeze
+    MUTATIONS = {
+      'keener_senses' => { name: 'Keener Senses', description: '+3% dodge chance', effects: { 'dodge_bonus' => 0.03 } },
+      'thicker_hide' => { name: 'Thicker Hide', description: 'Take 5% less lust damage', effects: { 'damage_reduction' => 0.95 } },
+      'hungrier_heart' => { name: 'Hungrier Heart', description: '+3% chance to satisfy monsters', effects: { 'satisfy_bonus' => 0.03 } },
+      'tireless_body' => { name: 'Tireless Body', description: '+1 strength', effects: { 'strength' => 1 } },
+      'silken_voice' => { name: 'Silken Voice', description: '+2 LP whenever you submit', effects: { 'submit_lp_bonus' => 2 } },
+      'predator_grace' => { name: 'Predator Grace', description: '+1 agility', effects: { 'agility' => 1 } }
+    }.freeze
+
+    def deepen_key(player)
+      player.active_transformation_key&.to_s
+    end
+
+    def deepen_count(player, key = deepen_key(player))
+      key.nil? || key.empty? ? 0 : player.tracker("form_deepen_#{key}")
+    end
+
+    def deepen_stage(player, key = deepen_key(player))
+      count = deepen_count(player, key)
+      DEEPEN_THRESHOLDS.count { |t| count >= t }
+    end
+
+    def mutations_for(player, key = deepen_key(player))
+      return [] if key.nil? || key.empty?
+
+      Array(player.tracker_hash["form_mutations_#{key}"]).select { |m| MUTATIONS.key?(m.to_s) }
+    end
+
+    def pending_mutations(player, key = deepen_key(player))
+      [deepen_stage(player, key) - mutations_for(player, key).size, 0].max
+    end
+
+    def mutation_choices(player, key = deepen_key(player))
+      stage = mutations_for(player, key).size
+      MUTATIONS.keys.rotate(stage * 2).first(3) - mutations_for(player, key)
+    end
+
+    def choose_mutation!(player, mutation_key)
+      key = deepen_key(player)
+      return { ok: false, message: 'Take a hybrid form first.' } if key.nil? || key.empty?
+      return { ok: false, message: 'Unknown mutation.' } unless MUTATIONS.key?(mutation_key.to_s)
+      return { ok: false, message: 'Your form has not deepened enough for another mutation yet.' } if pending_mutations(player, key) <= 0
+      return { ok: false, message: 'Choose one of the mutations your form is offering.' } unless mutation_choices(player, key).include?(mutation_key.to_s)
+
+      player.update(trackers: player.tracker_hash.merge("form_mutations_#{key}" => mutations_for(player, key) + [mutation_key.to_s]))
+      { ok: true, message: "Your form deepens — **#{MUTATIONS[mutation_key.to_s][:name]}**: #{MUTATIONS[mutation_key.to_s][:description]}." }
+    end
+
+    def record_deepen!(player, log)
+      key = deepen_key(player)
+      return if key.nil? || key.empty?
+
+      before = deepen_stage(player, key)
+      player.bump_tracker!("form_deepen_#{key}")
+      after = deepen_stage(player, key)
+      return unless after > before
+
+      form = active(player)
+      log << "🧬 Your **#{form[:name]}** deepens (Stage #{after}) — choose a mutation in `/transformation`."
+    end
+
+    # --- Resonance: monsters know their own kind ---------------------------
+
+    GROUP_AFFINITIES = {
+      'Beast' => 'beast', 'Demon' => 'demon', 'Plant' => 'plant', 'Supernatural' => 'undead',
+      'Eldritch' => 'mimic', 'Arachnid' => 'beast', 'Dragon' => 'beast', 'Stone' => 'undead',
+      'Object' => 'mimic', 'Synthetic' => 'slime', 'Holy' => 'demon'
+    }.freeze
+
+    def resonance?(player, monster_type)
+      form = active(player)
+      return false unless form && monster_type
+
+      GROUP_AFFINITIES[form[:group].to_s] == monster_type.to_s
+    end
+
+    def fuse!(player, primary_key, secondary_key)
+      primary = get(primary_key)
+      secondary = get(secondary_key)
+      return { ok: false, message: 'Choose two real hybrid forms to fuse.' } unless primary && secondary
+      return { ok: false, message: 'A chimera needs two *different* forms.' } if primary_key.to_s == secondary_key.to_s
+
+      owned = player.unlocked_transformations
+      unless owned.include?(primary_key.to_s) && owned.include?(secondary_key.to_s)
+        return { ok: false, message: 'You can only fuse forms you have unlocked.' }
+      end
+      unless player.spend_lp!(FUSION_COST)
+        return { ok: false, message: "Fusing two forms costs **#{FUSION_COST} LP** — you have #{player.lp}." }
+      end
+
+      player.set_tracker!(CHIMERA_PRIMARY_TRACKER, primary_key.to_s)
+      player.set_tracker!(CHIMERA_SECONDARY_TRACKER, secondary_key.to_s)
+      player.update(active_transformation: CHIMERA_KEY)
+      form = chimera_form(player)
+      { ok: true, form: form,
+        message: "Your two shapes weave together — you are now a **#{form[:name]}**! " \
+                 "#{primary[:name]} leads at full strength; #{secondary[:name]} echoes at half. (−#{FUSION_COST} LP)" }
     end
 
     def eligible?(player, key)
@@ -234,11 +514,25 @@ module Engine
     end
 
     def active(player)
-      get(player.active_transformation_key)
+      key = player.active_transformation_key
+      key.to_s == CHIMERA_KEY ? chimera_form(player) : get(key)
     end
 
     def effects(player)
-      Hash(active(player)&.dig(:effects))
+      merged = {}
+      Hash(active(player)&.dig(:effects)).each { |k, v| merged[k.to_s] = v }
+      mutations_for(player).each do |m|
+        MUTATIONS[m][:effects].each do |k, v|
+          key = k.to_s
+          merged[key] =
+            if !merged.key?(key) then v
+            elsif mult_like?(key) then (merged[key].to_f * v.to_f).round(3)
+            elsif merged[key].is_a?(Numeric) && v.is_a?(Numeric) then (merged[key] + v).round(3)
+            else merged[key]
+            end
+        end
+      end
+      merged
     end
 
     def monster_rate(player)
