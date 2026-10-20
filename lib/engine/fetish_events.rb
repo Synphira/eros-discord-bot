@@ -1192,7 +1192,8 @@ module Engine
     def grant_living_clothing!(player, log)
       Engine::Treasure.sync_to_db!
       owned = player.equipment_dataset.select_map(Sequel[:equipment][:name])
-      tpl = Engine::Treasure::LIVING_CLOTHING.reject { |t| owned.include?(t[:name]) }.sample
+      tpl = Engine::Treasure::LIVING_CLOTHING.reject { |t| owned.include?(t[:name]) }
+                                             .select { |t| Engine::Treasure.template_allowed?(player, t) }.sample
       unless tpl
         log << '_You already wear every living outfit the tower offers — this one slinks away, sulking._'
         return

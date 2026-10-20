@@ -26,8 +26,12 @@ module Commands
 
         takeable = []
         lines = items.map do |item|
+          tpl = Engine::Treasure.template_for(item.name)
           if player.owns_equipment?(item.id)
             "◆ **#{item.name}** — _already bound to you_"
+          elsif unlocked.include?(item.name) && !Engine::Treasure.template_allowed?(player, tpl)
+            "◈ **#{item.name}** (#{item.slot}) — _sealed: re-enable **#{Engine::Treasure.requires_label(tpl)}** " \
+              'in `/options` to call it back_'
           elsif unlocked.include?(item.name)
             takeable << item
             "◈ **#{item.name}** (#{item.slot}) — _#{item.description}_\n  " \
@@ -67,6 +71,9 @@ module Commands
           'That item is not in the Cursed Shop.'
         elsif !player.cursed_shop_unlocked?(item.name)
           "You haven't unlocked **#{item.name}** yet — wear it and tear it free first."
+        elsif !Engine::Treasure.template_allowed?(player, Engine::Treasure.template_for(item.name))
+          tpl = Engine::Treasure.template_for(item.name)
+          "**#{item.name}** is sealed — re-enable **#{Engine::Treasure.requires_label(tpl)}** in `/options` first."
         else
           player.grant_equipment!(item)[:message]
         end

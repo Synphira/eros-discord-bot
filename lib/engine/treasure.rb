@@ -12,6 +12,7 @@ module Engine
         slot: 'legs',
         stat_modifiers: { 'agility' => 1, 'lust_resist' => -1 },
         violation_type: 'tease',
+        requires: 'breast_play',
         removal_cost: 10,
         rarity: 3
       },
@@ -22,6 +23,7 @@ module Engine
         slot: 'chest',
         stat_modifiers: { 'resistance' => 2, 'agility' => -1 },
         violation_type: 'binding',
+        requires: 'bondage',
         removal_cost: 15,
         rarity: 3
       },
@@ -32,6 +34,7 @@ module Engine
         slot: 'feet',
         stat_modifiers: { 'agility' => 1, 'lust_resist' => -1 },
         violation_type: 'positioning',
+        requires: 'feet',
         removal_cost: 8,
         rarity: 3
       },
@@ -42,6 +45,7 @@ module Engine
         slot: 'head',
         stat_modifiers: { 'resistance' => 1, 'lust_resist' => -1 },
         violation_type: 'choking',
+        requires: 'choking',
         removal_cost: 12,
         rarity: 3
       },
@@ -52,6 +56,7 @@ module Engine
         slot: 'accessory',
         stat_modifiers: { 'resistance' => 2, 'submission' => 1 },
         violation_type: 'anal',
+        requires: 'anal',
         removal_cost: 20,
         rarity: 4
       },
@@ -62,6 +67,7 @@ module Engine
         slot: 'weapon',
         stat_modifiers: { 'damage' => 6, 'lust_resist' => -1 },
         violation_type: 'heat',
+        requires: 'aphrodisiacs',
         removal_cost: 20,
         rarity: 4
       },
@@ -72,7 +78,152 @@ module Engine
         slot: 'weapon',
         stat_modifiers: { 'damage' => 4, 'submission' => 1 },
         violation_type: 'whip',
+        requires: 'spanking',
         removal_cost: 18,
+        rarity: 4
+      },
+      {
+        name: 'Tentacle Vine Belt',
+        description: 'A belt of glossy living vines that never stop exploring what they hold.',
+        type: 'armor',
+        slot: 'groin',
+        stat_modifiers: { 'resistance' => 1, 'submission' => 1 },
+        violation_type: 'tentacle',
+        requires: 'tentacles',
+        removal_cost: 18,
+        rarity: 4
+      },
+      {
+        name: 'Nectar Milking Bra',
+        description: 'A soft harness bra that kneads, squeezes and collects whatever you leak.',
+        type: 'armor',
+        slot: 'chest',
+        stat_modifiers: { 'resistance' => 1, 'lust_resist' => -1 },
+        violation_type: 'milk',
+        requires: 'lactation',
+        part: 'breasts',
+        removal_cost: 18,
+        rarity: 4
+      },
+      {
+        name: 'Knotted Tail Plug',
+        description: 'A thick plug with a swelling knot that loves to lodge itself deep and stay.',
+        type: 'accessory',
+        slot: 'accessory',
+        stat_modifiers: { 'submission' => 1, 'resistance' => 1 },
+        violation_type: 'knot',
+        requires: 'knotting',
+        removal_cost: 20,
+        rarity: 4
+      },
+      {
+        name: 'Possessed Pendant',
+        description: 'A pendant with something old inside it, whispering suggestions your body obeys first.',
+        type: 'accessory',
+        slot: 'head',
+        stat_modifiers: { 'submission' => 1, 'lust_resist' => -1 },
+        violation_type: 'possess',
+        requires: 'possession',
+        removal_cost: 16,
+        rarity: 4
+      },
+      {
+        name: 'Hypno Spiral Spectacles',
+        description: 'Spectacles etched with slow spirals. Looking through them makes obedience feel restful.',
+        type: 'armor',
+        slot: 'head',
+        stat_modifiers: { 'agility' => 1, 'submission' => 1 },
+        violation_type: 'hypno',
+        requires: 'mind_control',
+        removal_cost: 16,
+        rarity: 4
+      },
+      {
+        name: 'Sheer Exhibition Cloak',
+        description: 'A cloak that turns transparent exactly when someone is looking.',
+        type: 'armor',
+        slot: 'chest',
+        stat_modifiers: { 'agility' => 1, 'satisfy_bonus' => 0.03 },
+        violation_type: 'tease',
+        requires: 'exhibitionism',
+        removal_cost: 14,
+        rarity: 3
+      },
+      {
+        name: 'Buzzing Toy Harness',
+        description: 'A harness of humming little toys pressed against everything that makes you squirm.',
+        type: 'armor',
+        slot: 'groin',
+        stat_modifiers: { 'submission' => 1, 'lust_resist' => -1 },
+        violation_type: 'tease',
+        requires: 'toys',
+        removal_cost: 18,
+        rarity: 4
+      },
+      {
+        name: 'Good Pet Collar',
+        description: 'A plush collar with a bell and a tag engraved GOOD PET. It adores being led.',
+        type: 'accessory',
+        slot: 'head',
+        stat_modifiers: { 'submission' => 2 },
+        violation_type: 'binding',
+        requires: 'petplay',
+        removal_cost: 15,
+        rarity: 3
+      },
+      {
+        name: 'Living Maid Uniform',
+        description: 'A crisp little uniform that keeps smoothing itself — and you — into perfect service.',
+        type: 'armor',
+        slot: 'chest',
+        stat_modifiers: { 'resistance' => 1, 'submission' => 1 },
+        violation_type: 'squeeze',
+        requires: 'maid_service',
+        removal_cost: 18,
+        rarity: 4
+      },
+      {
+        name: 'Pony Bridle',
+        description: 'Soft leather straps and a polished bit that make your posture proud and obedient.',
+        type: 'armor',
+        slot: 'head',
+        stat_modifiers: { 'strength' => 1, 'submission' => 1 },
+        violation_type: 'binding',
+        requires: 'pony_play',
+        removal_cost: 16,
+        rarity: 4
+      },
+      {
+        name: 'Tickle-Feather Gloves',
+        description: 'Gloves sprouting soft feathers that brush every ticklish inch they can reach.',
+        type: 'accessory',
+        slot: 'accessory',
+        stat_modifiers: { 'agility' => 2, 'lust_resist' => -1 },
+        violation_type: 'tickle',
+        requires: 'tickling',
+        removal_cost: 14,
+        rarity: 3
+      },
+      {
+        name: 'Musk-Soaked Scarf',
+        description: 'A scarf heavy with a heady, animal musk that keeps your body warm and wanting.',
+        type: 'armor',
+        slot: 'head',
+        stat_modifiers: { 'resistance' => 1, 'lust_resist' => -1 },
+        violation_type: 'heat',
+        requires: 'musk',
+        removal_cost: 12,
+        rarity: 3
+      },
+      {
+        name: 'Broodmother Plug',
+        description: 'A smooth plug that swells warm and heavy inside you, pulsing like something about to hatch.',
+        type: 'accessory',
+        slot: 'accessory',
+        stat_modifiers: { 'submission' => 1, 'lust_resist' => -1 },
+        violation_type: 'egg',
+        requires: 'oviposition',
+        removal_cost: 20,
         rarity: 4
       }
     ].freeze
@@ -105,6 +256,7 @@ module Engine
         slot: 'chest',
         stat_modifiers: { 'resistance' => 2, 'lust_resist' => -1 },
         violation_type: 'squeeze',
+        requires: 'living_clothing',
         removal_cost: 18,
         rarity: 4
       },
@@ -115,6 +267,7 @@ module Engine
         slot: 'legs',
         stat_modifiers: { 'agility' => 2, 'lust_resist' => -1 },
         violation_type: 'squeeze',
+        requires: 'living_clothing',
         removal_cost: 14,
         rarity: 4
       },
@@ -125,6 +278,7 @@ module Engine
         slot: 'accessory',
         stat_modifiers: { 'strength' => 2, 'lust_resist' => -1 },
         violation_type: 'squeeze',
+        requires: 'living_clothing',
         removal_cost: 14,
         rarity: 4
       },
@@ -135,6 +289,7 @@ module Engine
         slot: 'groin',
         stat_modifiers: { 'submission' => 2, 'resistance' => 1, 'deny_climax' => true },
         violation_type: 'denial',
+        requires: 'chastity',
         removal_cost: 25,
         rarity: 5
       }
@@ -144,6 +299,33 @@ module Engine
 
     def all_mimic_templates
       MIMIC_TEMPLATES + EVENT_MIMICS
+    end
+
+    def template_for(name)
+      all_mimic_templates.find { |t| t[:name] == name.to_s }
+    end
+
+    # Cursed gear only binds a delver whose content toggles allow its theme,
+    # and only onto a body that has the part it is made for.
+    def template_allowed?(player, tpl)
+      return false unless tpl
+
+      req = tpl[:requires]
+      return false if req && !Engine::ContentOptions.enabled?(player, req)
+
+      part = tpl[:part]
+      return false if part && !player.body_parts_list.map(&:to_s).include?(part.to_s)
+
+      true
+    end
+
+    def eligible_mimic_templates(player, templates = MIMIC_TEMPLATES)
+      templates.select { |t| template_allowed?(player, t) }
+    end
+
+    def requires_label(tpl)
+      req = tpl && tpl[:requires]
+      req ? Engine::ContentOptions.preference(req)&.fetch(:label, req) : nil
     end
 
     def weapon_proc!(player, enc, log)
@@ -318,6 +500,11 @@ module Engine
       end
 
       result = open_chest(player, mimic: data[:mimic])
+      if result[:fight] && result[:monster]
+        return { ok: true, mode: :combat, name: CHEST_NAME, colour: 0x8b0000, log: result[:lines],
+                 monster: result[:monster], choices: [] }
+      end
+
       { ok: true, mode: :done, name: CHEST_NAME, colour: 0xb8860b, choices: [], log: result[:lines],
         broken: result[:broken] }
     end
@@ -328,6 +515,15 @@ module Engine
       lines = ['You pry open the chest and find:']
 
       mimic = rand <= mimic_chance(level) if mimic.nil?
+      if mimic && eligible_mimic_templates(player).empty?
+        # No cursed gear matches this delver's tastes, so the chest itself
+        # rears up as a mimic to fight instead of binding them.
+        monster = Engine::MonsterTypes.generate_monster(level, player: player, type: :mimic)
+        ambush = ['The lid snaps open on a mouth full of golden teeth — no gear in here matches your tastes, ' \
+                  'so the chest itself lunges! **Chest Mimic!**']
+        return { lines: ambush, climax: nil, broken: false, monster: monster, fight: true }
+      end
+
       loot =
         if mimic
           generate_mimic_loot(player, level)
@@ -355,8 +551,11 @@ module Engine
     OWNED_MIMIC_WEIGHT = 1
 
     def pick_mimic_template(player)
+      pool = eligible_mimic_templates(player)
+      return nil if pool.empty?
+
       owned = player.equipment_dataset.select_map(Sequel[:equipment][:name])
-      weighted = MIMIC_TEMPLATES.map do |tpl|
+      weighted = pool.map do |tpl|
         [tpl, owned.include?(tpl[:name]) ? OWNED_MIMIC_WEIGHT : UNOWNED_MIMIC_WEIGHT]
       end
       roll = rand * weighted.sum(&:last)
@@ -370,6 +569,8 @@ module Engine
 
     def generate_mimic_loot(player, level)
       template = pick_mimic_template(player)
+      return { lines: ['_The chest is empty — the mimic fled._'], climax: nil, broken: false } unless template
+
       item = ::Equipment.first(name: template[:name])
       unless item
         return { lines: ['_The chest is empty — the mimic fled._'], climax: nil, broken: false }
@@ -553,7 +754,10 @@ module Engine
     module_function
 
     VIOLATION_TAGS = {
-      'binding' => 'bondage', 'choking' => 'choking', 'anal' => 'anal', 'denial' => 'chastity', 'whip' => 'spanking'
+      'binding' => 'bondage', 'choking' => 'choking', 'anal' => 'anal', 'denial' => 'chastity', 'whip' => 'spanking',
+      'squeeze' => 'living_clothing', 'heat' => 'aphrodisiacs', 'tentacle' => 'tentacles', 'milk' => 'lactation',
+      'knot' => 'knotting', 'possess' => 'possession', 'hypno' => 'mind_control', 'tickle' => 'tickling',
+      'egg' => 'oviposition'
     }.freeze
 
     def generate(violation_type, player, item_name)
@@ -572,6 +776,13 @@ module Engine
         when 'denial' then generate_denial_scene(player, item_name)
         when 'heat' then generate_heat_scene(player, item_name)
         when 'whip' then generate_whip_scene(player, item_name)
+        when 'tentacle' then generate_tentacle_scene(player, item_name)
+        when 'milk' then generate_milk_scene(player, item_name)
+        when 'knot' then generate_knot_scene(player, item_name)
+        when 'possess' then generate_possess_scene(player, item_name)
+        when 'hypno' then generate_hypno_scene(player, item_name)
+        when 'tickle' then generate_tickle_scene(player, item_name)
+        when 'egg' then generate_egg_scene(player, item_name)
         end
       fallback = "The #{item_name} writhes against your skin, its movements sending shivers through your body."
       Engine::ContentOptions.pick(player, [scene].compact, fallback: [fallback])
@@ -686,6 +897,62 @@ module Engine
         "The #{item_name} wraps around your thigh and squeezes, whispering that you'd look so much better on your knees.",
         "The #{item_name} cracks beside your ear, and your body flinches into a submissive kneel before you can stop it.",
         "The #{item_name} trails its tip slowly up your spine, then snaps — and the sting melts into heat."
+      ].sample
+    end
+
+    def generate_tentacle_scene(_player, item_name)
+      [
+        "The #{item_name} sprouts slick little vines that wander over your hips and tease between your thighs.",
+        "A tendril from the #{item_name} curls around your thigh and squeezes in a slow, deliberate rhythm.",
+        "The #{item_name} comes alive, its vines coiling around your waist and tugging you into a helpless swaying."
+      ].sample
+    end
+
+    def generate_milk_scene(_player, item_name)
+      [
+        "The #{item_name} kneads your breasts in slow, hungry squeezes, coaxing warmth and wetness to your nipples.",
+        "The #{item_name} tightens and releases, over and over, milking you with shameless patience.",
+        "Soft cups of the #{item_name} suckle gently at your breasts until you're squirming and leaking."
+      ].sample
+    end
+
+    def generate_knot_scene(_player, item_name)
+      [
+        "The #{item_name} swells inside you, its knot lodging deep and refusing to slip free until it softens.",
+        "The #{item_name} pulses and thickens, stretching you around its bulge and holding you deliciously full.",
+        "Every step makes the #{item_name}'s knot nudge deeper, and your knees nearly give with each one."
+      ].sample
+    end
+
+    def generate_possess_scene(_player, item_name)
+      [
+        "Whispers spill from the #{item_name}, and your hands move on their own — caressing, presenting, obeying.",
+        "The #{item_name} goes warm, and your posture melts into something softer and far more willing.",
+        "Your body sways without your permission, steered by the thing inside the #{item_name}."
+      ].sample
+    end
+
+    def generate_hypno_scene(_player, item_name)
+      [
+        "The spirals of the #{item_name} catch the light, and your thoughts slow to a warm, obedient crawl.",
+        "A drowsy calm pours from the #{item_name}. Fighting feels like so much effort. Pleasing feels easy.",
+        "Your eyes glaze as the #{item_name} hums — suggestions settle into you like warm honey."
+      ].sample
+    end
+
+    def generate_tickle_scene(_player, item_name)
+      [
+        "The feathers of the #{item_name} flutter across your ribs, and helpless giggles shake your whole body.",
+        "The #{item_name} tickles under your arms and along your sides until you're squirming and breathless.",
+        "Soft plumes from the #{item_name} dance over your most ticklish skin, keeping you writhing."
+      ].sample
+    end
+
+    def generate_egg_scene(_player, item_name)
+      [
+        "The #{item_name} swells warm and heavy inside you, pulsing slow as something about to hatch.",
+        "Heat blooms around the #{item_name} as it thickens, keeping you full and achingly aware of it.",
+        "The #{item_name} throbs in a deep, patient rhythm, like a heartbeat that isn't yours."
       ].sample
     end
   end

@@ -18,7 +18,7 @@ module Eros
       'titles' => 'Profile', 'profile' => 'Profile', 'transformation' => 'Hybrids', 'equip' => 'Gear',
       'equipment' => 'Gear', 'unequip' => 'Gear', 'remove' => 'Gear', 'cursedshop' => 'Cursed Shop',
       'shop' => 'Shop', 'removecurse' => 'Curses', 'curses' => 'Curses', 'levelup' => 'Level Up',
-      'options' => 'Options', 'parlour' => 'Parlour', 'rest' => 'Rest', 'explore' => 'Explore',
+      'options' => 'Options', 'parlour' => 'Parlour', 'quests' => 'Quests', 'rest' => 'Rest', 'explore' => 'Explore',
       'fight' => 'Fight', 'flee' => 'Flee', 'submit' => 'Submit', 'status' => 'Status'
     }.freeze
 
@@ -246,6 +246,9 @@ module Eros
         if item.nil? || !item.cursed then 'That item is not in the Cursed Shop.'
         elsif !@player.cursed_shop_unlocked?(item.name)
           "You haven't unlocked **#{item.name}** yet. Wear it and tear it free first."
+        elsif !Engine::Treasure.template_allowed?(@player, Engine::Treasure.template_for(item.name))
+          tpl = Engine::Treasure.template_for(item.name)
+          "**#{item.name}** is sealed — re-enable **#{Engine::Treasure.requires_label(tpl)}** in Options first."
         else @player.grant_equipment!(item)[:message]
         end
       say(message)
@@ -329,7 +332,7 @@ module Eros
     end
 
     SIDE_NAV = { 'profile' => 'Profile', 'hybrids' => 'Hybrids', 'shop' => 'Shop',
-                 'cursed_shop' => 'Cursed Shop', 'parlour' => 'Parlour' }.freeze
+                 'cursed_shop' => 'Cursed Shop', 'parlour' => 'Parlour', 'quests' => 'Quests' }.freeze
 
     def side_nav(busy)
       SIDE_NAV.map do |screen, label|
@@ -349,6 +352,7 @@ module Eros
       when 'profile' then profile_view
       when 'hybrids' then hybrids_view
       when 'parlour' then parlour_view
+      when 'quests' then quests_view
       when 'options' then options_view
       when 'settings' then settings_view
       else hub_view
@@ -495,7 +499,7 @@ module Eros
       intro = { text: "_**Berry** zips between the shelves on iridescent wings, seed-freckles on her cheeks and a " \
                       "ledger under one arm. \"Welcome in, sugar! I run the shop, my wife Syn runs the parlour bench, " \
                       "and everything here is clean steel and soft lies.\" Berry also posts quests — find her board " \
-                      "at the **Parlour**._" }
+                      "on the **Quests** tab._" }
       { title: "Shop — #{@player.lp} LP", sections: [intro] + sections, actions: [tabs, back_row] }
     end
 
@@ -503,8 +507,12 @@ module Eros
       items = Engine::Treasure.all_mimic_templates.filter_map { |t| ::Equipment.first(name: t[:name]) }
       unlocked = @player.cursed_shop_unlocks
       sections = items.map do |item|
+        tpl = Engine::Treasure.template_for(item.name)
         if @player.owns_equipment?(item.id)
           { text: "◆ **#{item.name}** — _already bound to you_" }
+        elsif unlocked.include?(item.name) && !Engine::Treasure.template_allowed?(@player, tpl)
+          { text: "◈ **#{item.name}** (#{item.slot}) — _sealed: re-enable " \
+                  "**#{Engine::Treasure.requires_label(tpl)}** in Options to call it back_" }
         elsif unlocked.include?(item.name)
           { text: "◈ **#{item.name}** (#{item.slot}) — _#{item.description}_#{stats_of(item)}\n" \
                   "-# Free · removal #{item.removal_cost} LP",
@@ -654,10 +662,10 @@ module Eros
           actions: [btn("Get it (#{mark[:cost]})", 'mark_buy', arg: key, style: 'success',
                                                     disabled: full || @player.lp < mark[:cost])] }
       end
-      { title: "Parlour — #{@player.lp} LP", sections: [intro] + worn + offers + quest_sections, actions: [back_row] }
+      { title: "Parlour — #{@player.lp} LP", sections: [intro] + worn + offers, actions: [back_row] }
     end
 
-    def quest_sections
+    def quests_view
       sections = [{ text: "### 🍓 Berry's Quest Board\n" \
                           "_\"Errands, sugar! I run the shop, Syn runs the bench, and you run your pretty legs off " \
                           "for both of us.\"_\n#{Engine::Quests.board_lines(@player).join("\n")}\n" \
@@ -679,7 +687,7 @@ module Eros
                         actions: [btn("Take quest (#{spec[:reward]} LP)", 'quest_accept', arg: key, style: 'primary')] }
         end
       end
-      sections
+      { title: "Berry's Quests — #{@player.lp} LP", sections: sections, actions: [back_row] }
     end
 
     def options_view

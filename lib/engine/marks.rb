@@ -77,6 +77,76 @@ module Engine
         perk: '+1 resistance', effects: { 'resistance' => 1 },
         scene: "A tiny dangling charm shaped like a key settles into your navel with a warm tingle. It sways when you " \
                "move and chimes softly whenever you're aroused, which, in this tower, is always."
+      },
+      'rose_thorns' => {
+        kind: :tattoo, name: 'Rose & Thorns', place: 'winding down one arm', cost: 45,
+        perk: '+1 strength', effects: { 'strength' => 1 },
+        scene: "A deep-red rose blooms over your shoulder under Syn's fingertip, thorned vines curling all the way " \
+               "down to your wrist. The petals flush darker whenever your blood is up. \"Beautiful and armed,\" " \
+               "Syn murmurs. \"My favourite kind of customer.\""
+      },
+      'moon_moth' => {
+        kind: :tattoo, name: 'Moon Moth', place: 'on the sternum', cost: 50,
+        perk: '+2 LP from treasure', effects: { 'treasure_lp' => 2 },
+        scene: "Syn inks a pale moth between your breasts — or flat across your chest — its wings spread around a " \
+               "crescent moon. It flutters faintly toward anything valuable, tugging your skin like a compass " \
+               "with appetites. \"It likes gold,\" Syn says. \"It has that in common with Berry.\""
+      },
+      'inked_collar' => {
+        kind: :tattoo, name: 'Inked Collar', place: 'around the throat', cost: 50, requires: 'petplay',
+        perk: '+1 submission', effects: { 'submission' => 1 },
+        scene: "A black lace collar blooms around your throat under Syn's fingertip, complete with a tiny inked " \
+               "heart where a tag would hang. It warms whenever someone gives you an order. \"There,\" Syn " \
+               "purrs, thumb stroking the line. \"Now everyone knows you're the well-trained kind.\""
+      },
+      'padlocked_heart' => {
+        kind: :tattoo, name: 'Padlocked Heart', place: 'over the heart', cost: 55, requires: 'chastity',
+        perk: '+3% dodge chance', effects: { 'dodge_bonus' => 0.03 },
+        scene: "Syn inks a glossy heart over yours and snaps a little padlock through it, the keyhole shaped like " \
+               "a teasing wink. It clicks whenever something reaches for you, and somehow you're always half a " \
+               "step sideways when it matters. \"Locked up and hard to catch,\" she says. \"Berry approves.\""
+      },
+      'gate_sigil' => {
+        kind: :tattoo, name: 'Gate Sigil', place: 'ringed around your hole', cost: 65, requires: 'gaping',
+        perk: '+4% chance to satisfy monsters', effects: { 'satisfy_bonus' => 0.04 },
+        scene: "Syn spreads your cheeks and inks a ring of curling, welcoming script around your hole, every letter " \
+               "angled like an open door. It tingles invitingly whenever something big gets close. \"A door that " \
+               "pretty,\" Syn says, giving your ass an admiring squeeze, \"is just begging to be opened.\""
+      },
+      'ear_chain' => {
+        kind: :piercing, name: 'Ear Cuff Chain', place: 'along one ear', cost: 40,
+        perk: '+4% trap avoidance', effects: { 'trap_avoid_bonus' => 0.04 },
+        scene: "A fine silver chain threads itself along the curve of your ear with a cool, fizzing tingle, ending " \
+               "in a tiny bell. It rings — softly, impossibly — a heartbeat before hidden things shift in the " \
+               "dark. \"My early-warning system,\" Syn says. \"Try not to die; returns are a nightmare.\""
+      },
+      'lip_ring' => {
+        kind: :piercing, name: 'Lip Ring', place: 'through the lower lip', cost: 45, requires: 'oral',
+        perk: '+2% chance to satisfy monsters', effects: { 'satisfy_bonus' => 0.02 },
+        scene: "Syn holds your chin, runs her thumb over your lower lip until it parts for her, and a little silver " \
+               "ring melts through with a warm tingle. She tugs it once, gently, watching your eyes. \"Monsters " \
+               "will follow this like a handle,\" she promises."
+      },
+      'brow_bar' => {
+        kind: :piercing, name: 'Brow Bar', place: 'through one eyebrow', cost: 50,
+        perk: '+3% chance monsters back off', effects: { 'intimidate_chance' => 0.03 },
+        scene: "A sleek black bar settles through your eyebrow with a cool fizz, and your reflection immediately " \
+               "looks like trouble. Even the tower's hungrier residents hesitate when you raise it. \"Careful " \
+               "with that look, darling,\" Syn says. \"It works on me, too.\""
+      },
+      'labia_rings' => {
+        kind: :piercing, name: 'Labia Rings', place: 'through both outer labia', cost: 65, requires: 'vaginal', part: 'vagina',
+        perk: '+2 LP whenever a monster gets its hands on you', effects: { 'hit_lp' => 2 },
+        scene: "Syn spreads you wide and sets a row of tiny gold rings down each side of your pussy, each melting " \
+               "through with a hot, sweet tingle. They chime against each other when you walk and sing when " \
+               "something spreads you wider. \"Music,\" Syn says happily, \"everywhere you go.\""
+      },
+      'frenum_ladder' => {
+        kind: :piercing, name: 'Frenum Ladder', place: 'runged under the cock', cost: 65, part: 'penis',
+        perk: '+1 damage', effects: { 'damage' => 1 },
+        scene: "Syn strokes you hard and keeps you there with a practised hand while a ladder of little silver rungs " \
+               "settles under your cock, each with a warm, fizzing rush. Every thrust will drag them deliciously " \
+               "against tight heat. \"Now you'll hit harder,\" she says, flicking a rung, \"in every sense.\""
       }
     }.freeze
 

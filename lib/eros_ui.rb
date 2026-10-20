@@ -152,7 +152,8 @@ module ErosUI
     end
 
     container.row do |row|
-      row.button(label: "🍓 Berry's Quests & Syn's Parlour", style: :primary, custom_id: "eros:parlour:view:#{owner_id}")
+      row.button(label: "🍓 Berry's Quests", style: :primary, custom_id: "eros:quests:view:#{owner_id}")
+      row.button(label: "Syn's Parlour", style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
     end
 
     items.each_slice(5) do |slice|

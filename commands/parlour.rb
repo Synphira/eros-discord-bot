@@ -16,8 +16,8 @@ module Commands
             "the catalogue. Every tattoo and piercing she sells is displayed on her own inked, pierced body, " \
             "from the sigil low on her belly to the gold rings through her nipples. \"Something permanent, " \
             "darling?\" Syn purrs, not looking up. \"My work never fades. Not " \
-            "after defeat, not after a new cycle, not ever.\" Berry's wings flick. \"Eyes on the board while my " \
-            "wife works, pet. She's mine — the quests are yours.\"_"
+            "after defeat, not after a new cycle, not ever.\" Berry's wings flick. \"And if you're here for " \
+            "errands, pet, my quest board is its own page now — `/quests`. She's mine — the marks are yours.\"_"
 
     module_function
 
@@ -71,60 +71,6 @@ module Commands
           end
         end
 
-        attach_quest_board(c, player, event.user.id)
-      end
-    end
-
-    def attach_quest_board(container, player, owner_id)
-      container.separator(divider: true, spacing: :small)
-      container.text_display(
-        content: "### 🍓 Berry's Quest Board\n" \
-                 "_\"Errands, sugar! I run the shop, Syn runs the bench, and you run your pretty legs off for both " \
-                 "of us.\"_\n" \
-                 "#{Engine::Quests.board_lines(player).join("\n")}\n" \
-                 "-# Quests completed for Berry: **#{Engine::Quests.completed(player)}**"
-      )
-
-      active = Engine::Quests.active(player)
-      ready = active.select { |row| Engine::Quests.complete?(player, row) }
-      if ready.any?
-        container.row do |row|
-          ready.first(5).each do |row_q|
-            spec = Engine::Quests.quest(row_q['key'])
-            row.button(label: "Claim: #{spec[:name]} (#{spec[:reward]} LP)", style: :success,
-                       custom_id: "eros:parlour:claim:#{row_q['key']}:#{owner_id}")
-          end
-        end
-      end
-
-      offers = Engine::Quests.offers(player)
-      if offers.any? && active.size < Engine::Quests::MAX_ACTIVE
-        container.row do |row|
-          row.string_select(custom_id: "eros:parlour:quest:#{owner_id}", placeholder: "Take a quest from Berry…",
-                            min_values: 1, max_values: 1) do |menu|
-            offers.each do |key|
-              spec = Engine::Quests.quest(key)
-              label = Engine::TitleSystem::TRACKER_LABELS.fetch(spec[:tracker].to_sym, spec[:tracker])
-              menu.option(label: "#{spec[:name]} — #{spec[:reward]} LP"[0, 100], value: key,
-                          description: "#{spec[:target]}× #{label}"[0, 100])
-            end
-          end
-        end
-      elsif active.size >= Engine::Quests::MAX_ACTIVE
-        container.text_display(content: '-# Your quest list is full. Claim or drop one to take more of Berry\'s errands.')
-      end
-
-      if active.any?
-        container.row do |row|
-          row.string_select(custom_id: "eros:parlour:abandon:#{owner_id}", placeholder: 'Drop a quest…',
-                            min_values: 1, max_values: 1) do |menu|
-            active.each do |row_q|
-              spec = Engine::Quests.quest(row_q['key'])
-              done, target = Engine::Quests.progress(player, row_q)
-              menu.option(label: "#{spec[:name]} (#{done}/#{target})"[0, 100], value: row_q['key'])
-            end
-          end
-        end
       end
     end
 
@@ -140,39 +86,11 @@ module Commands
       show(event, notice: ([result[:message]] + news).join("\n"))
     end
 
-    def handle_quest(event, action, key)
-      player = ErosHelpers.require_player(event) or return
-      return show(event) if Eros.encounter_for(player)
-
-      result =
-        case action
-        when 'quest' then Engine::Quests.accept!(player, key)
-        when 'claim' then Engine::Quests.claim!(player, key)
-        when 'abandon' then Engine::Quests.abandon!(player, key)
-        end
-      lines = [result[:message]] + Array(result[:news])
-      show(event, notice: lines.join("\n"))
-    end
-
     string_select(custom_id: /^eros:parlour:(buy|remove):\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
       action = event.custom_id[/\Aeros:parlour:(buy|remove):\d+\z/, 1]
       Commands::Parlour.handle(event, action, Array(event.values).first.to_s)
-    end
-
-    string_select(custom_id: /^eros:parlour:(quest|abandon):\d+$/) do |event|
-      next unless ErosHelpers.assert_button_owner!(event)
-
-      action = event.custom_id[/\Aeros:parlour:(quest|abandon):\d+\z/, 1]
-      Commands::Parlour.handle_quest(event, action, Array(event.values).first.to_s)
-    end
-
-    button(custom_id: /^eros:parlour:claim:[a-z_]+:\d+$/) do |event|
-      next unless ErosHelpers.assert_button_owner!(event)
-
-      key = event.custom_id[/\Aeros:parlour:claim:([a-z_]+):\d+\z/, 1]
-      Commands::Parlour.handle_quest(event, 'claim', key)
     end
 
     button(custom_id: /^eros:parlour:view:\d+$/) do |event|
@@ -183,7 +101,7 @@ module Commands
 
     application_command(:parlour) { |event| Commands::Parlour.show(event) }
 
-    command(:parlour, description: "Visit Syn & Berry's: Syn's tattoos and piercings, and Berry's quests") do |event|
+    command(:parlour, description: "Visit Syn's parlour bench at Syn & Berry's: tattoos and piercings") do |event|
       Commands::Parlour.show(event)
       nil
     end

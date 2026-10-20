@@ -11,10 +11,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Added
 
-- **Syn & Berry's**: the shop and parlour are now run by a married fairy couple — Berry (cheerful, possessive, runs the shop) and Syn (dark, exhausted, flirty, works the parlour bench). Madame Vex is retired, and all mark scenes name Syn. **Berry's quest board** is on the Parlour screen: 3 offers at a time, up to 3 active, 12 repeatable errands paying 50–150 LP, with the **Berry's Favourite** achievement (10) and title (25). Synced from the bot.
+- **Syn & Berry's**: the shop and parlour are now run by a married fairy couple — Berry (cheerful, possessive, runs the shop) and Syn (dark, exhausted, flirty, works the parlour bench). Madame Vex is retired, and all mark scenes name Syn. **Berry's quest board** has its own **Quests** tab: 3 offers at a time, up to 3 active, 12 repeatable errands paying 50–150 LP, with the **Berry's Favourite** achievement (10) and title (25). Synced from the bot.
+- **10 new marks** at Syn's bench (21 designs total): Rose & Thorns, Moon Moth, Inked Collar, Padlocked Heart and Gate Sigil tattoos, plus Ear Cuff Chain, Lip Ring, Brow Bar, Labia Rings and Frenum Ladder piercings — some tucked behind content toggles (Petplay, Chastity, Gaping & Fisting, Oral). Synced from the bot.
 
 ### Changed
 
+- **Cursed gear respects your content toggles**: living mimic gear (now 24 pieces, with new tentacle, knotting, lactation, petplay, tickling, musk, oviposition and more) only drops while its theme is enabled in Options; the Cursed Shop seals pieces whose theme is off. If no piece matches your tastes, a mimic chest becomes a **Chest Mimic** fight instead. Synced from the bot.
+- **Quests moved to their own tab**: Berry's quest board no longer sits at the bottom of the Parlour screen — it's the new **Quests** tab. The Parlour is just Syn's marks again
 - **Chest loot rebalanced**: Defiance Tonics are rarer (25% → 15%), chests can drop useful consumables (Defiance Draught, Cooling Elixir, Bottled Sanctuary — always one you can use), and once you own all the chest-only gear, gear drops become unowned shop items instead of quietly turning into LP. Synced from the bot.
 
 ### Added
