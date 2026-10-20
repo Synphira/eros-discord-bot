@@ -63,7 +63,7 @@ Slash and prefix share the same handlers (prefix defaults to `e,`, and `E,` also
 | `/equip` · `/unequip` | `e,equip` · `e,unequip` | Equip / unequip normal gear (one trophy at a time) |
 | `/remove` | `e,remove [item]` | Destroy cursed mimic gear for LP (unlocks it in the Cursed Shop) |
 | `/options` | `e,options` | Content preferences in four menus (Core on by default; Bodies, Kinks and Fetishes opt-in) plus body sizes |
-| `/fetish_options` | `e,fetish_options [option] [on/off]` | Toggle one theme by key or name; no arguments lists all 57 |
+| `/fetish_options` | `e,fetish_options [option] [on/off]` | Toggle one theme by key or name; no arguments lists all 58 |
 | — | `e,sluttify [on/off]` | Turn every theme on or off at once (prefix only) |
 | `/fight` · `/flee` · `/submit` | `e,fight` · `e,flee` · `e,submit` | Combat actions (also buttons) |
 
@@ -93,7 +93,7 @@ Buttons are locked to the player who opened the panel. Button presses **edit** t
 - **Elites** — From floor 3, some monsters spawn with an affix (Rutting, Slick, Towering, Insatiable, Alluring) that buffs them. Beating one pays ×2 LP; satisfying one pays +10 LP.
 - **Marks** — Permanent tattoos and piercings from `/parlour`. Each costs LP and gives a small perk; they survive defeat, restarts and cycles. Some designs need a content toggle or body part.
 - **Monster types** — Beast, Demon, Slime, Undead, Plant, Mimic (each with roster, color, and assault/submit flavor).
-- **Curses** — Defeat rolls a curse from the foe's type pool. Effects include lust/damage multipliers, encounter weighting, no-flee/no-death, climax LP, defiance start penalties, and flat STR/AGI/RES.
+- **Curses** — Defeat always brands you with a curse from the foe's type pool, and the tower can also curse you when you orgasm in combat, satisfy a monster, or win a fight (bosses and elites brand you more often, and every extra cycle raises the odds). New curses are always ones you don't already bear. Effects include lust/damage multipliers, encounter weighting, no-flee/no-death, climax LP, defiance start penalties, and flat STR/AGI/RES. Curses feed Threat, so the more you carry, the stronger and hornier everything gets.
 - **Combat** — **Fight** chips monster **HP**. **Flee** (AGI-based). **Submit** / monster hits raise **lust** with assault scenes; climax at 100 costs 20 defiance and leaves you exhausted (STR/AGI -1 for 2 floors) until 10 climaxes in a run make you addicted, after which climaxes buff you instead. Victory grants LP (no automatic floor advance). Defeat applies a curse and resets floor, level, base stats, defiance, and lust. **Non-cursed gear is lost**; living (cursed) mimic gear persists.
 - **Bosses** — Every 5th floor, once per gate. Defeating *or satisfying* the boss clears it, grants LP and a trophy, and advances one floor. Bosses are half as easy to satisfy as normal monsters. Only one trophy can be worn at a time, and trophies are lost on defeat. The first time a boss drops below half HP it changes tactics: you pick between **resisting** (costs defiance, deals a heavy blow, but the boss hits harder) or **giving in** (lust, LP and a step of satisfaction, but the boss recovers a little).
 - **Stats** — STR: damage. AGI: flee, dodge monster attacks (not while submitting), avoid traps, and slip free of multi-turn events. RES: cuts every lust hit by `100 / (100 + RES × 5)`. Max defiance grows with level: `100 + 10·√(level − 1)`.

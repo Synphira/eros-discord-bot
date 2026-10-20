@@ -724,9 +724,27 @@ class Player < Sequel::Model(:players)
     heal_defiance!(amount)
   end
 
-  def apply_defeat_curse!(monster_type: nil)
+  # Picks a curse the player does not already bear: first from the given
+  # monster type's pool, then from any pool. Nil once every curse is borne.
+  def curse_candidate_entry(monster_type = nil)
+    owned = curses.map(&:name)
+    pool = Engine::CurseCatalog.for_type(monster_type)
+    unowned = pool.reject { |c| owned.include?(c[:name]) }
+    return unowned.sample if unowned.any?
+
+    Engine::CurseCatalog::CURSES.values.flatten.reject { |c| owned.include?(c[:name]) }.sample
+  end
+
+  # Chance-based curse (combat orgasms, satisfied monsters, victories).
+  # Returns the same shape as apply_defeat_curse!, or nil when the roll
+  # fails or the player already bears every curse in the catalogue.
+  def apply_curse!(monster_type: nil, chance: 1.0)
+    return nil if chance < 1.0 && rand >= chance
+
     Engine::CurseCatalog.sync_to_db!
-    entry = Engine::CurseCatalog.sample_for(monster_type)
+    entry = curse_candidate_entry(monster_type)
+    return nil unless entry
+
     curse = Curse.first(name: entry[:name])
     curse ||= Curse.create(
       name: entry[:name],
@@ -736,6 +754,11 @@ class Player < Sequel::Model(:players)
     )
     afflicted = afflict!(curse)
     { curse: curse, entry: entry, newly_afflicted: afflicted }
+  end
+
+  def apply_defeat_curse!(monster_type: nil)
+    apply_curse!(monster_type: monster_type, chance: 1.0) ||
+      { curse: nil, entry: nil, newly_afflicted: false }
   end
 
   def spend_lp!(cost)

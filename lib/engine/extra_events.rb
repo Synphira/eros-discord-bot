@@ -164,22 +164,15 @@ module Engine
       reward!(player, 4 + (level / 3), 12 + (level / 2), log)
     end
 
-    def eggs!(player, parts, level, log)
-      if parts.include?('vagina')
-        log << { scene: 'The creature positions itself between your legs, its thick, ribbed ovipositor pressing against your cunt lips. It ' \
-                        'thrusts in roughly, the ridges scraping your inner walls as it pushes deep into your womb. One by one, warm, ' \
-                        'fist-sized eggs travel down the tube, each one stretching you as it passes through your cervix.' }
-        log << { scene: 'The eggs settle in your womb, each one making your belly swell a little more. You can feel them shifting inside ' \
-                        'you, their hard shells pressing against each other. The creature chirps happily, its ovipositor still buried ' \
-                        'inside you as it deposits the last egg.' }
-      else
-        log << { scene: 'The creature forces you onto all fours as its thick ovipositor presses against your tight asshole. It thrusts in ' \
-                        'without mercy, the ridged shaft burying itself deep inside you. You scream as the first egg begins to travel ' \
-                        'down, stretching you painfully.' }
-        log << { scene: 'The eggs fill you, making your belly distend as more and more are deposited. You feel completely stuffed, unable ' \
-                        'to move without intense pressure from the eggs shifting inside you. The creature finally withdraws, leaving your ' \
-                        'ass gaping and leaking.' }
-      end
+    def eggs!(player, _parts, level, log)
+      log << { scene: 'The creature guides you onto all fours, and its thick, ribbed ovipositor presses against your ' \
+                      'asshole. It eases in slow and slick, the ridges stroking you open as it sinks deep into your ass. ' \
+                      'One by one, warm, fist-sized eggs travel down the tube, each one stretching you deliciously wide ' \
+                      'as it slips inside.' }
+      log << { scene: 'The eggs settle deep in your ass, each one making your belly swell a little more. You can feel ' \
+                      'them shifting inside you, their smooth shells pressing snugly against each other. The creature ' \
+                      'chirps happily, its ovipositor still buried in you as it deposits the last egg, then slides free ' \
+                      'and leaves you full, flushed and gaping.' }
       log << { scene: 'A short while later the eggs begin to dissolve, their shells melting away into a warm, tingling sensation inside ' \
                       'you. The energy spreads through your body, leaving you feeling both full and empty at the same time.' }
       reward!(player, 5 + (level / 3), 14 + (level / 2), log)

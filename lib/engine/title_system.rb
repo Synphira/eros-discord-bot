@@ -205,7 +205,8 @@ module Engine
         'shapeshifted' => ['Monstrous', :monster_form_events, 3, 'You have worn the bodies of the tower\'s creatures'],
         'head_maid' => ['Head Maid', :maid_events, 3, 'The house has never been served so thoroughly'],
         'show_pony' => ['Show Pony', :pony_events, 3, 'Harnessed, bridled, and ridden'],
-        'silenced' => ['Silenced', :gag_events, 3, 'Gagged and hooded, and better for it']
+        'silenced' => ['Silenced', :gag_events, 3, 'Gagged and hooded, and better for it'],
+        'wide_open' => ['Wide Open', :gaping_events, 3, "You've been fisted and left gaping, and loved every inch of it"]
       }.transform_values do |name, tracker, count, desc|
         { name: name, requirement: { tracker => count }, description: desc }
       end
@@ -276,6 +277,7 @@ module Engine
       ['maid_veteran', 'At Your Service', 'Serve the monster manor 3 times', :maid_events, 3, 25],
       ['pony_veteran', 'Well Trained', 'Get harnessed in the stables 3 times', :pony_events, 3, 25],
       ['gag_veteran', 'Mmmph', 'Wear a gag or hood 3 times', :gag_events, 3, 25],
+      ['gaping_veteran', 'Wide Open', 'Experience fisting 3 times', :gaping_events, 3, 30],
       ['denied_frustrated', 'Frustrated', 'Have an orgasm denied by chastity 5 times', :denied_climaxes, 5, 20],
       ['denied_desperate', 'Desperate', 'Have an orgasm denied by chastity 10 times', :denied_climaxes, 10, 40],
       ['denied_broken', 'Broken by Denial', 'Have an orgasm denied by chastity 25 times', :denied_climaxes, 25, 80],
@@ -465,7 +467,7 @@ module Engine
       corruption_events: 'corruption', body_writing_events: 'body_writing', musk_events: 'musk',
       temperature_events: 'temperature', size_events: 'size_difference', cum_play_events: 'cum_play',
       degradation_events: 'degradation', monster_form_events: 'monster_transformation', maid_events: 'maid_service',
-      pony_events: 'pony_play', gag_events: 'gags_hoods'
+      pony_events: 'pony_play', gag_events: 'gags_hoods', gaping_events: 'gaping'
     }.freeze
 
     module_function

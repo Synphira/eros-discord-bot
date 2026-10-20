@@ -115,12 +115,12 @@ module Engine
         blurb: 'a nest of warm, glistening eggs.',
         intro: 'A gentle, many-legged broodmother chirps from a nest of soft eggs. She seems to think you would make a lovely nursery.',
         accept: {
-          label: 'Carry her eggs', text: 'Let her fill you with eggs',
-          scenes: ['Her ovipositor slides in slowly, its ridged surface rubbing your insides deliciously as it pushes deep. One by one, ' \
-                   'warm, fist-sized eggs travel down the tube, each one stretching you as it slips inside.',
-                   'You waddle away heavy and full, your belly visibly swollen with the clutch shifting inside you. Each movement makes ' \
+          label: 'Carry her eggs', text: 'Let her fill your ass with eggs',
+          scenes: ['Her ovipositor slides into your ass slowly, its ridged surface rubbing your insides deliciously as it pushes deep. One by one, ' \
+                   'warm, fist-sized eggs travel down the tube, each one stretching you wide as it slips inside.',
+                   'You waddle away heavy and full, your belly visibly swollen with the clutch shifting deep in your ass. Each movement makes ' \
                    'you gasp as the eggs press against each other — a constant reminder that you are now a living incubator.'],
-          parts: { 'vagina' => 'She chooses your cunt, pressing each egg past your cervix until your womb is packed full.' },
+          parts: { 'anus' => 'She keeps your ass spread wide the whole time, admiring how beautifully it takes every single egg.' },
           lp: 6, lust: 14,
           condition: { key: 'egg_laden', name: 'Egg-Laden', floors: 2,
                        effects: { 'agility' => -1, 'explore_lp' => 2 } }

@@ -7,6 +7,20 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-19
+
+### Added
+
+- **Gaping & Fisting** opt-in fetish (58 toggles total) with three fisting events — Shrine of the Open Hand, The Gauntlet and The Living Gauntlet — plus the **Wide Open** title and achievement. Synced from the bot.
+
+### Changed
+
+- **Curses can now find you mid-combat**: orgasming in a fight (35%), satisfying a monster (30%, bosses 40%) and winning (10%, elites 25%, bosses 40%) can all brand you, with +5% per extra cycle. New curses are always ones you don't already have, and curses raise Threat, so the game gets harder the more you collect. Resistance and Submission also scale less steeply in deep cycles, so lust hits and satisfying take longer. Synced from the bot.
+
+### Fixed
+
+- Egg-laying events (Egg Chamber, Oviposition Chamber, Spawning Pool) now lay their eggs in your ass instead of your pussy. Synced from the bot.
+
 ## 2026-10-14
 
 ### Changed

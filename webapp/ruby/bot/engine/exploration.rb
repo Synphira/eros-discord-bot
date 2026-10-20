@@ -266,6 +266,10 @@ module Engine
           lines.concat(climax[:lines])
           if climax[:broken]
             @player.reset_run!
+            curse = @player.apply_defeat_curse!
+            if curse[:curse]
+              lines << "You've been cursed with **#{curse[:curse].name}**: #{curse[:entry][:description]}"
+            end
             lines << "You've been completely broken by the trap!"
             lines << 'Floor, defiance, and lust reset — LP, curses, and living gear persist; normal gear and trophies are lost.'
             return [lines.join("\n"), true]

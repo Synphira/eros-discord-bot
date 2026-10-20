@@ -15,6 +15,17 @@ module Engine
     PHASE_GIVE_LP = 10
     PHASE_GIVE_HEAL = 0.1
 
+    # Curses no longer wait for a defeat. The tower brands you for cumming
+    # in combat, for satisfying a monster, and sometimes just for winning.
+    # Each extra cycle adds +5% to every roll (see curse_chance).
+    CURSE_CHANCE_ORGASM = 0.35
+    CURSE_CHANCE_SATISFIED = 0.30
+    CURSE_CHANCE_VICTORY = 0.10
+    CURSE_CHANCE_ELITE_VICTORY = 0.25
+    CURSE_CHANCE_BOSS = 0.40
+    CURSE_CHANCE_PER_CYCLE = 0.05
+    CURSE_CHANCE_CAP = 0.85
+
     Encounter = Struct.new(
       :name, :type, :type_name, :color, :strength, :agility, :lust_damage, :hp, :max_hp,
       :special, :enraged, :is_boss, :elite,
@@ -208,7 +219,7 @@ module Engine
     end
 
     def resistance_factor
-      100.0 / (100 + (@player.effective_resistance * 5))
+      100.0 / (100 + (@player.effective_resistance * 3.5))
     end
 
     def monster_lust_hit(enc)
@@ -216,8 +227,25 @@ module Engine
       base = (base * @player.curse_effect_product("#{enc[:type]}_damage_mult", default: 1.0)).to_f
       base *= @player.lust_damage_multiplier(monster_type: enc[:type])
       base = base.round
-      base = 1 if base < 1
-      base
+      # Resistance can blunt a lust hit, but never below 15% of its raw
+      # strength — deep-cycle delvers still feel the tower's touch.
+      floor_hit = [(enc[:lust_damage].to_i * 0.15).ceil, 1].max
+      [base, floor_hit].max
+    end
+
+    def curse_chance(base, enc)
+      chance = base.to_f
+      chance += CURSE_CHANCE_PER_CYCLE * (@player.current_cycle.to_i - 1)
+      chance += 0.10 if Engine::Elites.elite?(enc)
+      [chance, CURSE_CHANCE_CAP].min
+    end
+
+    def roll_curse!(enc, log, base_chance, flavour)
+      result = @player.apply_curse!(monster_type: enc[:type], chance: curse_chance(base_chance, enc))
+      return unless result && result[:curse]
+
+      log << "#{flavour} — the tower brands you with **#{result[:curse].name}**: #{result[:entry][:description]} " \
+             '_(curses feed your Threat — see `/curses`)_'
     end
 
     def apply_fight!(enc, log)
@@ -444,8 +472,13 @@ module Engine
     end
 
     def monster_satisfy_chance(enc = {})
-      chance = (0.2 + (@player.effective_submission * 0.1) + @player.curse_effect_sum('satisfy_bonus') +
-                enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc)).clamp(0.05, 0.8)
+      # Submission still helps, but with diminishing returns, and each new
+      # cycle makes the tower's creatures harder to please.
+      chance = 0.15 + (@player.effective_submission * 0.055) + @player.curse_effect_sum('satisfy_bonus') +
+               enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc)
+      chance -= 0.03 * (@player.current_cycle.to_i - 1)
+      chance -= 0.05 if enc[:is_boss]
+      chance = chance.clamp(0.05, 0.70)
       chance = 1.0 if Engine::Dev.debug?(@player)
       chance
     end
@@ -468,6 +501,8 @@ module Engine
 
     def finish_satisfied!(enc, log)
       award_combat_end_bonus!(log)
+      roll_curse!(enc, log, CURSE_CHANCE_SATISFIED,
+                  "Satisfied, the #{enc[:name]} leaves its mark on you")
       if Engine::Elites.elite?(enc)
         @player.gain_lp!(Engine::Elites::SATISFY_LP_BONUS)
         @player.bump_tracker!('elites_satisfied')
@@ -480,6 +515,10 @@ module Engine
     def climax!(enc)
       climax = @player.try_climax!(monster_type: enc[:type], brief: @climaxed_this_turn)
       @climaxed_this_turn = true if climax
+      if climax && !climax[:broken] && !@player.climax_denied?
+        roll_curse!(enc, climax[:lines], CURSE_CHANCE_ORGASM,
+                    "Cumming for the #{enc[:name]} marks you as the tower's own")
+      end
       climax
     end
 
@@ -590,8 +629,12 @@ module Engine
         if satisfied
           log << "You satisfied the #{enc[:name]}! You gain **#{lp}** Lust Points " \
                  "_(×#{BOSS_SATISFY_LP_MULT} for winning through submission)_!"
+          roll_curse!(enc, log, CURSE_CHANCE_BOSS,
+                      "Even satisfied, the #{enc[:name]} does not let you leave unmarked")
         else
           log << "You defeated the #{enc[:name]}! You gain **#{lp}** Lust Points!"
+          roll_curse!(enc, log, CURSE_CHANCE_BOSS,
+                      "Victory tastes sweet — and the #{enc[:name]} makes sure you pay for it")
         end
 
         if reward[:special_item]
@@ -626,6 +669,9 @@ module Engine
         log << { scene: MonsterScenes.combat_line(@player, :victory, enc[:name], enc[:type]) }
         if @player.curse_effect_flag?("#{enc[:type]}_no_lp")
           log << "You defeated the #{enc[:name]}! You gain no Lust Points due to your curse."
+          roll_curse!(enc, log,
+                      Engine::Elites.elite?(enc) ? CURSE_CHANCE_ELITE_VICTORY : CURSE_CHANCE_VICTORY,
+                      "As the #{enc[:name]} yields, the tower slips its brand into you")
           return { ok: true, victory: true, encounter: enc, log: log, lp_gained: 0 }
         end
 
@@ -636,6 +682,9 @@ module Engine
         @player.bump_tracker!('elites_defeated') if Engine::Elites.elite?(enc)
         elite_note = Engine::Elites.elite?(enc) ? " _(×#{Engine::Elites::VICTORY_LP_MULT} for an elite)_" : ''
         log << "You defeated the #{enc[:name]}! You gain **#{lp_gain}** Lust Points!#{elite_note}"
+        roll_curse!(enc, log,
+                    Engine::Elites.elite?(enc) ? CURSE_CHANCE_ELITE_VICTORY : CURSE_CHANCE_VICTORY,
+                    "As the #{enc[:name]} yields, the tower slips its brand into you")
       end
       
       { ok: true, victory: true, encounter: enc, log: log }
@@ -723,6 +772,8 @@ module Engine
     end
 
     def curse_affliction_line(curse, entry, newly)
+      return 'The tower reaches for a fresh curse to brand you with — and finds you already bear every one of them.' unless curse
+
       if newly
         "You've been cursed with **#{curse.name}**: #{entry[:description]}"
       else

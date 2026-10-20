@@ -22,7 +22,7 @@ module Engine
       'lactation' => { label: 'Lactation & Milking', group: :body, default: false, description: 'Milking shrines, nectar, and leaking breasts.' },
       'growth' => { label: 'Part Growth', group: :body, default: false, description: 'Fountains that enlarge body parts (capped).' },
       'inflation' => { label: 'Inflation', group: :body, default: false, description: 'Being pumped full until your belly swells.' },
-      'oviposition' => { label: 'Oviposition', group: :body, default: false, description: 'Egg-laying creatures.' },
+      'oviposition' => { label: 'Oviposition', group: :body, default: false, description: 'Creatures laying their eggs in your ass.' },
       'breeding' => { label: 'Breeding', group: :body, default: false, description: 'Impregnation and fertility magic.' },
       'bimbofication' => { label: 'Bimbofication', group: :body, default: false, description: 'Airheaded, curvier, giggly transformations.' },
       'futanari' => { label: 'Futanari', group: :body, default: false, description: 'Magic that grants an extra endowment.' },
@@ -62,7 +62,8 @@ module Engine
       'degradation' => { label: 'Degradation', group: :fetish, default: false, description: 'Name-calling instead of praise.' },
       'maid_service' => { label: 'Maid Service', group: :fetish, default: false, description: 'Uniforms and serving the house.' },
       'pony_play' => { label: 'Pony Play', group: :fetish, default: false, description: 'Harnesses, bits, tails, and trotting.' },
-      'gags_hoods' => { label: 'Gags & Hoods', group: :fetish, default: false, description: 'Ball gags, ring gags, and leather hoods.' }
+      'gags_hoods' => { label: 'Gags & Hoods', group: :fetish, default: false, description: 'Ball gags, ring gags, and leather hoods.' },
+      'gaping' => { label: 'Gaping & Fisting', group: :fetish, default: false, description: 'Fisting and being left stretched wide open.' }
     }.freeze
 
     CORE_KEYS = PREFERENCES.select { |_, v| v[:group] == :core }.keys.freeze

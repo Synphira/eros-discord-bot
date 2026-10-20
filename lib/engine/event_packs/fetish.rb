@@ -614,6 +614,83 @@ module Engine
         },
         decline: { label: 'No thanks', text: 'Walk past the cart', lust: 2, escape: true,
                    scene: 'You slip past before he can press a sample on you. He shouts a discount after you.' }
+      },
+      'open_hand_shrine' => {
+        name: 'Shrine of the Open Hand', tag: 'gaping', tracker: 'gaping_events',
+        blurb: 'a marble hand rises from a shrine, fingers beckoning.',
+        intro: 'A shrine to Eros holds a single marble hand, larger than life, its fingers curling in slow invitation. ' \
+               'Warm oil glistens on the stone. An inscription reads: *OPEN FOR HER*.',
+        accept: {
+          label: 'Kneel and open', text: 'Take the whole hand in your ass',
+          scenes: ['You kneel with your back to the shrine and spread yourself, and the marble fingers begin their work: ' \
+                   'one, then two, then more, each slick digit stroking you wider with patient, divine confidence.',
+                   'Then the whole hand slides into your ass, thumb and all, and opens slowly inside you. You hang there ' \
+                   'gaping around her wrist, shaking and moaning, while the fingers curl and beckon deep within you.'],
+          parts: {
+            'vagina' => 'Afterwards the fingers turn their attention to your pussy, filling it just as completely, until ' \
+                        'both of your holes are stretched wide and dripping for the goddess.',
+            'penis' => 'Your cock throbs untouched the whole time, leaking steadily with every slow curl of her fingers.'
+          },
+          lp: 8, lust: 16,
+          condition: { key: 'stretched_open', name: 'Stretched Open', floors: 2,
+                       effects: { 'submission' => 1, 'satisfy_bonus' => 0.1, 'submit_lp_bonus' => 2 } }
+        },
+        alt: {
+          label: 'Fingers only', text: 'Just her fingers, for now',
+          scenes: ['You offer yourself more modestly, and the marble fingers oblige, stroking you open with three slick ' \
+                   'digits until you are relaxed, flushed and gaping just a little.'],
+          lp: 5, lust: 10,
+          condition: { key: 'nicely_loosened', name: 'Nicely Loosened', floors: 2,
+                       effects: { 'satisfy_bonus' => 0.05, 'agility' => 1 } }
+        },
+        decline: { label: 'Keep walking', text: 'Leave the hand unfilled', lust: 3,
+                   scene: 'You walk on. Behind you, the marble fingers curl closed, patient as ever.' }
+      },
+      'the_gauntlet' => {
+        name: 'The Gauntlet', tag: 'gaping', tracker: 'gaping_events',
+        blurb: 'a huge hand flexes at the end of a scarred arm.',
+        intro: 'A towering arena master blocks the corridor, one arm bare to the shoulder, his hand big enough to wrap ' \
+               'your whole waist. "Tower rules," he rumbles, slicking his fingers with oil. "Everyone takes the Gauntlet."',
+        accept: {
+          label: 'Take the Gauntlet', text: 'Let him fist you properly',
+          scenes: ['He works you open the slow way, knuckle by knuckle, praising every whimper as you relax around him. ' \
+                   'By the time his thumb slips in to join the rest, you are spread wider than you thought you could go.',
+                   'His whole fist fills your ass, turning and flexing inside you while his other hand holds your hips ' \
+                   'steady. When he finally eases out, you stay open, gaping and trembling, and he nods like a proud teacher.'],
+          parts: {
+            'vagina' => 'He saves your pussy for last, fisting it with the same slow pride until it gapes around his wrist too.',
+            'breasts' => 'His free hand kneads your breasts the whole time, rolling your nipples while you take him.'
+          },
+          lp: 9, lust: 16,
+          condition: { key: 'left_gaping', name: 'Left Gaping', floors: 3,
+                       effects: { 'lust_mult' => 1.1, 'submission' => 1, 'satisfy_bonus' => 0.1 } }
+        },
+        decline: { label: 'Refuse the rules', text: 'Nobody fists you by decree', lust: 3,
+                   scene: 'You refuse. He shrugs his mountain shoulders. "The tower always collects, little one."' },
+        fight: { label: 'Fight him', type: :beast, text: 'He cracks his knuckles and charges, Gauntlet first!' }
+      },
+      'living_gauntlet' => {
+        name: 'The Living Gauntlet', tag: 'gaping', tracker: 'gaping_events',
+        blurb: 'an enormous glove waves at you from a pedestal.',
+        intro: 'On a velvet pedestal lies a single enormous glove of supple, breathing leather, easily three times the ' \
+               'size of any hand. It rises on its fingertips and waves at you, then beckons with one thick finger.',
+        accept: {
+          label: 'Let it in', text: 'Be fisted by the glove itself',
+          scenes: ['The glove slicks itself with something warm and fragrant, then walks its fingers up your thighs like ' \
+                   'an eager pet. Two fingers slip into your ass, then three, stretching you open with playful patience.',
+                   'It pushes deeper until its whole padded hand is inside you, flexing and turning, and you are left ' \
+                   'moaning and gaping around its cuff when it finally slides free, giving your cheek a fond pat.'],
+          parts: {
+            'vagina' => 'It crawls round to your pussy next and fills that too, until you are stretched wide front and back.',
+            'penis' => 'A stray fingertip keeps stroking your cock while the rest of it is busy inside you.'
+          },
+          lp: 8, lust: 15,
+          condition: { key: 'glove_stretched', name: 'Glove-Stretched', floors: 2,
+                       effects: { 'mimic_submit_lp' => 3, 'satisfy_bonus' => 0.1, 'agility' => -1 } }
+        },
+        decline: { label: 'Wave back', text: 'Leave it waving', lust: 2,
+                   scene: 'You wave politely and walk on. The glove droops, then waves sadly at your back.' },
+        fight: { label: 'Stomp it', type: :mimic, text: 'The glove rears up, fingers spread like claws — it was a mimic all along!' }
       }
     }.freeze
   end

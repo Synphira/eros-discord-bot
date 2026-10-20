@@ -74,6 +74,7 @@ module Commands
       **2. Explore.** `/explore` opens the next room: a monster, a trap, a treasure chest, an event, or the stairs down.
       **3. Fight, flee or submit.** Beating a monster earns **Lust Points (LP)**. Fleeing depends on Agility. Submitting can satisfy it for LP, but your lust rises.
       **4. Watch your Defiance.** Defiance is your will to resist. Lust builds with every hit, and an orgasm at 100 lust drains Defiance. At 0 you are **broken**: back to floor 1 at level 1, with a new curse.
+      **4b. Curses find you anyway.** Cumming in combat, satisfying a monster, and even winning a fight can all earn you a curse — and every curse feeds your **Threat**, making the tower's monsters stronger and hornier. Deeper cycles brand you more often. Manage them with `/curses`, `/removecurse` and `/suppresscurse`.
       **5. Spend your LP.** Grow stronger in `/levelup`, buy gear in `/shop`, remove curses, or get marks in `/parlour`.
       **6. Rest.** `/rest` clears your lust and restores Defiance once every 5 minutes.
       **7. Go deeper.** A boss waits every 5 floors, and Eros, Goddess of Lust, waits on floor 35. Clear the tower to start a harder cycle with bigger rewards.

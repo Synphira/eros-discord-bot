@@ -6,6 +6,33 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-19
+
+### Added
+
+- **New opt-in fetish: Gaping & Fisting** (toggle `gaping` in `/options` → Opt-in fetishes; there are now 58 toggles, and `e,sluttify` covers it too). Three new events, each with a gentler alternative and a lasting condition:
+  - **Shrine of the Open Hand**: a marble hand of Eros fists your ass (and your pussy too, if you have one), leaving you **Stretched Open**
+  - **The Gauntlet**: an arena master's huge hand works you open knuckle by knuckle, leaving you **Left Gaping** — or fight him
+  - **The Living Gauntlet**: a giant breathing glove fists you itself, leaving you **Glove-Stretched** — or stomp the mimic
+  - New title and achievement: **Wide Open** (experience fisting 3 times)
+
+### Changed
+
+- **Curses no longer wait for a defeat.** The tower can now brand you mid-combat:
+  - Orgasming in combat without being broken: **35%**
+  - Satisfying a monster by submitting: **30%** (bosses: **40%**)
+  - Winning a fight: **10%**, elites **25%**, bosses **40%**
+  - Every cycle past the first adds **+5%** to all of these (elites add another +10%), capped at 85%. Defeat and being broken still always curse you, and being broken by a trap or event now curses you too
+  - Chance-based curses always pick one you don't already bear (type pool first, then any pool), so your collection keeps growing instead of repeating
+  - More curses means more **Threat**, so monsters get stronger and their lust hits grow — carrying curses is now a real difficulty spiral. `/help`'s tutorial explains the new rules
+- **Deep-cycle combat is less of a pushover:**
+  - Resistance now has softer diminishing returns, and a lust hit can never be reduced below 15% of its raw strength — high-RES delvers will feel more than 1–2 lust per turn
+  - Submission's satisfy chance has diminishing returns (max 70%, down from 80%), and each cycle makes monsters 3% harder to satisfy (bosses another 5%) — submitting still works, it just takes longer while the monster keeps its hands on you
+
+### Fixed
+
+- **Egg-laying events now put the eggs in your ass**, as intended: the Egg Chamber, the Oviposition Chamber and the Spawning Pool no longer use your pussy/womb (that's still the Breeding events' job). The Egg Chamber's scene was also rewritten — the ovipositor eases in slick and slow instead of forcing its way in
+
 ## 2026-10-14
 
 ### Changed

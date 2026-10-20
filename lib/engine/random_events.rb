@@ -349,6 +349,10 @@ module Engine
       log.concat(climax[:lines])
       if climax[:broken]
         loss = player.reset_run!
+        curse = player.apply_defeat_curse!
+        if curse[:curse]
+          log << "You've been cursed with **#{curse[:curse].name}**: #{curse[:entry][:description]}"
+        end
         log << "You've been completely broken by the encounter!"
         if loss[:gear_lost]&.any?
           log << "Your non-cursed gear and trophies are lost: #{loss[:gear_lost].map { |n| "**#{n}**" }.join(', ')}."

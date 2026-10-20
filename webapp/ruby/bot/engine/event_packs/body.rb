@@ -605,11 +605,10 @@ module Engine
         accept: {
           label: 'Float with her', text: 'Carry her glowing eggs',
           scenes: ['She draws you into the warm water and wraps you in her silky fronds, and a long, smooth ovipositor eases ' \
-                   'into you. One by one, soft eggs slip inside, each one cool and squishy and glowing faintly through your skin.',
+                   'into your ass. One by one, soft eggs slip inside, each one cool and squishy and glowing faintly through your skin.',
                    'You drift out of the pool round and heavy, your belly lit from within by a soft blue glow, every egg ' \
-                   'shifting and nudging inside you with each step.'],
-          parts: { 'vagina' => 'She fills your womb first, packing it with glowing eggs until your pussy clenches around the last one.',
-                   'anus' => 'When there is no more room, she fills your ass as well, the eggs nestling deep and snug.' },
+                   'shifting and nudging deep in your ass with each step.'],
+          parts: { 'anus' => 'She fills your ass completely, packing it with glowing eggs until it clenches snugly around the last one.' },
           lp: 6, lust: 14,
           condition: { key: 'spawn_laden', name: 'Spawn-Laden', floors: 2,
                        effects: { 'agility' => -1, 'slime_submit_lp' => 3, 'explore_lp' => 1 } }
