@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-20
+
+### Changed
+
+- **Floor descent is now threat-scaled**: stairs take a smaller share of the room pool as threat climbs (about 19% of rooms at low threat, ~13% at medium, ~8% at high), and the guaranteed-stairs backstop stretches with it — 20 rooms at low threat, 30 at medium, 40 at high. Room rolls are normalized, so monster spawn boosts can dilute the stairs but never crowd them out entirely
+
 ## 2026-10-19
 
 ### Fixed

@@ -7,6 +7,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-20
+
+### Changed
+
+- **Floor descent is now threat-scaled**: stairs get rarer (and the guaranteed-stairs backstop later) as threat climbs — 20/30/40 rooms at low/medium/high threat — and monster spawns can never crowd them out entirely. Synced from the bot.
+
 ## 2026-10-19
 
 ### Fixed

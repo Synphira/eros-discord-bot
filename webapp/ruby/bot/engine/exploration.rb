@@ -12,7 +12,9 @@ module Engine
     TREASURE_LP = 10
 
     # After this many rooms on one floor without descending, the stairs are guaranteed.
-    STAIRS_AFTER = 12
+    # Stairs also take a smaller share of the room pool as threat climbs — rarer, never gone.
+    STAIRS_LIMITS = { low: 20, medium: 30, high: 40 }.freeze
+    STAIRS_WEIGHTS = { low: 18, medium: 13, high: 8 }.freeze
 
     COLOURS = {
       monster: 0x8b1a1a,
@@ -133,7 +135,8 @@ module Engine
 
       return sanctuary_room if @player.sanctuary
 
-      if stairs_guaranteed?
+      threat = ThreatCalculator.calculate(@player)
+      if stairs_guaranteed?(threat)
         room = stairs_room
         room.message = "_You've combed every corner of Floor #{floor} — the tower can hide its stairs no longer._\n\n#{room.message}"
         return room
@@ -150,26 +153,27 @@ module Engine
         return event_room(Engine::RandomEvents.start!(@player))
       end
 
-      threat = ThreatCalculator.monster_modifiers(@player)
-      monster_chance = [[28 + threat.encounter_bonus, 55].min, 15].max
+      monster_weight = [[28 + threat.encounter_bonus, 55].min, 15].max
       rate = @player.encounter_rate_multiplier * Engine::TransformationSystem.monster_rate(@player)
-      monster_chance = [[(monster_chance * rate).round, 5].max, 70].min
-      trap_end = monster_chance + 17
-      treasure_end = trap_end + 15
-      stairs_end = treasure_end + 15
+      monster_weight = [[(monster_weight * rate).round, 5].max, 70].min
 
-      room_type = rand(100)
+      # Weighted pool, normalized: high monster weight dilutes the stairs, never erases them.
+      weights = {
+        monster: monster_weight,
+        trap: 17,
+        treasure: 15,
+        stairs: STAIRS_WEIGHTS.fetch(threat.category, 13),
+        empty: 15
+      }
+      pick = rand(weights.values.sum)
+      kind = weights.find { |_, w| (pick -= w) < 0 }.first
 
-      if room_type < monster_chance
-        monster_room
-      elsif room_type < trap_end
-        trap_room
-      elsif room_type < treasure_end
-        treasure_room
-      elsif room_type < stairs_end
-        stairs_room
-      else
-        empty_room
+      case kind
+      when :monster then monster_room
+      when :trap then trap_room
+      when :treasure then treasure_room
+      when :stairs then stairs_room
+      else empty_room
       end
     end
 
@@ -185,8 +189,8 @@ module Engine
       @player.tracker('rooms_on_floor')
     end
 
-    def stairs_guaranteed?
-      rooms_on_floor >= STAIRS_AFTER
+    def stairs_guaranteed?(threat)
+      rooms_on_floor >= STAIRS_LIMITS.fetch(threat.category, 14)
     end
 
     def note_room_explored!
