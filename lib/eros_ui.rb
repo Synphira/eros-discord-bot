@@ -415,7 +415,9 @@ module ErosUI
     sizes = Engine::ContentOptions.applicable_sizes(player)
     return '' if sizes.empty?
 
-    parts = sizes.map { |part, spec| "#{spec[:label]} **#{Engine::ContentOptions.size_of(player, part)}**" }
+    parts = sizes.map do |part, spec|
+      "#{spec[:label]} **#{Engine::ContentOptions.size_label(part, Engine::ContentOptions.size_of(player, part))}**"
+    end
     "**Body** #{parts.join(' · ')}\n"
   end
 

@@ -96,9 +96,22 @@ module Engine
 
     BODY_SIZES = {
       'penis' => { label: 'Penis', requires: 'penis', options: %w[small average large], default: 'average' },
-      'breasts' => { label: 'Breasts', requires: 'breasts', options: %w[small medium large], default: 'medium' },
+      'breasts' => { label: 'Breasts', requires: 'breasts', options: %w[flat a b c d e f], default: 'c',
+                     option_labels: { 'flat' => 'Flat', 'a' => 'A cup', 'b' => 'B cup', 'c' => 'C cup',
+                                      'd' => 'D cup', 'e' => 'E cup', 'f' => 'F cup' } },
       'butt' => { label: 'Butt', requires: nil, options: %w[small medium large huge], default: 'medium' }
     }.freeze
+
+    # Saves made before the cup-size scale keep working.
+    LEGACY_SIZE_MAP = {
+      'breasts' => { 'small' => 'a', 'medium' => 'c', 'large' => 'e', 'huge' => 'f' }
+    }.freeze
+
+    def size_label(part, size)
+      spec = BODY_SIZES[part.to_s] or return size.to_s
+
+      (spec[:option_labels] || {}).fetch(size.to_s, size.to_s)
+    end
 
     def preference(key)
       PREFERENCES[key.to_s]
@@ -163,6 +176,7 @@ module Engine
     def size_of(player, part)
       spec = BODY_SIZES[part.to_s] or return nil
       saved = player.body_sizes.is_a?(Hash) ? player.body_sizes[part.to_s] : nil
+      saved = LEGACY_SIZE_MAP.dig(part.to_s, saved) || saved
       spec[:options].include?(saved) ? saved : spec[:default]
     end
 

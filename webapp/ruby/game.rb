@@ -299,7 +299,7 @@ module Eros
 
       sizes = @player.body_sizes.is_a?(Hash) ? @player.body_sizes.dup : {}
       @player.update(body_sizes: sizes.merge(part => value))
-      say("#{spec[:label]} size set to **#{value}**.")
+      say("#{spec[:label]} size set to **#{Engine::ContentOptions.size_label(part, value)}**.")
     end
 
     def restart!
@@ -786,7 +786,8 @@ module Eros
         chosen = Engine::ContentOptions.size_of(@player, part)
         sections << { text: "**#{spec[:label]} size**",
                       actions: spec[:options].map do |size|
-                        btn(size.capitalize, 'size', arg: "#{part}:#{size}", style: size == chosen ? 'primary' : 'secondary')
+                        btn(Engine::ContentOptions.size_label(part, size), 'size', arg: "#{part}:#{size}",
+                            style: size == chosen ? 'primary' : 'secondary')
                       end }
       end
       intro = { text: '_Choose what the tower may show you. Scenes touching disabled **core** themes are re-rolled or ' \

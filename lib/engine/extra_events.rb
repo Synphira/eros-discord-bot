@@ -54,7 +54,9 @@ module Engine
 
     SIZE_WORDS = {
       'penis' => { 'small' => 'petite', 'average' => 'eager', 'large' => 'heavy, thick' },
-      'breasts' => { 'small' => 'perky', 'medium' => 'firm', 'large' => 'heavy', 'huge' => 'enormous' },
+      'breasts' => { 'flat' => 'flat', 'a' => 'small, perky', 'b' => 'perky', 'c' => 'firm', 'd' => 'heavy',
+                     'e' => 'huge', 'f' => 'enormous', 'small' => 'perky', 'medium' => 'firm', 'large' => 'heavy',
+                     'huge' => 'enormous' },
       'butt' => { 'small' => 'tight', 'medium' => 'round', 'large' => 'plump', 'huge' => 'enormous' }
     }.freeze
 
@@ -102,7 +104,7 @@ module Engine
                       'The machine starts with intense suction that pulls at your nipples, making them elongate and turn dark purple as ' \
                       'blood rushes to them. Milk begins spraying from your tits in thick, steady streams, filling the collection tubes ' \
                       'with creamy white fluid.' }
-      bonus = { 'small' => 0, 'medium' => 2, 'large' => 4 }.fetch(size, 0)
+      bonus = { 'flat' => 0, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5 }.fetch(size, 0)
       if parts.include?('penis')
         log << { scene: 'A third, smaller cup descends and attaches to your cock, its suction immediately making your shaft swell as the ' \
                         'machine begins milking your prostate from inside. You can feel your balls constricting as thick ropes of semen ' \

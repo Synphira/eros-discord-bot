@@ -8,6 +8,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Changed
+
+- **Breast sizes are now a cup scale**: Flat, A cup, B cup, C cup, D cup, E cup, F cup (in `/options`, shown with cup names everywhere sizes are displayed). Existing delvers migrate automatically (small → A, medium → C, large → E), and growth events now climb the cup ladder one rung at a time
+
 ### Added
 
 - **Syn & Berry have taken over the shop and parlour.** Madame Vex is gone; the establishment is now run by a married fairy couple:

@@ -9,6 +9,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-19
 
+### Changed
+
+- **Breast sizes are now a cup scale** (Flat → A–F cup, with automatic migration for existing saves). Synced from the bot.
+
 ### Added
 
 - **Syn & Berry's**: the shop and parlour are now run by a married fairy couple — Berry (cheerful, possessive, runs the shop) and Syn (dark, exhausted, flirty, works the parlour bench). Madame Vex is retired, and all mark scenes name Syn. **Berry's quest board** has its own **Quests** tab: 3 offers at a time, up to 3 active, 12 repeatable errands paying 50–150 LP, with the **Berry's Favourite** achievement (10) and title (25). Synced from the bot.

@@ -53,7 +53,9 @@ module Commands
         sizes = Engine::ContentOptions.applicable_sizes(player)
         unless sizes.empty?
           c.separator(divider: true, spacing: :small)
-          current = sizes.keys.map { |part| "#{sizes[part][:label]} **#{Engine::ContentOptions.size_of(player, part)}**" }
+          current = sizes.keys.map do |part|
+            "#{sizes[part][:label]} **#{Engine::ContentOptions.size_label(part, Engine::ContentOptions.size_of(player, part))}**"
+          end
           c.text_display(content: "**Body:** #{current.join(' · ')}")
           sizes.each do |part, spec|
             c.row do |row|
@@ -65,7 +67,8 @@ module Commands
               ) do |menu|
                 chosen = Engine::ContentOptions.size_of(player, part)
                 spec[:options].each do |size|
-                  menu.option(label: "#{spec[:label]}: #{size}", value: size, default: size == chosen)
+                  menu.option(label: "#{spec[:label]}: #{Engine::ContentOptions.size_label(part, size)}", value: size,
+                              default: size == chosen)
                 end
               end
             end
