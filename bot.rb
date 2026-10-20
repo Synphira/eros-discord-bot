@@ -72,6 +72,7 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::Transformation,
   Commands::Rest,
   Commands::Parlour,
+  Commands::Quests,
   Commands::Options,
   Commands::CursedShop,
   Commands::Dev,
