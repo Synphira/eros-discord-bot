@@ -546,6 +546,21 @@ module Engine
                  'how this body begs."_'
       end
 
+      if eros_form_keys(player).include?('eldritch_bride')
+        if form && form[:chimera]
+          lines << "_Then her smile sharpens. Her great white tentacles stir — answering the tentacle hair " \
+                   'woven through your fused shape, suckers tasting the air toward you. "Even fused into ' \
+                   "something new, the **Eldritch Bride** in you knows me,\" she purrs. \"The deep dressed you " \
+                   'as a bride, little one. It should have known whose altar you\'d end up on."_'
+        else
+          lines << "_Then her smile sharpens, and something in her glowing red eyes goes possessive. Her great " \
+                   'white tentacles uncoil toward your tentacle hair, suckers kissing along it in open ' \
+                   'recognition. "An **Eldritch Bride**," she breathes. "The deep places claimed you, dressed ' \
+                   'you in suckers and star-flecked hunger, and kept whispering my name. Brides belong at ' \
+                   'their goddess\'s feet, pet. Kneel prettily."_'
+        end
+      end
+
       marks = Engine::Marks.owned(player)
       if marks.any?
         names = marks.map { |k| Engine::Marks::MARKS[k][:name] }
@@ -590,6 +605,17 @@ module Engine
                   'purrs. "How generous of it to gift-wrap you for me."'
       end
 
+      if eros_form_keys(player).include?('eldritch_bride')
+        scenes << 'Your tentacle hair rises to meet Eros\'s great white tentacles of its own accord, suckers ' \
+                  'kissing crimson-magenta undersides, and she laughs with genuine delight as they twine ' \
+                  'together. "Look at you — reaching for your goddess before I even touch you," she purrs. ' \
+                  '"The deep taught you devotion, bride. I intend to be worshipped with it."'
+        scenes << 'Eros gathers your tentacle hair in both cuffed hands like a bridal veil and draws you in by ' \
+                  'it, her own tentacles sliding beneath you to present you to her. "Something in the dark ' \
+                  'keeps answering you," she murmurs against your star-flecked eyes. "From tonight, pet, the ' \
+                  'only voice that answers is mine."'
+      end
+
       marks = Engine::Marks.owned(player)
       marks.each do |key|
         mark = Engine::Marks::MARKS[key]
@@ -613,6 +639,16 @@ module Engine
                   'have to touch you myself."'
       end
       scenes
+    end
+
+    # Form keys making up the player's active shape: both halves for a
+    # chimera, so form-specific reactions recognise fused forms too.
+    def eros_form_keys(player)
+      form = Engine::TransformationSystem.active(player)
+      return [] unless form
+      return Array(form[:combo]).map(&:to_s) if form[:chimera]
+
+      [player.active_transformation_key.to_s]
     end
 
     def name_list(names)

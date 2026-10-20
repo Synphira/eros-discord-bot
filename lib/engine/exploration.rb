@@ -18,7 +18,7 @@ module Engine
     # After this many rooms on one floor without descending, the stairs are guaranteed.
     # Stairs also take a smaller share of the room pool as threat climbs — rarer, never gone.
     STAIRS_LIMITS = { low: 20, medium: 30, high: 40 }.freeze
-    STAIRS_WEIGHTS = { low: 18, medium: 13, high: 8 }.freeze
+    STAIRS_WEIGHTS = { low: 16, medium: 9, high: 4 }.freeze
 
     COLOURS = {
       monster: 0x8b1a1a,
@@ -166,7 +166,7 @@ module Engine
         monster: monster_weight,
         trap: 17,
         treasure: 15,
-        stairs: STAIRS_WEIGHTS.fetch(threat.category, 13),
+        stairs: STAIRS_WEIGHTS.fetch(descent_tier(threat), 9),
         empty: 15
       }
       pick = rand(weights.values.sum)
@@ -193,8 +193,23 @@ module Engine
       @player.tracker('rooms_on_floor')
     end
 
+    # Descent pressure folds cycle depth into threat for stair purposes only:
+    # each completed cycle adds +8, so a rich late-cycle delver reads as high
+    # pressure even where raw threat (LP + curses) tops out at medium.
+    def descent_pressure(threat)
+      threat.percent + ((@player.current_cycle.to_i - 1) * 8)
+    end
+
+    def descent_tier(threat)
+      pressure = descent_pressure(threat)
+      return :high if pressure >= 70
+      return :medium if pressure >= 40
+
+      :low
+    end
+
     def stairs_guaranteed?(threat)
-      rooms_on_floor >= STAIRS_LIMITS.fetch(threat.category, 14)
+      rooms_on_floor >= STAIRS_LIMITS.fetch(descent_tier(threat), 30)
     end
 
     def note_room_explored!

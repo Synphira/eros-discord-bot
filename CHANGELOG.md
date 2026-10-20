@@ -8,9 +8,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Fixed
+
+- **Eros now recognises Eldritch Brides**: the final boss has a special greeting and tailored scenes for the form — including when it's fused into a chimera as either half — honouring the form's promise that "Eros looks at you differently"
+
 ### Changed
 
-- **Floor descent is now threat-scaled**: stairs take a smaller share of the room pool as threat climbs (about 19% of rooms at low threat, ~13% at medium, ~8% at high), and the guaranteed-stairs backstop stretches with it — 20 rooms at low threat, 30 at medium, 40 at high. Room rolls are normalized, so monster spawn boosts can dilute the stairs but never crowd them out entirely
+- **Floor descent is now pressure-scaled**: stairs take a smaller share of the room pool as descent pressure climbs (about 18% of rooms at low pressure, ~9% at medium, ~3% at high), and the guaranteed-stairs backstop stretches with it — 20 rooms at low pressure, 30 at medium, 40 at high. Descent pressure folds your cycle into threat (+8 per completed cycle), so a rich cycle-5 delver counts as high pressure even where raw threat tops out at medium. Room rolls are normalized, so monster spawn boosts can dilute the stairs but never crowd them out entirely
 
 ## 2026-10-19
 

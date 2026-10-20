@@ -9,9 +9,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Fixed
+
+- **Eros now recognises Eldritch Brides** (pure or fused into a chimera) with a special greeting and tailored scenes. Synced from the bot.
+
 ### Changed
 
-- **Floor descent is now threat-scaled**: stairs get rarer (and the guaranteed-stairs backstop later) as threat climbs — 20/30/40 rooms at low/medium/high threat — and monster spawns can never crowd them out entirely. Synced from the bot.
+- **Floor descent is now pressure-scaled**: stairs get rarer (and the guaranteed-stairs backstop later) as descent pressure climbs — 20/30/40 rooms at low/medium/high pressure, with each completed cycle adding pressure, so a rich cycle-5 delver counts as high — and monster spawns can never crowd them out entirely. Synced from the bot.
 
 ## 2026-10-19
 
