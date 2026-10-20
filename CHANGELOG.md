@@ -8,6 +8,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Fixed
+
+- **`/transformation` could fail with a Discord "Invalid Form Body" error** for players with a chimera, deepening, and several unlocks at once — the panel's text could exceed Discord's component message limit. Form cards are now trimmed and unlock news is capped at 3 lines
+
 ### Added
 
 - **100 titles and 150 achievements**: 19 new titles (Mimic's Favourite, Throne Breaker, Eternal Delver, Trap Toy, Untouchable, Chest Goblin, Denial Royalty, Two-in-One Flesh, Walking Menagerie, Burden Bearer, and more) and 51 new achievements across every category — deep-cycle grinds (1,000 kills, 7 cycles, 25,000 LP), Berry's quests and story, monster admirers, altars, chimeras, burdens, and the six-mark canvas

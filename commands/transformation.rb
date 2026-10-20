@@ -36,9 +36,9 @@ module Commands
         c.text_display(content: notice) if notice
         if (form = Engine::TransformationSystem.active(player))
           c.text_display(
-            content: "**#{form[:name]}** — _#{form[:description]}_\n" \
-                     "**Appearance** #{form[:appearance].join(' · ')}\n" \
-                     "**Effects** #{Engine::TransformationSystem.effect_lines(form).join(' · ')}"
+            content: "**#{form[:name]}** — _#{form[:description].to_s[0, 160]}_\n" \
+                     "**Appearance** #{form[:appearance].join(' · ')[0, 200]}\n" \
+                     "**Effects** #{Engine::TransformationSystem.effect_lines(form).join(' · ')[0, 200]}"
           )
         end
         if active_key
@@ -69,10 +69,14 @@ module Commands
             "#{marker} **#{t[:name]}** _(#{t[:group]})_ — #{Engine::TransformationSystem.effect_lines(t).join(' · ')}"
           else
             "◇ #{t[:name]} _(#{t[:group]})_ — _#{Engine::TitleSystem.progress_text(player, t[:requirement])}_"
-          end
+          end[0, 220]
         end
         c.text_display(content: lines.empty? ? '_No forms available with your current content options._' : lines.join("\n"))
-        c.text_display(content: news.join("\n")) if news.any?
+        if news.any?
+          shown = news.first(3)
+          shown << "-# …and #{news.size - 3} more unlocks — see `/titles` and `/achievements`." if news.size > 3
+          c.text_display(content: shown.join("\n"))
+        end
 
         owned_here = slice.map(&:first).select { |k| owned.include?(k) }
         if owned_here.any? || active_key
@@ -100,9 +104,9 @@ module Commands
           c.separator(divider: true, spacing: :small)
           c.text_display(
             content: "🧬 **Your Chimera — #{form[:name]}**\n" \
-                     "_#{form[:description]}_\n" \
-                     "**Appearance** #{form[:appearance].join(' · ')}\n" \
-                     "**Effects** #{Engine::TransformationSystem.effect_lines(form).join(' · ')}"
+                     "_#{form[:description].to_s[0, 160]}_\n" \
+                     "**Appearance** #{form[:appearance].join(' · ')[0, 200]}\n" \
+                     "**Effects** #{Engine::TransformationSystem.effect_lines(form).join(' · ')[0, 200]}"
           )
           if active_key != Engine::TransformationSystem::CHIMERA_KEY
             c.row do |row|
