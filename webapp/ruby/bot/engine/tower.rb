@@ -7,7 +7,9 @@ module Engine
     FINAL_BOSS_FLOOR = 35
     BOSS_FLOORS = [5, 10, 15, 20, 25, 30, FINAL_BOSS_FLOOR].freeze
 
-    CYCLE_STEP = 0.2
+    # Monster/boss stats (and their LP rewards) compound per cycle, so deep
+    # cycles out-scale even heavily levelled delvers: x1.3, x1.69, x2.2, ...
+    CYCLE_GROWTH = 1.3
     CLEAR_LP_PER_CYCLE = 500
 
     module_function
@@ -22,7 +24,7 @@ module Engine
     end
 
     def cycle_multiplier(cycle)
-      1.0 + (CYCLE_STEP * ([cycle.to_i, 1].max - 1))
+      (CYCLE_GROWTH**([cycle.to_i, 1].max - 1)).round(3)
     end
 
     def clear_reward_lp(cycle)

@@ -9,7 +9,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Changed
+
+- **Late cycles now bite much harder**: monster and boss stats compound at ×1.3 per cycle (cycle 8: ×6.3), satisfying monsters gets harder each cycle, and bosses demand an extra successful submit every two cycles. Synced from the bot.
+
 ### Fixed
+
+- **Stairs minimum is now enforced at a single choke point**, and the stairs message reports how many rooms you searched on the floor above. Synced from the bot.
 
 - **Eros now recognises Eldritch Brides** (pure or fused into a chimera) with a special greeting and tailored scenes. Synced from the bot.
 

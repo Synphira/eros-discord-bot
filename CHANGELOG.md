@@ -8,7 +8,13 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Changed
+
+- **Late cycles now bite much harder**: monster and boss stats (and their LP rewards) compound at ×1.3 per cycle instead of a flat +20% — cycle 6 is ×3.7, cycle 8 is ×6.3 — so heavily levelled builds stop one-shotting the tower. Satisfying monsters also gets harder each cycle (−5% per cycle, and the satisfy chance cap itself shrinks), and bosses demand one extra successful submit every two cycles (cycle 8 bosses need 6)
+
 ### Fixed
+
+- **Stairs minimum is now enforced at a single choke point**: no path (room roll, sanctuary, guarantee) can produce stairs before the threat/cycle minimum, and the stairs message now reports how many rooms you searched on the floor above so the count is visible in-game
 
 - **Eros now recognises Eldritch Brides**: the final boss has a special greeting and tailored scenes for the form — including when it's fused into a chimera as either half — honouring the form's promise that "Eros looks at you differently"
 

@@ -7,6 +7,11 @@ module Engine
     VICTORY_LP = 15
     BOSS_SATISFY_NEEDED = 3
     BOSS_SATISFY_LP_MULT = 1.75
+
+    # Bosses demand one extra successful submit every two cycles.
+    def self.boss_satisfy_needed(player)
+      BOSS_SATISFY_NEEDED + ((player.current_cycle.to_i - 1) / 2)
+    end
     PHASE_ACTIONS = %i[resist give_in].freeze
     PHASE_RESIST_COST = 0.1
     PHASE_RESIST_DAMAGE = 0.15
@@ -388,20 +393,21 @@ module Engine
     end
 
     def boss_submit_roll!(enc, log, chance)
+      needed = self.class.boss_satisfy_needed(@player)
       if rand < chance
         enc[:satisfaction] = enc[:satisfaction].to_i + 1
-        if enc[:satisfaction] >= BOSS_SATISFY_NEEDED
+        if enc[:satisfaction] >= needed
           boss_line!(enc, :sated, log)
           log << "The #{enc[:name]} arches and cries out, **completely satisfied**!"
           log << 'Spent and sated, it lets you pass deeper into the tower.'
           return :satisfied
         end
         boss_line!(enc, :wanting, log)
-        log << "The #{enc[:name]} moans, clearly enjoying you — **satisfaction #{enc[:satisfaction]}/#{BOSS_SATISFY_NEEDED}** " \
+        log << "The #{enc[:name]} moans, clearly enjoying you — **satisfaction #{enc[:satisfaction]}/#{needed}** " \
                "_(#{(chance * 100).round}% per submit)_. It wants more…"
       else
         boss_line!(enc, :unimpressed, log)
-        log << "The #{enc[:name]} is unimpressed — satisfaction stays at **#{enc[:satisfaction]}/#{BOSS_SATISFY_NEEDED}** " \
+        log << "The #{enc[:name]} is unimpressed — satisfaction stays at **#{enc[:satisfaction]}/#{needed}** " \
                "_(#{(chance * 100).round}% per submit)_."
       end
       nil
@@ -452,7 +458,7 @@ module Engine
       enc[:satisfaction] = enc[:satisfaction].to_i + 1
       log << { scene: Engine::BossFights.phase_line(@player, enc[:name], :give) }
       log << "You give in. Lust **+#{PHASE_GIVE_LUST}** (now #{@player.lust}) · **+#{lp} LP** · " \
-             "satisfaction **#{enc[:satisfaction]}/#{BOSS_SATISFY_NEEDED}** · it recovers **#{heal}** HP."
+             "satisfaction **#{enc[:satisfaction]}/#{self.class.boss_satisfy_needed(@player)}** · it recovers **#{heal}** HP."
       climax = climax!(enc)
       if climax
         log.concat(climax[:lines])
@@ -463,7 +469,7 @@ module Engine
           log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
         end
       end
-      return nil if enc[:satisfaction] < BOSS_SATISFY_NEEDED
+      return nil if enc[:satisfaction] < self.class.boss_satisfy_needed(@player)
 
       boss_line!(enc, :sated, log)
       log << "The #{enc[:name]} arches and cries out, **completely satisfied**!"
@@ -481,9 +487,10 @@ module Engine
       chance = 0.15 + (@player.effective_submission * 0.055) + @player.curse_effect_sum('satisfy_bonus') +
                enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc)
       chance += 0.08 if Engine::TransformationSystem.resonance?(@player, enc[:type])
-      chance -= 0.03 * (@player.current_cycle.to_i - 1)
+      chance -= 0.05 * (@player.current_cycle.to_i - 1)
       chance -= 0.05 if enc[:is_boss]
-      chance = chance.clamp(0.05, 0.70)
+      cap = (0.70 - (0.02 * (@player.current_cycle.to_i - 1))).clamp(0.40, 0.70)
+      chance = chance.clamp(0.05, cap)
       chance = 1.0 if Engine::Dev.debug?(@player)
       chance
     end

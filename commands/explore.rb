@@ -48,7 +48,7 @@ module Commands
             c.separator(divider: true, spacing: :small)
             c.text_display(
               content: '**Boss fight!** Choose **Fight**, **Flee**, or **Submit**.' \
-                       "\n-# Submitting is a gamble: land #{Engine::CombatEngine::BOSS_SATISFY_NEEDED} successful " \
+                       "\n-# Submitting is a gamble: land #{Engine::CombatEngine.boss_satisfy_needed(player)} successful " \
                        "submits to satisfy the boss for ×#{Engine::CombatEngine::BOSS_SATISFY_LP_MULT} LP — " \
                        "but it keeps attacking and you can't dodge while submitting."
             )

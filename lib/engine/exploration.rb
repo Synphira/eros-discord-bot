@@ -145,7 +145,7 @@ module Engine
 
       threat = ThreatCalculator.calculate(@player)
       if stairs_guaranteed?(threat)
-        room = stairs_room
+        room = stairs_room(force: true)
         room.message = "_You've combed every corner of Floor #{floor} — the tower can hide its stairs no longer._\n\n#{room.message}"
         return room
       end
@@ -230,7 +230,7 @@ module Engine
       room = case rand(100)
              when 0...35 then treasure_room
              when 35...65
-               (rooms_on_floor + 1) >= stairs_minimum(ThreatCalculator.calculate(@player)) ? stairs_room : empty_room
+               (rooms_on_floor + 1) >= stairs_minimum(ThreatCalculator.calculate(@player)) ? stairs_room(force: true) : empty_room
              else empty_room
              end
       note = '_The bottled sanctuary shields you — this room is safe._'
@@ -362,7 +362,15 @@ module Engine
       event_room(Engine::Treasure.present_chest!(@player))
     end
 
-    def stairs_room
+    # Single choke point: no caller may produce stairs before the minimum,
+    # however it got here. `force:` is only for callers that already checked
+    # the minimum themselves (the guarantee, a sanctuary room).
+    def stairs_room(force: false)
+      unless force || stairs_available?(ThreatCalculator.calculate(@player))
+        return empty_room
+      end
+
+      searched = rooms_on_floor
       expired = @player.advance_floor!
       worn = Player.worn_off_line(expired)
 
@@ -374,6 +382,7 @@ module Engine
           **Stairs downward** — stone steps spiral into colder dark.
 
           You descend to **Floor #{@player.current_floor}**.
+          _Rooms searched on the floor above: **#{searched}**._
           #{Engine::Biomes.line(@player)}
           Deepest reached: **#{Player.depth_label(@player.deepest_depth)}**.
           The threats below will be stronger.#{worn ? "\n#{worn}" : ''}
