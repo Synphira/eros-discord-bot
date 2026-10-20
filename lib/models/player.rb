@@ -356,6 +356,8 @@ class Player < Sequel::Model(:players)
     data = tracker_hash.dup
     data['cycles_completed'] = data['cycles_completed'].to_i + 1
     data['highest_cycle'] = [data['highest_cycle'].to_i, cleared + 1].max
+    data['rooms_floor_stamp'] = "#{cleared + 1}:1"
+    data['rooms_on_floor'] = 0
     update(
       trackers: data,
       current_cycle: cleared + 1,
@@ -615,6 +617,7 @@ class Player < Sequel::Model(:players)
       current_cycle: 1,
       conditions: [],
       trackers: tracker_hash.merge(RUN_TRACKERS.to_h { |k| [k, 0] })
+                            .merge('rooms_floor_stamp' => '1:1', 'rooms_on_floor' => 0)
     )
     update(defiance: starting_defiance)
     Engine::NPCSystem.reset_finished!(self)
@@ -654,6 +657,10 @@ class Player < Sequel::Model(:players)
     gain_lp!(explore_lp) if explore_lp.positive?
     expired = tick_conditions!
     note_floor_reached!(current_floor + 1)
+    # The stair search starts fresh on the new floor — zeroed explicitly,
+    # not just left for the floor stamp to invalidate.
+    set_tracker!('rooms_floor_stamp', "#{current_cycle}:#{current_floor}")
+    set_tracker!('rooms_on_floor', 0)
     expired
   end
 

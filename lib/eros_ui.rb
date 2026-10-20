@@ -439,6 +439,9 @@ module ErosUI
       content: "**#{player.gender}**#{hybrid ? " · **Hybrid:** #{hybrid}" : ''}\n" \
                "Lv **#{player.level}** · **Cycle #{player.current_cycle}** · " \
                "Floor **#{player.current_floor}**/#{Engine::Tower::FINAL_BOSS_FLOOR}\n" \
+               "**Floor progress** Rooms searched **#{Engine::Exploration.stairs_status(player)[:searched]}** · " \
+               "stairs from room **#{Engine::Exploration.stairs_status(player)[:minimum]}** · " \
+               "guaranteed by room **#{Engine::Exploration.stairs_status(player)[:limit]}**\n" \
                "#{body_sizes_line(player)}" \
                "**Submission** `#{player.effective_submission}` _(#{player.submission_display}, " \
                "base #{player.submission})_"

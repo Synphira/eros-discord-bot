@@ -430,6 +430,9 @@ module Eros
       notes << clean(Engine::Corruption.status_line(@player).to_s) if Engine::Corruption.status_line(@player)
       notes << "Chastity: #{Engine::ChastitySystem.description(@player)}" if Engine::ChastitySystem.in_chastity?(@player)
       notes << 'Sanctuary: your next room is safe.' if @player.sanctuary
+      stairs = Engine::Exploration.stairs_status(@player)
+      notes << "Rooms searched on this floor: #{stairs[:searched]} (stairs from room #{stairs[:minimum]}, " \
+               "guaranteed by room #{stairs[:limit]})"
       notes
     end
 

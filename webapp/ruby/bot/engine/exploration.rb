@@ -112,6 +112,18 @@ module Engine
       end
     end
 
+    # Live stair-search state for status screens: rooms searched on this
+    # floor, the earliest room stairs may appear, and the guaranteed room.
+    def self.stairs_status(player)
+      exp = new(player)
+      threat = ThreatCalculator.calculate(player)
+      {
+        searched: exp.send(:rooms_on_floor),
+        minimum: exp.send(:stairs_minimum, threat),
+        limit: exp.send(:stairs_limit, threat)
+      }
+    end
+
     def initialize(player)
       @player = player
     end

@@ -9,6 +9,14 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-20
 
+### Fixed
+
+- **The stair-search counter now resets explicitly** on descending, defeat, and cycle clear. Synced from the bot.
+
+### Added
+
+- **Floor progress on the status screen**: rooms searched on this floor, when stairs can first appear, and when they're guaranteed. Synced from the bot.
+
 ### Changed
 
 - **Late cycles now bite much harder**: monster and boss stats compound at ×1.3 per cycle (cycle 8: ×6.3), satisfying monsters gets harder each cycle, and bosses demand an extra successful submit every two cycles. Synced from the bot.
