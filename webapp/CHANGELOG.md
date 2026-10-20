@@ -15,7 +15,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
-- **Floor descent is now pressure-scaled**: stairs get rarer (and the guaranteed-stairs backstop later) as descent pressure climbs — 20/30/40 rooms at low/medium/high pressure, with each completed cycle adding pressure, so a rich cycle-5 delver counts as high — and monster spawns can never crowd them out entirely. Synced from the bot.
+- **Floor descent is now threat- and cycle-scaled**: stairs never appear before 5/10/15 rooms (low/medium/high threat), are guaranteed by 20/30/40, and both bounds grow +5 rooms per cycle after the first (medium-threat cycle 6: stairs from room 35, guaranteed by 55) — and monster spawns can never crowd them out entirely. Synced from the bot.
 
 ## 2026-10-19
 

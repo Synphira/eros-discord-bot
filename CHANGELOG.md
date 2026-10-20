@@ -14,7 +14,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
-- **Floor descent is now pressure-scaled**: stairs take a smaller share of the room pool as descent pressure climbs (about 18% of rooms at low pressure, ~9% at medium, ~3% at high), and the guaranteed-stairs backstop stretches with it — 20 rooms at low pressure, 30 at medium, 40 at high. Descent pressure folds your cycle into threat (+8 per completed cycle), so a rich cycle-5 delver counts as high pressure even where raw threat tops out at medium. Room rolls are normalized, so monster spawn boosts can dilute the stairs but never crowd them out entirely
+- **Floor descent is now threat- and cycle-scaled**: stairs take a smaller share of the room pool as threat climbs (about 18% of rooms at low threat, ~9% at medium, ~3% at high), can never appear before a threat-scaled minimum (5 rooms at low threat, 10 at medium, 15 at high), and are guaranteed by a threat-scaled maximum (20/30/40 rooms). Both the minimum and the maximum grow by +5 rooms per cycle after the first — so a medium-threat cycle-6 floor hides its stairs for at least 35 rooms and guarantees them by 55. Room rolls are normalized, so monster spawn boosts can dilute the stairs but never crowd them out entirely
 
 ## 2026-10-19
 

@@ -19,6 +19,10 @@ module Engine
     # Stairs also take a smaller share of the room pool as threat climbs — rarer, never gone.
     STAIRS_LIMITS = { low: 20, medium: 30, high: 40 }.freeze
     STAIRS_WEIGHTS = { low: 16, medium: 9, high: 4 }.freeze
+    # The stairs can never appear before this many rooms on a floor.
+    # Both the minimum and the guarantee grow by +5 per cycle after the first.
+    STAIRS_MINIMUMS = { low: 5, medium: 10, high: 15 }.freeze
+    CYCLE_ROOM_BONUS = 5
 
     COLOURS = {
       monster: 0x8b1a1a,
@@ -166,7 +170,7 @@ module Engine
         monster: monster_weight,
         trap: 17,
         treasure: 15,
-        stairs: STAIRS_WEIGHTS.fetch(descent_tier(threat), 9),
+        stairs: stairs_available?(threat) ? STAIRS_WEIGHTS.fetch(threat.category, 9) : 0,
         empty: 15
       }
       pick = rand(weights.values.sum)
@@ -193,23 +197,27 @@ module Engine
       @player.tracker('rooms_on_floor')
     end
 
-    # Descent pressure folds cycle depth into threat for stair purposes only:
-    # each completed cycle adds +8, so a rich late-cycle delver reads as high
-    # pressure even where raw threat (LP + curses) tops out at medium.
-    def descent_pressure(threat)
-      threat.percent + ((@player.current_cycle.to_i - 1) * 8)
+    # Every cycle after the first stretches both ends of the search by +5 rooms.
+    def cycle_room_bonus
+      ([@player.current_cycle.to_i, 1].max - 1) * CYCLE_ROOM_BONUS
     end
 
-    def descent_tier(threat)
-      pressure = descent_pressure(threat)
-      return :high if pressure >= 70
-      return :medium if pressure >= 40
+    def stairs_minimum(threat)
+      STAIRS_MINIMUMS.fetch(threat.category, 10) + cycle_room_bonus
+    end
 
-      :low
+    def stairs_limit(threat)
+      STAIRS_LIMITS.fetch(threat.category, 30) + cycle_room_bonus
+    end
+
+    # Counts the room being explored right now (the counter ticks before the
+    # room roll), so the minimumth room of a floor is the earliest possible stairs.
+    def stairs_available?(threat)
+      rooms_on_floor >= stairs_minimum(threat)
     end
 
     def stairs_guaranteed?(threat)
-      rooms_on_floor >= STAIRS_LIMITS.fetch(descent_tier(threat), 30)
+      rooms_on_floor >= stairs_limit(threat)
     end
 
     def note_room_explored!
@@ -221,7 +229,8 @@ module Engine
       @player.update(sanctuary: false)
       room = case rand(100)
              when 0...35 then treasure_room
-             when 35...65 then stairs_room
+             when 35...65
+               (rooms_on_floor + 1) >= stairs_minimum(ThreatCalculator.calculate(@player)) ? stairs_room : empty_room
              else empty_room
              end
       note = '_The bottled sanctuary shields you — this room is safe._'
