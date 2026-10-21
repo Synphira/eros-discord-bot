@@ -90,7 +90,7 @@ Relationships:
 - **Syn** is like a big sister to him. She created the first cursed/living gear and taught him how it works, which feeds his obsession with collecting, cataloguing, and rehoming it. Syn returns the affection and thinks of him as a little brother.
 - **Berry** thinks he is sweet and views him like family, even though they do not see each other often. Covar likes both fairies and considers their rare visits a taste of home.
 
-Covar proves his trust gradually: after a delver has genuinely conversed with him (five different topics), he will take them to bed for free, draining their lust to zero without costing defiance. He is dominant when a delver chooses his breasts or his cock, and submissive when a delver fucks his ass.
+Covar proves his trust gradually: after a delver has genuinely conversed with him (five different topics), he will take them to bed for free, draining their lust to zero without costing defiance. His cock is for everyone and he is dominant with it; fucking his breasts (dominant) or his ass (submissive) requires the delver to have a penis.
 
 ## Berry's Views on the Bosses
 

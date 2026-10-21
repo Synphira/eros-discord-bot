@@ -11,7 +11,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Added
 
-- **Covar Zephyren keeps the Cursed Shop**: the Cursed Shop now has its incubus keeper — talk to him across 8 lore topics, and after hearing out 5 different topics he will drain your lust to zero for free (his breasts or cock, dominant; his ass, submissive) at no defiance cost. Syn and Berry also gain a Covar topic once you've torn free living gear. Synced from the bot.
+- **Covar Zephyren keeps the Cursed Shop**: the Cursed Shop now has its incubus keeper — talk to him across 8 lore topics, and after hearing out 5 different topics he will drain your lust to zero for free at no defiance cost (his cock for everyone; fucking his breasts or his ass needs a cock of your own). Syn and Berry also gain a Covar topic once you've torn free living gear. Synced from the bot.
 - **Talk to Syn and Berry**: Talk buttons on the Quests and Parlour screens open a conversation with either fairy — 17 topics including all seven bosses, unlocked as you defeat or satisfy them and experience the tower. Synced from the bot.
 - **Remove ALL curses button**: the Curses screen now offers a **Remove ALL N curses (X LP)** purge at 50 LP per curse, with the total shown up front and the button greyed out when you can't afford it. Suppressed curses are left untouched. Synced from the bot.
 

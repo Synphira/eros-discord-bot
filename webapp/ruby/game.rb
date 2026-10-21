@@ -795,12 +795,13 @@ module Eros
       end
       if @talk_person == 'covar'
         if Engine::Conversations.covar_sex_unlocked?(@player)
-          buttons = Engine::Conversations::COVAR_SEX.map do |part, s|
-            btn(s[:button], 'covar_sex', arg: part, style: 'danger')
+          buttons = Engine::Conversations::COVAR_SEX.filter_map do |part, s|
+            btn(s[:button], 'covar_sex', arg: part, style: 'danger') if Engine::Conversations.covar_sex_available?(@player, part)
           end
+          note = @player.body_parts_list.map(&:to_s).include?('penis') ? '' : "\n-# Fucking his breasts or his ass needs a cock of your own — his cock is for everyone."
           sections << { text: '_Covar has stopped pretending this is only conversation. "You know me well ' \
                               'enough now, delver. If you\'re wound too tight to think — pick a part of me. ' \
-                              'I\'ll drain that lust right out of you. No defiance, no charge."_',
+                              "I'll drain that lust right out of you. No defiance, no charge.\"_#{note}",
                         actions: buttons }
         else
           heard = Engine::Conversations.covar_topics_heard(@player).size

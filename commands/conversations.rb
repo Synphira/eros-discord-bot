@@ -60,9 +60,14 @@ module Commands
             )
             c.row do |row|
               Engine::Conversations::COVAR_SEX.each do |part, spec|
+                next unless Engine::Conversations.covar_sex_available?(player, part)
+
                 row.button(label: spec[:button], style: :danger,
                            custom_id: "eros:covar:sex:#{part}:#{event.user.id}")
               end
+            end
+            unless player.body_parts_list.map(&:to_s).include?('penis')
+              c.text_display(content: '-# Fucking his breasts or his ass needs a cock of your own — his cock is for everyone.')
             end
           else
             c.text_display(

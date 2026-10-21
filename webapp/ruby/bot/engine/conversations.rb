@@ -179,13 +179,13 @@ module Engine
 
     COVAR_SEX = {
       'breasts' => {
-        label: 'His breasts', button: '🍒 Take his breasts',
-        text: 'Covar does not wait to be asked twice. He hauls you in against that impossible chest and ' \
-              'keeps you there, one hand firm at the back of your head, the other guiding yours up to knead ' \
-              'the heavy weight of him. "There you go," he purrs, all dominance and warmth, setting the pace ' \
-              'himself — your mouth on his nipple, his tail curling possessively round your waist. He feeds ' \
-              'you his breasts until you are flushed, aching, and entirely his, and only when you are shaking ' \
-              'does he let you spill your orgasm against him. He holds you through it, smug as a cat.'
+        label: 'His breasts', button: '🍒 Fuck his breasts', needs_part: 'penis',
+        text: 'Covar does not wait to be asked twice. He hauls you in, presses that impossible chest around ' \
+              'your cock, and keeps you there — both hands squeezing his breasts together, setting the pace ' \
+              'himself while his tail curls possessively round your waist. "There you go," he purrs, all ' \
+              'dominance and warmth, watching your face over the swell of him. He works you between his ' \
+              'breasts until you are shaking, and only then does he let you spill your orgasm across his ' \
+              'chest. He holds you through it, smug as a cat.'
       },
       'cock' => {
         label: 'His cock', button: '🍆 Take his cock',
@@ -197,14 +197,14 @@ module Engine
               'he says, breathless and pleased. "Drained. You\'re welcome."'
       },
       'ass' => {
-        label: 'His ass', button: '🍑 Fuck his ass',
+        label: 'His ass', button: '🍑 Fuck his ass', needs_part: 'penis',
         text: 'The moment you make it clear which of you will be doing the taking, the great incubus melts. ' \
               '"Oh," Covar breathes, already bending over his own counter, tail lashing with eagerness, "oh, ' \
               'it has been a *while*." The dom of the cursed shop begs beautifully — please, and more, and ' \
-              'don\'t stop — until you take his ass and reduce him to a whimpering, grateful mess clutching ' \
-              'the counter edge. Your orgasm wrings a second, helpless one out of him. Afterwards he stays ' \
-              'folded there a moment, laughing weakly. "Come back any time," he says. "Please. That\'s not ' \
-              'shop talk."'
+              'don\'t stop — until you slide your cock into his ass and reduce him to a whimpering, grateful ' \
+              'mess clutching the counter edge. Your orgasm wrings a second, helpless one out of him. ' \
+              'Afterwards he stays folded there a moment, laughing weakly. "Come back any time," he says. ' \
+              '"Please. That\'s not shop talk."'
       }
     }.freeze
 
@@ -406,6 +406,16 @@ module Engine
       covar_topics_heard(player).size >= COVAR_SEX_TOPICS_REQUIRED
     end
 
+    # Fucking his breasts or his ass takes a cock of the delver's own;
+    # his cock is for everyone.
+    def covar_sex_available?(player, part)
+      spec = COVAR_SEX[part.to_s]
+      return false unless spec
+
+      need = spec[:needs_part]
+      need.nil? || player.body_parts_list.map(&:to_s).include?(need)
+    end
+
     def covar_sex(player, part)
       spec = COVAR_SEX[part.to_s]
       return { ok: false, message: 'Covar raises an eyebrow. "Pick a part of me, delver."' } unless spec
@@ -414,6 +424,12 @@ module Engine
                  message: "Covar smiles and shakes his head. \"Get to know me first — " \
                           "#{covar_topics_heard(player).size}/#{COVAR_SEX_TOPICS_REQUIRED} conversations. " \
                           'I like to be courted."' }
+      end
+      unless covar_sex_available?(player, part)
+        return { ok: false,
+                 message: "Covar's gaze drops, then returns with a sympathetic grin. \"That one needs a " \
+                          'cock of your own, delver — and the tower didn\'t give you one. My cock, though? ' \
+                          'That\'s for everyone."' }
       end
 
       cleared = player.lust.to_i
