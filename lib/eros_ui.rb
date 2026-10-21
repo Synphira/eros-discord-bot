@@ -560,13 +560,15 @@ module ErosUI
       container.text_display(content: corruption)
     end
     admirer_types = Engine::Admirers.types(player)
-    admirer_line = "💌 **Admirers** — **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
+    admirer_line = "**Admirers** — **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
     if admirer_types.any?
-      following = admirer_types.map do |type|
+      soonest = admirer_types.sort_by { |type| Engine::Admirers.rooms_left(player, type) }.first(3)
+      following = soonest.map do |type|
         name = Engine::Admirers.name_for(player, type) || type
         "#{name} _(#{Engine::Admirers.rooms_left(player, type)} rooms left)_"
       end
-      admirer_line += "\n-# Following you: #{following.join(' · ')}"
+      following << "+#{admirer_types.size - 3} more" if admirer_types.size > 3
+      admirer_line += "\n-# Leaving you soonest: #{following.join(' · ')}"
     end
     container.text_display(content: admirer_line)
     container.text_display(content: Engine::Weekly.status_line)
