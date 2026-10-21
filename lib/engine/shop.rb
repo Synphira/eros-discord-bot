@@ -301,7 +301,11 @@ module Engine
     end
 
     def buy_gender_potion(player, item, target_gender)
-      if player.gender.to_s == target_gender
+      same_gender = player.gender.to_s == target_gender
+      # Already that gender on paper is only a refusal when the body agrees;
+      # a delver wearing a borrowed shape can drink to make it truly theirs
+      # (or to melt the borrowed shape off and be themselves again).
+      if same_gender && gender_conditions(player).empty?
         return { ok: false, error: :already,
                  message: "You are already **#{target_gender.downcase}** — Berry slides the draught back. " \
                           '"That one would be a very expensive sip of nothing, sugar."' }
@@ -312,8 +316,14 @@ module Engine
       cleared = clear_gender_conditions!(player)
       player.update(gender: target[:gender], body_parts: target[:body_parts])
       player.bump_tracker!('gender_bending_events')
-      message = "You down the draught. Heat rewrites you from the inside out — you are **#{target_gender.downcase}** " \
-                'now, body and all.'
+      message =
+        if same_gender
+          "You down the draught. The borrowed shape melts off you — **#{target_gender.downcase}**, in your " \
+            'own body again, and this time it stays.'
+        else
+          "You down the draught. Heat rewrites you from the inside out — you are **#{target_gender.downcase}** " \
+            'now, body and all.'
+        end
       if cleared.any?
         names = cleared.map { |n| "**#{n}**" }.join(', ')
         message += " The gender-changing #{names} #{cleared.size == 1 ? 'condition washes' : 'conditions wash'} away with it."
@@ -321,8 +331,14 @@ module Engine
       { ok: true, message: message }
     end
 
-    # Conditions that rewrote the delver's sex (adding or removing parts)
-    # do not survive a true gender change.
+    # Conditions that rewrote the delver's sex (adding or removing parts).
+    def gender_conditions(player)
+      player.condition_list.select do |c|
+        Array(c['parts']).any? || Array(c['remove_parts']).any?
+      end
+    end
+
+    # ...do not survive a true gender change.
     def clear_gender_conditions!(player)
       gender_conditions, kept = player.condition_list.partition do |c|
         Array(c['parts']).any? || Array(c['remove_parts']).any?
