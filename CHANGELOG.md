@@ -35,6 +35,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Fixed
 
+- **Eros no longer purges the same curse every visit**: when an altar visit chose the free curse purge, she always took the first curse in the list, so the same curse kept being picked. She now chooses a random active curse each visit.
 - Eros's floor-35 introduction now matches the temple's true history: the tower was raised *for* her by her clergy (she did not build it herself), her greeting no longer taunts delvers about "escaping," and beating or satisfying her is described as what it is — she returns you herself to begin the next cycle.
 - **Chimera screen could fail with Discord's "Invalid Form Body"**: its **◀ Back to Hybrid Forms** button shared the same button ID as the navigation row's **Hybrids** button, and Discord rejects duplicate component IDs in one message. The back button now has its own ID. Error reports also now include Discord's field-level rejection details (which component and why), so any future invalid panel names its own culprit instead of just "Invalid Form Body."
 - **Hybrid and Chimera screens no longer cut text off mid-sentence**: form descriptions, appearances, and effects now display in full on both screens — verified against the longest content in the game, with even the bulkiest pages using well under half of Discord's text limit. The fusion pickers also page now (**◀ Forms / Forms ▶** buttons), so all of your forms stay reachable even past Discord's 25-option menu cap.

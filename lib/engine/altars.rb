@@ -50,7 +50,7 @@ module Engine
         log << '🌹 **Eros visits.** Warmth pours over you as invisible hands — and one very visible tentacle — ' \
                'straighten your clothes, stroke your hair, and send you on glowing. **Eros\'s Favour** settles on you.'
       else
-        curse = player.active_curses.first
+        curse = player.active_curses.sample
         if curse
           player.drop_curse!(curse.name)
           log << "🌹 **Eros visits.** \"This one doesn't suit you, pet.\" A tentacle plucks the **#{curse.name}** " \
