@@ -13,9 +13,10 @@ module Engine
     BURDENS = {
       'hungry_tower' => { name: 'Hungry Tower', description: 'Monsters’ lust hits land 15% harder',
                           effects: { 'lust_mult' => 1.15 } },
-      'glass_defiance' => { name: 'Glass Defiance', description: '−10 max Defiance',
-                            effects: { 'max_hp' => -10 } },
-      'slow_feet' => { name: 'Slow Feet', description: '−1 agility', effects: { 'agility' => -1 } },
+      'glass_defiance' => { name: 'Glass Defiance', description: 'Max Defiance capped at 30 — two orgasms without recovery will break you',
+                            effects: { 'defiance_cap' => 30 } },
+      'slow_feet' => { name: 'Slow Feet', description: 'You cannot flee from combat, and traps always catch you',
+                       effects: { 'no_flee' => true, 'no_trap_dodge' => true } },
       'tempting_dark' => { name: 'Tempting Dark', description: 'Monster rooms are 25% more common',
                            effects: { 'encounter_rate' => 1.25 } },
       'branded_start' => { name: 'Branded Start', description: 'Begin the cycle wearing a fresh curse',
@@ -57,11 +58,13 @@ module Engine
       list = active(player)
       if list.include?(key.to_s)
         player.update(trackers: player.tracker_hash.merge(TRACKER => list - [key.to_s]))
+        player.clamp_defiance!
         { ok: true, message: "Burden shed: **#{BURDENS[key.to_s][:name]}**. Eros pouts, but allows it — this once, at the threshold." }
       elsif list.size >= MAX_BURDENS
         { ok: false, message: "You may carry at most #{MAX_BURDENS} burdens." }
       else
         player.update(trackers: player.tracker_hash.merge(TRACKER => list + [key.to_s]))
+        player.clamp_defiance!
         { ok: true, message: "Burden taken: **#{BURDENS[key.to_s][:name]}** — #{BURDENS[key.to_s][:description]}. " \
                               "Every LP gain this cycle is now ×#{format('%.2f', lp_multiplier(player))}." }
       end

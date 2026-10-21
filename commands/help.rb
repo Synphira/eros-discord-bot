@@ -14,7 +14,7 @@ module Commands
         label: 'Getting Started', emoji: '🗝️', blurb: 'Create, view and restart your delver',
         commands: [
           ['/create · /start', 'e,create · e,start', 'Create your delver: body type, submission stance and name'],
-          ['/status', 'e,status', 'Character sheet: stats, deepest floor and Threat'],
+          ['/status', 'e,status', 'Character sheet: stats, deepest floor, Threat — and cycle burdens at a cycle\'s start'],
           ['/name', 'e,name [name]', 'Set or change your character name'],
           ['/restart', 'e,restart', 'New delver and body type; titles, achievements and progress are kept'],
           ['/help', 'e,help', 'This menu']
@@ -80,7 +80,9 @@ module Commands
       **5. Spend your LP.** Grow stronger in `/levelup`, buy gear at Berry's counter in `/shop`, remove curses, or get marks from Syn in `/parlour`. Berry also posts **quests** on her own board in `/quests` — do her errands (defeat monsters, open chests, satisfy bosses…) for bonus LP.
       **6. Rest.** `/rest` clears your lust and restores Defiance once every 5 minutes.
       **7. Go deeper.** A boss waits every 5 floors, and Eros, Goddess of Lust, waits on floor 35. Clear the tower to start a harder cycle with bigger rewards.
-      **8. Make it yours.** Turn themes on or off any time in `/options`.
+      **8. Cycles.** Beating the tower sends you back to floor 1 on a new **cycle** — you keep your delver, gear, titles and progress, and collect a clear bonus in LP. Each cycle, monsters and bosses hit harder and pay out more (their strength compounds by about ×1.3 per cycle), and the tower brands you with curses more readily. Cycles are the long game: climb, clear, climb again.
+      **9. Burdens.** At the very start of a cycle — floor 1, before you delve — you may take on up to **3 burdens** in `/status`: torments that last the whole cycle and make **every LP gain +25% each** (×1.75 with all three). Once you leave floor 1 they're locked in until you clear the tower. The five: **Hungry Tower** (monsters' lust hits land 15% harder), **Glass Defiance** (max Defiance capped at 30 — two orgasms without recovery will break you), **Slow Feet** (you cannot flee from combat, and traps always catch you), **Tempting Dark** (monster rooms 25% more common), and **Branded Start** (begin the cycle wearing a fresh curse). Toggle them with the burden buttons on `/status` while you're still at a cycle's start.
+      **10. Make it yours.** Turn themes on or off any time in `/options`.
     TEXT
 
     module_function

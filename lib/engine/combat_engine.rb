@@ -307,6 +307,10 @@ module Engine
     end
 
     def apply_flee!(enc, log)
+      if Engine::Burdens.active?(@player, 'slow_feet')
+        log << 'Your burdened feet won\'t carry you — **Slow Feet** roots you in place!'
+        return :blocked
+      end
       if @player.curse_effect_flag?("#{enc[:type]}_no_flee")
         log << "You can't escape from this monster!"
         return :blocked

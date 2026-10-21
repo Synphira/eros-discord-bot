@@ -583,6 +583,7 @@ class Player < Sequel::Model(:players)
 
   def trap_avoid_chance
     return 1.0 if Engine::Dev.debug?(self)
+    return 0.0 if curse_effect_flag?('no_trap_dodge')
 
     ((0.1 + (0.02 * effective_agility)).clamp(0.1, 0.6) + curse_effect_sum('trap_avoid_bonus')).clamp(0.1, 0.85)
   end
@@ -604,6 +605,11 @@ class Player < Sequel::Model(:players)
   end
 
   def max_defiance
+    # A defiance cap (Glass Defiance) is exact: bonuses cannot raise max
+    # defiance past it, and reductions cannot push it below it either.
+    cap = curse_effect_sum('defiance_cap').round
+    return cap if cap.positive?
+
     bonus = curse_effect_sum('max_hp_bonus') + equipment_effect_sum('max_hp')
     [self.class.calculate_max_hp(level) + bonus.round, 1].max
   end
