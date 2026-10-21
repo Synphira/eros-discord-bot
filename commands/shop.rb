@@ -44,6 +44,9 @@ module Commands
         end
         c.separator(divider: true, spacing: :small)
         aisle = "**#{label}** — page **#{page + 1}/#{pages}** · Your Lust Points: **#{player.lp}**"
+        if category == 'special' && (theme = Engine::Shop::POTION_PAGE_LABELS[page])
+          aisle = "**#{label} · #{theme}** — page **#{page + 1}/#{pages}** · Your Lust Points: **#{player.lp}**"
+        end
         if category == 'special'
           aisle += "\n_Berry wipes a row of bright bottles. \"Potions are drunk on the spot, sugar — no takeaway. " \
                    'The body tonics do one size at a time, and those Becoming draughts? Pick the shape you ' \

@@ -89,6 +89,10 @@ module Engine
         description: 'Drink on the spot: −40 lust.' },
       { name: 'Bottled Sanctuary', type: 'special', slot: 'consumable', cost: 75, rarity: 3,
         description: 'Your next exploration is safe: no monsters, traps, or events.' },
+      { name: 'Potion of Purity', type: 'special', slot: 'consumable', cost: 500, rarity: 3,
+        description: 'Drink on the spot: washes away all of your corruption.' },
+      { name: 'Potion of Depravity', type: 'special', slot: 'consumable', cost: 10, rarity: 3,
+        description: 'Drink on the spot: deepens your corruption by 25, toward Fully Corrupted.' },
       { name: 'Male Becoming Draught', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
         description: 'Drink on the spot: permanently become male (penis, anus). Also washes away any ' \
                      'condition that changed your gender.' },
@@ -140,6 +144,17 @@ module Engine
       'Hermaphrodite Becoming Draught' => 'Hermaphrodite'
     }.freeze
 
+    # The Potions aisle is shelved by theme — each list is exactly one page.
+    POTION_PAGES = [
+      ['Cooling Elixir', 'Defiance Draught', 'Bottled Sanctuary', 'Potion of Purity', 'Potion of Depravity'],
+      ['Breast Growth Tonic', 'Cock Growth Tonic', 'Butt Growth Tonic'],
+      ['Breast Shrinking Tonic', 'Cock Shrinking Tonic', 'Butt Shrinking Tonic'],
+      ['Male Becoming Draught', 'FtM Becoming Draught', 'Female Becoming Draught', 'MtF Becoming Draught',
+       'Hermaphrodite Becoming Draught']
+    ].freeze
+
+    POTION_PAGE_LABELS = ['Draughts & Elixirs', 'Growth Tonics', 'Shrinking Tonics', 'Becoming Draughts'].freeze
+
     CATEGORIES = %w[weapon armor accessory special].freeze
 
     CATEGORY_LABELS = {
@@ -190,7 +205,11 @@ module Engine
     def stock_for(category)
       category = normalize_category(category)
       names = INVENTORY.select { |i| i[:type] == category }.map { |i| i[:name] }
-      ::Equipment.where(name: names, cursed: false).all.sort_by { |e| [e.cost.to_i, e.name] }
+      items = ::Equipment.where(name: names, cursed: false).all
+      return items.sort_by { |e| [e.cost.to_i, e.name] } unless category == 'special'
+
+      order = POTION_PAGES.flatten
+      items.sort_by { |e| order.index(e.name) || order.size }
     end
 
     def normalize_category(category)
@@ -200,6 +219,9 @@ module Engine
     end
 
     def page_count(category)
+      category = normalize_category(category)
+      return POTION_PAGES.size if category == 'special'
+
       total = stock_for(category).size
       return 1 if total.zero?
 
@@ -209,7 +231,14 @@ module Engine
     def page_items(category, page)
       category = normalize_category(category)
       page = [[page.to_i, 0].max, page_count(category) - 1].min
+      return potion_page_items(page) if category == 'special'
+
       stock_for(category).slice(page * PAGE_SIZE, PAGE_SIZE) || []
+    end
+
+    def potion_page_items(page)
+      by_name = stock_for('special').to_h { |e| [e.name, e] }
+      (POTION_PAGES[page.to_i] || []).filter_map { |name| by_name[name] }
     end
 
     def buy_item(player, item_id)
@@ -240,6 +269,10 @@ module Engine
         end
 
         case item.name
+        when 'Potion of Purity'
+          return buy_purity(player, item)
+        when 'Potion of Depravity'
+          return buy_depravity(player, item)
         when 'Bottled Sanctuary'
           if player.sanctuary
             return { ok: false, error: :already_active, message: 'Your sanctuary is already active — explore first.' }
@@ -276,6 +309,42 @@ module Engine
       end
 
       { ok: true, message: "You purchased **#{item.name}**! Check your inventory with `e,equipment`." }
+    end
+
+    def buy_purity(player, item)
+      level = Engine::Corruption.level(player)
+      if level <= 0
+        return { ok: false, error: :already_pure,
+                 message: "There's no corruption on you to wash away — Berry keeps your LP." }
+      end
+
+      player.spend_lp!(item.cost)
+      player.set_tracker!(Engine::Corruption::KEY, 0)
+      Engine::Corruption.refresh!(player)
+      { ok: true,
+        message: "You down the potion. A cool clarity washes through you — **corruption #{level} → 0**. Untouched again." }
+    end
+
+    def buy_depravity(player, item)
+      unless Engine::Corruption.enabled?(player)
+        return { ok: false, error: :corruption_disabled,
+                 message: 'The potion sits inert. Corruption is closed to you — enable **Corruption** in `/options` first.' }
+      end
+
+      old = Engine::Corruption.level(player)
+      if old >= Engine::Corruption::MAX
+        return { ok: false, error: :fully_corrupted,
+                 message: 'You are already **Fully Corrupted**. The potion could not make you worse if it tried.' }
+      end
+
+      player.spend_lp!(item.cost)
+      new_level = [old + 25, Engine::Corruption::MAX].min
+      player.set_tracker!(Engine::Corruption::KEY, new_level)
+      Engine::Corruption.refresh!(player)
+      stage_name = Engine::Corruption.stage(new_level)&.at(1) || 'Touched'
+      { ok: true,
+        message: "You down the potion. Heat settles under your skin and stays there — **corruption " \
+                 "#{old} → #{new_level}** (#{stage_name})." }
     end
 
     def buy_size_potion(player, item, part, delta)

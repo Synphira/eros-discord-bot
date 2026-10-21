@@ -371,7 +371,7 @@ module Engine
       lust_increase = (monster_lust_hit(enc) * 0.5).round
       @player.gain_lust!(lust_increase)
       log << "Your lust increases by **#{lust_increase}** from the passionate encounter! (now #{@player.lust})"
-      Engine::Corruption.add!(@player, 1, log)
+      Engine::Corruption.add!(@player, 5, log)
 
       climax = climax!(enc)
       if climax

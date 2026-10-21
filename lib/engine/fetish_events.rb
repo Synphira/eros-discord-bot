@@ -1208,8 +1208,8 @@ module Engine
       when :gender_swap then gender_swap!(player, log)
       when :beastkin then log << "_Your body takes on the traits of a **#{BEASTKIN_ANIMALS.sample}**._"
       when :overstimulate then overstimulate!(player, log)
-      when :corrupt then Engine::Corruption.add!(player, 3, log)
-      when :purify then Engine::Corruption.add!(player, -3, log)
+      when :corrupt then Engine::Corruption.add!(player, 15, log)
+      when :purify then Engine::Corruption.add!(player, -15, log)
       when :body_writing then body_writing!(player, log)
       when :monster_form then monster_form!(player, log)
       end
