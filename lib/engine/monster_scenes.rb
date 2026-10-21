@@ -236,7 +236,7 @@ module Engine
         "The #{monster_name} presses you against the wall and grinds its body against yours, its hands everywhere at once.",
         "The #{monster_name} drags you down and gropes every part of you it can reach, squeezing and rubbing until you're panting.",
         "The #{monster_name} rubs itself against you hard and fast, using your body for its pleasure until you're as worked up as it is.",
-        "The #{monster_name} gets its hands between your legs and doesn't let go, stroking and rubbing until your hips jerk into its touch.",
+        "The #{monster_name} gets its hands on your thighs and hips and doesn't let go, stroking and rubbing until your hips jerk into its touch.",
         "The #{monster_name} kisses you hard, its tongue filling your mouth as it presses you down beneath its weight."
       ]
     end
@@ -320,8 +320,12 @@ module Engine
 
       if parts.include?('anus')
         scenes << "The #{monster_name} flows into your eager ass, its cool touch making you gasp with pleasure."
-        scenes << "The slime forms tendrils that stimulate your prostate perfectly, making you see stars with each movement."
-        scenes << "The #{monster_name} expands and contracts inside you, its rhythm driving you closer to ecstasy with each pulse."
+        if parts.include?('penis')
+          scenes << "The slime forms tendrils inside your ass that stimulate your prostate perfectly, making you see stars with each movement."
+        else
+          scenes << "The slime forms tendrils that press in slow, perfect waves deep inside your ass, making you see stars with each movement."
+        end
+        scenes << "The #{monster_name} expands and contracts inside your ass, its rhythm driving you closer to ecstasy with each pulse."
       end
 
       if parts.include?('breasts')
@@ -432,8 +436,8 @@ module Engine
         "The #{monster_name} holds you close, its heartbeat quickening as your bodies move together in perfect rhythm.",
         "The #{monster_name} kisses you deeply, its touch making your body respond with growing heat and desire.",
         "The #{monster_name} traces patterns on your skin, each touch sending jolts of pleasure through your body.",
-        "The #{monster_name} moves against you with practiced skill, its body finding yours in the darkness.",
-        "The #{monster_name} worships your body with its hands and mouth, leaving no part of you untouched."
+        "The #{monster_name} grinds its hips against yours with practiced skill, kissing your neck while its hands stroke your thighs.",
+        "The #{monster_name} worships your body with its hands and mouth — kisses down your chest, palms stroking your thighs and hips."
       ]
     end
 
@@ -484,8 +488,8 @@ module Engine
                 'Wave after wave of orgasm rolls through you until your legs give out and your thoughts dissolve. You go limp, utterly and blissfully broken.']
       },
       defeated: {
-        nil => ['Your last scrap of resistance gives way, and the %<name>s takes you however it likes until you black out from pleasure.',
-                'You sink to your knees, too spent to resist, and the %<name>s has its way with you for what feels like hours.']
+        nil => ['Your last scrap of resistance gives way, and the %<name>s works you over — mouth, hands and body — until you black out from pleasure.',
+                'You sink to your knees, too spent to resist, and the %<name>s keeps you there, using your mouth and hands, for what feels like hours.']
       }
     }.freeze
 
@@ -518,7 +522,7 @@ module Engine
     PRAISE = {
       'beast' => [
         'The %<name>s rumbles a deep, satisfied growl and licks the sweat from your neck, still pressed heavily against you. Good mate.',
-        'The %<name>s nuzzles between your thighs, sniffing at the mess it left on you with obvious pride.',
+        'The %<name>s nuzzles along your thigh, sniffing at the mess it left on your skin with obvious pride.',
         'The %<name>s flops down beside you and drags you against its warm fur, keeping you close like a prize.'
       ],
       'demon' => [
@@ -554,7 +558,7 @@ module Engine
     ].freeze
 
     DEGRADING_PRAISE = [
-      'The %<name>s pats your cheek, not gently. "Good little hole. Crawl back tomorrow."',
+      'The %<name>s pats your cheek, not gently. "Good little slut. Crawl back tomorrow."',
       'The %<name>s wipes itself clean on your thigh and laughs. "Pathetic. You loved every second, didn\'t you?"',
       'The %<name>s looks down at the mess it made of you and sneers. "Filthy slut. Off you go."',
       '"That\'s all you\'re good for," the %<name>s tells you, and the worst part is how much hearing it turns you on.',
@@ -765,10 +769,10 @@ module Engine
     def generic_willing(monster_name)
       [
         "You strip for the #{monster_name} and press your naked body against it, rubbing yourself on it until you're both panting.",
-        "You kneel before the #{monster_name} and let it use you however it likes, moaning at every touch.",
-        "You drag the #{monster_name}'s hands between your legs and grind against them until you're shaking.",
+        "You kneel before the #{monster_name} and offer it your mouth, hands and thighs, moaning at every touch.",
+        "You drag the #{monster_name}'s hands to your thighs and hips and grind against them until you're shaking.",
         "You kiss the #{monster_name} deeply and climb into its lap, rocking your hips against it in a slow, needy rhythm.",
-        "You beg the #{monster_name} to take you, and it does, over and over until you lose count."
+        "You beg the #{monster_name} for more, and it kisses you, grinds against your hips and works you with its hands again and again until you lose count."
       ]
     end
   end

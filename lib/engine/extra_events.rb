@@ -126,12 +126,18 @@ module Engine
         log << { scene: caged }
         bonus += 2
       end
-      if breasts
+      if breasts && parts.include?('penis')
+        log << { scene: 'At last the rhythm eases. The cups pop free of your breasts and the sleeve slides off your cock ' \
+                        'together, leaving both heavy, flushed and thoroughly drained as the shrine hums its approval.' }
+      elsif breasts
         log << { scene: 'At last the rhythm eases. The cups release with a soft pop, leaving your breasts heavy, flushed and slick ' \
                         'with milk as the shrine hums its approval.' }
-      else
+      elsif parts.include?('penis')
         log << { scene: 'At last the rhythm eases. The sleeve loosens and withdraws, leaving your cock twitching and thoroughly ' \
                         'drained as the shrine hums its approval.' }
+      else
+        log << { scene: 'At last the rhythm eases and the pumps fall silent, leaving your cock throbbing, untouched, behind ' \
+                        'its cage — milked dry without ever being freed, as the shrine hums its approval.' }
       end
       reward!(player, 3 + (level / 3) + (bonus / 2), 10 + (level / 2) + bonus, log)
     end
@@ -167,7 +173,8 @@ module Engine
             'is overwhelming as the growth continues.'
         end
       log << { scene: scene }
-      log << "_Your #{label} grew: **#{old} → #{new}** (change it any time in `/options`)._"
+      log << "_Your #{label} grew: **#{old} → #{new}** (tonics in the shop's Potions aisle can change it further)._"
+
       reward!(player, 3, 8 + (level / 2), log)
     end
 

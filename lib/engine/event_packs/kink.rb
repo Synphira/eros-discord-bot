@@ -99,17 +99,19 @@ module Engine
                    'until you are leaning into her hand. She brushes you, feeds you treats, and teaches you to sit, beg and roll over.',
                    'When you have earned it, she rewards her pup properly, mounting you right there on the cushions and growling ' \
                    'praise into your ear.'],
-          parts: { 'vagina' => 'Her thick cock spreads your pussy wide as she ruts into you from behind.',
-                   'anus' => 'She takes your ass slow and deep, one hand on your collar, calling you a good pup with every thrust.',
-                   'penis' => 'She reaches under you and strokes your cock in time with her thrusts until you whimper.' },
+          by_part: { 'vagina' => 'Her thick cock spreads your pussy wide as she ruts into you from behind.',
+                     'anus' => 'She takes your ass slow and deep, one hand on your collar, calling you a good pup with every thrust.' },
+          parts: { 'penis' => 'She reaches under you and strokes your cock in time with her thrusts until you whimper.' },
           lp: 6, lust: 12,
           condition: { key: 'kennel_trained', name: 'Kennel-Trained', floors: 3,
                        effects: { 'beast_submit_lp' => 3, 'agility' => 1, 'flee_bonus' => -0.05 } }
         },
         alt: {
           label: 'Take her knot', text: 'Let her tie you like a real pup', needs_tag: 'knotting',
-          scenes: ['She grins all teeth and mounts you hard, rutting until her knot swells and locks you together. You stay ' \
-                   'tied on the cushions for a long, blissful while, panting as she strokes your back.'],
+          scenes: ['She grins all teeth and mounts you hard from behind, rutting until her knot swells and locks you together. ' \
+                   'You stay tied on the cushions for a long, blissful while, panting as she strokes your back.'],
+          by_part: { 'vagina' => 'Her knot pops into your pussy and swells, locking her cock inside you.',
+                     'anus' => 'Her knot pops into your ass and swells, locking her cock inside you.' },
           lp: 8, lust: 15,
           condition: { key: 'knotted_pup', name: 'Knotted Pup', floors: 2,
                        effects: { 'beast_lust_mult' => 0.85, 'beast_submit_lp' => 4 } }

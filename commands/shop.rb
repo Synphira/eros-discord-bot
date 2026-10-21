@@ -46,6 +46,13 @@ module Commands
         c.text_display(content: "Your Lust Points: **#{player.lp}**")
         c.separator(divider: true, spacing: :small)
         c.text_display(content: "**#{label}** — page **#{page + 1}/#{pages}**")
+        if category == 'special'
+          c.text_display(
+            content: '_Berry wipes a row of bright bottles. "Potions are drunk on the spot, sugar — no takeaway. ' \
+                     'The body tonics do one size at a time, and those Becoming draughts? Pick the shape you ' \
+                     'want to keep, darling — those changes are for good."_'
+          )
+        end
 
         if items.empty?
           c.text_display(content: '_Nothing in this aisle._')

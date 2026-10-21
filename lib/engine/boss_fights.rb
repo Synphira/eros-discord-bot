@@ -211,8 +211,8 @@ module Engine
         willing: {
           'vagina' => ['You spread your legs for the Verdant Dryad and moan as she slides her fingers into your cunt, ' \
                        'kissing you deeply while a tendril teases your clit.',
-                       'You sink down onto the smooth root she grows for you, riding it slow and deep while she holds ' \
-                       'your waist and whispers encouragement against your ear.'],
+                       'You sink down onto the smooth root she grows for you, your pussy stretching around it as ' \
+                       'you ride it slow and deep while she holds your waist and whispers encouragement against your ear.'],
           'penis' => ["You push your cock into the Dryad's hot, sap-slick pussy and fuck her against her tree, her " \
                       'legs locked around your waist and her moans shaking petals loose from her hair.'],
           'anus' => ['You back onto the smooth vine she offers and take it into your ass, sighing as it swells gently ' \
@@ -263,7 +263,7 @@ module Engine
                      'Its knot swells against your rim and pops inside your ass, locking you onto it as it howls and fills you.'],
           'breasts' => ['The Alpha Beast laps at your breasts with its huge tongue, dragging it over your nipples until they are stiff and wet.'],
           'any' => ["The Alpha Beast presses you down beneath its massive body, its musk filling your lungs until you're dizzy with need.",
-                    'It noses between your legs, breathing in your scent with a low, possessive growl.']
+                    'It noses along your inner thigh, breathing in your scent with a low, possessive growl.']
         },
         willing: {
           'vagina' => ['You get on all fours and present yourself to the Alpha Beast, crying out as it mounts you and its huge cock fills your cunt.',
@@ -292,7 +292,7 @@ module Engine
                     'Eros stands, towering, horns sweeping black against the candlelight, and walks you backward with one finger on your chest until her tentacles catch you and hold you up for her mouth.']
         },
         willing: {
-          'vagina' => ['You climb into Eros\'s lap and sink down onto the glowing cock she conjures for you, moaning as she holds your hips and makes you ride it at her pace.',
+          'vagina' => ['You climb into Eros\'s lap and sink down onto the glowing cock she conjures for you, your pussy stretching around it, moaning as she holds your hips and makes you ride it at her pace.',
                        'You kneel between Eros\'s thighs and worship her pussy with your tongue, and she rewards you by sliding her toes between your legs and rubbing your cunt until you shake.'],
           'penis' => ['You offer your cock to Eros and she takes it in her mouth, sucking you slow and deep while her eyes stay locked on yours, daring you to last.'],
           'anus' => ['You bend over her throne and spread yourself for her, crying out as Eros fills your ass with her glowing cock and calls you her good little slut.'],
@@ -538,7 +538,48 @@ module Engine
 
     def phase_line(player, boss_name, key)
       text = phase(boss_name)&.dig(key) or return nil
-      Engine::ContentOptions.pick(player, [text])
+      text = "#{text} #{give_anatomy_line(player, boss_name)}" if key.to_sym == :give
+      Engine::ContentOptions.pick(player, [text].compact)
+    end
+
+    # Surrender lines name what the boss actually does with the delver's
+    # body, picked by the parts available to be used.
+    def give_anatomy_line(player, boss_name)
+      parts = Engine::ChastitySystem.scene_parts(player)
+      case canonical_name(boss_name)
+      when 'Alpha Beast'
+        if parts.include?('vagina')
+          'Its cock sinks deep into your pussy with every slow rut, its swelling knot pressing against you.'
+        else
+          'Its cock sinks deep into your ass with every slow rut, its swelling knot pressing against you.'
+        end
+      when 'Incubus King'
+        if parts.include?('vagina')
+          'His cock slides into your pussy and works you open, slow and thorough, while he holds you kneeling.'
+        else
+          'His cock slides into your ass and works you open, slow and thorough, while he holds you kneeling.'
+        end
+      when 'Succubus Queen'
+        if parts.include?('vagina')
+          'The tip of her tail presses against your clit and circles it, teasing, while she kisses you.'
+        elsif parts.include?('penis')
+          'Her tail curls around your cock and strokes it, teasing, while she kisses you.'
+        else
+          'Her tail presses against the steel sealing you and taps it, teasing, while she kisses you.'
+        end
+      when 'Verdant Dryad'
+        if parts.include?('vagina')
+          'A soft vine slips into your pussy and curls gently inside you while she cradles you.'
+        elsif parts.include?('penis')
+          'A soft vine coils around your cock and strokes you gently while she cradles you.'
+        end
+      when 'Eros'
+        if parts.include?('vagina')
+          'One thick tentacle slides into your pussy and pumps you slow and deep while the rest hold you open for her.'
+        elsif parts.include?('penis')
+          'One thick tentacle coils around your cock and strokes you slow and thorough while the rest hold you open for her.'
+        end
+      end
     end
 
     def scene(player, boss_name, kind)
@@ -674,7 +715,7 @@ module Engine
         'against white, and she takes her time with everything the tentacles present to her.',
         "Eros rises to her full, towering height, horns sweeping above you, and her tentacles draw you up her " \
         'body — past the heart on her glossy white bodysuit, into her arms — while her bare, gradient-fading ' \
-        'feet slide between your legs and tease you until you are begging her for more than teasing.'
+        'feet slide along your inner thighs and tease you until you are begging her for more than teasing.'
       ]
 
       form = Engine::TransformationSystem.active(player)

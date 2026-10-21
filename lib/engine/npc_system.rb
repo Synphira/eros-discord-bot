@@ -225,7 +225,10 @@ module Engine
                 condition: { key: 'living_breastplate', name: 'Clinging Breastplate', floors: 3,
                              effects: { 'resistance' => 1, 'lust_mult' => 1.1 } },
                 scenes: ['The moment the LP changes hands, his breastplate peels away — and leaps straight onto *you*.',
-                         '"Oh no — it likes you now!" he gasps, as it clamps around your chest and starts kneading.'] },
+                         '"Oh no — it likes you now!" he gasps, as it clamps around your chest and moulds itself to you.'],
+                by_part: { 'breasts' => ['It cups your breasts and starts kneading them through the living metal, ' \
+                                         'squeezing in slow, possessive pulses.'] },
+                otherwise: ['It flattens over your chest, kneading the flesh there in slow, possessive pulses.'] },
               { key: 'fight', label: 'Fight him', text: 'Take his LP by force', lp: 25, lust: 18, set: 'robbed',
                 scenes: ['You land a single hit and every piece of his gear activates at once. "Can\'t... take it!" he wails ' \
                          'as it works him over relentlessly until he collapses, twitching.',
@@ -272,8 +275,14 @@ module Engine
                    'me? Just for a little while?"',
             choices: [
               { key: 'join', label: 'Join them', text: 'Step into the tentacles', lp: 60, lust: 40, set: 'joined',
-                scenes: ['You step in beside Alex and the tentacles wrap around you both, stroking, squeezing and filling, ' \
-                         'until the two of you are a tangle of moans and shaking limbs.'] },
+                scenes: ['You step in beside Alex and the tentacles wrap around you both, stroking and squeezing, ' \
+                         'until the two of you are a tangle of moans and shaking limbs.'],
+                by_part: {
+                  'vagina' => ['A thick tentacle slides into your pussy and pumps you in time with the ones working Alex.'],
+                  'penis' => ['A slick tentacle coils around your cock and strokes you in time with the ones working Alex.'],
+                  'anus' => ['A slim tentacle works its way into your ass and thrusts in time with the ones working Alex.']
+                },
+                otherwise: ['Tentacles stroke your thighs and hips until you are shaking beside them.'] },
               { key: 'leave', label: 'Leave them', text: 'Let them have their bliss', lust: 15, set: 'left',
                 scenes: ['"Thank you for showing me the way," Alex calls after you. You walk on, still flushed from the sight.'] }
             ]
@@ -318,8 +327,10 @@ module Engine
                               'squeezes in slow, tireless waves, milking you stroke after stroke until your hips are ' \
                               'bucking helplessly against the frame and you are drained to the last shudder.']
                 },
-                otherwise: ['She seals a warm pump over your sex and starts a slow, tireless rhythm — stroking, ' \
-                            'squeezing, coaxing — until you are trembling, flushed and milked dry.'] }
+                otherwise: ['She seals the warm pump over your cage instead. It pulses and tugs at the steel, ' \
+                            'milking nothing but whimpers out of you, until you are shaking and \'dry\' in every way ' \
+                            'that matters.'],
+                caged: true }
             ]
           }
         ]
@@ -338,7 +349,8 @@ module Engine
                 scenes: ['You unlock the stocks and she throws her arms around you. "Thank you! Let me reward you properly..."'],
                 by_part: { 'penis' => ['She sinks to her knees and takes your cock deep into her mouth, humming happily.'],
                            'vagina' => ['She sinks to her knees and buries her tongue between your thighs until your legs shake.'] },
-                otherwise: ['She sinks to her knees and worships you with her lips and tongue until your legs shake.'],
+                otherwise: ['She sinks to her knees and lavishes kisses over the cage sealing you, teasing the ' \
+                            'steel with her lips and tongue until your legs shake.'],
                 caged: true },
               { key: 'use', label: 'Use her', text: 'Take what she is offering', lp: 20, lust: 30, caged: true,
                 by_part: { 'penis' => ['You step behind her and thrust into her exposed pussy. "Yes... take me... fill me..." ' \
@@ -355,11 +367,13 @@ module Engine
               { key: 'help', label: 'Free them', text: 'Find the release lever', lp: 10, lust: 15, caged: true,
                 scenes: ['You find a lever and the wall swings open. A young man stumbles out, sticky and breathless. "Thank you..."'],
                 by_part: { 'penis' => ['He thanks you with a quick, eager blowjob before hurrying off.'],
-                           'vagina' => ['He thanks you with his tongue, quick and eager, before hurrying off.'] },
+                           'vagina' => ['He thanks you with his tongue between your thighs, lapping at your pussy ' \
+                                        'quick and eager, before hurrying off.'] },
                 otherwise: ['He thanks you with a deep, breathless kiss before hurrying off.'] },
               { key: 'use', label: 'Use the holes', text: 'Join the queue', lp: 20, lust: 35, caged: true,
-                by_part: { 'penis' => ['You pick a hole and push your cock through. Whoever is trapped there moans around ' \
-                                       'you, and you use them until you are shaking and breathless.'],
+                by_part: { 'penis' => ['You pick a hole and push your cock through into a warm, waiting mouth. Whoever ' \
+                                       'is trapped there moans around you, sucking you down, and you use them until you ' \
+                                       'are shaking and breathless.'],
                            'vagina' => ['You press your pussy to a hole and a hungry tongue answers at once, lapping at you ' \
                                         'until you are shaking and breathless.'] },
                 otherwise: ['You explore the offered body with your hands, teasing and stroking until the moans behind the ' \
@@ -376,10 +390,16 @@ module Engine
                          'blushes crimson. "Let me... repay you."'],
                 by_part: { 'penis' => ['She drops to her knees and takes your cock in her mouth, sucking with grateful enthusiasm.'],
                            'vagina' => ['She drops to her knees and laps at your pussy with grateful enthusiasm.'] },
-                otherwise: ['She drops to her knees and kisses her way up your thighs with grateful enthusiasm.'] },
+                otherwise: ['She drops to her knees and kisses her way up your thighs to the cage sealing you, ' \
+                            'and worships the steel there with grateful enthusiasm.'] },
               { key: 'join', label: 'Join her', text: 'Touch yourself beside her', lp: 15, lust: 40,
                 scenes: ['You sit beside her and start touching yourself. She notices and beckons. "Come... let\'s do it ' \
-                         'together..." You watch each other, hands moving faster and faster, until you are both panting.'] }
+                         'together..." You watch each other, hands moving faster and faster, until you are both panting.'],
+                by_part: {
+                  'vagina' => ['Your fingers rub your clit and slip into your pussy while she watches, matching your pace.'],
+                  'penis' => ['Your hand wraps around your cock and strokes while she watches, matching your pace.']
+                },
+                otherwise: ['Your hands stroke your thighs and hips while she watches, matching your pace.'] }
             ]
           },
           {

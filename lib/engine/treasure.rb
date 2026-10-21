@@ -57,6 +57,7 @@ module Engine
         stat_modifiers: { 'resistance' => 2, 'submission' => 1 },
         violation_type: 'anal',
         requires: 'anal',
+        part: 'anus',
         removal_cost: 20,
         rarity: 4
       },
@@ -113,6 +114,7 @@ module Engine
         stat_modifiers: { 'submission' => 1, 'resistance' => 1 },
         violation_type: 'knot',
         requires: 'knotting',
+        part: 'anus',
         removal_cost: 20,
         rarity: 4
       },
@@ -217,12 +219,13 @@ module Engine
       },
       {
         name: 'Broodmother Plug',
-        description: 'A smooth plug that swells warm and heavy inside you, pulsing like something about to hatch.',
+        description: 'A smooth plug that swells warm and heavy inside your ass, pulsing like something about to hatch.',
         type: 'accessory',
         slot: 'accessory',
         stat_modifiers: { 'submission' => 1, 'lust_resist' => -1 },
         violation_type: 'egg',
         requires: 'oviposition',
+        part: 'anus',
         removal_cost: 20,
         rarity: 4
       }
@@ -788,6 +791,11 @@ module Engine
       if type == 'milk' && !player.body_parts_list.map(&:to_s).include?('breasts')
         type = 'tease'
       end
+      # Plugs live in the ass; if a delver somehow has none to plug, the
+      # gear settles for teasing instead.
+      if %w[anal knot egg].include?(type) && !Engine::ChastitySystem.scene_parts(player).include?('anus')
+        type = 'tease'
+      end
 
       scene =
         case type
@@ -856,11 +864,11 @@ module Engine
 
     def generate_positioning_scene(_player, item_name)
       [
-        "The #{item_name} coaxes your body into a lewd position, making you present yourself invitingly.",
-        "The #{item_name} shifts, moving your limbs until you're in a vulnerable pose.",
-        "The #{item_name} takes control of your body, positioning you for easy access.",
-        "The #{item_name} comes alive, tugging you into a deliciously shameless pose.",
-        "The #{item_name} manipulates your limbs, arranging you like a doll for someone's pleasure."
+        "The #{item_name} coaxes your body into a lewd position, arching your back and pushing your hips up invitingly.",
+        "The #{item_name} shifts, moving your limbs until you're kneeling with your knees spread and your chest down.",
+        "The #{item_name} takes control of your body, bending you over with your ass in the air for easy access.",
+        "The #{item_name} comes alive, tugging you into a deliciously shameless pose — on all fours, head low, hips high.",
+        "The #{item_name} manipulates your limbs, arranging you like a doll on your knees with your thighs parted for someone's pleasure."
       ].sample
     end
 
@@ -924,12 +932,15 @@ module Engine
       ].sample
     end
 
-    def generate_tentacle_scene(_player, item_name)
-      [
-        "The #{item_name} sprouts slick little vines that wander over your hips and tease between your thighs.",
+    def generate_tentacle_scene(player, item_name)
+      parts = Engine::ChastitySystem.scene_parts(player)
+      scenes = [
         "A tendril from the #{item_name} curls around your thigh and squeezes in a slow, deliberate rhythm.",
         "The #{item_name} comes alive, its vines coiling around your waist and tugging you into a helpless swaying."
-      ].sample
+      ] + Engine::ChastitySystem.lines_for(player, :tentacles, actor: item_name)
+      scenes << "The #{item_name} sprouts slick little vines that slip between your folds and rub your clit in slow circles." if parts.include?('vagina')
+      scenes << "The #{item_name} sprouts slick little vines that coil around your cock and stroke it in a slow, deliberate rhythm." if parts.include?('penis')
+      Engine::ContentOptions.pick(player, scenes)
     end
 
     def generate_milk_scene(_player, item_name)
@@ -942,9 +953,9 @@ module Engine
 
     def generate_knot_scene(_player, item_name)
       [
-        "The #{item_name} swells inside you, its knot lodging deep and refusing to slip free until it softens.",
-        "The #{item_name} pulses and thickens, stretching you around its bulge and holding you deliciously full.",
-        "Every step makes the #{item_name}'s knot nudge deeper, and your knees nearly give with each one."
+        "The #{item_name} swells inside your ass, its knot lodging deep and refusing to slip free until it softens.",
+        "The #{item_name} pulses and thickens in your ass, stretching you around its bulge and holding you deliciously full.",
+        "Every step makes the #{item_name}'s knot nudge deeper into your ass, and your knees nearly give with each one."
       ].sample
     end
 
@@ -974,9 +985,9 @@ module Engine
 
     def generate_egg_scene(_player, item_name)
       [
-        "The #{item_name} swells warm and heavy inside you, pulsing slow as something about to hatch.",
-        "Heat blooms around the #{item_name} as it thickens, keeping you full and achingly aware of it.",
-        "The #{item_name} throbs in a deep, patient rhythm, like a heartbeat that isn't yours."
+        "The #{item_name} swells warm and heavy inside your ass, pulsing slow as something about to hatch.",
+        "Heat blooms around the #{item_name} as it thickens in your ass, keeping you full and achingly aware of it.",
+        "The #{item_name} throbs in your ass in a deep, patient rhythm, like a heartbeat that isn't yours."
       ].sample
     end
   end

@@ -82,19 +82,63 @@ module Engine
            'A string of claws and fangs. The tower pays well for every kill you add to it.',
            { 'victory_lp_bonus' => 4, 'crit_chance' => 0.05 }),
 
-      # Consumables
+      # Potions (drunk on the spot)
       { name: 'Defiance Draught', type: 'special', slot: 'consumable', cost: 30, rarity: 1,
         description: 'Drink on the spot: restores 40% of your max defiance.' },
       { name: 'Cooling Elixir', type: 'special', slot: 'consumable', cost: 25, rarity: 1,
         description: 'Drink on the spot: −40 lust.' },
-      { name: 'Curse Purification Scroll', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
-        description: 'Purges one random curse on the spot (no extra removal fee).' },
       { name: 'Bottled Sanctuary', type: 'special', slot: 'consumable', cost: 75, rarity: 3,
-        description: 'Your next exploration is safe: no monsters, traps, or events.' }
+        description: 'Your next exploration is safe: no monsters, traps, or events.' },
+      { name: 'Male Becoming Draught', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
+        description: 'Drink on the spot: permanently become male (penis, anus). Also washes away any ' \
+                     'condition that changed your gender.' },
+      { name: 'FtM Becoming Draught', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
+        description: 'Drink on the spot: permanently become male (FtM: vagina, anus). Also washes away any ' \
+                     'condition that changed your gender.' },
+      { name: 'Female Becoming Draught', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
+        description: 'Drink on the spot: permanently become female (vagina, anus, breasts). Also washes away ' \
+                     'any condition that changed your gender.' },
+      { name: 'MtF Becoming Draught', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
+        description: 'Drink on the spot: permanently become female (MtF: penis, anus, breasts). Also washes ' \
+                     'away any condition that changed your gender.' },
+      { name: 'Hermaphrodite Becoming Draught', type: 'special', slot: 'consumable', cost: 100, rarity: 4,
+        description: 'Drink on the spot: permanently become a hermaphrodite (penis, vagina, anus, breasts). ' \
+                     'Also washes away any condition that changed your gender.' },
+      { name: 'Breast Growth Tonic', type: 'special', slot: 'consumable', cost: 40, rarity: 2,
+        description: 'Drink on the spot: your breasts grow one size.' },
+      { name: 'Breast Shrinking Tonic', type: 'special', slot: 'consumable', cost: 40, rarity: 2,
+        description: 'Drink on the spot: your breasts shrink one size.' },
+      { name: 'Cock Growth Tonic', type: 'special', slot: 'consumable', cost: 40, rarity: 2,
+        description: 'Drink on the spot: your cock grows one size.' },
+      { name: 'Cock Shrinking Tonic', type: 'special', slot: 'consumable', cost: 40, rarity: 2,
+        description: 'Drink on the spot: your cock shrinks one size.' },
+      { name: 'Butt Growth Tonic', type: 'special', slot: 'consumable', cost: 40, rarity: 2,
+        description: 'Drink on the spot: your butt grows one size.' },
+      { name: 'Butt Shrinking Tonic', type: 'special', slot: 'consumable', cost: 40, rarity: 2,
+        description: 'Drink on the spot: your butt shrinks one size.' }
     ].freeze
 
     DRAUGHT_PCT = 0.4
     ELIXIR_LUST = 40
+
+    # Potion name => [body part, size steps]. Applied on the spot at buy time.
+    SIZE_POTIONS = {
+      'Breast Growth Tonic' => ['breasts', 1],
+      'Breast Shrinking Tonic' => ['breasts', -1],
+      'Cock Growth Tonic' => ['penis', 1],
+      'Cock Shrinking Tonic' => ['penis', -1],
+      'Butt Growth Tonic' => ['butt', 1],
+      'Butt Shrinking Tonic' => ['butt', -1]
+    }.freeze
+
+    # Becoming draughts: potion name => the gender it permanently makes you.
+    GENDER_POTIONS = {
+      'Male Becoming Draught' => 'Male',
+      'FtM Becoming Draught' => 'Male (FtM)',
+      'Female Becoming Draught' => 'Female',
+      'MtF Becoming Draught' => 'Female (MtF)',
+      'Hermaphrodite Becoming Draught' => 'Hermaphrodite'
+    }.freeze
 
     CATEGORIES = %w[weapon armor accessory special].freeze
 
@@ -102,7 +146,7 @@ module Engine
       'weapon' => 'Weapons',
       'armor' => 'Armor',
       'accessory' => 'Accessories',
-      'special' => 'Special'
+      'special' => 'Potions'
     }.freeze
 
     PAGE_SIZE = 5
@@ -151,6 +195,7 @@ module Engine
 
     def normalize_category(category)
       key = category.to_s.downcase
+      key = 'special' if %w[potion potions].include?(key)
       CATEGORIES.include?(key) ? key : 'weapon'
     end
 
@@ -186,16 +231,15 @@ module Engine
       end
 
       if item.type == 'special'
+        if (potion = SIZE_POTIONS[item.name])
+          return buy_size_potion(player, item, *potion)
+        end
+
+        if (target_gender = GENDER_POTIONS[item.name])
+          return buy_gender_potion(player, item, target_gender)
+        end
+
         case item.name
-        when 'Curse Purification Scroll'
-          if player.active_curse_count.positive?
-            player.spend_lp!(item.cost)
-            curse_to_remove = player.active_curses_ordered.sample
-            DB[:player_curses].where(player_id: player.discord_id, curse_id: curse_to_remove.id).delete
-            player.clamp_defiance!
-            return { ok: true, message: "You used the scroll to remove the **#{curse_to_remove.name}** curse!" }
-          end
-          return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" }
         when 'Bottled Sanctuary'
           if player.sanctuary
             return { ok: false, error: :already_active, message: 'Your sanctuary is already active — explore first.' }
@@ -232,6 +276,59 @@ module Engine
       end
 
       { ok: true, message: "You purchased **#{item.name}**! Check your inventory with `e,equipment`." }
+    end
+
+    def buy_size_potion(player, item, part, delta)
+      spec = Engine::ContentOptions::BODY_SIZES[part]
+      label = spec[:label].downcase
+      if spec[:requires] && !player.body_parts_list.map(&:to_s).include?(spec[:requires].to_s)
+        return { ok: false, error: :no_part,
+                 message: "The tonic fizzes uselessly — you have no #{label} for it to work on." }
+      end
+
+      old, new_size = Engine::ContentOptions.step_size(player, part, delta)
+      if old == new_size
+        edge = delta.positive? ? 'as large as tonics can make it' : 'as small as tonics can make it'
+        return { ok: false, error: :at_limit, message: "Your #{label} is already #{edge}." }
+      end
+
+      player.spend_lp!(item.cost)
+      sizes = player.body_sizes.is_a?(Hash) ? player.body_sizes.dup : {}
+      player.update(body_sizes: sizes.merge(part => new_size))
+      { ok: true,
+        message: "You down the tonic. Your #{label}: **#{Engine::ContentOptions.size_label(part, old)} → " \
+                 "#{Engine::ContentOptions.size_label(part, new_size)}**." }
+    end
+
+    def buy_gender_potion(player, item, target_gender)
+      if player.gender.to_s == target_gender
+        return { ok: false, error: :already,
+                 message: "You are already **#{target_gender.downcase}** — Berry slides the draught back. " \
+                          '"That one would be a very expensive sip of nothing, sugar."' }
+      end
+
+      target = CharacterArchetypes::ALL.values.find { |a| a[:gender] == target_gender }
+      player.spend_lp!(item.cost)
+      cleared = clear_gender_conditions!(player)
+      player.update(gender: target[:gender], body_parts: target[:body_parts])
+      player.bump_tracker!('gender_bending_events')
+      message = "You down the draught. Heat rewrites you from the inside out — you are **#{target_gender.downcase}** " \
+                'now, body and all.'
+      if cleared.any?
+        names = cleared.map { |n| "**#{n}**" }.join(', ')
+        message += " The gender-changing #{names} #{cleared.size == 1 ? 'condition washes' : 'conditions wash'} away with it."
+      end
+      { ok: true, message: message }
+    end
+
+    # Conditions that rewrote the delver's sex (adding or removing parts)
+    # do not survive a true gender change.
+    def clear_gender_conditions!(player)
+      gender_conditions, kept = player.condition_list.partition do |c|
+        Array(c['parts']).any? || Array(c['remove_parts']).any?
+      end
+      player.update(conditions: kept) if gender_conditions.any?
+      gender_conditions.map { |c| c['name'] }
     end
 
     def sell_item(player, equipment_id)

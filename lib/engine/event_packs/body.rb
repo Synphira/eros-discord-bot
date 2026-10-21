@@ -62,12 +62,14 @@ module Engine
                'His eyes glow with ancient, patient hunger. *"Let me make you fruitful."*',
         accept: {
           label: 'Lie in the moss', text: 'Let the forest lord breed you',
-          scenes: ['He lays you down in the soft moss and covers you with his great body, his thick cock sinking into you slow ' \
-                   'and deep. Each powerful stroke shakes pollen loose from the branches like drifting stars.',
+          scenes: ['He lays you down in the soft moss and covers you with his great body, moving slow and deep. Each ' \
+                   'powerful stroke shakes pollen loose from the branches like drifting stars.',
                    'He groans and spills inside you, pumping you full until your belly swells warm and round and begins to glow ' \
                    'with a soft green light.'],
-          parts: { 'vagina' => 'His seed floods your womb, and you feel it take root there, warm and blissful and certain.',
-                   'anus' => 'Even when he takes your ass, the glow settles low in your belly all the same, his magic finding a way.' },
+          by_part: { 'vagina' => 'His thick cock sinks into your pussy, and his seed floods your womb, where you feel it take ' \
+                                 'root, warm and blissful and certain.',
+                     'anus' => 'His thick cock sinks into your ass, and even there the glow settles low in your belly all the ' \
+                               'same, his magic finding a way.' },
           lp: 7, lust: 14,
           condition: { key: 'grove_blessed', name: 'Grove-Blessed', floors: 3,
                        effects: { 'healing_mult' => 1.2, 'plant_submit_lp' => 2, 'agility' => -1 } }
@@ -86,9 +88,12 @@ module Engine
           scenes: ['He pulls you into the silk and takes you slow, whispering filthy promises in your ear as he moves. A rune ' \
                    'blooms on your lower belly, glowing brighter with every thrust.',
                    'When he finally spills inside you, the rune flares hot pink and settles into a warm, contented glow. You feel ' \
-                   'heavy, fertile, and utterly satisfied.'],
-          parts: { 'vagina' => 'He grinds deep as he cums, flooding your womb until the rune pulses in time with your heartbeat.',
-                   'penis' => 'He strokes your cock in rhythm until you spill across the runes, and they drink it in greedily.' },
+                   'heavy, claimed, and utterly satisfied.'],
+          by_part: { 'vagina' => 'His cock slides into your pussy and he grinds deep as he cums, flooding your womb until the ' \
+                                 'rune pulses in time with your heartbeat.',
+                     'anus' => 'His cock slides into your ass and he grinds deep as he cums, flooding you until the rune pulses ' \
+                               'in time with your heartbeat.' },
+          parts: { 'penis' => 'He strokes your cock in rhythm until you spill across the runes, and they drink it in greedily.' },
           lp: 7, lust: 14,
           condition: { key: 'heat_rune', name: 'Heat Rune', floors: 3,
                        effects: { 'demon_lust_mult' => 0.9, 'submit_lp_bonus' => 2, 'healing_mult' => 1.15 } }
@@ -188,9 +193,9 @@ module Engine
         },
         alt: {
           label: 'Take hers', text: 'Let her fuck you',
-          scenes: ['She bends you over the chaise and slides her cock into you, gripping your hips and taking you hard and deep.'],
-          parts: { 'vagina' => 'She fills your pussy with long, heavy strokes and cums so much it runs down your thighs.',
-                   'anus' => 'She takes your ass slow and deep, then floods it with her hot cum.' },
+          scenes: ['She bends you over the chaise and slides her cock in, gripping your hips and taking you hard and deep.'],
+          by_part: { 'vagina' => 'She fills your pussy with long, heavy strokes and cums so much it runs down your thighs.',
+                     'anus' => 'She takes your ass slow and deep, then floods it with her hot cum.' },
           lp: 7, lust: 14,
           condition: { key: 'futa_claimed', name: 'Futa-Claimed', floors: 2,
                        effects: { 'demon_submit_lp' => 3, 'lust_mult' => 1.1 } }
@@ -232,8 +237,13 @@ module Engine
         },
         alt: {
           label: 'Bed the queen', text: 'Stay as you are and please her',
-          scenes: ['She draws you onto her throne and rides you slow, her body shifting under your hands from one shape to ' \
-                   'another between kisses, until you cum together to the court\'s delighted cheers.'],
+          scenes: ['She draws you onto her throne, her body shifting under your hands from one shape to another between ' \
+                   'kisses, until you cum together to the court\'s delighted cheers.'],
+          by_part: {
+            'penis' => 'She sinks down onto your cock and rides it slow, her shifting pussy clenching around you.',
+            'vagina' => 'She grinds her shifting pussy against yours, clit to clit, until you are both trembling.'
+          },
+          otherwise: 'She rides your thigh slow and shameless, grinding herself against you until she shudders.',
           lp: 6, lust: 12,
           condition: { key: 'fae_favour', name: 'Fae Favour', floors: 3,
                        effects: { 'agility' => 1, 'treasure_lp' => 2 } }
@@ -587,8 +597,8 @@ module Engine
         alt: {
           label: 'Something thicker', text: 'Get pumped full of cum instead', needs_tag: 'cum_play',
           scenes: ['She whistles, and a broad-chested storm spirit drifts down to join her, already hard and grinning.'],
-          parts: { 'vagina' => 'He pumps your womb so full of hot cum that your belly swells round and sloshing.',
-                   'anus' => 'He fucks your ass and cums and cums until your belly bulges round and heavy.' },
+          by_part: { 'vagina' => 'He sinks his cock into your pussy and pumps your womb so full of hot cum that your belly swells round and sloshing.',
+                     'anus' => 'He sinks his cock into your ass and fucks you, cumming and cumming until your belly bulges round and heavy.' },
           lp: 6, lust: 14,
           condition: { key: 'cum_swollen', name: 'Cum-Swollen', floors: 2,
                        effects: { 'agility' => -2, 'max_hp_bonus' => 12, 'submit_lp_bonus' => 2 } }

@@ -32,7 +32,7 @@ module SlashCommands
     { name: 'suppresscurse', description: 'Spend 25 LP to silence a curse until your next defeat',
       options: [opt('number', 'Curse number from the list', type: INTEGER)] },
     { name: 'shop', description: 'Browse the shop by category',
-      options: [opt('category', 'Shop aisle', choices: choices('weapon', 'armor', 'accessory', 'special'))] },
+      options: [opt('category', 'Shop aisle', choices: choices('weapon', 'armor', 'accessory', 'potions'))] },
     { name: 'buy', description: 'Buy an item from the shop', options: [opt('item', 'Item name', required: true)] },
     { name: 'sell', description: 'Sell an item from your pack', options: [opt('item', 'Item name', required: true)] },
     { name: 'cursedshop', description: 'Re-summon living gear you have torn free before (free)' },
@@ -52,7 +52,7 @@ module SlashCommands
       options: [opt('category', 'Category', choices: choices('combat', 'submission', 'exploration', 'curses', 'lust', 'events', 'kinks', 'challenges'))] },
     { name: 'leaderboard', description: 'Top delvers by cycles, depth, highest level, kills, or LP earned',
       options: [opt('stat', 'Ranking', choices: choices('cycles', 'depth', 'level', 'kills', 'lp'))] },
-    { name: 'options', description: 'Content preferences (fetish toggles) and body sizes' },
+    { name: 'options', description: 'Content preferences (fetish toggles)' },
     { name: 'fetish_options', description: 'Toggle one content theme on or off (no option = list all)',
       options: [opt('option', 'Theme key or name, e.g. bimbofication'), opt('state', 'On or off', choices: choices('on', 'off'))] }
   ].freeze

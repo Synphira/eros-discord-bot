@@ -64,7 +64,7 @@ module Commands
       'options' => {
         label: 'Content Options', emoji: '🎚️', blurb: 'Choose which themes the tower shows you',
         commands: [
-          ['/options', 'e,options', 'Content toggles and body sizes'],
+          ['/options', 'e,options', 'Content toggles (body sizes come from Potions in /shop)'],
           ['/fetish_options', 'e,fetish_options [option] [on/off]', 'Toggle one theme (no arguments lists them all)'],
           [nil, 'e,sluttify [on/off]', 'Turn every theme on or off at once']
         ]

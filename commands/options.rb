@@ -57,26 +57,13 @@ module Commands
             "#{sizes[part][:label]} **#{Engine::ContentOptions.size_label(part, Engine::ContentOptions.size_of(player, part))}**"
           end
           c.text_display(content: "**Body:** #{current.join(' · ')}")
-          sizes.each do |part, spec|
-            c.row do |row|
-              row.string_select(
-                custom_id: "eros:opts:size:#{part}:#{event.user.id}",
-                placeholder: "#{spec[:label]} size",
-                min_values: 1,
-                max_values: 1
-              ) do |menu|
-                chosen = Engine::ContentOptions.size_of(player, part)
-                spec[:options].each do |size|
-                  menu.option(label: "#{spec[:label]}: #{Engine::ContentOptions.size_label(part, size)}", value: size,
-                              default: size == chosen)
-                end
-              end
-            end
-          end
+          c.text_display(
+            content: '_Sizes are no longer picked here — the tower insists you earn your shape. Berry sells ' \
+                     'growth and shrinking tonics (and a certain draught) in the shop\'s **Potions** aisle._'
+          )
         end
         c.text_display(
-          content: '-# Changes save instantly. Sizes appear in scenes and some opt-in events. ' \
-                   'Quick toggle: `e,fetish_options <option> <on/off>`.'
+          content: '-# Changes save instantly. Quick toggle: `e,fetish_options <option> <on/off>`.'
         )
       end
     end
@@ -86,16 +73,6 @@ module Commands
       saved = player.preferences.is_a?(Hash) ? player.preferences.dup : {}
       keys.each { |k| saved[k] = values.include?(k) }
       player.update(preferences: saved)
-    end
-
-    def set_size!(player, part, value)
-      spec = Engine::ContentOptions::BODY_SIZES[part] or return false
-      return false unless spec[:options].include?(value)
-      return false unless Engine::ContentOptions.applicable_sizes(player).key?(part)
-
-      sizes = player.body_sizes.is_a?(Hash) ? player.body_sizes.dup : {}
-      player.update(body_sizes: sizes.merge(part => value))
-      true
     end
 
     def toggle(event, option, state)
@@ -137,20 +114,9 @@ module Commands
       Commands::Options.show(event, notice: '_Preferences saved._')
     end
 
-    string_select(custom_id: /^eros:opts:size:[a-z]+:\d+$/) do |event|
-      next unless ErosHelpers.assert_button_owner!(event)
-
-      player = Player[event.user.id]
-      next unless player
-
-      part = event.custom_id[/\Aeros:opts:size:([a-z]+):\d+\z/, 1]
-      ok = Commands::Options.set_size!(player, part, Array(event.values).first.to_s)
-      Commands::Options.show(event, notice: ok ? '_Body size saved._' : '_That size is not available._')
-    end
-
     application_command(:options) { |event| Commands::Options.show(event) }
 
-    command(:options, description: 'Content preferences and body sizes') do |event|
+    command(:options, description: 'Content preferences') do |event|
       Commands::Options.show(event)
       nil
     end

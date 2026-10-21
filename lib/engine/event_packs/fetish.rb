@@ -201,8 +201,8 @@ module Engine
                    'slide sideways into soft, sticky filth.',
                    'You find yourself stroking the velvet petals, then stroking yourself, giving in a little more with every breath.'],
           parts: {
-            'vagina' => 'Your pussy swells and drips, aching to be filled by anything at all.',
-            'penis' => 'Your cock goes achingly hard, leaking a steady string as the pollen works on you.'
+            'vagina' => 'Your pussy swells and drips as your fingers circle your clit, aching to be filled by anything at all.',
+            'penis' => 'Your cock goes achingly hard in your stroking hand, leaking a steady string as the pollen works on you.'
           },
           lp: 8, lust: 16, special: :corrupt,
           condition: { key: 'tainted_bloom', name: 'Tainted Bloom', floors: 3,
@@ -270,10 +270,12 @@ module Engine
           scenes: ['He lets you press against his broad, sweat-slick chest and breathe him in, and the musk goes straight to ' \
                    'your head and between your legs at the same time. You rub your face against his fur shamelessly.',
                    'By the time he is done with you, you are soaked in his scent and humming with a deep, animal need.'],
-          parts: {
+          by_part: {
             'vagina' => 'He lifts you onto his thick cock and your pussy stretches around him while you breathe in his musk.',
-            'penis' => 'He grinds your cock against his sweaty abs until you spill across his fur.',
             'anus' => 'He bends you over the bench and fucks your ass slow and deep, his musk heavy all around you.'
+          },
+          parts: {
+            'penis' => 'Your cock bounces and leaks beneath you with every rut of his hips.'
           },
           lp: 7, lust: 14,
           condition: { key: 'bull_scented', name: 'Bull-Scented', floors: 3,
@@ -283,6 +285,10 @@ module Engine
           label: 'Steal the loincloth', text: 'Just bury your face in it',
           scenes: ['While he is in the steam you snatch his loincloth off the hook and bury your face in it, breathing deep ' \
                    'until your knees go weak and you are touching yourself right there by the lockers.'],
+          parts: {
+            'vagina' => 'Your fingers rub your clit in frantic circles, your pussy dripping as his scent fills your head.',
+            'penis' => 'You wrap your hand around your cock and stroke it frantically as his scent fills your head.'
+          },
           lp: 5, lust: 12,
           condition: { key: 'scent_hound', name: 'Scent Hound', floors: 3, effects: { 'explore_lp' => 1, 'lust_mult' => 1.1 } }
         },
@@ -552,9 +558,11 @@ module Engine
           scenes: ['He brushes your hair into a glossy mane, laces you into hoof-boots and a snug harness, and walks you around ' \
                    'the paddock on a lead, praising your gait.',
                    'Then he mounts you in the soft grass, hands on your harness, and rides you like a prize.'],
-          parts: {
+          by_part: {
             'vagina' => 'His thick cock sinks into your pussy from behind, and you whinny and stamp your hoof-boots.',
-            'anus' => 'He takes your ass slow and steady, tugging your mane with each thrust.',
+            'anus' => 'He takes your ass slow and steady, tugging your mane with each thrust.'
+          },
+          parts: {
             'penis' => 'He reaches under you and strokes your cock like he is milking a prize stallion.'
           },
           lp: 7, lust: 12,
@@ -637,8 +645,8 @@ module Engine
         },
         alt: {
           label: 'Fingers only', text: 'Just her fingers, for now',
-          scenes: ['You offer yourself more modestly, and the marble fingers oblige, stroking you open with three slick ' \
-                   'digits until you are relaxed, flushed and gaping just a little.'],
+          scenes: ['You offer yourself more modestly, and the marble fingers oblige, stroking your ass open with ' \
+                   'three slick digits until you are relaxed, flushed and gaping just a little.'],
           lp: 5, lust: 10,
           condition: { key: 'nicely_loosened', name: 'Nicely Loosened', floors: 2,
                        effects: { 'satisfy_bonus' => 0.05, 'agility' => 1 } }

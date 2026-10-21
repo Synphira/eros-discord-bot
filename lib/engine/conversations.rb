@@ -368,7 +368,8 @@ module Engine
       },
       'cock' => {
         label: 'His cock', button: '🍆 Take his cock',
-        blurb: 'For everyone: the keeper turns you against his own counter and drains you dry, firmly and thoroughly.',
+        blurb: 'For everyone: the keeper bends you over his own counter and fucks you — pussy if you have one, ' \
+               'ass if you don\'t — firmly, thoroughly, and until you\'re drained.',
         text: 'He turns you against his own counter with an incubus\'s certainty, the bell above his shop ' \
               'door politely ignored. "My counter, my rules," Covar growls, and takes you the way the tower ' \
               'taught him to want people — firmly, thoroughly, one hand spread between your shoulders to ' \
@@ -605,14 +606,14 @@ module Engine
       covar_topics_heard(player).size >= COVAR_SEX_TOPICS_REQUIRED
     end
 
-    # Fucking his breasts or his ass takes a cock of the delver's own;
-    # his cock is for everyone.
+    # Fucking his breasts or his ass takes a cock of the delver's own —
+    # and an uncaged one; his cock is for everyone.
     def covar_sex_available?(player, part)
       spec = COVAR_SEX[part.to_s]
       return false unless spec
 
       need = spec[:needs_part]
-      need.nil? || player.body_parts_list.map(&:to_s).include?(need)
+      need.nil? || Engine::ChastitySystem.scene_parts(player).include?(need)
     end
 
     def covar_sex(player, part)
@@ -625,6 +626,13 @@ module Engine
                           'I like to be courted."' }
       end
       unless covar_sex_available?(player, part)
+        need = spec[:needs_part]
+        if need && player.body_parts_list.map(&:to_s).include?(need.to_s)
+          return { ok: false,
+                   message: "Covar's gaze drops to your cage, then returns with a sympathetic grin. \"Locked " \
+                            'away, delver? That one needs your cock free and hard. My cock, though? That\'s ' \
+                            'for everyone."' }
+        end
         return { ok: false,
                  message: "Covar's gaze drops, then returns with a sympathetic grin. \"That one needs a " \
                           'cock of your own, delver — and the tower didn\'t give you one. My cock, though? ' \
@@ -634,7 +642,26 @@ module Engine
       cleared = player.lust.to_i
       player.update(lust: 0)
       player.bump_tracker!('covar_trysts')
-      { ok: true, part: part.to_s, lust_cleared: cleared, text: spec[:text] }
+      { ok: true, part: part.to_s, lust_cleared: cleared, text: covar_text(player, part, spec) }
+    end
+
+    # His cock goes where the delver's body invites it: pussy when they have
+    # one free, ass otherwise. The other two options are already explicit.
+    def covar_text(player, part, spec)
+      return spec[:text] unless part.to_s == 'cock'
+
+      parts = Engine::ChastitySystem.scene_parts(player)
+      taken =
+        if parts.include?('vagina')
+          'He slides his cock into your pussy in one sure stroke and fucks you deep, grinding against your clit ' \
+          'with every roll of his hips until your orgasm tears out of you around him'
+        else
+          'He slides his cock into your ass in one sure stroke and fucks you deep, one hand spread between your ' \
+          'shoulders, until your orgasm tears out of you under him'
+        end
+      'He turns you against his own counter with an incubus\'s certainty, the bell above his shop door politely ' \
+        "ignored. \"My counter, my rules,\" Covar growls. #{taken}, and his own orgasm follows with a groan he " \
+        'does not bother to hide. "There," he says, breathless and pleased. "Drained. You\'re welcome."'
     end
 
     def available_topics(player, person)

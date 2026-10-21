@@ -112,6 +112,16 @@ module Engine
         log << 'You kneel and offer yourself on the altar steps. Stone tentacles warm and soften beneath you, ' \
                'suckers kissing along your thighs while candlelight crawls over your skin — she takes her time ' \
                'looking, and the looking alone leaves you trembling and soaked.'
+        parts = Engine::ChastitySystem.scene_parts(player)
+        touches = []
+        touches << 'One warm sucker seals over your clit and pulses there, patient as prayer.' if parts.include?('vagina')
+        touches << 'One tentacle curls around your cock and squeezes in slow, reverent pulses.' if parts.include?('penis')
+        touches << 'Two suckers latch onto your nipples and tug them stiff.' if parts.include?('breasts')
+        if touches.empty?
+          caged = Engine::ChastitySystem.line(player, :tease)
+          touches << caged if caged
+        end
+        log << touches.join(' ') if touches.any?
         player.gain_lust!(25)
         gain_attention!(player, 15, log)
         log << "**+25 Lust** · Attention **#{attention(player)}/#{MAX_ATTENTION}**."
