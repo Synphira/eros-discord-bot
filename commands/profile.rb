@@ -152,15 +152,21 @@ module Commands
         c.text_display(content: news.join("\n")) if news.any?
         c.separator(divider: true, spacing: :small)
 
-        cats.keys.each_slice(4) do |group|
-          c.row do |row|
-            group.each do |key|
+        c.row do |row|
+          row.string_select(
+            custom_id: "eros:ach:pick:#{event.user.id}",
+            placeholder: 'Choose a category…',
+            min_values: 1,
+            max_values: 1
+          ) do |menu|
+            cats.each do |key, label|
               in_cat = Engine::TitleSystem.achievements_in(key, player)
               got = in_cat.count { |a| done.include?(a[:id]) }
-              row.button(
-                label: "#{cats[key]} #{got}/#{in_cat.size}",
-                style: key == category ? :primary : :secondary,
-                custom_id: "eros:ach:cat:#{key}:#{event.user.id}"
+              menu.option(
+                label: label,
+                value: key,
+                description: "#{got}/#{in_cat.size} unlocked",
+                default: key == category
               )
             end
           end
@@ -356,6 +362,12 @@ module Commands
 
       cat = event.custom_id[/\Aeros:ach:cat:([a-z_]+):\d+\z/, 1]
       Commands::Profile.show_achievements(event, category: cat)
+    end
+
+    string_select(custom_id: /^eros:ach:pick:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Profile.show_achievements(event, category: Array(event.values).first.to_s, page: 0)
     end
 
     button(custom_id: /^eros:ach:page:[a-z_]+:-?\d+:\d+$/) do |event|

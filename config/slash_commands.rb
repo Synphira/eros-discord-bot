@@ -49,7 +49,7 @@ module SlashCommands
     { name: 'transformation', description: 'View hybrid forms, or take one by name',
       options: [opt('name', 'Form name, or "clear" to return to human')] },
     { name: 'achievements', description: 'View achievements and progress',
-      options: [opt('category', 'Category', choices: choices('combat', 'submission', 'exploration', 'curses', 'lust', 'events', 'kinks', 'challenges'))] },
+      options: [opt('category', 'Category', choices: choices('combat', 'submission', 'exploration', 'cycles', 'events', 'residents', 'curses', 'cursed_shop', 'lust', 'marks', 'fortune', 'kinks', 'forms', 'challenges'))] },
     { name: 'leaderboard', description: 'Top delvers by cycles, depth, highest level, kills, LP earned, or admirers won',
       options: [opt('stat', 'Ranking', choices: choices('cycles', 'depth', 'level', 'kills', 'lp', 'admirers'))] },
     { name: 'options', description: 'Content preferences (fetish toggles)' },
