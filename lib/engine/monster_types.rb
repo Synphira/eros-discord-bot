@@ -8,37 +8,56 @@ module Engine
       beast: {
         name: 'Beast',
         description: 'Animalistic creatures driven by instinct',
-        common_monsters: ['Wolf', 'Bear', 'Minotaur', 'Gargoyle'],
+        common_monsters: ['Wolf', 'Bear', 'Minotaur', 'Gargoyle', 'Silkweaver', 'Giant Spider',
+                          'Giant Moth', 'Giant Bee', 'Broodmother', 'Lamia', 'Naga', 'Centaur',
+                          'Harpy', 'Satyr', 'Ogre', 'Troll', 'Goblin', 'Orc', 'Kitsune', 'Dragon',
+                          'HuCow', 'Wildcat', 'Wild Dog'],
         color: 0x8b4513
       },
       demon: {
         name: 'Demon',
         description: 'Otherworldly beings of dark energy',
-        common_monsters: ['Imp', 'Succubus', 'Incubus', 'Hellhound'],
+        common_monsters: ['Imp', 'Succubus', 'Incubus', 'Hellhound', 'Demoness', 'Oni', 'Siren',
+                          'Fae Trickster', 'Cambion', 'Rakshasa', 'Ifrit', 'Djinn', 'Night Hag',
+                          'Pit Fiend', 'Chain Devil', 'Velvet Devil', 'Sin Eater', 'Dream Eater',
+                          'Carnal Fiend', 'Ember Fiend'],
         color: 0xff0000
       },
       slime: {
         name: 'Slime',
         description: 'Amorphous creatures that can change shape',
-        common_monsters: ['Green Slime', 'Purple Slime', 'Jelly Cube', 'Gelatinous Mass'],
+        common_monsters: ['Green Slime', 'Purple Slime', 'Jelly Cube', 'Gelatinous Mass',
+                          'Amber Slime', 'Cream Slime', 'Crystal Slime', 'Rubber Slime', 'Jellyfish',
+                          'Rose Slime', 'Honey Slime', 'Milk Slime', 'Oil Slime', 'Bubble Slime',
+                          'Syrup Slime', 'Pudding Slime', 'Mercury Slime', 'Glow Slime', 'Tar Slime',
+                          'Foam Slime'],
         color: 0x00ff00
       },
       undead: {
         name: 'Undead',
         description: 'Reanimated corpses and spirits',
-        common_monsters: ['Zombie', 'Skeleton', 'Ghost', 'Wraith'],
+        common_monsters: ['Zombie', 'Skeleton', 'Ghost', 'Wraith', 'Vampire', 'Lich', 'Banshee',
+                          'Ghoul', 'Mummy', 'Revenant', 'Specter', 'Wight', 'Poltergeist', 'Dullahan',
+                          'Jiangshi', 'Headless Knight', 'Tomb Widow', 'Pale Bride', 'Crypt Keeper',
+                          'Bone Dancer'],
         color: 0x9370db
       },
       plant: {
         name: 'Plant',
         description: 'Carnivorous flora and nature spirits',
-        common_monsters: ['Tentacle Vine', 'Alraune', 'Man-Eating Flower', 'Living Ivy'],
+        common_monsters: ['Tentacle Vine', 'Alraune', 'Man-Eating Flower', 'Living Ivy', 'Dryad',
+                          'Mycelian', 'Black Orchid', 'Treant', 'Mandrake', 'Corpse Flower',
+                          'Blood Rose', 'Venus Mantrap', 'Pitcher Plant', 'Sundew', 'Moonflower',
+                          'Strangler Fig', 'Thorn Vine', 'Pollen Sprite', 'Sap Dryad', 'Nightshade'],
         color: 0x228b22
       },
       mimic: {
     name: 'Mimic',
     description: 'Shape-shifting creatures that disguise themselves as objects',
-    common_monsters: ['Chest Mimic', 'Door Mimic', 'Statue Mimic', 'Item Pile Mimic'],
+    common_monsters: ['Chest Mimic', 'Door Mimic', 'Statue Mimic', 'Item Pile Mimic', 'Chair Mimic',
+                      'Wardrobe Mimic', 'Couch Mimic', 'Clothing Mimic', 'Stone Golem', 'Bed Mimic',
+                      'Book Mimic', 'Mirror Mimic', 'Bath Mimic', 'Throne Mimic', 'Curtain Mimic',
+                      'Rug Mimic', 'Chandelier Mimic', 'Clock Mimic', 'Piano Mimic', 'Loom Mimic'],
     color: 0x696969
   }
 }.freeze

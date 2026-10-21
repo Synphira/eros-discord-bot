@@ -62,7 +62,7 @@ module Engine
         },
         decline: { label: 'Hug the far wall', text: 'Edge past (AGI)', lust: 2, escape: true,
                    scene: 'You flatten against the opposite wall and sidle past while the lips pout and blow you kisses.' },
-        fight: { label: 'Fight the wall', type: :mimic, text: 'The wall heaves — the whole corridor is one enormous mimic!' }
+        fight: { name: 'Corridor Mimic', label: 'Fight the wall', type: :mimic, text: 'The wall heaves — the whole corridor is one enormous mimic!' }
       },
       'rivals_bargain' => {
         name: 'Rival\'s Bargain', tag: 'oral', tracker: 'oral_events',
@@ -125,7 +125,7 @@ module Engine
         },
         decline: { label: 'Leave', text: 'Walk away from the bed', lust: 4,
                    scene: 'You force yourself out of the room. His soft laughter follows you, promising next time.' },
-        fight: { label: 'Banish him', type: :demon, text: 'The incubus rises with a sigh and comes to change your mind.' }
+        fight: { name: 'Incubus', label: 'Banish him', type: :demon, text: 'The incubus rises with a sigh and comes to change your mind.' }
       },
       'moonstone_lover' => {
         name: 'Moonstone Lover', tag: 'vaginal', tracker: 'vaginal_events', requires: 'vagina',
@@ -163,7 +163,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Wave him off', lust: 3,
                    scene: 'He tosses his mane in disappointment and gallops off into the trees.' },
-        fight: { label: 'Wrestle him', type: :beast, text: 'The stallion tosses his head and charges!' }
+        fight: { name: 'Centaur', label: 'Wrestle him', type: :beast, text: 'The stallion tosses his head and charges!' }
       },
       'satyr_bathhouse' => {
         name: 'Satyr Bathhouse', tag: 'anal', tracker: 'anal_events',
@@ -215,7 +215,7 @@ module Engine
         },
         decline: { label: 'Shoo it', text: 'Step around (AGI)', lust: 2, escape: true,
                    scene: 'You dodge around the eager slime and dart through the far door.' },
-        fight: { label: 'Pop it', type: :slime, text: 'The slime stops being polite and lunges for you!' }
+        fight: { name: 'Amber Slime', label: 'Pop it', type: :slime, text: 'The slime stops being polite and lunges for you!' }
       },
       'gargoyle_ledge' => {
         name: 'Gargoyle Ledge', tag: 'anal', tracker: 'anal_events',
@@ -238,7 +238,7 @@ module Engine
         },
         decline: { label: 'Keep walking', text: 'Don\'t look down', lust: 2,
                    scene: 'You keep well away from the edge. The gargoyle closes its eyes, unbothered.' },
-        fight: { label: 'Topple it', type: :demon, text: 'The gargoyle spreads its wings and swoops at you!' }
+        fight: { name: 'Gargoyle', label: 'Topple it', type: :beast, text: 'The gargoyle spreads its wings and swoops at you!' }
       },
       'wisp_hollow' => {
         name: 'Wisp Hollow', tag: 'breast_play', tracker: 'breast_play_events',
@@ -319,7 +319,7 @@ module Engine
         },
         decline: { label: 'Squeeze past', text: 'Try to slip by (AGI)', lust: 3, escape: true,
                    scene: 'You duck under his arm and slip past while he is still staring.' },
-        fight: { label: 'Fight him', type: :beast, text: 'The minotaur snorts and lowers his horns.' }
+        fight: { name: 'Minotaur', label: 'Fight him', type: :beast, text: 'The minotaur snorts and lowers his horns.' }
       },
       'hellhound_kennel' => {
         name: 'Hellhound Kennel', tag: 'knotting', tracker: 'knotting_events',
@@ -345,7 +345,7 @@ module Engine
         },
         decline: { label: 'Back out slowly', text: 'Leave the kennel (AGI)', lust: 3, escape: true,
                    scene: 'You back out with your eyes down, and the pack lets you go with a disappointed huff.' },
-        fight: { label: 'Fight the pack leader', type: :beast, text: 'The hellhound bares glowing fangs and leaps!' }
+        fight: { name: 'Hellhound', label: 'Fight the pack leader', type: :demon, text: 'The hellhound bares glowing fangs and leaps!' }
       },
       'wolfkin_den' => {
         name: 'Wolfkin Den', tag: 'knotting', tracker: 'knotting_events',
@@ -481,7 +481,7 @@ module Engine
         },
         decline: { label: 'Pass', text: 'Thank her and move on', lust: 2,
                    scene: 'She sighs and settles back into the sun.' },
-        fight: { label: 'Fight her', type: :beast, text: 'The lamia rears up, hissing, offended by the refusal!' }
+        fight: { name: 'Lamia', label: 'Fight her', type: :beast, text: 'The lamia rears up, hissing, offended by the refusal!' }
       },
       'tentacle_bath' => {
         name: 'Tentacle Bath', tag: 'tentacles', tracker: 'tentacle_events',
@@ -536,7 +536,7 @@ module Engine
         },
         decline: { label: 'Duck under', text: 'Dash through (AGI)', lust: 3, escape: true,
                    scene: 'You duck low and sprint beneath the swaying tentacles.' },
-        fight: { label: 'Hack at them', type: :plant, text: 'The tentacles thrash and lash toward you!' }
+        fight: { name: 'Tentacle Vine', label: 'Hack at them', type: :plant, text: 'The tentacles thrash and lash toward you!' }
       },
       'honeyed_orchard' => {
         name: 'Honeyed Orchard', tag: 'aphrodisiacs', tracker: 'aphrodisiac_events',
@@ -589,7 +589,7 @@ module Engine
         },
         decline: { label: 'Hold your breath', text: 'Hurry through (AGI)', lust: 3, escape: true,
                    scene: 'You hold your breath and hurry through before the smoke can take hold.' },
-        fight: { label: 'Douse the censers', type: :demon, text: 'The succubus rises from her divan, thoroughly annoyed.' }
+        fight: { name: 'Succubus', label: 'Douse the censers', type: :demon, text: 'The succubus rises from her divan, thoroughly annoyed.' }
       },
       'phantom_waltz' => {
         name: 'Phantom Waltz', tag: 'possession', tracker: 'possession_events',
@@ -613,7 +613,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Keep your body to yourself', lust: 2,
                    scene: 'You shake your head. She fades with a wistful sigh.' },
-        fight: { label: 'Exorcise her', type: :undead, text: 'The ghost shrieks and swoops at you!' }
+        fight: { name: 'Ghost', label: 'Exorcise her', type: :undead, text: 'The ghost shrieks and swoops at you!' }
       },
       'ring_of_the_rider' => {
         name: 'Ring of the Rider', tag: 'possession', tracker: 'possession_events',
@@ -676,7 +676,7 @@ module Engine
         },
         decline: { label: 'Close the lid', text: 'Leave the toys', lust: 2,
                    scene: 'You close the lid. The buzzing goes muffled and sad.' },
-        fight: { label: 'Kick the chest', type: :mimic, text: 'The chest yawns wide, toys and all — it was a mimic!' }
+        fight: { name: 'Chest Mimic', label: 'Kick the chest', type: :mimic, text: 'The chest yawns wide, toys and all — it was a mimic!' }
       },
       'goblin_workshop' => {
         name: 'Goblin Workshop', tag: 'toys', tracker: 'toy_events',
@@ -752,7 +752,7 @@ module Engine
         },
         decline: { label: 'Step back', text: 'Avoid the basin', lust: 2,
                    scene: 'You keep your distance. The slime burbles sadly and settles.' },
-        fight: { label: 'Fight it', type: :slime, text: 'The slime surges out of its basin toward you!' }
+        fight: { name: 'Cream Slime', label: 'Fight it', type: :slime, text: 'The slime surges out of its basin toward you!' }
       },
       'silkweavers_web' => {
         name: 'Silkweaver\'s Web', tag: 'bondage', tracker: 'bondage_events',
@@ -785,7 +785,7 @@ module Engine
         },
         decline: { label: 'Back out', text: 'Slip out (AGI)', lust: 3, escape: true,
                    scene: 'You slip between the strands and out of the chamber before she can drop.' },
-        fight: { label: 'Fight her', type: :beast, text: 'The silkweaver drops toward you, legs spread wide!' }
+        fight: { name: 'Silkweaver', label: 'Fight her', type: :beast, text: 'The silkweaver drops toward you, legs spread wide!' }
       }
     }.freeze
   end

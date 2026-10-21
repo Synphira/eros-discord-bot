@@ -28,7 +28,7 @@ module Engine
       'bloating_slime' => {
         name: 'Bloating Slime',
         blurb: 'the floor softens and pulses beneath you.',
-        description: "A gelatinous slime that forces its way into your body, expanding until you're painfully stuffed."
+        description: 'A gelatinous slime that forces its way into every entrance it can find and swells inside you, stretching you fuller and fuller.'
       },
       'egg_chamber' => {
         name: 'Egg Chamber',
@@ -38,7 +38,7 @@ module Engine
       'paddle_golem' => {
         name: 'Paddle Golem',
         blurb: 'a wooden golem holds a paddle.',
-        description: "A rough-hewn golem that wants to spank your ass until it's red and raw."
+        description: 'A rough-hewn golem that wants to bend you over its knee and spank you until you are squirming, soaked, and begging it to keep count.'
       },
       'edging_altar' => {
         name: 'Edging Altar',
@@ -179,13 +179,14 @@ module Engine
     end
 
     def bloating!(player, level, log)
-      log << { scene: 'The slime suddenly surges into your mouth, forcing its way down your throat. You can feel it expanding inside your ' \
-                      'stomach, filling you completely. Your belly begins to swell outward, stretching painfully as the creature pumps ' \
-                      'more of itself into you.' }
-      log << { scene: 'Another tendril of slime forces its way into your ass, the cold gelatinous mass filling you completely. You feel so ' \
-                      'full you might burst, the pressure making you gasp as your stomach distends into a round, pregnant shape.' }
+      log << { scene: 'The slime suddenly surges into your mouth, forcing its way down your throat in thick, pulsing gulps. You can feel ' \
+                      'it expanding inside your stomach, filling you completely. Your belly begins to swell outward, stretching ' \
+                      'obscenely taut as the creature pumps more and more of itself into you.' }
+      log << { scene: 'Another tendril of slime forces its way between your cheeks and deep into your ass, the cool gelatinous mass ' \
+                      'filling you from the other side. Stuffed from both ends, you can barely breathe, your distended belly round ' \
+                      'and heavy as it rocks you with every obscene slosh inside you.' }
       log << { scene: 'Content at last, the slime begins to slowly withdraw, the sensation of its departure as intense as its entry. As it ' \
-                      'leaves your ass with a wet sucking sound, your body collapses inward, leaving you trembling and empty.' }
+                      'leaves your ass with a wet sucking sound, your body collapses inward, leaving you trembling, dripping and empty.' }
       reward!(player, 4 + (level / 3), 12 + (level / 2), log)
     end
 
@@ -205,14 +206,15 @@ module Engine
 
     def paddle!(player, level, log)
       size = Engine::ContentOptions.size_of(player, 'butt')
-      log << { scene: "The golem forces you over its knee, exposing your #{size_word(player, 'butt')} rear. The wooden paddle crashes " \
-                      'down, leaving an immediate red mark that quickly darkens to purple. Each impact comes harder than the last, the ' \
-                      'sound echoing through the chamber as you struggle and scream.' }
+      log << { scene: "The golem bends you over its knee and bares your #{size_word(player, 'butt')} ass to the room. The wooden paddle " \
+                      'lands with a crack that echoes off the stone, and your hips buck at every swat, heat blooming hotter across ' \
+                      'your cheeks. By the tenth you are grinding against its hard wooden thigh, gasping and shamelessly wet.' }
       extra = { 'small' => 0, 'medium' => 1, 'large' => 2, 'huge' => 3 }.fetch(size, 0)
-      log << { scene: 'After twenty brutal swats, your ass is a mass of welts and bruises. The golem runs its rough wooden fingers over ' \
-                      'the damage, pressing into the deepest welts and making you cry out.' }
+      log << { scene: 'After twenty counted swats the golem sets the paddle aside and rubs slow, heavy circles over your heated, ' \
+                      'tingling cheeks, its rough wooden fingers dipping teasingly between them to find how soaked the spanking ' \
+                      'left you. It nods, satisfied, and lets you up on trembling legs.' }
       player.adjust_defiance!(-3)
-      log << "The brutal spanking costs you **3** defiance. (now #{player.defiance}/#{player.max_defiance})"
+      log << "The relentless spanking costs you **3** defiance. (now #{player.defiance}/#{player.max_defiance})"
       reward!(player, 3 + (level / 3) + extra, 8 + (level / 2) + (extra * 2), log)
     end
 

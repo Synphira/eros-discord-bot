@@ -284,6 +284,7 @@ module Engine
       player.clear_event!
       if outcome[:fight]
         monster = Engine::MonsterTypes.generate_monster(level, player: player, type: outcome[:fight])
+        monster = monster.merge(name: outcome[:monster_name]) if outcome[:monster_name]
         return { ok: true, mode: :combat, name: data[:name], colour: 0x8b0000, log: log, monster: monster, choices: [] }
       end
 

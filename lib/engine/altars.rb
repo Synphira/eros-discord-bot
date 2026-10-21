@@ -82,9 +82,9 @@ module Engine
 
     def choices(_player)
       [
-        { key: 'pray', label: 'Pray', text: 'Kneel and pray (draw her Attention, small blessing)', style: :primary },
-        { key: 'tithe', label: "Tithe #{TITHE_COST} LP", text: 'Offer Lust Points for a greater blessing', style: :success },
-        { key: 'kneel', label: 'Kneel and offer yourself', text: 'Offer your body to the altar (lust, more Attention)', style: :danger },
+        { key: 'pray', label: 'Pray', text: 'Kneel and pray (a little of her Attention, a little Defiance back)', style: :primary },
+        { key: 'tithe', label: "Tithe #{TITHE_COST} LP", text: 'Offer Lust Points for her Favour blessing (and some of her Attention)', style: :success },
+        { key: 'kneel', label: 'Kneel and offer yourself', text: 'Offer your body to the altar (+25 Lust, the most of her Attention)', style: :danger },
         { key: 'leave', label: 'Leave', text: 'Back away respectfully', style: :secondary }
       ]
     end
@@ -106,7 +106,7 @@ module Engine
 
         log << "You pour #{TITHE_COST} LP of lust-light into the offering bowl. It burns rose-red and rises like incense."
         Engine::FetishEvents.apply_condition!(player, BLESSING, log)
-        gain_attention!(player, 20, log)
+        gain_attention!(player, 15, log)
         log << "**Eros's Favour** settles on you · Attention **#{attention(player)}/#{MAX_ATTENTION}**."
       when 'kneel'
         log << 'You kneel and offer yourself on the altar steps. Stone tentacles warm and soften beneath you, ' \
@@ -123,7 +123,7 @@ module Engine
         end
         log << touches.join(' ') if touches.any?
         player.gain_lust!(25)
-        gain_attention!(player, 15, log)
+        gain_attention!(player, 25, log)
         log << "**+25 Lust** · Attention **#{attention(player)}/#{MAX_ATTENTION}**."
       else
         log << 'You back away from the altar. Behind you, one candle stays lit a moment longer than the rest.'

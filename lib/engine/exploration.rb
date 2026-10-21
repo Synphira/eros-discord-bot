@@ -57,13 +57,95 @@ module Engine
       ]
     end
 
+    # What a spotted trap looks like before you decide its fate.
+    def self.trap_tease(name)
+      case name.to_s
+      when 'Lust Rune'
+        'A rune carved into the flagstone glows faintly pink, pulsing like a heartbeat. Whatever blessing it ' \
+          'gives, it plainly gives between the legs.'
+      when 'Binding Vines'
+        'Hairline cracks in the floor breathe green, and something leafy shifts beneath them, coiling in wait ' \
+          'for the weight of a body to hold.'
+      when 'Aphrodisiac Gas'
+        'A vent in the wall sighs sweet-smelling vapor in slow, rhythmic puffs, each one warmer than the last.'
+      when 'Pleasure Seal'
+        'A circle of pale light sleeps on the floor, its pattern shaped — unmistakably — like a pair of ' \
+          'open, eager hands.'
+      else
+        'It waits, patient and hungry.'
+      end
+    end
+
+    # Explicit scene for a sprung trap, matched to the body it catches.
+    def self.trap_scenes(player, trap)
+      parts = Engine::ChastitySystem.scene_parts(player)
+      caged = Engine::ChastitySystem.caged_parts(player)
+      lines =
+        case trap[:name].to_s
+        when 'Lust Rune'
+          s = ['The rune flares rose-red beneath you and raw heat detonates between your legs, as if an invisible ' \
+               'tongue had just dragged, slow and deliberate, over your most sensitive skin.']
+          s << 'Your clit swells and throbs under the phantom stroking, your cunt clenching around nothing and ' \
+               'dripping down your thighs while the rune pulses in time with your heartbeat.' if parts.include?('vagina')
+          s << 'Your cock hardens so fast it strains, precum beading at the tip as invisible fingers seem to wrap ' \
+               'and stroke you from root to head, patient and merciless.' if parts.include?('penis')
+          s << 'Your nipples stiffen and ache as if pinched and rolled between hot lips, and your hole clenches ' \
+               'with every pulse of the rune, desperate to be filled.' if parts.include?('breasts') && (parts & %w[vagina penis]).empty?
+          s
+        when 'Aphrodisiac Gas'
+          s = ['Sweet gas rolls off the floor in a warm cloud and curls up between your legs. Every breath fans ' \
+               'the heat lower and hotter, until your clothes feel like hands dragging over your skin.']
+          s << 'Your pussy throbs with your pulse, clit swollen and slick, aching to be touched, filled, used — ' \
+               'and the gas gives you nothing but more wanting.' if parts.include?('vagina')
+          s << 'Your cock stands hard and leaking inside your clothes, throbbing untouched with every heartbeat, ' \
+               'and the gas gives you nothing but more wanting.' if parts.include?('penis')
+          s
+        when 'Pleasure Seal'
+          s = ['A seal of light blooms across your groin — and then ghostly hands are on you all at once, ' \
+               'groping, stroking, teasing everywhere you are most sensitive, inhumanly patient and utterly thorough.']
+          s << 'Phantom fingers spread your folds and plunge into your cunt while a ghost tongue works your clit, ' \
+               'fucking you with touch that is not there until you are shaking and gushing around nothing.' if parts.include?('vagina')
+          s << 'A phantom hand wraps your cock and strokes you hard and slow while ghost lips seal over the head ' \
+               'and suck, milking strings of precum from you with touch that is not there.' if parts.include?('penis')
+          s << 'Ghost mouths latch onto your nipples and suckle in turns, tugging them stiff while invisible ' \
+               'fingers trail lower, lower — and never quite arrive.' if parts.include?('breasts') && (parts & %w[vagina penis]).empty?
+          s
+        when 'Binding Vines'
+          s = ['Living vines explode from the floor and yank your wrists and ankles wide, hoisting you spread ' \
+               'while nectar-slick tendrils slither under your clothes and grope boldly over every inch of you.']
+          s << 'A tendril strokes your slit and circles your clit in slow, wet spirals until you are dripping, ' \
+               'then slides deep into your cunt and pumps you while its brothers hold you helpless.' if parts.include?('vagina')
+          s << 'A tendril coils around your cock and pumps you in slick, ridged strokes, another teasing between ' \
+               'your cheeks, while the rest hold you helpless and spread.' if parts.include?('penis')
+          s << 'When the vines at last go slack and dump you to the floor, your legs are trembling too hard to ' \
+               'trust — they wrung every drop of steadiness out of you.'
+          s
+        else
+          ['The trap springs, and hot, invisible hands make a thorough example of you before it lets you go.']
+        end
+      if (parts & %w[vagina penis]).empty? && caged.any?
+        case trap[:name].to_s
+        when 'Aphrodisiac Gas'
+          lines << (Engine::ChastitySystem.line(player, :mist) ||
+                    'Beneath your chastity everything throbs with need the gas will not let you spend.')
+        when 'Binding Vines'
+          lines.concat(Engine::ChastitySystem.scenes(player, :vines).map { |h| h[:scene] })
+        else
+          lines << 'All of it lands on the steel sealing you — the heat builds and builds behind your chastity, ' \
+                   'denied even a trap\'s touch, until you are squirming against the metal.'
+        end
+      end
+      lines
+    end
+
     # Resolves a spotted trap the player chose not to dodge automatically.
     # Returns [detail_line, broken].
     def self.apply_trap_effect(player, trap)
       case trap[:effect].to_s
       when 'lust'
+        lines = trap_scenes(player, trap)
         player.gain_lust!(trap[:value].to_i)
-        lines = ["Lust surges — **+#{trap[:value].to_i} Lust** (now #{player.lust})."]
+        lines << "Lust surges — **+#{trap[:value].to_i} Lust** (now #{player.lust})."
         climax = player.try_climax!
         if climax
           lines.concat(climax[:lines])
@@ -82,7 +164,7 @@ module Engine
       when 'agility'
         new_agi = [player.agility + trap[:value].to_i, 1].max
         player.update(agility: new_agi)
-        ["Vines cinch tight — **AGI #{trap[:value].to_i}** (now #{player.agility}).", false]
+        [(trap_scenes(player, trap) + ["Your legs stay shaky long after — **AGI #{trap[:value].to_i}** (now #{player.agility})."]).join("\n"), false]
       else
         ['The trap fizzles harmlessly.', false]
       end
@@ -423,6 +505,7 @@ module Engine
           colour: COLOURS[:trap],
           log: [
             "**Floor #{@player.current_floor}** — a pressure plate clicks underfoot.",
+            { scene: self.class.trap_tease(trap[:name]) },
             "You spot the **#{trap[:name]}** just in time. You could leap clear... or stay exactly where you are " \
             'and let it happen. ' \
             "_(AGI #{@player.effective_agility} · #{(@player.trap_avoid_chance * 100).round}% dodge chance — the choice is yours.)_"

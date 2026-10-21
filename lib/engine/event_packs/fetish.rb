@@ -55,7 +55,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'One is plenty, thanks', lust: 4,
                    scene: 'You shake your head. She pouts, then blows you a kiss that tingles all the way down your spine.' },
-        fight: { label: 'Fight her', type: :demon, text: 'The succubus rises from the bed, eyes glowing. "Fine. We\'ll play rough."' }
+        fight: { name: 'Succubus', label: 'Fight her', type: :demon, text: 'The succubus rises from the bed, eyes glowing. "Fine. We\'ll play rough."' }
       },
       'feather_vines' => {
         name: 'Feather Vines', tag: 'tickling', tracker: 'tickling_events',
@@ -162,7 +162,7 @@ module Engine
         },
         decline: { label: 'Shut the doors', text: 'Keep your own clothes', lust: 2,
                    scene: 'You push the doors shut. Something inside sighs and rattles the hangers sulkily.' },
-        fight: { label: 'Kick it', type: :mimic, text: 'The wardrobe snaps its doors at you like jaws and lunges!' }
+        fight: { name: 'Wardrobe Mimic', label: 'Kick it', type: :mimic, text: 'The wardrobe snaps its doors at you like jaws and lunges!' }
       },
       'sin_altar' => {
         name: 'Altar of Sin', tag: 'corruption', tracker: 'corruption_events',
@@ -210,7 +210,7 @@ module Engine
         },
         decline: { label: 'Hold your breath', text: 'Hurry past', lust: 4,
                    scene: 'You hold your breath and hurry past. A few motes of pollen cling to your skin, tingling.' },
-        fight: { label: 'Uproot it', type: :plant, text: 'The orchid\'s roots tear free of the floor and lash at you!' }
+        fight: { name: 'Black Orchid', label: 'Uproot it', type: :plant, text: 'The orchid\'s roots tear free of the floor and lash at you!' }
       },
       'glowing_quill' => {
         name: 'Glowing Quill', tag: 'body_writing', tracker: 'body_writing_events',
@@ -294,7 +294,7 @@ module Engine
         },
         decline: { label: 'Leave', text: 'Get out before the smell gets you', lust: 4,
                    scene: 'You back out of the steam, but his scent clings to your clothes for a long while.' },
-        fight: { label: 'Challenge him', type: :beast, text: 'The minotaur snorts, lowers his horns, and charges!' }
+        fight: { name: 'Minotaur', label: 'Challenge him', type: :beast, text: 'The minotaur snorts, lowers his horns, and charges!' }
       },
       'orc_hot_spring' => {
         name: 'Orc Hot Spring', tag: 'musk', tracker: 'musk_events',
@@ -516,7 +516,7 @@ module Engine
         },
         decline: { label: 'Leave the mess', text: 'Not your kitchen', lust: 2,
                    scene: 'You leave the mess behind. The slime burbles sadly into the dishwater.' },
-        fight: { label: 'Mop it up', type: :slime, text: 'The slime surges out of the sink, wobbling indignantly!' }
+        fight: { name: 'Green Slime', label: 'Mop it up', type: :slime, text: 'The slime surges out of the sink, wobbling indignantly!' }
       },
       'chariot_race' => {
         name: 'Chariot Race', tag: 'pony_play', tracker: 'pony_events',
@@ -593,7 +593,7 @@ module Engine
         },
         decline: { label: 'Leave', text: 'Keep your voice', lust: 2,
                    scene: 'You shake your head and slip out. Not a single footstep echoes behind you.' },
-        fight: { label: 'Break the silence', type: :undead, text: 'You shout, and the wraith shrieks back, flying at you!' }
+        fight: { name: 'Wraith', label: 'Break the silence', type: :undead, text: 'You shout, and the wraith shrieks back, flying at you!' }
       },
       'muzzle_merchant' => {
         name: 'Muzzle Merchant', tag: 'gags_hoods', tracker: 'gag_events',
@@ -675,7 +675,7 @@ module Engine
         },
         decline: { label: 'Refuse the rules', text: 'Nobody fists you by decree', lust: 3,
                    scene: 'You refuse. He shrugs his mountain shoulders. "The tower always collects, little one."' },
-        fight: { label: 'Fight him', type: :beast, text: 'He cracks his knuckles and charges, Gauntlet first!' }
+        fight: { name: 'Arena Master', label: 'Fight him', type: :beast, text: 'He cracks his knuckles and charges, Gauntlet first!' }
       },
       'living_gauntlet' => {
         name: 'The Living Gauntlet', tag: 'gaping', tracker: 'gaping_events',
@@ -698,7 +698,7 @@ module Engine
         },
         decline: { label: 'Wave back', text: 'Leave it waving', lust: 2,
                    scene: 'You wave politely and walk on. The glove droops, then waves sadly at your back.' },
-        fight: { label: 'Stomp it', type: :mimic, text: 'The glove rears up, fingers spread like claws — it was a mimic all along!' }
+        fight: { name: 'Gauntlet Mimic', label: 'Stomp it', type: :mimic, text: 'The glove rears up, fingers spread like claws — it was a mimic all along!' }
       }
     }.freeze
   end

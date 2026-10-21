@@ -53,7 +53,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Stay as you are', lust: 2,
                    scene: 'You shake your head. The golem shrugs its heavy shoulders and goes back to its clay.' },
-        fight: { label: 'Topple it', type: :mimic, text: 'The pedestal sprouts teeth — the whole studio was a mimic\'s lure!' }
+        fight: { name: 'Pedestal Mimic', label: 'Topple it', type: :mimic, text: 'The pedestal sprouts teeth — the whole studio was a mimic\'s lure!' }
       },
       'fertility_grove' => {
         name: 'Fertility Grove', tag: 'breeding', tracker: 'impregnation_events',
@@ -76,7 +76,7 @@ module Engine
         },
         decline: { label: 'Bow out', text: 'Leave the grove', lust: 3,
                    scene: 'You bow politely and back away. The forest lord closes his eyes, content to wait for another.' },
-        fight: { label: 'Fight', type: :plant, text: 'The silver trees creak to life to defend their lord!' }
+        fight: { name: 'Silver Treant', label: 'Fight', type: :plant, text: 'The silver trees creak to life to defend their lord!' }
       },
       'incubus_bower' => {
         name: 'Incubus Bower', tag: 'breeding', tracker: 'impregnation_events',
@@ -202,7 +202,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Neither, thanks', lust: 3,
                    scene: 'You decline. She shrugs, gives herself a lazy stroke, and waves you on.' },
-        fight: { label: 'Resist her', type: :demon, text: 'Her smile sharpens. *"Oh, you want to play rough?"*' }
+        fight: { name: 'Succubus', label: 'Resist her', type: :demon, text: 'Her smile sharpens. *"Oh, you want to play rough?"*' }
       },
       'moon_tide_pool' => {
         name: 'Moon Tide Pool', tag: 'gender_bending', tracker: 'gender_bending_events',
@@ -270,7 +270,7 @@ module Engine
         },
         decline: { label: 'Leave it', text: 'Stay your size', lust: 1,
                    scene: 'You leave the bellows still. The forge-glow dims with a disappointed hiss.' },
-        fight: { label: 'Fight', type: :mimic, text: 'The anvil yawns open into a ring of teeth — a mimic!' }
+        fight: { name: 'Anvil Mimic', label: 'Fight', type: :mimic, text: 'The anvil yawns open into a ring of teeth — a mimic!' }
       },
       'colossal_bloom' => {
         name: 'Colossal Bloom', tag: 'giant', tracker: 'body_growth_events',
@@ -323,7 +323,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Stay full-sized', lust: 2,
                    scene: 'You decline. She sighs and dusts the empty shelf, still watching you hungrily as you go.' },
-        fight: { label: 'Fight her', type: :demon, text: 'Her eyes flash. *"If you won\'t shelve yourself, I\'ll do it for you."*' }
+        fight: { name: 'Demoness', label: 'Fight her', type: :demon, text: 'Her eyes flash. *"If you won\'t shelve yourself, I\'ll do it for you."*' }
       },
       'pixie_revel' => {
         name: 'Pixie Revel', tag: 'shrinking', tracker: 'body_reduction_events',
@@ -364,7 +364,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Skip the honey', lust: 1,
                    scene: 'You decline the spoon. The queen licks it clean herself with a lazy, sticky smile.' },
-        fight: { label: 'Fight', type: :beast, text: 'The hive\'s drones swarm to defend their queen!' }
+        fight: { name: 'Giant Bee', label: 'Fight', type: :beast, text: 'The hive\'s drones swarm to defend their queen!' }
       },
       'ogres_kitchen' => {
         name: 'Ogre\'s Kitchen', tag: 'weight_gain', tracker: 'weight_gain_events',
@@ -510,7 +510,7 @@ module Engine
         },
         decline: { label: 'Leave it', text: 'Let it drift by', lust: 2,
                    scene: 'You step aside. The garment drifts sadly back to the loom to be rewoven.' },
-        fight: { label: 'Cut it down', type: :beast, text: 'A huge spider drops from the loom to defend its work!' }
+        fight: { name: 'Giant Spider', label: 'Cut it down', type: :beast, text: 'A huge spider drops from the loom to defend its work!' }
       },
       'phantom_wardrobe' => {
         name: 'Phantom Wardrobe', tag: 'living_clothing', tracker: 'living_clothing_events',
@@ -538,7 +538,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Sit this one out', lust: 2,
                    scene: 'You decline with a curtsy of your own. The empty outfit bows and waltzes away.' },
-        fight: { label: 'Break the spell', type: :undead, text: 'The dancers stop. The spirit wearing them all turns toward you!' }
+        fight: { name: 'Waltzing Spirit', label: 'Break the spell', type: :undead, text: 'The dancers stop. The spirit wearing them all turns toward you!' }
       },
       'alchemists_vat' => {
         name: 'Alchemist\'s Vat', tag: 'monster_transformation', tracker: 'monster_form_events',
@@ -575,7 +575,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Keep your own body', lust: 2,
                    scene: 'You shake your head. The dryad tucks the seed away and sinks back into the roots.' },
-        fight: { label: 'Fight', type: :plant, text: 'The roots lash out — the bower itself is hungry!' }
+        fight: { name: 'Dryad', label: 'Fight', type: :plant, text: 'The roots lash out — the bower itself is hungry!' }
       },
       'zephyr_chamber' => {
         name: 'Zephyr Chamber', tag: 'inflation', tracker: 'inflation_events',
@@ -624,7 +624,7 @@ module Engine
         },
         decline: { label: 'Stay ashore', text: 'Keep out of the water', lust: 2,
                    scene: 'You stay at the edge. The queen sinks back beneath the glowing eggs with a soft ripple.' },
-        fight: { label: 'Fight', type: :slime, text: 'The water itself surges up — the pool is a slime guarding its spawn!' }
+        fight: { name: 'Jellyfish Queen', label: 'Fight', type: :slime, text: 'The water itself surges up — the pool is a slime guarding its spawn!' }
       }
     }.freeze
   end

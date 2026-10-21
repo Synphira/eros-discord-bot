@@ -48,7 +48,7 @@ module Engine
         },
         decline: { label: 'Dodge', text: 'Try to dodge the nozzles (AGI)', lust: 2, escape: true,
                    scene: 'You twist away from the hose and slip out of the room before it can latch on.' },
-        fight: { label: 'Burst it', type: :slime, text: 'The nozzles belong to a bloated slime — and it wants you!' }
+        fight: { name: 'Bloated Slime', label: 'Burst it', type: :slime, text: 'The nozzles belong to a bloated slime — and it wants you!' }
       },
       'living_clothing' => {
         name: 'Living Clothing', tag: 'living_clothing', tracker: nil,
@@ -67,7 +67,7 @@ module Engine
         },
         decline: { label: 'Leave it', text: 'Leave it hanging', lust: 2,
                    scene: 'You carefully weave around the drifting clothes. They droop sadly back onto their hangers as you leave.' },
-        fight: { label: 'Rip it apart', type: :mimic, text: 'The outfit lunges — it was a mimic all along!' }
+        fight: { name: 'Clothing Mimic', label: 'Rip it apart', type: :mimic, text: 'The outfit lunges — it was a mimic all along!' }
       },
       'beast_taming' => {
         name: 'Beast Taming', tag: 'petplay', tracker: 'petplay_events',
@@ -91,7 +91,7 @@ module Engine
         },
         decline: { label: 'Refuse the collar', text: 'Leave the pack be', lust: 2,
                    scene: 'You step away from the alpha. It drops the collar with a disappointed huff and lets you go.' },
-        fight: { label: 'Challenge the alpha', type: :beast, text: 'The alpha bares its teeth and charges!' }
+        fight: { name: 'Alpha Wolf', label: 'Challenge the alpha', type: :beast, text: 'The alpha bares its teeth and charges!' }
       },
       'rubber_chamber' => {
         name: 'Rubber Chamber', tag: 'latex', tracker: 'latex_events',
@@ -111,7 +111,7 @@ module Engine
         },
         decline: { label: 'Step around', text: 'Avoid the puddle', lust: 1,
                    scene: 'You edge around the gleaming pool.' },
-        fight: { label: 'Fight it', type: :slime, text: 'The latex surges up into a hungry rubber slime!' }
+        fight: { name: 'Rubber Slime', label: 'Fight it', type: :slime, text: 'The latex surges up into a hungry rubber slime!' }
       },
       'oviposition_chamber' => {
         name: 'Oviposition Chamber', tag: 'oviposition', tracker: 'oviposition_events',
@@ -130,7 +130,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Politely decline', lust: 2,
                    scene: 'The broodmother clicks, disappointed, and returns to her nest.' },
-        fight: { label: 'Fight', type: :beast, text: 'The broodmother rears up, defending her nest!' }
+        fight: { name: 'Broodmother', label: 'Fight', type: :beast, text: 'The broodmother rears up, defending her nest!' }
       },
       'chastity_trap' => {
         name: 'Chastity Trap', tag: 'chastity', tracker: 'chastity_events',
@@ -284,7 +284,7 @@ module Engine
         },
         decline: { label: 'Walk through', text: 'Ignore the pedestal', lust: 1,
                    scene: 'You reject the pedestal\'s call and pick your way carefully through the room. The furniture watches you leave.' },
-        fight: { label: 'Smash it', type: :mimic, text: 'A chair lurches up on too many legs!' }
+        fight: { name: 'Chair Mimic', label: 'Smash it', type: :mimic, text: 'A chair lurches up on too many legs!' }
       },
       'mirror_of_change' => {
         name: 'Mirror of Change', tag: 'gender_bending', tracker: 'gender_bending_events',
@@ -422,7 +422,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Refuse her', lust: 2,
                    scene: 'You respectfully decline. She tuts and lets you go — *this* time.' },
-        fight: { label: 'Defy her', type: :demon, text: 'Her eyes flash. *"Oh, a brat. Wonderful."*' }
+        fight: { name: 'Demon Mistress', label: 'Defy her', type: :demon, text: 'Her eyes flash. *"Oh, a brat. Wonderful."*' }
       },
       'public_shame' => {
         name: 'Public Shame', tag: 'humiliation', tracker: 'humiliation_events',
@@ -462,7 +462,7 @@ module Engine
         },
         decline: { label: 'Cover your ears', text: 'Run through (AGI)', lust: 2, escape: true,
                    scene: 'You clamp your hands over your ears and sprint through, leaving the whispers behind.' },
-        fight: { label: 'Silence them', type: :undead, text: 'The whispers coalesce into a lustful wraith!' }
+        fight: { name: 'Wraith', label: 'Silence them', type: :undead, text: 'The whispers coalesce into a lustful wraith!' }
       },
       'sensory_void' => {
         name: 'Sensory Void', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
@@ -500,7 +500,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Walk off the stage', lust: 2,
                    scene: 'You slip away before anyone can place a bid. The crowd groans.' },
-        fight: { label: 'Fight the auctioneer', type: :demon, text: 'The auctioneer snarls and lunges!' }
+        fight: { name: 'Demon Auctioneer', label: 'Fight the auctioneer', type: :demon, text: 'The auctioneer snarls and lunges!' }
       },
       'strap_on_chamber' => {
         name: 'Strap-On Chamber', tag: 'pegging', tracker: 'strap_on_events',
@@ -672,7 +672,7 @@ module Engine
         },
         decline: { label: 'Stay dry', text: 'Walk around the pool', lust: 1,
                    scene: 'You decide against changing and walk around the pool. The spirits splash after you.' },
-        fight: { label: 'Fight the guardian', type: :beast, text: 'A great wolf-spirit rises from the water!' }
+        fight: { name: 'Wolf Spirit', label: 'Fight the guardian', type: :beast, text: 'A great wolf-spirit rises from the water!' }
       },
       'overstimulation_engine' => {
         name: 'Overstimulation Engine', tag: 'overstimulation', tracker: 'overstim_events',
@@ -698,7 +698,7 @@ module Engine
         },
         decline: { label: 'Back away', text: 'Leave the chair alone', lust: 4,
                    scene: 'You back out of the room. Behind you the machine keeps humming, patient.' },
-        fight: { label: 'Smash it', type: :mimic, text: 'The chair lurches toward you on stubby legs. It was a mimic all along!' }
+        fight: { name: 'Chair Mimic', label: 'Smash it', type: :mimic, text: 'The chair lurches toward you on stubby legs. It was a mimic all along!' }
       },
       'tickle_trap' => {
         name: 'Tickle Trap', tag: 'tickling', tracker: 'tickling_events',
@@ -861,7 +861,7 @@ module Engine
         },
         decline: { label: 'Back away', text: 'You very much cannot take it', lust: 3,
                    scene: 'You decide you very much cannot take it and back out. The ogre\'s laughter shakes the walls.' },
-        fight: { label: 'Fight it', type: :beast, text: 'The ogre roars and charges!' }
+        fight: { name: 'Ogre', label: 'Fight it', type: :beast, text: 'The ogre roars and charges!' }
       },
       'cum_fountain' => {
         name: 'Cum Fountain', tag: 'cum_play', tracker: 'cum_play_events',
@@ -1120,7 +1120,7 @@ module Engine
         return { ok: false, retry: true } unless spec[:fight]
 
         log << { scene: spec[:fight][:text] }
-        { ok: true, fight: spec[:fight][:type] }
+        { ok: true, fight: spec[:fight][:type], monster_name: spec[:fight][:name] }
       when 'decline'
         decline!(player, key, spec, level, log)
       when 'accept', 'alt'
