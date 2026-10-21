@@ -39,6 +39,9 @@ module Commands
                    'wife Syn runs the parlour bench through that curtain, and everything here is clean steel and ' \
                    'soft lies — no living gear at my counter. Errands? Oh, I have errands. Press **Berry\'s Quests**."_'
         )
+        if (regard = Engine::Regard.line(player, :shop))
+          c.text_display(content: regard)
+        end
         c.separator(divider: true, spacing: :small)
         c.text_display(content: "Your Lust Points: **#{player.lp}**")
         c.separator(divider: true, spacing: :small)

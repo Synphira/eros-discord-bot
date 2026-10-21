@@ -5,7 +5,8 @@ module Engine
   # the tower: beating (or satisfying) a boss opens that boss as a topic with
   # both fairies, and each wife has very different things to say about them.
   # Per the lore in docs/lore.md, neither fairy ever calls this place a
-  # dungeon, and neither confirms what it really is — yet.
+  # dungeon before the reveal: after a delver's first return from floor 35,
+  # Syn confirms it is a temple, and revealed variants replace the coy ones.
   module Conversations
     PEOPLE = {
       'berry' => {
@@ -105,6 +106,184 @@ module Engine
              'this place to show her what my faith looks like: visitors tempted, unraveled, and driven into ' \
              'depravity, floor by floor, all of it hers. Judge the work kindly, darling. It was made with love."'
       }
+    }.freeze
+
+    # The reveal, delivered by Syn after a delver's first return from
+    # floor 35. From then on, revealed variants replace the coy answers:
+    # Syn speaks as a builder, Berry keeps her domestic voice with proper
+    # nouns finally allowed.
+    REVEAL_SCENE =
+      '_Syn looks at you for a long moment, then sets her needle down like a decision. "You\'ve been to ' \
+      'the top, darling. You\'ve met her, and she handed you back herself — so we stop lying to you now. ' \
+      'This is not a dungeon, and it never was. It is a **temple** — to Eros, built by me and six old ' \
+      'friends of mine, floor by floor, to tempt the world into giving in to her. The cycles are hers: ' \
+      'her answer to our work, and the reason nobody leaves unchanged. Ask me properly now. I built this ' \
+      'place. I can finally say so."_'
+
+    REVEALED_BOSS_ANSWERS = {
+      'broodmother' => {
+        berry: '"In this temple, she\'s a high priestess," Berry says, with enormous reluctance. "Ancient, ' \
+               'holy, and still the creature who once kept my wife. The temple can have her ministry. I ' \
+               'keep my opinion."',
+        syn: '"My Broodmother of the first five floors," Syn says. "She kept me once, long before the ' \
+             'temple — I bargained my way out of her, and when I built, I came back and offered her an ' \
+             'endless table instead. She is not tame, darling. She is employed. There is a difference, ' \
+             'and the difference is architecture."'
+      },
+      'succubus_queen' => {
+        berry: '"A high priestess of this temple," Berry says, "and my wife\'s oldest collaborator in ' \
+               'cruelty. The traps were their great work together. In this house I am expected to call ' \
+               'that holy. I call it Tuesday."',
+        syn: '"My Queen built the traps with me," Syn says openly. "Every plate and petal of them — the ' \
+             'temple\'s first ministry, and still the one I am proudest of. She was a small court\'s ' \
+             'queen before I made her eternal. Ask her about the work sometime. She preens."'
+      },
+      'incubus_king' => {
+        berry: '"High priest of this temple," Berry says, "unfortunately ordained. He hits on me in a ' \
+               'house of worship, sugar. Syn says that makes it liturgy. I say it makes it paperwork."',
+        syn: '"The King\'s half of the spawning spell keeps this temple stocked," Syn says. "He owed me ' \
+             'a debt once; I collected in genius. His priesthood is real, his crown is self-declared, ' \
+             'and both facts annoy him in exactly the wrong order."'
+      },
+      'verdant_dryad' => {
+        berry: '"Our Dryad of the temple," Berry says warmly. "A high priestess, a dear friend, and the ' \
+               'reason there is fruit worth eating in a house of sin. Even her vines are hospitable. ' \
+               'Eventually. To someone."',
+        syn: '"The Dryad\'s garden is the temple\'s mercy and its stickiest argument," Syn says. "She ' \
+             'came for company, gave us the vine and tentacle work, and has been feeding this house ' \
+             'since before the walls were finished. Rooted things keep a temple honest."'
+      },
+      'lich_lord' => {
+        berry: '"The temple\'s high priest of the cold floors," Berry says with a shudder. "Syn\'s ' \
+               'teacher, a thousand years dead, and still the only cleric I will not be alone in a ' \
+               'room with. Holy is not the same as welcome, sugar."',
+        syn: '"My teacher wears the twenty-first floor," Syn says. "Everything this temple is built ' \
+             'with — lust made to work — I learned in his cold hands. He joined us to run an experiment ' \
+             'with thirty-five floors of apparatus. I owe him the craft. I decline him the company. ' \
+             'Priesthood changes neither fact."'
+      },
+      'alpha_beast' => {
+        berry: '"A high priest of this temple," Berry declares, "and a very good boy. The temple has ' \
+               'doctrine, sugar, and the doctrine is that nobody is mean about him in my shop."',
+        syn: '"My puppy keeps the wide floors," Syn says, glowing. "I designed them broad for his pack ' \
+             'when we raised the temple, and he has been its most honest priest ever since: no ' \
+             'doctrine, no scheme, just wanting, offered up whole. Eros could ask for no cleaner ' \
+             'worship than his."'
+      },
+      'eros' => {
+        berry: 'Berry\'s voice goes soft and certain. "Now you\'ve stood in front of her too. Isn\'t ' \
+               'she perfect? This whole temple is just us downstairs loving her as loudly as we know ' \
+               'how. You understand now, sugar. I can see that you do."',
+        syn: '"You have met my Goddess," Syn says, and there is no tease anywhere in her. "I built her ' \
+             'a temple out of my own past — every priest in it someone I had loved, owed, studied ' \
+             'under, or escaped — and she answered by trapping the world in it with us. Judge the ' \
+             'work kindly, darling. It was made with love, and now you are part of it."'
+      }
+    }.freeze
+
+    REVEALED_GENERAL = {
+      'this_place' => {
+        berry: '"The temple, sugar," Berry says, almost giddy with permission. "Eros\'s temple, ' \
+               'thirty-five floors of it, and my wife built it with her oldest friends. I just keep ' \
+               'the shop at its heart and feed everyone who bleeds in. Welcome to church."',
+        syn: '"My temple," Syn says simply. "To Eros, built by seven pairs of hands over decades — ' \
+             'traps, spawning-spells, gardens, kennels, all of it ministry, all of it mine to finally ' \
+             'name. You have been in church since the doors closed behind you, darling."'
+      },
+      'cycles' => {
+        berry: '"Her cycles, sugar," Berry says. "We built the temple; she answered it by making ' \
+               'sure nobody just... leaves. Round and round until it takes. I have stopped pretending ' \
+               'that isn\'t romantic. It is simply also a cage."',
+        syn: '"The cycles are hers," Syn says. "Not ours. We built a temple on dreams and signs, and ' \
+             'when it stood finished, she laid the loop over it herself — our one proof she answered. ' \
+             'Every return is her hand on the back of your neck, darling. Gentle. Final."'
+      },
+      'covar' => {
+        berry: '"Covar keeps the Cursed Shop for this temple," Berry says, "and he is family, sugar. ' \
+               'Tower\'s own, remade by the place he serves. If the temple has a matchmaker, it\'s ' \
+               'him, and yes, I still send food down."',
+        syn: '"My little brother tends the temple\'s living gear," Syn says. "I made the first of it; ' \
+             'he made a ministry of collecting the rest. In a house built to change people, darling, ' \
+             'the boy who loves what it made of him might be its truest priest — don\'t tell the ' \
+             'ordained ones I said so."'
+      }
+    }.freeze
+
+    # Satisfying a boss (rather than beating them) earns extra fairy
+    # material, appended the first time that boss is discussed afterwards.
+    SATISFY_EXTRAS = {
+      'broodmother' => {
+        berry: '_You satisfied her? Berry stares. "Well. At least somebody in this marriage\'s orbit has. Don\'t tell me details and don\'t you dare bring her home."_',
+        syn: '_"And you satisfied her, rather than fighting?" Syn\'s smile turns slow. "Good. Everyone should, once. Tell me whether the brood watched. No — tell me everything."_'
+      },
+      'succubus_queen' => {
+        berry: '_"You satisfied the Queen." Berry\'s smile is bright and dangerous. "Centuries of practice, she says. I\'ll be checking my wife\'s story against yours, sugar."_',
+        syn: '_Syn positively glows. "Satisfied her? Then you\'ve had the full court treatment. She only does the gaze properly for people she intends to keep thinking about."_'
+      },
+      'incubus_king' => {
+        berry: '_"You satisfied him and walked out?" Berry looks almost impressed. "He\'ll be telling the court it was a royal visitation. Let him. You and I know who did the work."_',
+        syn: '_"You satisfied the King?" Syn laughs, delighted. "He\'ll have posed afterwards like it was his achievement. It never is, darling, and somehow he never learns."_'
+      },
+      'verdant_dryad' => {
+        berry: '_"You satisfied the Dryad?" Berry softens. "Then you smell of fruit and pollen for days and everybody\'s kind about it. That\'s her gift. One of them."_',
+        syn: '_"Satisfied my Dryad?" Syn murmurs. "Then the garden has your measure now, darling. She keeps what she pleases. Go back sometime — slowly."_'
+      },
+      'lich_lord' => {
+        berry: '_"You satisfied the Lich." Berry shudders theatrically. "Warmth for the corpse, from my own customer. I\'ll be boiling the ledger tonight, sugar."_',
+        syn: '_"You gave him your pleasure willingly?" Syn\'s distaste wars with professional pride. "Then his data is excellent and his hands were everywhere. Both. It\'s always both with him."_'
+      },
+      'alpha_beast' => {
+        berry: '_"You satisfied the big boy?" Berry beams. "Did he wag? He wags. You\'re pack-adjacent now, sugar — that\'s a real honour in this house."_',
+        syn: '_"You satisfied my puppy?" Syn purrs. "Then you\'ve been claimed in the honestest way this temple knows. He\'ll remember your scent forever, darling. So will I."_'
+      },
+      'eros' => {
+        berry: '_Berry takes your hands, hushed. "You satisfied her. You. Sugar, do you understand what you did? Neither do I, and I\'ve believed in her my whole married life."_',
+        syn: '_Syn is quiet a moment. "You satisfied my Goddess," she says at last. "Whatever I built, I never built that. Some doors only open from your side, darling."_'
+      }
+    }.freeze
+
+    # Shorter familiar versions for repeat asks (first answer is the full
+    # one; the fairies remember being asked).
+    REPEAT_BOSS = {
+      'broodmother' => { berry: '"Still hate her, still because of Syn. Some things are load-bearing, sugar."',
+                         syn: '"Still my favourite argument for fucking a mimic once, darling. The brood remembers you kindly."' },
+      'succubus_queen' => { berry: '"Still flirting with my wife across the centuries. Still counting the jokes. Still losing."',
+                            syn: '"My old friend, my fellow trapwright. Ask her about the work; she\'ll preen for a week."' },
+      'incubus_king' => { berry: '"Still only bearable with Syn in the room. Some liturgies never change."',
+                          syn: '"Annoying, gorgeous, and half the reason the halls stay stocked. My favourite debt I ever collected."' },
+      'verdant_dryad' => { berry: '"Still fruit, still friendship, still the safest arms in the building."',
+                           syn: '"My green friend. Half of what grabs you down there started as her daydream."' },
+      'lich_lord' => { berry: '"Still dead, still creepy, still not invited to dinner."',
+                       syn: '"My cold teacher. I owe him the craft; the company remains declined."' },
+      'alpha_beast' => { berry: '"A puppy. A very good boy. This is the whole report, every time."',
+                         syn: '"My adorable puppy. Yes, he\'s still perfect. Next question, darling."' },
+      'eros' => { berry: '"Still perfect, sugar. Some answers don\'t need updating."',
+                  syn: '"My Goddess. Everything else I say is footnotes, darling."' }
+    }.freeze
+
+    REPEAT_GENERAL = {
+      'this_place' => { berry: '"Tower, floors, us in the middle. Still true, sugar."',
+                        syn: '"Old, deliberate, and full of purpose. The rest you climb for, darling."' },
+      'each_other' => { berry: '"Still mine, still trouble, still worth it."',
+                        syn: '"Still Berry. Still the dangerous one, whatever the needles suggest."' },
+      'your_work' => { berry: '"Shop, board, ledger. The empire holds, sugar."',
+                       syn: '"I ink; she sells; you carry the evidence. Complete service, as ever."' },
+      'monsters' => { berry: '"Still restocking themselves. I still don\'t ask the tower."',
+                      syn: '"My working hums along. The halls provide, darling."' },
+      'traps' => { berry: '"Still mostly my wife\'s fault. She\'s still proud."',
+                   syn: '"Still my workmanship. Changed, not just caught — remember?"' },
+      'curses' => { berry: '"Still purge, silence, or pay up front. The handwriting fades when you do."',
+                    syn: '"Still signatures, darling. I still study them up close."' },
+      'marks' => { berry: '"Still my wife\'s handwriting on you. She remembers her favourites."',
+                   syn: '"Still promises that survive you. The portrait continues, darling."' },
+      'transformations' => { berry: '"Still growing on people. The book stays closed, sugar."',
+                             syn: '"The place, getting honest with you. It suits you, darling."' },
+      'altars' => { berry: '"Still kneel, offer, be seen. She knows her regulars."',
+                    syn: '"Still her favourite currency: being noticed back."' },
+      'cycles' => { berry: '"Still round again, prettier. The tower keeps its favourites."',
+                    syn: '"Another sitting, darling. The portrait is never finished."' },
+      'covar' => { berry: '"Still sweet, still family, still not eating properly."',
+                   syn: '"My little brother of the cursed counter. Still cataloguing my scripture."' }
     }.freeze
 
     # Covar's own topics. He is not bound by the fairies' careful language:
@@ -380,11 +559,27 @@ module Engine
       bosses = BOSS_TOPICS.map do |spec|
         present(player, spec.merge(
                           BOSS_ANSWERS.fetch(spec[:key], {}),
+                          revealed_berry: REVEALED_BOSS_ANSWERS.dig(spec[:key], :berry),
+                          revealed_syn: REVEALED_BOSS_ANSWERS.dig(spec[:key], :syn),
                           question: "What about #{spec[:label]}?",
                           unlock_text: "Defeat or satisfy #{spec[:label]} once"
                         ))
       end
       general + bosses
+    end
+
+    # The reveal: earned by a first return from floor 35, delivered by Syn
+    # in person, and remembered afterwards.
+    def temple_revealed?(player)
+      player.tracker('temple_revealed').positive?
+    end
+
+    def reveal_ready?(player)
+      !temple_revealed?(player) && player.tracker('cycles_completed').positive?
+    end
+
+    def note_revealed!(player)
+      player.set_tracker!('temple_revealed', 1)
     end
 
     def topics_for(player, person)
@@ -441,6 +636,14 @@ module Engine
       topics_for(player, person).select { |topic| topic[:unlocked] }.first(25)
     end
 
+    def boss_satisfied?(player, topic)
+      return false unless topic[:boss]
+
+      Array(player.tracker_hash['bosses_satisfied_names'])
+        .map { |name| Engine::BossFights.canonical_name(name) }
+        .include?(Engine::BossFights.canonical_name(topic[:boss]))
+    end
+
     def answer(player, person, key)
       person = normalize_person(person)
       topic = topics_for(player, person).find { |t| t[:key] == key.to_s }
@@ -449,7 +652,36 @@ module Engine
         return { ok: false, topic: topic, message: "🔒 **#{topic[:label]}** — #{unlock_hint(player, topic)}" }
       end
 
-      { ok: true, person: person, topic: topic, text: topic[person.to_sym].to_s }
+      revealed_now = temple_revealed?(player)
+      revealed = REVEALED_GENERAL.dig(topic[:key], person.to_sym) if revealed_now
+      full = revealed || topic[:"revealed_#{person}"] if revealed_now
+      full = (full || topic[person.to_sym]).to_s
+
+      # The fairies remember being asked: first answer in full, repeats in
+      # a shorter familiar version (revealed repeats keep the long form,
+      # with a familiar frame).
+      token = "#{person}:#{topic[:key]}:#{revealed_now ? 'r' : 'c'}"
+      heard = Array(player.tracker_hash['talk_heard']).map(&:to_s).include?(token)
+      repeat = (REPEAT_BOSS.dig(topic[:key], person.to_sym) || REPEAT_GENERAL.dig(topic[:key], person.to_sym)) unless revealed_now
+      text =
+        if heard && repeat
+          repeat
+        elsif heard && revealed_now
+          "_Asked me that before — still true._\n#{full}"
+        else
+          full
+        end
+
+      # Satisfying this boss earns extra, the first time it comes up.
+      satisfied_extra = nil
+      if !heard && topic[:boss] && boss_satisfied?(player, topic)
+        satisfied_extra = SATISFY_EXTRAS.dig(topic[:key], person.to_sym)
+        text = "#{text}\n\n#{satisfied_extra}" if satisfied_extra
+      end
+
+      player.remember!('talk_heard', token) unless person == 'covar'
+      { ok: true, person: person, topic: topic, text: text, heard_before: heard,
+        satisfied_extra: !satisfied_extra.nil? }
     end
 
     def present(player, topic)

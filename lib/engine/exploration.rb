@@ -163,7 +163,10 @@ module Engine
       end
       note_room_explored!
 
-      return event_room(Engine::Altars.present!(@player)) if rand < 0.07
+      court = dreaming_court?
+      return manifestation_room if court && rand < 0.12
+
+      return event_room(Engine::Altars.present!(@player)) if rand < (court ? 0.16 : 0.07)
 
       if (npc = Engine::NPCSystem.maybe_start!(@player))
         return event_room(npc)
@@ -176,6 +179,9 @@ module Engine
       monster_weight = [[28 + threat.encounter_bonus, 55].min, 15].max
       rate = @player.encounter_rate_multiplier * Engine::TransformationSystem.monster_rate(@player)
       monster_weight = [[(monster_weight * rate).round, 5].max, 70].min
+      # The dreaming court (floors 31-34) is sparse: Eros's own presence
+      # crowds out lesser hungers. What finds you there is her.
+      monster_weight = [(monster_weight * 0.6).round, 5].max if court
 
       # Weighted pool, normalized: high monster weight dilutes the stairs, never erases them.
       weights = {
@@ -198,6 +204,69 @@ module Engine
     end
 
     private
+
+    # Floors 31-34: Eros's dreaming court, just below her throne.
+    def dreaming_court?
+      wrapped = ((@player.current_floor.to_i - 1) % 35) + 1
+      (31..34).cover?(wrapped)
+    end
+
+    # One-time domain intro for the section the player has just entered.
+    def domain_suffix
+      line = Engine::Biomes.domain_intro(@player)
+      line ? "\n#{line}\n" : ''
+    end
+
+    # A partial manifestation: never her full presence below floor 35 —
+    # a tentacle, a voice, warmth. The closer her Attention, the kinder.
+    def manifestation_room
+      attention = Engine::Altars.attention(@player)
+      lines = [
+        "**Floor #{@player.current_floor}** — the dreaming court stirs.",
+        domain_suffix.strip,
+        Engine::Biomes.line(@player)
+      ].reject(&:empty?)
+
+      if attention >= 40
+        @player.gain_lp!(15)
+        lines << '_Warmth closes around you like an embrace held a breath too long, and a great white ' \
+                 'tentacle uncoils from nowhere to stroke your cheek — unhurried, familiar. "Almost ' \
+                 'home, my attentive one," Eros murmurs, from everywhere and nowhere. "Come up. I have ' \
+                 'been watching you almost as much as you have been pleasing me."_'
+        lines << '**+15 LP** — her favour, pressed into your palm.'
+      elsif attention >= 15
+        @player.gain_lust!(8)
+        lines << '_A voice with no mouth, close as breath on your ear: "Closer," Eros purrs. Something ' \
+                 'vast and warm brushes the length of you and is gone, leaving your skin singing. ' \
+                 '_Lust +8._'
+      else
+        @player.gain_lust!(5)
+        lines << '_The candlelight bends toward you, all at once, like a head turning. You feel ' \
+                 '**considered** — briefly, distantly, the way weather considers a field. Then it passes. ' \
+                 '_Lust +5._'
+      end
+      lines << '_No monster finds you here. Down here, the only hunger that matters is hers._'
+
+      broken = false
+      if (climax = @player.try_climax!)
+        lines.concat(Array(climax[:lines]))
+        broken = climax[:broken]
+        if broken
+          @player.reset_run!
+          curse = @player.apply_defeat_curse!
+          lines << "You've been cursed with **#{curse[:curse].name}**: #{curse[:entry][:description]}" if curse[:curse]
+          lines << "Even her lightest touch was too much. Floor, defiance, and lust reset — LP, curses, and living gear persist."
+        end
+      end
+
+      RoomResult.new(
+        kind: :empty,
+        colour: 0x8b0046,
+        with_actions: !broken,
+        broken: broken,
+        message: lines.join("\n")
+      )
+    end
 
     def floor_stamp
       "#{@player.current_cycle}:#{@player.current_floor}"
@@ -312,7 +381,7 @@ module Engine
         with_actions: true,
         message: <<~MSG.strip
           **Floor #{@player.current_floor}** — something stirs.
-          #{Engine::Biomes.line(@player)}
+          #{Engine::Biomes.line(@player)}#{domain_suffix}
 
           You encounter a **#{monster[:name]}** _(#{monster[:type_name]})_!
           _#{monster[:type_description]}_
@@ -361,7 +430,7 @@ module Engine
         with_actions: !broken,
         message: <<~MSG.strip
           **Floor #{@player.current_floor}** — the floor gives way.
-
+          #{domain_suffix}
           You've triggered a **#{trap[:name]}**!
           #{detail}
 
@@ -395,7 +464,7 @@ module Engine
 
           You descend to **Floor #{@player.current_floor}**.
           _Rooms searched on the floor above: **#{searched}**._
-          #{Engine::Biomes.line(@player)}
+          #{Engine::Biomes.line(@player)}#{domain_suffix}
           Deepest reached: **#{Player.depth_label(@player.deepest_depth)}**.
           The threats below will be stronger.#{worn ? "\n#{worn}" : ''}
         MSG
@@ -409,7 +478,7 @@ module Engine
         with_actions: true,
         message: <<~MSG.strip
           **Floor #{@player.current_floor}** — silence.
-          #{Engine::Biomes.line(@player)}
+          #{Engine::Biomes.line(@player)}#{domain_suffix}
 
           You find an empty room. Nothing of interest here.
 

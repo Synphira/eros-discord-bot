@@ -21,6 +21,13 @@ module Commands
         return
       end
 
+      # The reveal: after a first return from floor 35, Syn delivers it in
+      # person the next time this delver talks to her.
+      if person == 'syn' && Engine::Conversations.reveal_ready?(player)
+        Engine::Conversations.note_revealed!(player)
+        notice = [Engine::Conversations::REVEAL_SCENE, notice].compact.join("\n\n")
+      end
+
       topics = Engine::Conversations.topics_for(player, person)
       unlocked = topics.select { |topic| topic[:unlocked] }
       locked = topics.reject { |topic| topic[:unlocked] }
@@ -28,6 +35,15 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOURS[person]) do |c|
         c.text_display(content: "## #{spec[:emoji]} #{spec[:heading]} — #{player.display_name}\n#{spec[:intro]}")
         c.text_display(content: notice) if notice
+        if person != 'covar' && (regard = Engine::Regard.line(player, person == 'syn' ? :parlour : :shop))
+          c.text_display(content: regard)
+        end
+        if person != 'covar' && Engine::Conversations.temple_revealed?(player)
+          c.text_display(content: '-# You know what this place is now. Their answers have changed — ask again.')
+        end
+        if person != 'covar' && topics.any? { |t| t[:boss] && t[:unlocked] && Engine::Conversations.boss_satisfied?(player, t) }
+          c.text_display(content: '-# They especially want to hear about the bosses you **satisfied**, not just beat.')
+        end
 
         c.row do |row|
           row.string_select(
@@ -89,6 +105,7 @@ module Commands
           c.row do |row|
             row.button(label: '🍓 Quest Board', style: :secondary, custom_id: "eros:quests:view:#{event.user.id}")
             row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{event.user.id}")
+            row.button(label: '📖 Journal', style: :secondary, custom_id: "eros:codex:view:#{event.user.id}")
           end
         end
       end

@@ -18,6 +18,8 @@ require_relative 'lib/engine/corruption'
 require_relative 'lib/engine/marks'
 require_relative 'lib/engine/quests'
 require_relative 'lib/engine/conversations'
+require_relative 'lib/engine/codex'
+require_relative 'lib/engine/regard'
 require_relative 'lib/engine/biomes'
 require_relative 'lib/engine/altars'
 require_relative 'lib/engine/admirers'
@@ -79,6 +81,7 @@ Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require pa
   Commands::Parlour,
   Commands::Quests,
   Commands::Conversations,
+  Commands::Codex,
   Commands::Options,
   Commands::CursedShop,
   Commands::Dev,

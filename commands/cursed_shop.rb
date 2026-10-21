@@ -26,6 +26,9 @@ module Commands
                    'I charge in stories."_'
         )
         c.text_display(content: notice) if notice
+        if (regard = Engine::Regard.line(player, :cursed))
+          c.text_display(content: regard)
+        end
         c.separator(divider: true, spacing: :small)
 
         takeable = []

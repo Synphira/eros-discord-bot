@@ -33,6 +33,12 @@ module Engine
     end
 
     def visit!(player, log)
+      visits = player.tracker('eros_visits') + 1
+      player.set_tracker!('eros_visits', visits)
+      if visits > 1
+        log << "_She comes the way weather returns to a favourite field — without announcement and " \
+               "entirely on purpose. Visit **#{visits}**, pet. She is keeping count too._"
+      end
       case rand(3)
       when 0
         player.gain_lp!(40)
@@ -64,6 +70,12 @@ module Engine
              { scene: 'An altar of white stone and dark red silk, carved with a towering, horned goddess whose ' \
                       'stone tentacles curl around the offering bowl. The candles light themselves as you ' \
                       "approach. Her Attention rests on you at **#{attention(player)}/#{MAX_ATTENTION}**." }]
+      if attention(player) >= 60
+        log << '_The candles were already lit — all of them, flames leaning toward you like faces. ' \
+               'She was watching this altar before you found it. She was watching **you**._'
+      elsif attention(player) >= 25
+        log << '_One candle lights a breath before the others. Noticed, then. Not yet known._'
+      end
       log << 'What do you offer your goddess?'
       { ok: true, mode: :choice, name: 'Altar of Eros', colour: 0x5c0a2e, log: log, choices: choices(player) }
     end

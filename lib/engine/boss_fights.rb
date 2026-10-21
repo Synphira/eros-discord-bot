@@ -89,16 +89,17 @@ module Engine
         title: 'Eros, Goddess of Lust',
         type: 'demon',
         type_name: 'Goddess of Lust',
-        description: 'The goddess who built this tower as her temple towers over her throne of gold and silk — pale ' \
+        description: 'The goddess for whom this tower was raised — its temple, its clergy, and its cycles all ' \
+                     'answering to her — towers over her throne of gold and silk — pale ' \
                      'ash-grey hair in bangs marked with crimson hearts, massive pitch-black horns sweeping from her ' \
                      'crown, and deep red eyes glowing above a cruel, confident smile. A thick black choker hugs her ' \
                      'throat, and where a cape should fall, enormous smooth white tentacles coil and writhe behind ' \
                      'her, their undersides a wet crimson-magenta lined with glistening suckers that move with lives ' \
-                     'of their own. She wears a glossy white high-cut bodysuit with puff sleeves, dark piping and a ' \
+                     'of their own. She wears a glossy white high-cut bodysuit with puff sleeves, dark piping, a ' \
                      'red heart over her chest, a split mantle flaring white outside and dark red within, heavy black ' \
                      'cuffs on her wrists, and sheer white thigh-highs bound in tattered wraps above bare feet that ' \
                      'fade into purplish-pink. Every sin below flows up into her. "There you are, pet. Did you really ' \
-                     'think you were escaping?"',
+                     'think the top was a door?"',
         color: 0x5c0a2e,
         strength: 28,
         agility: 16,
@@ -420,7 +421,7 @@ module Engine
         end
       warning =
         if boss[:final]
-          'This is the goddess herself. Defeat or satisfy her to conquer her tower and begin the next cycle.'
+          'This is the goddess herself. Defeat or satisfy her, and she will return you herself to begin the next cycle.'
         else
           "This foe is far more dangerous than any you've faced before."
         end
@@ -437,6 +438,8 @@ module Engine
         HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
       MSG
       message += "\n#{start_lines.join("\n")}" if start_lines.any?
+      gossip = gossip_line(player, boss[:name])
+      message += "\n\n#{gossip}" if gossip
       if boss[:final]
         regard = eros_regard_lines(player)
         message += "\n\n#{regard.join("\n")}" if regard.any?
@@ -548,6 +551,52 @@ module Engine
                                                actor: boss_name.to_s.delete_prefix('The '))
       pool += eros_tailored_scenes(player) if boss_name == 'Eros'
       Engine::ContentOptions.pick(player, pool, fallback: spec['any'])
+    end
+
+    # The lords know what the fairies say about them at the shop. If this
+    # delver has actually heard that gossip, the boss may quote it back.
+    GOSSIP_KEYS = {
+      'Mimic Broodmother' => 'broodmother', 'Succubus Queen' => 'succubus_queen',
+      'Incubus King' => 'incubus_king', 'Verdant Dryad' => 'verdant_dryad',
+      'Lich Lord' => 'lich_lord', 'Alpha Beast' => 'alpha_beast', 'Eros' => 'eros'
+    }.freeze
+
+    GOSSIP_CHANCE = 0.5
+
+    GOSSIP_LINES = {
+      'Mimic Broodmother' => '_Every lid in the chamber lifts a little, listening. "The strawberry wife ' \
+                             'hates me, I hear," the Broodmother purrs from all of them at once. "Because ' \
+                             'of Syn. Tell her — Mother keeps what she catches. She may visit her wife ' \
+                             'any time."_',
+      'Succubus Queen' => '_The Queen\'s gaze sharpens with delight. "So. You\'ve been at the shop, ' \
+                          'hearing my darling Syn describe me — and her little wife counting our jokes. ' \
+                          'Tell them both: the count is about to go up."_',
+      'Incubus King' => '_The King grins like a headline. "Word is the strawberry only likes me with ' \
+                        'Syn in the room. Then let\'s give her something to tolerate, delver. Hold ' \
+                        'still."_',
+      'Verdant Dryad' => '_A warm laugh moves through the leaves. "The fairies call me friend and send ' \
+                         'their delvers down smelling of my fruit," the Dryad says. "You may tell them ' \
+                         'the garden says come and sit. Both of you. Any time."_',
+      'Lich Lord' => '_Blue fire steadies on you. "The living wife is creeped out, and my pupil declines ' \
+                     'my company while using my life\'s work," the Lich Lord observes. "Recorded. ' \
+                     'Quoted. Filed. Now — be warm at me, data."_',
+      'Alpha Beast' => '_The great head tilts, and the tail — the whole room learns — thumps once against ' \
+                       'the floor. "The little flying ones say Puppy," the Alpha rumbles, pleased beyond ' \
+                       'all strategy. "Puppy says: run, or don\'t. Both are good."_',
+      'Eros' => '_Eros\'s cruel smile takes on a conspiratorial edge. "My fairies have been describing ' \
+                'me to you," she purrs. "Berry\'s devotion. Syn\'s pride. Both so certain, both so ' \
+                'partial. Shall we give them something accurate to say, pet?"_'
+    }.freeze
+
+    def gossip_line(player, boss_name)
+      key = GOSSIP_KEYS[canonical_name(boss_name)]
+      return nil unless key
+
+      heard = Array(player.tracker_hash['talk_heard']).map(&:to_s)
+      return nil unless heard.any? { |token| token.split(':')[1] == key }
+      return nil unless rand < GOSSIP_CHANCE
+
+      GOSSIP_LINES[canonical_name(boss_name)]
     end
 
     # Eros reads every delver who reaches her: the hybrid shape the tower gave

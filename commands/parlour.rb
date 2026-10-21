@@ -36,6 +36,9 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: INTRO)
         c.text_display(content: notice) if notice
+        if (regard = Engine::Regard.line(player, :parlour))
+          c.text_display(content: regard)
+        end
         lines = owned.map { |k| "◆ #{Engine::Marks.label(k)} — _#{Engine::Marks::MARKS[k][:perk]}_" }
         c.text_display(
           content: "**Your marks** #{owned.size}/#{Engine::Marks.max_marks(player)} · **LP** #{player.lp}\n" \
