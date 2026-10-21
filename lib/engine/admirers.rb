@@ -6,8 +6,13 @@ module Engine
   # on your behalf — and getting jealous of the others.
   module Admirers
     THRESHOLD = 3
+    # Rooms an admirer keeps following you before it loses your scent and
+    # wanders off — admirers are a passing favour, not a collection.
+    LIFESPAN_ROOMS = 20
     TYPES_TRACKER = 'admirer_types'
     NAMES_TRACKER = 'admirer_names'
+    ROOMS_TRACKER = 'admirer_rooms'
+    TOTAL_TRACKER = 'admirers_total'
 
     module_function
 
@@ -19,6 +24,22 @@ module Engine
       Array(player.tracker_hash[TYPES_TRACKER]).map(&:to_s)
     end
 
+    # How many admirers you have right this moment, and how many you have
+    # ever had (legacy saves predate the total, so never show fewer than
+    # the ones currently following).
+    def current_count(player)
+      types(player).size
+    end
+
+    def total(player)
+      [player.tracker(TOTAL_TRACKER), current_count(player)].max
+    end
+
+    def rooms_left(player, type)
+      rooms = player.tracker_hash[ROOMS_TRACKER]
+      rooms.is_a?(Hash) && rooms.key?(type.to_s) ? rooms[type.to_s].to_i : LIFESPAN_ROOMS
+    end
+
     def admirer?(player, type)
       types(player).include?(type.to_s)
     end
@@ -28,17 +49,59 @@ module Engine
       names.is_a?(Hash) ? names[type.to_s] : nil
     end
 
+    def rooms_hash(player)
+      rooms = player.tracker_hash[ROOMS_TRACKER]
+      rooms.is_a?(Hash) ? rooms.transform_keys(&:to_s) : {}
+    end
+
+    def set_rooms_left!(player, type, rooms)
+      player.update(trackers: player.tracker_hash.merge(ROOMS_TRACKER => rooms_hash(player).merge(type.to_s => rooms)))
+    end
+
+    # One explored room passes: every admirer's remaining rooms tick down,
+    # and any that reach zero lose your scent and vanish. Returns the
+    # departed admirers' display names so the caller can say goodbye.
+    def tick_rooms!(player)
+      owned = types(player)
+      return [] if owned.empty?
+
+      rooms = rooms_hash(player)
+      departed = []
+      kept = owned.select do |type|
+        left = (rooms.key?(type) ? rooms[type].to_i : LIFESPAN_ROOMS) - 1
+        rooms[type] = left
+        departed << type if left <= 0
+        left.positive?
+      end
+      names = player.tracker_hash[NAMES_TRACKER]
+      names = names.is_a?(Hash) ? names.transform_keys(&:to_s) : {}
+      departed_names = departed.map { |type| names[type] || type }
+      player.update(trackers: player.tracker_hash.merge(
+                      TYPES_TRACKER => kept,
+                      NAMES_TRACKER => names.reject { |k, _| departed.include?(k) },
+                      ROOMS_TRACKER => rooms.reject { |k, _| departed.include?(k) }
+                    ))
+      departed_names
+    end
+
     def record_satisfaction!(player, enc, log)
       type = enc[:type].to_s
       return if type.empty?
 
       player.bump_tracker!("admirer_#{type}")
-      return unless count(player, type) >= THRESHOLD && !admirer?(player, type)
+      if admirer?(player, type)
+        # Pleasing it again reminds it why it follows you: full lifespan anew.
+        set_rooms_left!(player, type, LIFESPAN_ROOMS)
+        return
+      end
+      return unless count(player, type) >= THRESHOLD
 
       player.update(trackers: player.tracker_hash.merge(
                       TYPES_TRACKER => types(player) + [type],
-                      NAMES_TRACKER => (player.tracker_hash[NAMES_TRACKER] || {}).merge(type => enc[:name].to_s)
+                      NAMES_TRACKER => (player.tracker_hash[NAMES_TRACKER] || {}).merge(type => enc[:name].to_s),
+                      ROOMS_TRACKER => rooms_hash(player).merge(type => LIFESPAN_ROOMS)
                     ))
+      player.bump_tracker!(TOTAL_TRACKER)
       log << "💌 **A monster has become your admirer!** The **#{enc[:name]}** you pleased so thoroughly now " \
              "follows your scent through the tower. Its kind will go easier on you — and it leaves gifts."
       others = types(player) - [type]

@@ -559,21 +559,18 @@ module ErosUI
     if (corruption = Engine::Corruption.status_line(player))
       container.text_display(content: corruption)
     end
-    container.text_display(content: Engine::Weekly.status_line)
-    container.separator(divider: true, spacing: :small)
-    combat_line = player.reconcile_encounter! ? 'Engaged' : 'Quiet for now'
-    event = player.event_data
-    if event
-      extra =
-        if event[:mode].to_s == 'timed'
-          " · Event: **#{event[:name]}** _(turn #{event[:turn]}/#{event[:duration]})_ — press **Continue**"
-        else
-          " · Event: **#{event[:name]}** — choose a button"
-        end
-      container.text_display(content: "**Combat:** #{combat_line}#{extra}")
-    else
-      container.text_display(content: "**Combat:** #{combat_line}")
+    admirer_types = Engine::Admirers.types(player)
+    admirer_line = "💌 **Admirers** — **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
+    if admirer_types.any?
+      following = admirer_types.map do |type|
+        name = Engine::Admirers.name_for(player, type) || type
+        "#{name} _(#{Engine::Admirers.rooms_left(player, type)} rooms left)_"
+      end
+      admirer_line += "\n-# Following you: #{following.join(' · ')}"
     end
+    container.text_display(content: admirer_line)
+    container.text_display(content: Engine::Weekly.status_line)
+    player.reconcile_encounter!
     container.separator(divider: false, spacing: :small)
     container.text_display(
       content: '-# Defeat resets the run and returns you to Cycle 1 — LP, curses, living gear, titles, ' \

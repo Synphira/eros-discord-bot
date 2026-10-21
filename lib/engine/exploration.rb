@@ -133,6 +133,17 @@ module Engine
     end
 
     def roll
+      result = roll_room
+      if result && @departed_admirers&.any?
+        goodbyes = @departed_admirers.map do |name|
+          "💌 _Your admirer, the **#{name}**, has lost your scent in the tower's halls and wanders off for good._"
+        end
+        result.message = (goodbyes + [result.message]).compact.join("\n\n")
+      end
+      result
+    end
+
+    def roll_room
       if @player.active_event?
         return pending_event_nudge
       end
@@ -304,6 +315,7 @@ module Engine
     def note_room_explored!
       @player.set_tracker!('rooms_floor_stamp', floor_stamp)
       @player.set_tracker!('rooms_on_floor', rooms_on_floor + 1)
+      @departed_admirers = Engine::Admirers.tick_rooms!(@player)
     end
 
     def sanctuary_room
