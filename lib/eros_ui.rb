@@ -226,12 +226,6 @@ module ErosUI
       ) if page.positive?
 
       row.button(
-        label: "Pg #{page + 1}/#{pages}",
-        style: :secondary,
-        custom_id: "eros:shop:page:#{category}:#{page}:#{owner_id}"
-      )
-
-      row.button(
         label: 'Next ▶',
         style: :secondary,
         custom_id: "eros:shop:page:#{category}:#{[page + 1, pages - 1].min}:#{owner_id}"
