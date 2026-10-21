@@ -351,17 +351,17 @@ module Commands
       Commands::Profile.show_achievements(event)
     end
 
-    button(custom_id: /^eros:ach:cat:[a-z]+:\d+$/) do |event|
+    button(custom_id: /^eros:ach:cat:[a-z_]+:\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
-      cat = event.custom_id[/\Aeros:ach:cat:([a-z]+):\d+\z/, 1]
+      cat = event.custom_id[/\Aeros:ach:cat:([a-z_]+):\d+\z/, 1]
       Commands::Profile.show_achievements(event, category: cat)
     end
 
-    button(custom_id: /^eros:ach:page:[a-z]+:-?\d+:\d+$/) do |event|
+    button(custom_id: /^eros:ach:page:[a-z_]+:-?\d+:\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
-      _, cat, page = event.custom_id.match(/\Aeros:ach:page:([a-z]+):(-?\d+):\d+\z/).to_a
+      _, cat, page = event.custom_id.match(/\Aeros:ach:page:([a-z_]+):(-?\d+):\d+\z/).to_a
       Commands::Profile.show_achievements(event, category: cat, page: page.to_i)
     end
 

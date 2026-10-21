@@ -290,6 +290,31 @@ module Engine
         requirement: { burdens_carried: 3 },
         description: 'You carry every burden the cycle offers, and smile about it'
       },
+      'living_curator' => {
+        name: 'Living Curator',
+        requirement: { mimics_removed_count: 15 },
+        description: 'Fifteen living pieces have worn you, been torn free, and been catalogued by Covar'
+      },
+      'living_archivist' => {
+        name: 'Living Archivist',
+        requirement: { mimics_removed_count: 20 },
+        description: 'Twenty living pieces remember your body well enough to find it again'
+      },
+      'covars_favourite_customer' => {
+        name: "Covar's Favourite Customer",
+        requirement: { cursed_gear_collection_complete: true },
+        description: 'All 24 living pieces have been unlocked at the Cursed Shop — Covar keeps your shelf polished'
+      },
+      'covars_confidant' => {
+        name: "Covar's Confidant",
+        requirement: { covar_topics_heard: 8 },
+        description: 'You have heard every story Covar tells across his counter'
+      },
+      'covars_regular' => {
+        name: "Covar's Regular",
+        requirement: { covar_trysts: 10 },
+        description: 'Ten visits behind the bead curtain — Covar leaves the bed made up for you'
+      },
 
       'original_syn' => {
         name: 'The Original Syn',
@@ -363,7 +388,7 @@ module Engine
     ).freeze
 
     TITLE_PRIORITY = %w[
-      original_syn sin_sculptor climax_checker depraved_one silver_delver endless_legend cycle_sovereign tenfold eternal mythic legendary master royal_consort mimic_seedbed survivor experienced novice cursed lustful submissive rich
+      original_syn sin_sculptor climax_checker depraved_one silver_delver endless_legend cycle_sovereign tenfold eternal mythic legendary master royal_consort covars_favourite_customer mimic_seedbed survivor experienced novice cursed lustful submissive rich
       broken addicted pure succubus_bane incubus_bane succubus_pet incubus_toy beast_breeder demon_consort
       slime_vessel undead_paramour plant_pollinated pit_survivor glory_hole_veteran trap_springer
     ].freeze
@@ -373,6 +398,7 @@ module Engine
       'submission' => 'Submission',
       'exploration' => 'Exploration',
       'curses' => 'Curses',
+      'cursed_shop' => 'Cursed Shop',
       'lust' => 'Lust',
       'events' => 'Events',
       'kinks' => 'Kinks',
@@ -721,6 +747,30 @@ module Engine
         requirement: { max_curses_simultaneous: 20 }, reward: { lp: 250 } },
       { id: 'first_tear', category: 'curses', name: 'First Tear', description: 'Tear free your first living item',
         requirement: { mimics_removed_count: 1 }, reward: { lp: 20 } },
+      { id: 'mimic_curator', category: 'cursed_shop', name: 'Mimic Curator',
+        description: 'Tear free 15 different living items for Covar to catalogue',
+        requirement: { mimics_removed_count: 15 }, reward: { lp: 250 } },
+      { id: 'mimic_archivist', category: 'cursed_shop', name: 'Mimic Archivist',
+        description: 'Tear free 20 different living items for the Cursed Shop',
+        requirement: { mimics_removed_count: 20 }, reward: { lp: 350 } },
+      { id: 'complete_living_collection', category: 'cursed_shop', name: 'Every Piece Remembers You',
+        description: 'Unlock all 24 different living items at the Cursed Shop',
+        requirement: { cursed_gear_collection_complete: true }, reward: { lp: 500 } },
+      { id: 'properly_courted', category: 'cursed_shop', name: 'Properly Courted',
+        description: 'Hear out 5 of Covar\'s conversations and earn his invitation behind the curtain',
+        requirement: { covar_topics_heard: 5 }, reward: { lp: 50 } },
+      { id: 'covar_confidant', category: 'cursed_shop', name: 'Shop Confidant',
+        description: 'Hear all 8 of Covar\'s conversations at the Cursed Shop counter',
+        requirement: { covar_topics_heard: 8 }, reward: { lp: 100 } },
+      { id: 'behind_the_curtain', category: 'cursed_shop', name: 'Behind the Curtain',
+        description: 'Take Covar to bed for the first time',
+        requirement: { covar_trysts: 1 }, reward: { lp: 40 } },
+      { id: 'covar_counter_regular', category: 'cursed_shop', name: 'Counter Regular',
+        description: 'Take Covar to bed 5 times',
+        requirement: { covar_trysts: 5 }, reward: { lp: 100 } },
+      { id: 'covars_devotion', category: 'cursed_shop', name: "Covar's Devotion",
+        description: 'Take Covar to bed 10 times',
+        requirement: { covar_trysts: 10 }, reward: { lp: 200 } },
 
       { id: 'lp_mountain', category: 'lust', name: 'Lust Mountain', description: 'Earn 10,000 LP total',
         requirement: { lp_earned: 10_000 }, reward: { lp: 300 } },
@@ -792,6 +842,9 @@ module Engine
       mimic_broodmother_cursed: 'Broodmother cleared while wearing 5 cursed items',
       depraved_tower_clears: 'Eros clears with every content theme on',
       mimics_removed_count: 'living items torn free',
+      cursed_gear_collection_complete: 'complete living-gear collection',
+      covar_topics_heard: 'Covar conversations heard',
+      covar_trysts: 'Covar trysts',
       tentacle_pit_survived: 'tentacle pits survived',
       glory_hole_encounters: 'glory hole uses',
       traps_triggered: 'traps triggered',

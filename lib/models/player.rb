@@ -225,6 +225,10 @@ class Player < Sequel::Model(:players)
     when :royal_demons_cleared
       (Array(tracker_hash['bosses_seen']) & ['Succubus Queen', 'Incubus King']).size
     when :mimics_removed_count then cursed_shop_unlocks.size
+    when :cursed_gear_collection_complete
+      names = Engine::Treasure.all_mimic_templates.map { |t| t[:name].to_s }
+      (names - cursed_shop_unlocks).empty? ? 1 : 0
+    when :covar_topics_heard then Array(tracker_hash['covar_topics_heard']).map(&:to_s).uniq.size
     when :current_floor then current_floor.to_i
     when :marks_owned then Engine::Marks.owned(self).size
     when :forms_unlocked then unlocked_transformations.size
