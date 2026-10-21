@@ -71,20 +71,10 @@ module Commands
           if Engine::Conversations.covar_sex_unlocked?(player)
             c.text_display(
               content: '_Covar has stopped pretending this is only conversation. "You know me well enough ' \
-                       'now, delver. If you\'re wound too tight to think — pick a part of me. I\'ll drain ' \
-                       'that lust right out of you. No defiance, no charge. Call it shop hospitality."_'
+                       'now, delver. If you\'re wound too tight to think, my bed\'s behind the curtain — ' \
+                       'I\'ll drain that lust right out of you. No defiance, no charge. Call it shop ' \
+                       'hospitality."_'
             )
-            c.row do |row|
-              Engine::Conversations::COVAR_SEX.each do |part, spec|
-                next unless Engine::Conversations.covar_sex_available?(player, part)
-
-                row.button(label: spec[:button], style: :danger,
-                           custom_id: "eros:covar:sex:#{part}:#{event.user.id}")
-              end
-            end
-            unless player.body_parts_list.map(&:to_s).include?('penis')
-              c.text_display(content: '-# Fucking his breasts or his ass needs a cock of your own — his cock is for everyone.')
-            end
           else
             c.text_display(
               content: "-# Get to know Covar: **#{heard}/#{Engine::Conversations::COVAR_SEX_TOPICS_REQUIRED}** " \
@@ -92,6 +82,7 @@ module Commands
             )
           end
           c.row do |row|
+            row.button(label: '🛏️ Go to bed with Covar', style: :danger, custom_id: "eros:cshop:bed:#{event.user.id}")
             row.button(label: '◀ Cursed Shop', style: :secondary, custom_id: "eros:cshop:open:#{event.user.id}")
             row.button(label: 'Shop', style: :secondary, custom_id: "eros:shop:cat:weapon:#{event.user.id}")
           end
@@ -124,8 +115,8 @@ module Commands
           text = "**#{spec[:name]} on #{result[:topic][:label]}**\n#{result[:text]}"
           if person == 'covar' && !was_unlocked && Engine::Conversations.covar_sex_unlocked?(player)
             text += "\n\n_Covar's grin turns slow and certain. \"There it is. You know me now, delver — " \
-                    'well enough. If that lust ever gets too loud, come back to my counter and pick a part ' \
-                    'of me. I\'ll take care of it. All of it."_'
+                    'well enough. If that lust ever gets too loud, my bed is behind the curtain. Press ' \
+                    '**🛏️ Go to bed with Covar** and I\'ll take care of it. All of it."_'
           end
           text
         else
@@ -134,31 +125,11 @@ module Commands
       show(event, person, notice: notice)
     end
 
-    def covar_sex(event, part)
-      player = ErosHelpers.require_player(event) or return
-      result = Engine::Conversations.covar_sex(player, part)
-      notice =
-        if result[:ok]
-          "#{result[:text]}\n\n**Lust drained: #{result[:lust_cleared]} → 0** — and your defiance never " \
-            'wavered. Covar adjusts his shirt like that was a business transaction.'
-        else
-          result[:message]
-        end
-      show(event, 'covar', notice: notice)
-    end
-
     button(custom_id: /^eros:talk:(berry|syn|covar):\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
       person = event.custom_id[/\Aeros:talk:(berry|syn|covar):\d+\z/, 1]
       Commands::Conversations.show(event, person)
-    end
-
-    button(custom_id: /^eros:covar:sex:(breasts|cock|ass):\d+$/) do |event|
-      next unless ErosHelpers.assert_button_owner!(event)
-
-      part = event.custom_id[/\Aeros:covar:sex:(breasts|cock|ass):\d+\z/, 1]
-      Commands::Conversations.covar_sex(event, part)
     end
 
     string_select(custom_id: /^eros:talk:topic:(berry|syn|covar):\d+$/) do |event|

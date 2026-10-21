@@ -273,7 +273,7 @@ module Engine
       'traps' => { berry: '"Still mostly my wife\'s fault. She\'s still proud."',
                    syn: '"Still my workmanship. Changed, not just caught — remember?"' },
       'curses' => { berry: '"Still purge, silence, or pay up front. The handwriting fades when you do."',
-                    syn: '"Still signatures, darling. I still study them up close."' },
+                    syn: '"Still blessings, darling. Still beautiful. Your Lust Points still do not buy my approval."' },
       'marks' => { berry: '"Still my wife\'s handwriting on you. She remembers her favourites."',
                    syn: '"Still promises that survive you. The portrait continues, darling."' },
       'transformations' => { berry: '"Still growing on people. The book stays closed, sugar."',
@@ -358,6 +358,7 @@ module Engine
     COVAR_SEX = {
       'breasts' => {
         label: 'His breasts', button: '🍒 Fuck his breasts', needs_part: 'penis',
+        blurb: 'He takes charge, pressing that impossible chest around your cock and setting the pace himself.',
         text: 'Covar does not wait to be asked twice. He hauls you in, presses that impossible chest around ' \
               'your cock, and keeps you there — both hands squeezing his breasts together, setting the pace ' \
               'himself while his tail curls possessively round your waist. "There you go," he purrs, all ' \
@@ -367,6 +368,7 @@ module Engine
       },
       'cock' => {
         label: 'His cock', button: '🍆 Take his cock',
+        blurb: 'For everyone: the keeper turns you against his own counter and drains you dry, firmly and thoroughly.',
         text: 'He turns you against his own counter with an incubus\'s certainty, the bell above his shop ' \
               'door politely ignored. "My counter, my rules," Covar growls, and takes you the way the tower ' \
               'taught him to want people — firmly, thoroughly, one hand spread between your shoulders to ' \
@@ -376,6 +378,7 @@ module Engine
       },
       'ass' => {
         label: 'His ass', button: '🍑 Fuck his ass', needs_part: 'penis',
+        blurb: 'Take him, and the dominant keeper melts — begging, grateful, and gloriously submissive.',
         text: 'The moment you make it clear which of you will be doing the taking, the great incubus melts. ' \
               '"Oh," Covar breathes, already bending over his own counter, tail lashing with eagerness, "oh, ' \
               'it has been a *while*." The dom of the cursed shop begs beautifully — please, and more, and ' \
@@ -445,10 +448,12 @@ module Engine
         unlock_text: 'Be cursed once',
         berry: '"Curses stick because this place likes leaving handwriting on people," Berry says. "You can pay ' \
                'to purge one, silence one, or purge the whole pile at once if you\'re feeling flush. Syn will ' \
-               'want to look at them first. For research. Allegedly."',
-        syn: '"A curse is a signature," Syn says, tracing the air above your skin without touching it. "Something ' \
-             'here decided you were interesting and signed its work. I study the marks they leave. Up close. ' \
-             'While you\'re wearing them. It\'s purely academic, darling. Mostly."'
+               'call every one of them a blessing and glare at you for wanting them gone. Bring Lust Points, ' \
+               'sugar — that is the only language that has ever persuaded her to pick up the eraser."',
+        syn: '"A curse is a blessing with better handwriting," Syn says, tracing the air above your skin ' \
+             'without touching it. "Something here decided you were interesting and made art of you. Then ' \
+             'mortals come whining to me to smother it or scrape it off. I take their Lust Points, darling — ' \
+             'it is the only reason I agree to the vandalism. The points buy the deed. They never buy my approval."'
       },
       {
         key: 'marks', label: 'Marks', question: 'What do marks mean to you?',

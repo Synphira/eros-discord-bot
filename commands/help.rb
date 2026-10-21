@@ -32,7 +32,7 @@ module Commands
       'curses' => {
         label: 'Curses', emoji: '🩸', blurb: 'View, remove and suppress curses',
         commands: [
-          ['/curses', 'e,curses', 'Your active curses by monster type'],
+          ['/curses', 'e,curses', "Syn's curse ledger: page your blessings five at a time and pay her — reluctantly — to Suppress or Remove each one"],
           ['/removecurse', 'e,removecurse [N]', 'Remove a curse for 50 LP'],
           ['/suppresscurse', 'e,suppresscurse [N]', 'Silence a curse for 25 LP until your next defeat']
         ]
@@ -45,7 +45,7 @@ module Commands
           ['/equipment', 'e,equipment', 'Your gear, trophy and inventory'],
           ['/equip · /unequip', 'e,equip [item] · e,unequip [item]', 'Wear or take off gear (one trophy at a time)'],
           ['/remove', 'e,remove [item]', 'Tear off living gear for LP'],
-          ['/cursedshop', 'e,cursedshop', "Covar Zephyren's counter: take back living gear you have torn free, for free — talk to him, too"],
+          ['/cursedshop', 'e,cursedshop [weapon|armor|accessory]', "Covar Zephyren's counter: browse living gear by aisle and take back what you've torn free, for free — talk to him, or take him to bed"],
           ['/parlour', 'e,parlour', "Syn's permanent tattoos and piercings"],
           ['/quests', 'e,quests', "Berry's quest board: errands for bonus Lust Points"]
         ]

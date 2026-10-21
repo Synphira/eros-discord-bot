@@ -323,6 +323,25 @@ module Engine
       templates.select { |t| template_allowed?(player, t) }
     end
 
+    # Why a template is sealed for this delver, in player-facing words, or
+    # nil when it can bind them. Content preferences are named before body
+    # requirements so the delver knows what could actually be changed.
+    def template_block_reason(player, tpl)
+      return 'That piece is not in the Cursed Shop.' unless tpl
+
+      req = tpl[:requires]
+      if req && !Engine::ContentOptions.enabled?(player, req)
+        return "re-enable **#{requires_label(tpl)}** in `/options` to call it back"
+      end
+
+      part = tpl[:part]
+      if part && !player.body_parts_list.map(&:to_s).include?(part.to_s)
+        return "it needs #{part.to_s.tr('_', ' ')} your body does not have"
+      end
+
+      nil
+    end
+
     def requires_label(tpl)
       req = tpl && tpl[:requires]
       req ? Engine::ContentOptions.preference(req)&.fetch(:label, req) : nil

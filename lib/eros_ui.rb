@@ -154,6 +154,47 @@ module ErosUI
     end
   end
 
+  # One Cursed Shop item as a section, mirroring the normal shop: the
+  # piece's text with its own state button beside it. Living gear is free
+  # to call back once unlocked; the button says why when it cannot be.
+  def attach_cursed_item_section(container, item, player:, category:, page:, owner_id:)
+    tpl = Engine::Treasure.template_for(item.name)
+    owned = player.owns_equipment?(item.id)
+    unlocked = player.cursed_shop_unlocked?(item.name)
+    block_reason = unlocked && !owned ? Engine::Treasure.template_block_reason(player, tpl) : nil
+    mods = Engine::Treasure.format_stat_changes(item.stat_modifiers)
+
+    label, style, disabled =
+      if owned
+        ['Bound', :secondary, true]
+      elsif !unlocked
+        ['Locked', :secondary, true]
+      elsif block_reason
+        ['Sealed', :secondary, true]
+      else
+        ['Take', :danger, false]
+      end
+
+    content =
+      if unlocked || owned
+        "**#{item.name}** (Free)#{owned ? ' _(already bound)_' : ''} — _#{item.description}_\n" \
+          "#{mods} · removal #{item.removal_cost.to_i} LP" \
+          "#{block_reason ? "\n_Sealed: #{block_reason}._" : ''}"
+      else
+        "**???** (#{item.slot}) — _find it in a chest, wear it, and tear it free to unlock it_"
+      end
+
+    container.section do |section|
+      section.text_display(content: content)
+      section.button(
+        label: label,
+        style: style,
+        custom_id: "eros:cshop:take:#{item.id}:#{category}:#{page}:#{owner_id}",
+        disabled: disabled
+      )
+    end
+  end
+
   def attach_shop_buttons(container, shop, owner_id)
     category = Engine::Shop.normalize_category(shop[:category] || shop['category'])
     page = (shop[:page] || shop['page']).to_i
