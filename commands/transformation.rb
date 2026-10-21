@@ -200,7 +200,7 @@ module Commands
           row.button(label: "Fuse them (#{Engine::TransformationSystem::FUSION_COST} LP)", style: :success,
                      custom_id: "eros:chimera:fuse:#{event.user.id}")
           row.button(label: '◀ Back to Hybrid Forms', style: :secondary,
-                     custom_id: "eros:hybrid:view:#{event.user.id}")
+                     custom_id: "eros:chimera:back:#{event.user.id}")
           if pick_pages > 1
             row.button(label: '◀ Forms', style: :secondary,
                        custom_id: "eros:chimera:pickpage:#{pick_page - 1}:#{event.user.id}", disabled: pick_page.zero?)
@@ -320,6 +320,12 @@ module Commands
     end
 
     button(custom_id: /^eros:hybrid:view:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Transformation.show(event)
+    end
+
+    button(custom_id: /^eros:chimera:back:\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Transformation.show(event)

@@ -60,9 +60,13 @@ module ErrorReporter
 
   def report(error)
     message = error.message.to_s.lines.map(&:strip).reject(&:empty?).join(' — ')
+    # Discord API errors (e.g. InvalidFormBody) carry field-level details in
+    # `errors` — which exact component/field was rejected. Never drop them:
+    # "Invalid Form Body" alone does not say what to fix.
+    details = error.respond_to?(:errors) ? Array(error.errors).map(&:to_s).reject(&:empty?) : []
     frames = project_frames(error.backtrace)
     hidden = Array(error.backtrace).size - frames.size
-    hint = HINTS.find { |pattern, _| pattern.match?("#{error.class} #{message}") }&.last
+    hint = HINTS.find { |pattern, _| pattern.match?("#{error.class} #{message} #{details.join(' ')}") }&.last
 
     lines = [
       RULE,
@@ -71,6 +75,7 @@ module ErrorReporter
       "Trigger:  #{Thread.current[:eros_context] || 'background / not tied to a command'}",
       "Where:    #{frames.first || '(inside a gem — see trace)'}"
     ]
+    lines << "Details:  #{details.first(5).join(' | ')}" if details.any?
     lines << "Hint:     #{hint}" if hint
     if frames.size > 1
       lines << 'Our code (most recent first):'
@@ -82,7 +87,7 @@ module ErrorReporter
 
     $stderr.puts("\n#{text}\n")
     write_file(text, error)
-    post_to_discord(text, "#{error.class}|#{frames.first}|#{message[0, 120]}")
+    post_to_discord(text, "#{error.class}|#{frames.first}|#{message[0, 120]}|#{details.first.to_s[0, 120]}")
   rescue StandardError => e
     warn "ErrorReporter failed (#{e.class}: #{e.message}); original: #{error.class}: #{error.message}"
   end

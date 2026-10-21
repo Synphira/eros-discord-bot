@@ -24,6 +24,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Fixed
 
+- **Chimera screen could fail with Discord's "Invalid Form Body"**: its **◀ Back to Hybrid Forms** button shared the same button ID as the navigation row's **Hybrids** button, and Discord rejects duplicate component IDs in one message. The back button now has its own ID. Error reports also now include Discord's field-level rejection details (which component and why), so any future invalid panel names its own culprit instead of just "Invalid Form Body."
 - **Hybrid and Chimera screens no longer cut text off mid-sentence**: form descriptions, appearances, and effects now display in full on both screens — verified against the longest content in the game, with even the bulkiest pages using well under half of Discord's text limit. The fusion pickers also page now (**◀ Forms / Forms ▶** buttons), so all of your forms stay reachable even past Discord's 25-option menu cap.
 - **`/curses` and `/removecurse` no longer break with many curses**: both are paginated (8 per page) so the list stays within Discord's component limits no matter how branded you are, and the purge menus page along with the list. Curse numbers stay the same on every page, so `e,removecurse N` still lines up.
 - **The Dildo Trap no longer dodges itself**: spotting it in time now offers the same choice as other traps — **Dodge** or **Let it happen** — instead of automatically rolling you aside.
