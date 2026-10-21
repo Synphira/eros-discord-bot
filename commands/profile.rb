@@ -179,8 +179,11 @@ module Commands
       end
     end
 
-    def show_leaderboard(event, stat = nil)
-      stat = Engine::ProfileSystem.normalize_stat(stat)
+    def show_leaderboard(event, stat = nil, page: nil)
+      keys = Engine::ProfileSystem::STATS.keys
+      # Paging wraps: Next on the last ranking cycles back to the first.
+      stat = page.nil? ? Engine::ProfileSystem.normalize_stat(stat) : keys[page.to_i % keys.size]
+      index = keys.index(stat)
       spec = Engine::ProfileSystem::STATS[stat]
       rows = Engine::ProfileSystem.leaderboard(stat, limit: 10)
       viewer = Player[event.user.id]
@@ -204,13 +207,10 @@ module Commands
           c.text_display(content: "-# #{note}")
         end
         c.row do |row|
-          Engine::ProfileSystem::STATS.each do |key, s|
-            row.button(
-              label: s[:label],
-              style: key == stat ? :primary : :secondary,
-              custom_id: "eros:lb:#{key}:#{event.user.id}"
-            )
-          end
+          row.button(label: '◀ Prev', style: :secondary, custom_id: "eros:lb:page:#{index - 1}:#{event.user.id}")
+          row.button(label: "#{spec[:label]} (#{index + 1}/#{keys.size})", style: :primary,
+                     custom_id: "eros:lb:page:info:#{event.user.id}", disabled: true)
+          row.button(label: 'Next ▶', style: :secondary, custom_id: "eros:lb:page:#{index + 1}:#{event.user.id}")
         end
         attach_nav(c, event.user.id, :leaderboard) if viewer
       end
@@ -372,6 +372,13 @@ module Commands
       Commands::Profile.show_leaderboard(event, stat)
     end
 
+    button(custom_id: /^eros:lb:page:-?\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      page = event.custom_id[/\Aeros:lb:page:(-?\d+):\d+\z/, 1].to_i
+      Commands::Profile.show_leaderboard(event, page: page)
+    end
+
     application_command(:profile) { |event| Commands::Profile.show_profile(event, lookup: event.options['name'].to_s) }
     application_command(:titles) { |event| Commands::Profile.show_titles(event) }
     application_command(:title) { |event| Commands::Profile.set_title(event, event.options['name'].to_s) }
@@ -403,7 +410,7 @@ module Commands
       nil
     end
 
-    command(:leaderboard, description: 'Top delvers (cycles, depth, level, kills, lp)') do |event, stat|
+    command(:leaderboard, description: 'Top delvers (cycles, depth, level, kills, lp, admirers)') do |event, stat|
       Commands::Profile.show_leaderboard(event, stat)
       nil
     end

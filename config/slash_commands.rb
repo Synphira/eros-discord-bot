@@ -50,8 +50,8 @@ module SlashCommands
       options: [opt('name', 'Form name, or "clear" to return to human')] },
     { name: 'achievements', description: 'View achievements and progress',
       options: [opt('category', 'Category', choices: choices('combat', 'submission', 'exploration', 'curses', 'lust', 'events', 'kinks', 'challenges'))] },
-    { name: 'leaderboard', description: 'Top delvers by cycles, depth, highest level, kills, or LP earned',
-      options: [opt('stat', 'Ranking', choices: choices('cycles', 'depth', 'level', 'kills', 'lp'))] },
+    { name: 'leaderboard', description: 'Top delvers by cycles, depth, highest level, kills, LP earned, or admirers won',
+      options: [opt('stat', 'Ranking', choices: choices('cycles', 'depth', 'level', 'kills', 'lp', 'admirers'))] },
     { name: 'options', description: 'Content preferences (fetish toggles)' },
     { name: 'fetish_options', description: 'Toggle one content theme on or off (no option = list all)',
       options: [opt('option', 'Theme key or name, e.g. bimbofication'), opt('state', 'On or off', choices: choices('on', 'off'))] }

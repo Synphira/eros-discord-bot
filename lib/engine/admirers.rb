@@ -9,6 +9,9 @@ module Engine
     # Rooms an admirer keeps following you before it loses your scent and
     # wanders off — admirers are a passing favour, not a collection.
     LIFESPAN_ROOMS = 20
+    # At most this many admirers at once; a newcomer drives off the one
+    # closest to losing your scent anyway.
+    MAX_ADMIRERS = 3
     TYPES_TRACKER = 'admirer_types'
     NAMES_TRACKER = 'admirer_names'
     ROOMS_TRACKER = 'admirer_rooms'
@@ -58,6 +61,16 @@ module Engine
       player.update(trackers: player.tracker_hash.merge(ROOMS_TRACKER => rooms_hash(player).merge(type.to_s => rooms)))
     end
 
+    def evict!(player, type)
+      names = player.tracker_hash[NAMES_TRACKER]
+      names = names.is_a?(Hash) ? names.transform_keys(&:to_s) : {}
+      player.update(trackers: player.tracker_hash.merge(
+                      TYPES_TRACKER => types(player) - [type.to_s],
+                      NAMES_TRACKER => names.reject { |k, _| k == type.to_s },
+                      ROOMS_TRACKER => rooms_hash(player).reject { |k, _| k == type.to_s }
+                    ))
+    end
+
     # One explored room passes: every admirer's remaining rooms tick down,
     # and any that reach zero lose your scent and vanish. Returns the
     # departed admirers' display names so the caller can say goodbye.
@@ -96,13 +109,21 @@ module Engine
       end
       return unless count(player, type) >= THRESHOLD
 
+      if types(player).size >= MAX_ADMIRERS
+        evicted = types(player).min_by { |t| rooms_left(player, t) }
+        evicted_name = name_for(player, evicted) || evicted
+        evict!(player, evicted)
+        log << "Your scent is crowded, though — the newcomer drives off your **#{evicted_name}** admirer, " \
+               'which slinks away with a last, longing look.'
+      end
+
       player.update(trackers: player.tracker_hash.merge(
                       TYPES_TRACKER => types(player) + [type],
                       NAMES_TRACKER => (player.tracker_hash[NAMES_TRACKER] || {}).merge(type => enc[:name].to_s),
                       ROOMS_TRACKER => rooms_hash(player).merge(type => LIFESPAN_ROOMS)
                     ))
       player.bump_tracker!(TOTAL_TRACKER)
-      log << "💌 **A monster has become your admirer!** The **#{enc[:name]}** you pleased so thoroughly now " \
+      log << "**A monster has become your admirer!** The **#{enc[:name]}** you pleased so thoroughly now " \
              "follows your scent through the tower. Its kind will go easier on you — and it leaves gifts."
       others = types(player) - [type]
       return if others.empty?
@@ -115,7 +136,7 @@ module Engine
       type = enc[:type].to_s
       if admirer?(player, type) && rand < 0.35
         enc[:strength] = [(enc[:strength].to_i * 0.85).round, 1].max
-        lines << "💌 Your admirer, the **#{name_for(player, type) || enc[:name]}**, has been here before you — " \
+        lines << "Your admirer, the **#{name_for(player, type) || enc[:name]}**, has been here before you — " \
                  'the foe is already flustered, distracted, and weaker for it. _(foe STR reduced)_'
         return
       end
@@ -124,7 +145,7 @@ module Engine
       return unless jealous && rand < 0.2
 
       enc[:lust_damage] = (enc[:lust_damage].to_i * 1.1).round
-      lines << "💌 Your admirer (the **#{name_for(player, jealous)}**) smells another kind on you and sulks — " \
+      lines << "Your admirer (the **#{name_for(player, jealous)}**) smells another kind on you and sulks — " \
                'word spreads, and this foe presses you harder out of spite. _(foe lust hit up)_'
     end
 
@@ -136,7 +157,7 @@ module Engine
       type = owned.sample
       lp = 10 + player.current_floor
       player.gain_lp!(lp)
-      log << "💌 A gift from your **#{name_for(player, type) || type}** admirer waits where you can find it — " \
+      log << "A gift from your **#{name_for(player, type) || type}** admirer waits where you can find it — " \
              "**+#{lp} LP**, still warm."
     end
   end

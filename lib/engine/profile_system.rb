@@ -27,6 +27,11 @@ module Engine
         label: 'LP Earned',
         value: ->(p) { p.tracker('lp_earned') },
         format: ->(v) { "#{v} LP" }
+      },
+      'admirers' => {
+        label: 'Admirers Won',
+        value: ->(p) { Engine::Admirers.total(p) },
+        format: ->(v) { "#{v} admirer#{'s' unless v == 1}" }
       }
     }.freeze
 

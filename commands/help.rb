@@ -57,7 +57,7 @@ module Commands
           ['/titles · /title', 'e,titles · e,title [name|auto]', 'View and wear earned titles'],
           ['/achievements', 'e,achievements [category]', 'Achievements by category'],
           ['/transformation', 'e,transformation [name|clear|fuse A + B]', 'Hybrid forms, or fuse two into a Chimera'],
-          ['/leaderboard', 'e,leaderboard [cycles|depth|kills|lp]', 'Top delvers'],
+          ['/leaderboard', 'e,leaderboard [cycles|depth|level|kills|lp|admirers]', 'Top delvers, including admirers won'],
           ['/codex', 'e,codex', "Your delver's journal: lore fragments earned by living in the tower"]
         ]
       },

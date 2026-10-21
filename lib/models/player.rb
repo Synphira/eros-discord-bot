@@ -233,7 +233,10 @@ class Player < Sequel::Model(:players)
     when :marks_owned then Engine::Marks.owned(self).size
     when :forms_unlocked then unlocked_transformations.size
     when :chimera_fused then Engine::TransformationSystem.chimera_combo(self) ? 1 : 0
-    when :admirer_kinds then Array(tracker_hash['admirer_types']).size
+    when :admirer_kinds
+      # Kinds ever won, not kinds currently following — admirers wander off
+      # (and cap at 3), so the current list can no longer reach 6.
+      Engine::MonsterTypes::TYPES.keys.count { |t| tracker("admirer_#{t}") >= Engine::Admirers::THRESHOLD }
     when :burdens_carried then Array(tracker_hash['cycle_burdens']).size
     when :is_developer then Engine::Dev.owner?(discord_id) ? 1 : 0
     when :is_bug_tester then Engine::Dev.bug_tester?(discord_id) ? 1 : 0
