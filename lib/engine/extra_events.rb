@@ -81,8 +81,19 @@ module Engine
       log << bits.join(' · ')
     end
 
+    def milkable?(player)
+      parts = player.body_parts_list.map(&:to_s)
+      (parts & %w[breasts penis]).any?
+    end
+
     def apply!(player, type, level, log)
       parts = Engine::ChastitySystem.scene_parts(player)
+      if type.to_s == 'milking_shrine' && !milkable?(player)
+        log << { scene: 'The cups drift over you, searching for breasts or a cock to latch onto, then retreat with a disappointed hiss. ' \
+                        'The shrine powers down, leaving you untouched.' }
+        return
+      end
+
       bump_trackers!(player, type)
       case type
       when 'milking_shrine' then milking!(player, parts, level, log)
@@ -99,24 +110,29 @@ module Engine
     end
 
     def milking!(player, parts, level, log)
-      size = Engine::ContentOptions.size_of(player, 'breasts')
-      log << { scene: "The brass cups immediately clamp onto your #{size_word(player, 'breasts')} breasts, creating an airtight seal. " \
-                      'The machine starts with intense suction that pulls at your nipples, making them elongate and turn dark purple as ' \
-                      'blood rushes to them. Milk begins spraying from your tits in thick, steady streams, filling the collection tubes ' \
-                      'with creamy white fluid.' }
-      bonus = { 'flat' => 0, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5 }.fetch(size, 0)
+      breasts = parts.include?('breasts')
+      bonus = 0
+      if breasts
+        size = Engine::ContentOptions.size_of(player, 'breasts')
+        log << { scene: "The brass cups settle over your #{size_word(player, 'breasts')} breasts and seal snugly. A slow, rhythmic " \
+                        'suction coaxes milk from your nipples in thick, steady streams, filling the collection tubes with creamy white fluid.' }
+        bonus += { 'flat' => 0, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5 }.fetch(size, 0)
+      end
       if parts.include?('penis')
-        log << { scene: 'A third, smaller cup descends and attaches to your cock, its suction immediately making your shaft swell as the ' \
-                        'machine begins milking your prostate from inside. You can feel your balls constricting as thick ropes of semen ' \
-                        'spurt from your tip, collected by the hungry machine.' }
+        log << { scene: 'A soft sleeve descends and seals around your cock, pulsing in time with the pumps. It milks you with shameless ' \
+                        'patience, drawing thick ropes from your tip again and again into the waiting tubes.' }
         bonus += 2
       elsif (caged = Engine::ChastitySystem.line(player, :milking))
         log << { scene: caged }
         bonus += 2
       end
-      log << { scene: "The machine's rhythm increases, the suction becoming painful as it tries to extract every last drop. Your breasts " \
-                      'are now raw and dripping, your nipples swollen to twice their size. When the cups finally release with a loud pop, ' \
-                      'your breasts sag, covered in your own milk, nipples glistening and sore.' }
+      if breasts
+        log << { scene: 'At last the rhythm eases. The cups release with a soft pop, leaving your breasts heavy, flushed and slick ' \
+                        'with milk as the shrine hums its approval.' }
+      else
+        log << { scene: 'At last the rhythm eases. The sleeve loosens and withdraws, leaving your cock twitching and thoroughly ' \
+                        'drained as the shrine hums its approval.' }
+      end
       reward!(player, 3 + (level / 3) + (bonus / 2), 10 + (level / 2) + bonus, log)
     end
 

@@ -45,8 +45,8 @@ module Engine
       'public_humiliation' => 'exhibitionism_events'
     }.freeze
 
-    EVENT_REQUIRES = {
-      'milking_shrine' => 'breasts'
+    EVENT_REQUIRES_ANY = {
+      'milking_shrine' => %w[breasts penis]
     }.freeze
 
     module_function
@@ -71,8 +71,8 @@ module Engine
         next false if tag && !Engine::ContentOptions.enabled?(player, tag)
         next Engine::FetishEvents.available?(player, key) if Engine::FetishEvents.event?(key)
 
-        need = EVENT_REQUIRES[key]
-        need.nil? || parts.include?(need)
+        needs = EVENT_REQUIRES_ANY[key]
+        needs.nil? || (needs & parts).any?
       end
     end
 

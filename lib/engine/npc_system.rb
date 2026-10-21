@@ -305,6 +305,7 @@ module Engine
                              effects: { 'lust_mult' => 1.15, 'satisfy_bonus' => 0.1 } },
                 scenes: ['The green milk tingles on your tongue and spreads under your skin. Even the air feels like a caress.'] },
               { key: 'become', label: 'Be milked', text: 'Take a free frame', lp: 20, lust: 25,
+                needs_any_part: %w[breasts penis],
                 trackers: %w[being_milked_events lactation_events],
                 condition: { key: 'milked_dry', name: 'Milked Dry', floors: 2,
                              effects: { 'submission' => 1, 'submit_lp_bonus' => 2 } },
@@ -513,7 +514,11 @@ module Engine
     end
 
     def option_allowed?(player, opt)
-      return false if opt[:needs_part] && !player.body_parts_list.map(&:to_s).include?(opt[:needs_part])
+      parts = player.body_parts_list.map(&:to_s)
+      return false if opt[:needs_part] && !parts.include?(opt[:needs_part].to_s)
+      if opt[:needs_any_part]
+        return false if (Array(opt[:needs_any_part]).map(&:to_s) & parts).empty?
+      end
       return false if opt[:needs_form] && !Array(opt[:needs_form]).include?(player.active_transformation_key.to_s)
 
       true

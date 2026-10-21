@@ -297,11 +297,12 @@ module Engine
       },
       'milking_chamber' => {
         name: 'Milking Chamber', tag: 'lactation', tracker: 'being_milked_events',
+        requires_any: %w[breasts penis],
         blurb: 'brass pumps hiss rhythmically.',
         intro: 'A padded stall full of contraptions built to draw fluids from living bodies. A machine of brass pumps and suction cups ' \
                'hisses awake as you approach, its attachments extending toward you. A little plaque promises generous payment.',
         accept: {
-          label: 'Get milked', text: 'Strap in and be milked',
+          label: 'Get milked', text: 'Strap in and be milked', needs_any_part: %w[breasts penis],
           scenes: ['The pumps latch on and pull in a slow, relentless rhythm, the ache blurring into overwhelming pleasure.',
                    'Your body answers by giving more than you thought possible. The machine purrs, pleased with your output.'],
           parts: { 'breasts' => 'Your breasts swell and ache as the cups tug, milk spraying in thick white jets from your dark, swollen nipples.',
@@ -1022,17 +1023,22 @@ module Engine
 
     def available?(player, key)
       spec = event(key) or return false
+      parts = player.body_parts_list.map(&:to_s)
+      if spec[:requires_any]
+        return false if (Array(spec[:requires_any]).map(&:to_s) & parts).empty?
+      end
+
       case spec[:requires]
       when nil then true
       when :swappable then SWAPS.key?(player.gender.to_s)
-      else player.body_parts_list.map(&:to_s).include?(spec[:requires].to_s)
+      else parts.include?(spec[:requires].to_s)
       end
     end
 
     def choices(player, key)
       spec = event(key) or return []
       list = []
-      list << choice_button('accept', spec[:accept], :primary)
+      list << choice_button('accept', spec[:accept], :primary) if option_allowed?(player, spec[:accept])
       list << choice_button('alt', spec[:alt], :primary) if spec[:alt] && option_allowed?(player, spec[:alt])
       list << choice_button('fight', spec[:fight], :danger) if spec[:fight]
       list << choice_button('decline', spec[:decline], :secondary)
@@ -1044,8 +1050,13 @@ module Engine
     end
 
     def option_allowed?(player, opt)
+      return false if opt.nil?
       return false if opt[:needs_tag] && !Engine::ContentOptions.enabled?(player, opt[:needs_tag])
-      return false if opt[:needs_part] && !player.body_parts_list.map(&:to_s).include?(opt[:needs_part])
+      parts = player.body_parts_list.map(&:to_s)
+      return false if opt[:needs_part] && !parts.include?(opt[:needs_part].to_s)
+      if opt[:needs_any_part]
+        return false if (Array(opt[:needs_any_part]).map(&:to_s) & parts).empty?
+      end
 
       true
     end
@@ -1076,7 +1087,7 @@ module Engine
         decline!(player, key, spec, level, log)
       when 'accept', 'alt'
         opt = spec[choice.to_sym]
-        return { ok: false, retry: true } unless opt && (choice == 'accept' || option_allowed?(player, opt))
+        return { ok: false, retry: true } unless option_allowed?(player, opt)
 
         accept!(player, key, spec, opt, level, log)
         { ok: true }

@@ -783,6 +783,11 @@ module Engine
       type = violation_type.to_s
       tag = VIOLATION_TAGS[type]
       type = 'tease' if tag && !Engine::ContentOptions.enabled?(player, tag)
+      # The milking bra can only milk breasts the delver currently has; if a
+      # condition has since taken them, it settles for teasing instead.
+      if type == 'milk' && !player.body_parts_list.map(&:to_s).include?('breasts')
+        type = 'tease'
+      end
 
       scene =
         case type
