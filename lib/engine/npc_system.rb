@@ -286,10 +286,10 @@ module Engine
         stages: [
           {
             floors: (15..25),
-            intro: 'A long room hums with machinery. Women are strapped into milking frames, their breasts — large to ' \
-                   'enormous — sealed into rhythmic pumps. Some moan in pleasure, others whimper. A technician in a lab ' \
-                   'coat smiles at you. "Care to try our special milk? Red is an aphrodisiac, blue restores willpower, ' \
-                   'green heightens sensitivity..."',
+            intro: 'A long room hums with machinery. Delvers are strapped into milking frames, chests sealed into ' \
+                   'rhythmic pumps, hips bucking against padded rests. Some moan in pleasure, others whimper. A technician ' \
+                   'in a lab coat smiles at you. "Care to try our special milk? Red is an aphrodisiac, blue restores ' \
+                   'willpower, green heightens sensitivity... or maybe you\'d like to make some?"',
             choices: [
               { key: 'red', label: 'Red milk', text: 'Aphrodisiac', lp: 15, lust: 30,
                 condition: { key: 'red_milk', name: 'Red Milk Heat', floors: 3,
@@ -304,12 +304,21 @@ module Engine
                 condition: { key: 'green_milk', name: 'Green Milk Sensitivity', floors: 3,
                              effects: { 'lust_mult' => 1.15, 'satisfy_bonus' => 0.1 } },
                 scenes: ['The green milk tingles on your tongue and spreads under your skin. Even the air feels like a caress.'] },
-              { key: 'become', label: 'Be milked', text: 'Take a free frame', needs_part: 'breasts', lp: 20, lust: 25,
+              { key: 'become', label: 'Be milked', text: 'Take a free frame', lp: 20, lust: 25,
                 trackers: %w[being_milked_events lactation_events],
                 condition: { key: 'milked_dry', name: 'Milked Dry', floors: 2,
                              effects: { 'submission' => 1, 'submit_lp_bonus' => 2 } },
-                scenes: ['The technician straps you into an empty frame and seals the cups over your breasts. The pumps ' \
-                         'start to pull — an ache that melts into helpless, rhythmic pleasure as you are milked dry.'] }
+                scenes: ['The technician straps you into an empty frame, limbs spread and held fast, and studies you ' \
+                         'with a connoisseur\'s eye. "Wonderful," she says. "Now let\'s see what you give me."'],
+                by_part: {
+                  'breasts' => ['She seals the cups over your breasts and the pumps start to pull — an ache that melts ' \
+                                'into helpless, rhythmic pleasure as you are milked dry.'],
+                  'penis' => ['She guides a warm, slick sleeve over your cock and seals it in place. The pump rolls and ' \
+                              'squeezes in slow, tireless waves, milking you stroke after stroke until your hips are ' \
+                              'bucking helplessly against the frame and you are drained to the last shudder.']
+                },
+                otherwise: ['She seals a warm pump over your sex and starts a slow, tireless rhythm — stroking, ' \
+                            'squeezing, coaxing — until you are trembling, flushed and milked dry.'] }
             ]
           }
         ]

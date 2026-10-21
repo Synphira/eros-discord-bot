@@ -13,6 +13,11 @@ module Engine
         value: ->(p) { p.deepest_depth },
         format: ->(v) { Player.depth_label(v) }
       },
+      'level' => {
+        label: 'Highest Level',
+        value: ->(p) { p.progress_value(:highest_level) },
+        format: ->(v) { "Lv #{v}" }
+      },
       'kills' => {
         label: 'Monsters Defeated',
         value: ->(p) { p.tracker('monsters_killed') },

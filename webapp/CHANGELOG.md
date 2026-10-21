@@ -7,6 +7,24 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-21
+
+### Added
+
+- **Talk to Syn and Berry**: Talk buttons on the Quests and Parlour screens open a conversation with either fairy — 17 topics including all seven bosses, unlocked as you defeat or satisfy them and experience the tower. Synced from the bot.
+- **Remove ALL curses button**: the Curses screen now offers a **Remove ALL N curses (X LP)** purge at 50 LP per curse, with the total shown up front and the button greyed out when you can't afford it. Suppressed curses are left untouched. Synced from the bot.
+
+### Changed
+
+- **Floor 20 has a new boss: the Verdant Dryad** replaces the Ancient Treant, with all-new scenes; same stats, plant typing and trophy. Synced from the bot.
+- **Chimera fusion has its own screen**: the Hybrid Forms view now shows a **Fuse a Chimera…** button instead of the fusion picks inline; the fusion screen keeps your current chimera and both picks, with a back button. Synced from the bot.
+- **The Milking Station milks everyone now**: "Be milked" no longer requires breasts — the sleeve pump handles cocks, and everyone else gets a turn in the frame too. Synced from the bot.
+
+### Fixed
+
+- **The Dildo Trap no longer dodges itself**: spotting it in time now offers **Dodge** or **Let it happen**, like other traps. Synced from the bot.
+- **Berry's Cursed Bearer quest can always be finished**: it counts every curse gained while active, including re-gained ones. Synced from the bot.
+
 ## 2026-10-20
 
 ### Added

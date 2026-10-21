@@ -8,6 +8,7 @@
   "bot/engine/corruption.rb",
   "bot/engine/marks.rb",
   "bot/engine/quests.rb",
+  "bot/engine/conversations.rb",
   "bot/engine/biomes.rb",
   "bot/engine/altars.rb",
   "bot/engine/admirers.rb",

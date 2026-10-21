@@ -6,6 +6,26 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-21
+
+### Added
+
+- **Talk to Syn and Berry**: **Talk** buttons on `/quests` and `/parlour` open a conversation with either fairy — pick a topic and hear their very different takes. There are 17 topics: this place, their marriage, their work, monsters, traps, curses, marks, forms, altars, cycles, and all seven bosses. Boss topics unlock once you've defeated or satisfied that boss; the rest open as you experience the tower, with locked topics showing what they need.
+- **Remove ALL curses button**: the `/removecurse` menu now has a **Remove ALL N curses (X LP)** button that purges every active curse in one rite, priced honestly at 50 LP per curse — the total is shown on the button and in the menu text, the button greys out when you can't afford it, and suppressed curses are left untouched.
+- **Highest Level leaderboard**: `/leaderboard` gains a **Highest Level** ranking — your best level ever is now remembered across defeats and resets, so veterans keep their crown even at floor 1. (Slash commands need re-registering: `bundle exec rake commands:register`.)
+
+### Changed
+
+- **Floor 20 has a new boss: the Verdant Dryad** replaces the Ancient Treant — a towering, voluptuous dryad of bark-brown skin, leaf-green hair and blooming flowers, stepping out of her great tree. Same floor, plant typing, stats, root-grasp, pollen phase and Treant Heartwood trophy; all of her combat, submission and phase scenes are new. Fights and boss records saved under the old name carry over to her.
+- **Chimera fusion has its own screen**: the hybrid menu now shows a single **Fuse a Chimera…** button instead of the two pick menus and fuse button inline; the fusion screen keeps your current chimera, both picks, and a back button.
+- **The Milking Station milks everyone now**: the "Be milked" option no longer requires breasts — expectant delvers with a cock get the sleeve pump instead, and everyone else gets a turn in the frame too.
+
+### Fixed
+
+- **`/curses` and `/removecurse` no longer break with many curses**: both are paginated (8 per page) so the list stays within Discord's component limits no matter how branded you are, and the purge menus page along with the list. Curse numbers stay the same on every page, so `e,removecurse N` still lines up.
+- **The Dildo Trap no longer dodges itself**: spotting it in time now offers the same choice as other traps — **Dodge** or **Let it happen** — instead of automatically rolling you aside.
+- **Berry's Cursed Bearer quest can always be finished**: it now counts every curse you gain while the quest is active — including re-gaining a curse you'd already collected and purged — instead of only counting brand-new curses. Delvers who had already collected every curse can complete it again.
+
 ## 2026-10-20
 
 ### Added

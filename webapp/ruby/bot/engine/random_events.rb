@@ -142,6 +142,7 @@ module Engine
       return Engine::Treasure.chest_choices(player) if type == 'chest'
       return Engine::Altars.choices(player) if type == 'altar'
       return Engine::Exploration.trap_choices if type == 'trap'
+      return Engine::Exploration.trap_choices if type == 'dildo_trap'
 
       glory_hole_choices(player)
     end
@@ -211,13 +212,21 @@ module Engine
     def resolve_immediate!(player, type, level)
       meta = event_meta(type)
       if type.to_s == 'dildo_trap' && rand < player.trap_avoid_chance
-        player.bump_tracker!('traps_avoided')
+        player.store_event!(
+          type: 'dildo_trap',
+          mode: 'choice',
+          name: meta[:name],
+          level: level
+        )
         log = [
           "**Floor #{level}** — #{meta[:blurb]}",
-          "A hidden mechanism whirs — you roll aside before it can catch you! " \
-          "_(AGI #{player.effective_agility} · #{(player.trap_avoid_chance * 100).round}% to avoid)_"
+          { scene: meta[:description] },
+          'The mechanism whirs — you spot it a heartbeat before it can catch you. You could roll aside... ' \
+          'or stay exactly where you are and let it happen. ' \
+          "_(AGI #{player.effective_agility} · #{(player.trap_avoid_chance * 100).round}% dodge chance — the choice is yours.)_"
         ]
-        return { ok: true, mode: :done, name: meta[:name], colour: COLOUR, log: log, choices: [], broken: false }
+        return { ok: true, mode: :choice, name: meta[:name], colour: COLOUR, log: log,
+                 choices: Engine::Exploration.trap_choices, broken: false }
       end
 
       log = [
@@ -242,6 +251,7 @@ module Engine
       return Engine::Treasure.choose_chest!(player, data, choice_key.to_s) if data[:type].to_s == 'chest'
       return choose_altar!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'altar'
       return choose_trap!(player, data, choice_key.to_s) if data[:type].to_s == 'trap'
+      return choose_dildo_trap!(player, data, choice_key.to_s, level, log) if data[:type].to_s == 'dildo_trap'
 
       ok = apply_glory_choice!(player, choice_key.to_s, level, log)
       unless ok
@@ -288,6 +298,29 @@ module Engine
 
       player.clear_event!
       result
+    end
+
+    def choose_dildo_trap!(player, data, choice, level, log)
+      meta = event_meta('dildo_trap')
+      case choice
+      when 'dodge'
+        player.clear_event!
+        player.bump_tracker!('traps_avoided')
+        log << 'You roll aside as the mechanism fires, the slick head sliding past into the wall, harmless. ' \
+               "_(AGI #{player.effective_agility} · #{(player.trap_avoid_chance * 100).round}% dodge chance)_"
+        { ok: true, mode: :done, name: data[:name], colour: COLOUR, log: log, choices: [], broken: false }
+      when 'let_it_happen'
+        player.clear_event!
+        log << "**Floor #{level}** — #{meta[:blurb]}"
+        log << { scene: meta[:description] }
+        apply_immediate_effect!(player, 'dildo_trap', level, log)
+        finish = finalize_lust!(player, log)
+        colour = finish[:broken] ? 0x444444 : COLOUR
+        finish.merge(ok: true, mode: :done, name: data[:name], colour: colour, choices: [])
+      else
+        { ok: true, mode: :choice, name: data[:name], colour: COLOUR,
+          log: ['Pick another option.'], choices: Engine::Exploration.trap_choices }
+      end
     end
 
     def choose_altar!(player, data, choice, _level, log)

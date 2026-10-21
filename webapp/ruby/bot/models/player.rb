@@ -209,9 +209,16 @@ class Player < Sequel::Model(:players)
   def progress_value(key)
     case key.to_sym
     when :highest_floor then highest_floor_reached.to_i
+    when :highest_level then highest_level_reached
     when :curses_acquired
       (Array(tracker_hash['curses_seen']) | curses_dataset.select_map(Sequel[:curses][:name])).size
-    when :unique_bosses_defeated then Array(tracker_hash['bosses_seen']).size
+    when :curses_gained
+      # Lifetime curse applications (re-gaining a purged curse counts too).
+      # Until the counter exists it reads as the distinct count, so quest
+      # baselines recorded before it was tracked stay meaningful.
+      tracker_hash.key?('curses_gained') ? tracker('curses_gained') : progress_value(:curses_acquired)
+    when :unique_bosses_defeated
+      Array(tracker_hash['bosses_seen']).map { |n| Engine::BossFights.canonical_name(n) }.uniq.size
     when :royal_demons_cleared
       (Array(tracker_hash['bosses_seen']) & ['Succubus Queen', 'Incubus King']).size
     when :mimics_removed_count then cursed_shop_unlocks.size
@@ -269,7 +276,18 @@ class Player < Sequel::Model(:players)
     { ok: true, message: "You now bear the title **#{entry[:name]}**." }
   end
 
+  # Records the highest level ever reached (level resets each run, so the
+  # lifetime best lives in trackers). Feeds the Highest Level leaderboard.
+  def note_highest_level!
+    set_tracker!('highest_level', level.to_i) if level.to_i > tracker('highest_level')
+  end
+
+  def highest_level_reached
+    [tracker('highest_level'), level.to_i].max
+  end
+
   def check_progress!
+    note_highest_level!
     lines = []
     3.times do
       new_titles = Engine::TitleSystem::TITLES.reject { |k, _| earned_titles.include?(k) }
@@ -870,6 +888,7 @@ class Player < Sequel::Model(:players)
       agility: agility + 1,
       resistance: resistance + 1
     )
+    note_highest_level!
     update(defiance: max_defiance)
     gained = max_defiance - old_max
     max_note = gained.positive? ? "Max defiance +#{gained} → **#{max_defiance}**" : "Max defiance **#{max_defiance}**"
@@ -1069,6 +1088,46 @@ class Player < Sequel::Model(:players)
     }
   end
 
+  # Total LP to purge every active curse at once (suppressed curses stay).
+  def remove_all_curses_cost
+    active_curse_count * CURSE_REMOVE_COST
+  end
+
+  def remove_all_curses!
+    list = active_curses_ordered
+    return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" } if list.empty?
+
+    cost = list.size * CURSE_REMOVE_COST
+    unless spend_lp!(cost)
+      return {
+        ok: false,
+        error: :insufficient_lp,
+        count: list.size,
+        cost: cost,
+        message: "You don't have enough Lust Points! Purging all #{list.size} curses costs " \
+                 "**#{cost} LP** (you have #{lp})."
+      }
+    end
+
+    deleted = DB[:player_curses]
+              .where(player_id: discord_id, curse_id: list.map(&:id), is_suppressed: false)
+              .delete
+    if deleted.zero?
+      refund_lp!(cost)
+      return { ok: false, error: :curse_not_found, message: 'Curse not found.' }
+    end
+    refund_lp!((list.size - deleted) * CURSE_REMOVE_COST) if deleted < list.size
+
+    {
+      ok: true,
+      count: deleted,
+      cost: deleted * CURSE_REMOVE_COST,
+      curses: list,
+      message: "You've purged **all #{deleted} curses** in one rite — " \
+               "#{deleted * CURSE_REMOVE_COST} LP spent. (LP left: #{lp})"
+    }
+  end
+
   def suppress_curse_at!(index)
     curse = active_curses_ordered[index]
     return { ok: false, error: :invalid_index, message: 'That curse number is invalid.' } unless curse
@@ -1118,9 +1177,18 @@ class Player < Sequel::Model(:players)
     { ok: true, action: :suppressed, curse_id: curse_id, lp_spent: cost }
   end
 
+  # Counts one more curse actually landing on the player. The first time it
+  # runs it seeds itself from the distinct-curses count, so lifetime totals
+  # (and quest baselines recorded against that count) stay sensible.
+  def note_curse_gained!
+    base = tracker_hash.key?('curses_gained') ? tracker('curses_gained') : progress_value(:curses_acquired)
+    set_tracker!('curses_gained', base + 1)
+  end
+
   def afflict!(curse)
     return false if curses_dataset.where(curse_id: curse.id).any?
 
+    note_curse_gained!
     DB[:player_curses].insert(
       player_id: discord_id,
       curse_id: curse.id,

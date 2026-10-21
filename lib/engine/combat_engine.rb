@@ -637,7 +637,7 @@ module Engine
       if is_boss
         @player.bump_tracker!('bosses_defeated')
         @player.bump_tracker!('bosses_satisfied') if satisfied
-        @player.remember!('bosses_seen', enc[:name].to_s)
+        @player.remember!('bosses_seen', Engine::BossFights.canonical_name(enc[:name].to_s))
         boss_line!(enc, :beaten, log) unless satisfied
         note_broodmother_feat!(enc, log, satisfied: satisfied)
         reward = Engine::BossFights.boss_defeat_reward(@player, enc)

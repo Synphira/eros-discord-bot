@@ -30,6 +30,9 @@ module Eros
       @tab = nil
       @shop_cat = 'weapon'
       @chimera_picks = {}
+      @show_fusion = false
+      @talk_person = 'berry'
+      @show_talk = false
       @log = []
       @confirm = nil
       @outcome = nil
@@ -123,9 +126,25 @@ module Eros
       when 'remove_cursed' then say(@player.remove_cursed_equipment!(arg.to_s)[:message])
       when 'cshop_take' then cursed_shop_take!(arg.to_s)
       when 'curse_remove' then say(@player.remove_curse_at!(arg.to_i)[:message])
+      when 'curse_remove_all' then say(@player.remove_all_curses![:message])
       when 'curse_suppress' then say(@player.suppress_curse_at!(arg.to_i)[:message])
       when 'title' then say(@player.select_title!(arg.to_s.empty? ? nil : arg.to_s)[:message])
       when 'hybrid' then say(@player.select_transformation!(arg.to_s.empty? ? nil : arg.to_s)[:message])
+      when 'talk_open'
+        @talk_person = Engine::Conversations.normalize_person(arg)
+        @show_talk = true
+      when 'talk_person' then @talk_person = Engine::Conversations.normalize_person(arg)
+      when 'talk_close' then @show_talk = false
+      when 'talk_topic'
+        result = Engine::Conversations.answer(@player, @talk_person, arg.to_s)
+        if result[:ok]
+          spec = Engine::Conversations.person(@talk_person)
+          say("**#{spec[:name]} on #{result[:topic][:label]}**", result[:text])
+        else
+          say(result[:message])
+        end
+      when 'chimera_open' then @show_fusion = true
+      when 'chimera_close' then @show_fusion = false
       when 'chimera_pick'
         which, key = arg.to_s.split(':', 2)
         @chimera_picks[which] = key
@@ -154,6 +173,8 @@ module Eros
     def navigate(screen)
       @screen = screen
       @tab = nil
+      @show_fusion = false
+      @show_talk = false
     end
 
     def busy?
@@ -587,6 +608,15 @@ module Eros
           actions: [btn("Remove (#{remove} LP)", 'curse_remove', arg: i, style: 'danger', disabled: @player.lp < remove),
                     btn("Suppress (#{suppress} LP)", 'curse_suppress', arg: i, disabled: @player.lp < suppress)] }
       end
+      if @player.active_curse_count.positive?
+        total = @player.remove_all_curses_cost
+        sections.unshift(
+          { text: "**Purge everything at once** — all #{@player.active_curse_count} active curses for **#{total} LP** " \
+                  "(#{remove} LP each). Suppressed curses stay suppressed.",
+            actions: [btn("Remove ALL #{@player.active_curse_count} curses (#{total} LP)", 'curse_remove_all',
+                          style: 'danger', disabled: @player.lp < total)] }
+        )
+      end
       sections = [{ text: '_You are free of curses, for now._' }] if sections.empty?
       held = @player.suppressed_curses.map(&:name)
       sections << { text: "-# Suppressed until you are broken: #{held.join(', ')}" } if held.any?
@@ -640,6 +670,12 @@ module Eros
     def hybrids_view
       active = @player.active_transformation_key
       owned = @player.unlocked_transformations
+      if @show_fusion
+        sections = chimera_sections(active, owned, fusion: true)
+        sections << { text: '_Pick a primary and a secondary above, then fuse them._',
+                      actions: [btn('◀ Back to forms', 'chimera_close', style: 'secondary')] }
+        return { title: 'Chimera Fusion', sections: sections, actions: [back_row] }
+      end
       sections = Engine::TransformationSystem.visible(@player).map do |key, t|
         effects = Engine::TransformationSystem.effect_lines(t).map { |l| "• #{l}" }.join("\n")
         if key == active
@@ -679,7 +715,7 @@ module Eros
       sections
     end
 
-    def chimera_sections(active, owned)
+    def chimera_sections(active, owned, fusion: false)
       ts = Engine::TransformationSystem
       sections = []
       if (form = ts.chimera_form(@player))
@@ -691,6 +727,10 @@ module Eros
                                        : [btn('Take your Chimera', 'hybrid', arg: ts::CHIMERA_KEY, style: 'primary')] }
       end
       return sections if owned.size < 2
+      unless fusion
+        return sections << { text: "**Fuse a Chimera** (#{ts::FUSION_COST} LP) — weave two of your forms into one.",
+                             actions: [btn('🧬 Fuse a Chimera…', 'chimera_open', style: 'primary')] }
+      end
 
       name_of = ->(k) { ts.get(k)&.dig(:name) || '—' }
       pick_a = @chimera_picks['primary'].to_s
@@ -709,7 +749,34 @@ module Eros
       sections + [header] + cards
     end
 
+    def talk_view
+      spec = Engine::Conversations.person(@talk_person)
+      topics = Engine::Conversations.topics_for(@player, @talk_person)
+      sections = [{
+        text: "## #{spec[:emoji]} #{spec[:heading]}\n#{spec[:intro]}",
+        actions: [btn('🍓 Talk to Berry', 'talk_person', arg: 'berry',
+                      style: @talk_person == 'berry' ? 'primary' : 'secondary', disabled: @talk_person == 'berry'),
+                  btn('🖤 Talk to Syn', 'talk_person', arg: 'syn',
+                      style: @talk_person == 'syn' ? 'primary' : 'secondary', disabled: @talk_person == 'syn')]
+      }]
+      topics.each do |topic|
+        if topic[:unlocked]
+          sections << { text: "**#{topic[:label]}** — #{topic[:question]}",
+                        actions: [btn("Ask #{spec[:name]}", 'talk_topic', arg: topic[:key], style: 'primary')] }
+        else
+          sections << { text: "🔒 **#{topic[:label]}** — #{Engine::Conversations.unlock_hint(@player, topic)}" }
+        end
+      end
+      sections << { text: '_Their answers change with who you ask. Berry and Syn agree about very little._',
+                    actions: [btn('◀ Back', 'talk_close', style: 'secondary'),
+                              btn('🍓 Quest Board', 'nav', arg: 'quests', style: 'secondary'),
+                              btn('Parlour', 'nav', arg: 'parlour', style: 'secondary')] }
+      { title: spec[:heading], sections: sections, actions: [back_row] }
+    end
+
     def parlour_view
+      return talk_view if @show_talk
+
       owned = Engine::Marks.owned(@player)
       intro = { text: "_One half of Syn & Berry's glows with clean steel, where **Berry** — a strawberry-bright " \
                       "fairy with a smile like sunrise and a grip like ownership — is already writing your name in " \
@@ -718,7 +785,9 @@ module Eros
                       "sleepless shadows under her eyes and next to nothing on but black lace scraps — her own " \
                       "inked, pierced skin displays every mark she sells. Every mark Syn makes stays through " \
                       "every run._\n" \
-                      "-# Marks worn #{owned.size}/#{Engine::Marks.max_marks(@player)}" }
+                      "-# Marks worn #{owned.size}/#{Engine::Marks.max_marks(@player)}",
+                actions: [btn('🍓 Talk to Berry', 'talk_open', arg: 'berry', style: 'secondary'),
+                          btn('🖤 Talk to Syn', 'talk_open', arg: 'syn', style: 'primary')] }
       worn = owned.map do |key|
         mark = Engine::Marks::MARKS[key]
         { text: "#{Engine::Marks.label(key)} — #{mark[:perk]}", actions: [btn('Remove', 'mark_remove', arg: key)] }
@@ -733,10 +802,14 @@ module Eros
     end
 
     def quests_view
+      return talk_view if @show_talk
+
       sections = [{ text: "### 🍓 Berry's Quest Board\n" \
                           "_\"Errands, sugar! I run the shop, Syn runs the bench, and you run your pretty legs off " \
                           "for both of us.\"_\n#{Engine::Quests.board_lines(@player).join("\n")}\n" \
-                          "-# Quests completed for Berry: **#{Engine::Quests.completed(@player)}**" }]
+                          "-# Quests completed for Berry: **#{Engine::Quests.completed(@player)}**",
+                    actions: [btn('🍓 Talk to Berry', 'talk_open', arg: 'berry', style: 'primary'),
+                              btn('🖤 Talk to Syn', 'talk_open', arg: 'syn', style: 'secondary')] }]
       Engine::Quests.active(@player).each do |row|
         spec = Engine::Quests.quest(row['key'])
         actions = []

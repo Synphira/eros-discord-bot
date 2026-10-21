@@ -25,6 +25,7 @@ BOT_FILES = %w[
   lib/engine/corruption.rb
   lib/engine/marks.rb
   lib/engine/quests.rb
+  lib/engine/conversations.rb
   lib/engine/biomes.rb
   lib/engine/altars.rb
   lib/engine/admirers.rb

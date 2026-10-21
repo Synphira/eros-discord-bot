@@ -72,6 +72,11 @@ module Commands
         end
 
         attach_story(c, player, event.user.id)
+
+        c.row do |row|
+          row.button(label: '🍓 Talk to Berry', style: :secondary, custom_id: "eros:talk:berry:#{event.user.id}")
+          row.button(label: '🖤 Talk to Syn', style: :primary, custom_id: "eros:talk:syn:#{event.user.id}")
+        end
       end
     end
 

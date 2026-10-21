@@ -287,6 +287,16 @@ module ErosUI
         end
       end
     end
+    player = Player[owner_id]
+    if player&.active_curse_count&.positive?
+      total = player.active_curse_count
+      cost = player.remove_all_curses_cost
+      container.row do |row|
+        row.button(label: "Remove ALL #{total} curses (#{cost} LP)", style: :danger,
+                   custom_id: "eros:curseact:remove_all:#{owner_id}",
+                   disabled: player.lp < cost)
+      end
+    end
   end
 
   def build_curses_text(player, with_cost: false)
@@ -317,6 +327,52 @@ module ErosUI
       lines << "-# LP: `#{player.lp}`"
     end
     lines.join("\n")
+  end
+
+  CURSES_PER_PAGE = 8
+
+  # Paginated curse list for Discord's component limits: returns
+  # [text, total_pages]. Numbering stays global across pages so it always
+  # matches the numbers used by `e,removecurse N` and the purge menus.
+  def build_curses_page(player, page: 0, with_cost: false)
+    flat = player.curses_grouped_by_type.flat_map do |type, entries|
+      entries.map { |entry| entry.merge(type: type) }
+    end
+    suppressed = player.suppressed_curses
+    return ["You don't have any curses!", 1] if flat.empty? && suppressed.empty?
+
+    pages = [(flat.size.to_f / CURSES_PER_PAGE).ceil, 1].max
+    page = page.to_i.clamp(0, pages - 1)
+    slice = flat.slice(page * CURSES_PER_PAGE, CURSES_PER_PAGE) || []
+
+    lines = [with_cost ? 'Your curses:' : 'Your current curses:']
+    last_type = nil
+    slice.each do |entry|
+      if entry[:type] != last_type
+        lines << ''
+        lines << "**#{Engine::CurseCatalog.type_label(entry[:type])} Curses:**"
+        last_type = entry[:type]
+      end
+      curse = entry[:curse]
+      lines << "#{entry[:index] + 1}. **#{curse.name}**: #{curse.description.to_s[0, 220]}"
+    end
+    lines << "_Page #{page + 1} of #{pages} — curse numbers are the same on every page._" if pages > 1
+    if page == pages - 1 && suppressed.any?
+      lines << ''
+      lines << '**Suppressed** _(no effect until you are defeated)_:'
+      suppressed.sort_by(&:name).each { |curse| lines << "• ~~#{curse.name}~~" }
+    end
+    if with_cost
+      lines << ''
+      lines << "_**Remove** (#{Player::CURSE_REMOVE_COST} LP) deletes a curse for good. " \
+               "**Suppress** (#{Player::CURSE_SUPPRESS_COST} LP) silences it until your next defeat._"
+      if flat.size > 1
+        lines << "_Or purge everything at once: **Remove ALL #{flat.size} curses (#{player.remove_all_curses_cost} LP)**._"
+      end
+      lines << '_Use the menus, or `e,removecurse [number]` / `e,suppresscurse [number]`._'
+      lines << "-# LP: `#{player.lp}`"
+    end
+    [lines.join("\n"), pages]
   end
 
   def attach_create_buttons(container, owner_id)

@@ -117,40 +117,78 @@ module Commands
         end
 
         if owned.size >= 2
-          pick_a = player.tracker_hash['chimera_pick_primary'].to_s
-          pick_b = player.tracker_hash['chimera_pick_secondary'].to_s
-          name_of = ->(k) { Engine::TransformationSystem.get(k)&.dig(:name) || '—' }
-          c.separator(divider: true, spacing: :small)
-          c.text_display(
-            content: "**Fuse a Chimera** (#{Engine::TransformationSystem::FUSION_COST} LP) — primary **#{name_of.call(pick_a)}** " \
-                     "+ secondary **#{name_of.call(pick_b)}**\n" \
-                     '-# The primary keeps its full effects and combat special; the secondary echoes at half strength.'
-          )
           c.row do |row|
-            row.string_select(custom_id: "eros:chimera:primary:#{event.user.id}", placeholder: 'Choose the primary form…',
-                              min_values: 1, max_values: 1) do |menu|
-              owned.first(25).each do |key|
-                t = Engine::TransformationSystem.get(key)
-                menu.option(label: t[:name], value: key, default: key == pick_a)
-              end
-            end
-          end
-          c.row do |row|
-            row.string_select(custom_id: "eros:chimera:secondary:#{event.user.id}", placeholder: 'Choose the secondary form…',
-                              min_values: 1, max_values: 1) do |menu|
-              owned.first(25).each do |key|
-                t = Engine::TransformationSystem.get(key)
-                menu.option(label: t[:name], value: key, default: key == pick_b)
-              end
-            end
-          end
-          c.row do |row|
-            row.button(label: "Fuse them (#{Engine::TransformationSystem::FUSION_COST} LP)", style: :success,
-                       custom_id: "eros:chimera:fuse:#{event.user.id}")
+            row.button(label: '🧬 Fuse a Chimera…', style: :primary,
+                       custom_id: "eros:chimera:open:#{event.user.id}")
           end
         end
 
         Commands::Profile.attach_pager(c, 'eros:hybrid:page', page, pages, event.user.id) if pages > 1
+        Commands::Profile.attach_nav(c, event.user.id, :hybrids)
+      end
+    end
+
+    def show_fusion(event, notice: nil)
+      player = ErosHelpers.require_player(event) or return
+      unless player.transformations_supported?
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: 'Hybrid forms need a database update — ask the operator to run `bundle exec rake db:migrate`.')
+        end
+        return
+      end
+
+      owned = player.unlocked_transformations
+      return show(event, notice: 'Unlock at least two hybrid forms before you can fuse a Chimera.') if owned.size < 2
+
+      pick_a = player.tracker_hash['chimera_pick_primary'].to_s
+      pick_b = player.tracker_hash['chimera_pick_secondary'].to_s
+      name_of = ->(k) { Engine::TransformationSystem.get(k)&.dig(:name) || '—' }
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(
+          content: "## Chimera Fusion — #{player.display_name}\n" \
+                   "_Fuse two unlocked forms for **#{Engine::TransformationSystem::FUSION_COST} LP**. " \
+                   'The primary keeps its full effects and combat special; the secondary echoes at half strength._'
+        )
+        c.text_display(content: notice) if notice
+        if Engine::TransformationSystem.chimera_combo(player)
+          form = Engine::TransformationSystem.chimera_form(player)
+          c.text_display(
+            content: "🧬 **Your current Chimera — #{form[:name]}**\n" \
+                     "_#{form[:description].to_s[0, 160]}_\n" \
+                     "**Appearance** #{form[:appearance].join(' · ')[0, 200]}\n" \
+                     "**Effects** #{Engine::TransformationSystem.effect_lines(form).join(' · ')[0, 200]}"
+          )
+        end
+        c.separator(divider: true, spacing: :small)
+        c.text_display(
+          content: "Primary **#{name_of.call(pick_a)}** + secondary **#{name_of.call(pick_b)}** — " \
+                   'pick both halves below, then fuse them.'
+        )
+        c.row do |row|
+          row.string_select(custom_id: "eros:chimera:primary:#{event.user.id}", placeholder: 'Choose the primary form…',
+                            min_values: 1, max_values: 1) do |menu|
+            owned.first(25).each do |key|
+              t = Engine::TransformationSystem.get(key)
+              menu.option(label: t[:name], value: key, default: key == pick_a)
+            end
+          end
+        end
+        c.row do |row|
+          row.string_select(custom_id: "eros:chimera:secondary:#{event.user.id}", placeholder: 'Choose the secondary form…',
+                            min_values: 1, max_values: 1) do |menu|
+            owned.first(25).each do |key|
+              t = Engine::TransformationSystem.get(key)
+              menu.option(label: t[:name], value: key, default: key == pick_b)
+            end
+          end
+        end
+        c.row do |row|
+          row.button(label: "Fuse them (#{Engine::TransformationSystem::FUSION_COST} LP)", style: :success,
+                     custom_id: "eros:chimera:fuse:#{event.user.id}")
+          row.button(label: '◀ Back to forms', style: :secondary,
+                     custom_id: "eros:hybrid:view:#{event.user.id}")
+        end
         Commands::Profile.attach_nav(c, event.user.id, :hybrids)
       end
     end
@@ -205,7 +243,13 @@ module Commands
 
       which = event.custom_id[/\Aeros:chimera:(primary|secondary):\d+\z/, 1]
       player.set_tracker!("chimera_pick_#{which}", Array(event.values).first.to_s)
-      Commands::Transformation.show(event, notice: "#{which.capitalize} form chosen. Pick the other half, then **Fuse them**.")
+      Commands::Transformation.show_fusion(event, notice: "#{which.capitalize} form chosen. Pick the other half, then **Fuse them**.")
+    end
+
+    button(custom_id: /^eros:chimera:open:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Transformation.show_fusion(event)
     end
 
     button(custom_id: /^eros:chimera:fuse:\d+$/) do |event|
@@ -216,7 +260,7 @@ module Commands
 
       result = Engine::TransformationSystem.fuse!(player, player.tracker_hash['chimera_pick_primary'].to_s,
                                                   player.tracker_hash['chimera_pick_secondary'].to_s)
-      Commands::Transformation.show(event, notice: result[:message])
+      Commands::Transformation.show_fusion(event, notice: result[:message])
     end
 
     button(custom_id: /^eros:chimera:take:\d+$/) do |event|

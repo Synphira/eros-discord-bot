@@ -105,6 +105,25 @@ class Player
     { ok: true, curse: curse, message: "You've removed the curse: **#{curse.name}**! (LP left: #{lp})" }
   end
 
+  def remove_all_curses!
+    list = active_curses_ordered
+    return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" } if list.empty?
+
+    cost = list.size * CURSE_REMOVE_COST
+    unless spend_lp!(cost)
+      return { ok: false, error: :insufficient_lp, count: list.size, cost: cost,
+               message: "You don't have enough Lust Points! Purging all #{list.size} curses costs " \
+                        "**#{cost} LP** (you have #{lp})." }
+    end
+
+    names = list.map(&:name)
+    update(web_curses: curse_rows.reject { |r| names.include?(r['name']) && !r['suppressed'] })
+    clamp_defiance!
+    { ok: true, count: list.size, cost: cost, curses: list,
+      message: "You've purged **all #{list.size} curses** in one rite — " \
+               "#{cost} LP spent. (LP left: #{lp})" }
+  end
+
   def reactivate_suppressed_curses!
     names = suppressed_curses.map(&:name)
     update(web_curses: curse_rows.map { |r| r.merge('suppressed' => false) }) if names.any?
@@ -138,6 +157,7 @@ class Player
   def afflict!(curse)
     return false if curse_rows.any? { |r| r['name'] == curse.name }
 
+    note_curse_gained!
     update(web_curses: curse_rows + [{ 'name' => curse.name, 'suppressed' => false }])
     remember!('curses_seen', curse.name)
     count = active_curse_count

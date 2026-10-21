@@ -403,7 +403,7 @@ module Commands
       nil
     end
 
-    command(:leaderboard, description: 'Top delvers (cycles, depth, kills, lp)') do |event, stat|
+    command(:leaderboard, description: 'Top delvers (cycles, depth, level, kills, lp)') do |event, stat|
       Commands::Profile.show_leaderboard(event, stat)
       nil
     end

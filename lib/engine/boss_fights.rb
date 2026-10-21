@@ -43,10 +43,13 @@ module Engine
         special: 'dominating_presence'
       },
       20 => {
-        name: 'Ancient Treant',
+        name: 'Verdant Dryad',
         type: 'plant',
         type_name: 'Plant',
-        description: 'A colossal living tree dripping with amber sap, its roots carpeting the chamber. It catches anyone who wanders close, holds them in its branches, and fills them until they overflow.',
+        description: 'A towering dryad steps out of the great tree at the chamber\'s heart — a voluptuous woman with ' \
+                     'smooth bark-brown skin, long leaf-green hair crowned with blooming flowers, and a lush body ' \
+                     'barely draped in vines and petals. Her garden catches anyone who wanders close, and her vines ' \
+                     'are already reaching for you.',
         color: 0x228b22,
         strength: 20,
         agility: 6,
@@ -185,29 +188,46 @@ module Engine
         unimpressed: ['The King looks down at you, unmoved. "Try harder."'],
         beaten: ['The Incubus King drops to one knee, panting, his crown askew. For the first time, he looks at you with respect.']
       },
-      'Ancient Treant' => {
+      'Verdant Dryad' => {
         assault: {
-          'vagina' => ['Roots burst from the floor and pull your legs wide while a thick, smooth heartwood shaft rises between them and pushes into your cunt, slick with amber sap.',
-                       'The Ancient Treant fucks your pussy with a gnarled, ridged root while a soft, mossy tendril rubs your clit in slow circles.'],
-          'penis' => ["A sap-slick hollow in the treant's bark closes around your cock, its warm inner wood squeezing and pulling at you in slow, creaking pulls.",
-                      'Fine roots coil around your cock and balls and squeeze in rhythm while warm sap drips down your shaft.'],
-          'anus' => ['A smooth root slides between your cheeks and into your ass, growing thicker inside you as it pumps warm sap deep.'],
-          'breasts' => ['Mossy tendrils wrap your breasts and tug at your nipples while flowering buds latch on and suckle.'],
-          'any' => ['The Ancient Treant lifts you into its branches, roots wrapped around your limbs, and runs sap-slick vines over every inch of your skin.',
-                    "Golden pollen drifts down from the treant's crown and settles on your skin, and everywhere it touches starts to throb with need."]
+          'vagina' => ['Vines coil around your thighs and pull your legs wide as the Verdant Dryad kneels between them, ' \
+                       'sliding two bark-smooth fingers into your cunt while a flowering tendril rubs your clit in slow circles.',
+                       'She smiles, and a thick, smooth root rises from the soil between your legs, slick with her sap, ' \
+                       'pushing into your pussy while she watches your face and strokes your cheek.'],
+          'penis' => ['The Verdant Dryad pulls you down into her flowers and wraps her warm, sap-slick thighs around ' \
+                      'your cock, grinding against you while vines hold your hips exactly where she wants them.',
+                      'She takes your cock into her mouth, her lips soft as petals, while fine roots coil around your ' \
+                      'balls and squeeze in rhythm with her sucking.'],
+          'anus' => ['A smooth, slender vine slides between your cheeks and into your ass, curling gently inside you ' \
+                     'as it pumps warm sap deep.'],
+          'breasts' => ['She presses her own lush breasts against yours and takes your nipples between her fingers, ' \
+                        'rolling them while flowering buds bloom against your skin and suckle.'],
+          'any' => ['Vines lift you off the ground and hold you spread in the air while the Dryad steps close, running ' \
+                    'her hands and mouth over every inch of you at her leisure.',
+                    'Golden pollen drifts down from the flowers in her hair and settles on your skin, and everywhere ' \
+                    'it touches starts to throb with need.']
         },
         willing: {
-          'vagina' => ["You let the treant's roots spread your legs and sink down onto its heartwood shaft, moaning as it fills your cunt with sap.",
-                       'You grind your clit against its mossy bark while a root fucks you slow and deep.'],
-          'penis' => ["You push your cock into a sap-slick hollow in the treant's trunk and fuck it, the warm wood squeezing you with every thrust."],
-          'anus' => ['You back onto a smooth root and take it into your ass, sighing as it swells and pumps warm sap into you.'],
-          'breasts' => ["You press your breasts against the treant's mossy bark and let its buds suckle your nipples."],
-          'any' => ["You lie back in the treant's roots and let them hold you, vines sliding over your skin as it takes its time with you."]
+          'vagina' => ['You spread your legs for the Verdant Dryad and moan as she slides her fingers into your cunt, ' \
+                       'kissing you deeply while a tendril teases your clit.',
+                       'You sink down onto the smooth root she grows for you, riding it slow and deep while she holds ' \
+                       'your waist and whispers encouragement against your ear.'],
+          'penis' => ["You push your cock into the Dryad's hot, sap-slick pussy and fuck her against her tree, her " \
+                      'legs locked around your waist and her moans shaking petals loose from her hair.'],
+          'anus' => ['You back onto the smooth vine she offers and take it into your ass, sighing as it swells gently ' \
+                     'and pumps warm sap into you.'],
+          'breasts' => ['You press your breasts into her hands and let her squeeze and suck your nipples until they ' \
+                        'ache, her own chest heaving against you.'],
+          'any' => ['You lie back in her flowers and let her vines hold you open while the Dryad takes her time with ' \
+                    'you, her hands and mouth everywhere at once.']
         },
-        wanting: ["The Ancient Treant's roots tighten around you and its branches groan. It isn't finished with you."],
-        sated: ['The Ancient Treant shudders from root to crown, sap pouring down its bark, then slowly unwinds from you and settles back into the earth.'],
-        unimpressed: ['The treant creaks indifferently, its roots barely stirring.'],
-        beaten: ['The Ancient Treant groans and sinks into the earth, its roots going slack around you.']
+        wanting: ['The Verdant Dryad\'s vines tighten around your waist and pull you back against her lush body. ' \
+                  '"The garden isn\'t finished with you, little flower."'],
+        sated: ['The Verdant Dryad shudders and cries out, flowers bursting open all through her hair as pleasure ' \
+                'rolls through her. She unwinds her vines slowly and strokes your cheek. "Grow well, little flower."'],
+        unimpressed: ['The Verdant Dryad tilts her head, petals drifting from her hair. "The garden expected more of you."'],
+        beaten: ['The Verdant Dryad staggers back into her tree, her vines going slack around you, and sinks into ' \
+                 'the bark with a rustling sigh.']
       },
       'Lich Lord' => {
         assault: {
@@ -292,7 +312,7 @@ module Engine
                            'The %<name>s spits out a clutch of little mimics that latch onto you and refuse to let go!'],
       'seductive_gaze' => ['The %<name>s locks eyes with you, and a wave of heat floods between your legs. Your grip goes slack!'],
       'dominating_presence' => ['"Kneel," the %<name>s commands, and your legs obey before your mind can. You can\'t run!'],
-      'root_grasp' => ["The %<name>s's roots burst up and coil around your ankles, sliding up your thighs and slowing you down!"],
+      'root_grasp' => ["The %<name>s laughs softly and the floor blooms — her vines burst up and coil around your ankles, sliding up your thighs and slowing you down!"],
       'soul_drain' => ['As you submit, the %<name>s kisses you and draws the warmth right out of you, leaving you shivering and weaker!'],
       'primal_rage' => ['The %<name>s goes into rut! Its cock swells, its musk thickens, and its attacks grow more ferocious!'],
       'dominion_block' => ['%<name>s crooks one finger and the chamber doors slam shut. "Leaving so soon, pet? I didn\'t give you permission."',
@@ -316,7 +336,7 @@ module Engine
         stat_modifiers: { 'strength' => 3, 'agility' => 3 }
       },
       'Treant Heartwood' => {
-        description: 'A piece of living wood. +10 max Defiance, +2 RES.',
+        description: 'A piece of living heartwood from the Dryad\'s tree. +10 max Defiance, +2 RES.',
         stat_modifiers: { 'max_hp' => 10, 'resistance' => 2 }
       },
       "Lich's Phylactery" => {
@@ -457,13 +477,15 @@ module Engine
         give: 'Your knees hit the floor before you decide to let them. He strokes your hair, murmurs *good*, and takes you slowly ' \
               'and thoroughly right there at his feet.'
       },
-      'Ancient Treant' => {
-        intro: 'The Ancient Treant groans, and the whole chamber blooms. Flowers burst open on every branch, and heavy golden ' \
-               'pollen drifts down over you, warm and sweet.',
+      'Verdant Dryad' => {
+        intro: 'The Verdant Dryad stops fighting. She steps back into her flowers, and every bloom in her hair opens ' \
+               'at once. Heavy golden pollen drifts down over you, warm and sweet, and her smile turns hungry.',
         resist_label: 'Hold your breath', give_label: 'Breathe it in',
-        resist: 'You cover your face, push through the drifting gold and hack at the trunk until sap runs and the blossoms close.',
-        give: 'You breathe deep. The pollen floods you with heat, and soft vines lift you into the heart of a great flower, ' \
-              'caressing you everywhere while the petals close around you both.'
+        resist: 'You cover your face, push through the drifting gold and strike past her guard, and the blossoms in ' \
+                'her hair snap shut.',
+        give: 'You breathe deep. The pollen floods you with heat, and soft vines lift you into her arms. She cradles ' \
+              'you against her lush body in the heart of a great flower, caressing you everywhere while the petals ' \
+              'close around you both.'
       },
       'Lich Lord' => {
         intro: 'The Lich Lord raises a skeletal hand, and the cold in the chamber becomes a creeping, tingling chill that slides ' \
@@ -497,8 +519,8 @@ module Engine
       }
     }.freeze
 
-    # Fights saved before the final boss became Eros still carry the old name.
-    LEGACY_NAMES = { 'The Tower Lord' => 'Eros' }.freeze
+    # Fights saved under a boss's old name still carry it.
+    LEGACY_NAMES = { 'The Tower Lord' => 'Eros', 'Ancient Treant' => 'Verdant Dryad' }.freeze
 
     # Names that never take "the" in combat text.
     PROPER_NAMES = %w[Eros].freeze

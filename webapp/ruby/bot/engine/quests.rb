@@ -72,9 +72,10 @@ module Engine
               'sketchbook away, you have customers. ...Draw it later, then."'
       },
       'cursed_bearer' => {
-        name: 'Cursed Bearer', tracker: 'curses_acquired', target: 3, reward: 90,
-        ask: '"Collect 3 different curses," Berry says cheerfully, like it\'s a shopping list. "Syn studies the ' \
-             'marks they leave. Up close. While you\'re wearing them. She\'s very thorough, my wife."',
+        name: 'Cursed Bearer', tracker: 'curses_gained', target: 3, reward: 90,
+        ask: '"Get cursed 3 times," Berry says cheerfully, like it\'s a shopping list. "New curses, old curses, ' \
+             'curses you\'ve had before — Syn studies the marks they leave. Up close. While you\'re wearing them. ' \
+             'She\'s very thorough, my wife."',
         done: '"Three curses! Let\'s see them," Berry sings, and Syn is already there with her sketchbook, looking ' \
               'far too awake for once. "Research," Syn murmurs. "Sure it is, darling," Berry says.'
       },
