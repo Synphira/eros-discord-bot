@@ -16,10 +16,14 @@ module Commands
       unlocked = player.cursed_shop_unlocks
 
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
-        c.text_display(content: '## Cursed Shop')
+        c.text_display(content: '## Cursed Shop — Covar Zephyren')
         c.text_display(
-          content: '_Living gear you have worn and torn free remembers you. Call it back for free — ' \
-                   'removing it again costs its usual LP._'
+          content: '_The counter is manned by **Covar Zephyren**, an incubus with curved horns, a lashing ' \
+                   'tail, and a pair of large breasts making a warm spectacle of his open shirt. He was one ' \
+                   'of the first delvers in these halls; the tower remade him, and he stayed — happily — to ' \
+                   'mind the living gear. "Living gear you have worn and torn free remembers you," he says. ' \
+                   '"Call it back for free. Removing it again costs its usual LP. Conversation\'s free too — ' \
+                   'I charge in stories."_'
         )
         c.text_display(content: notice) if notice
         c.separator(divider: true, spacing: :small)
@@ -52,6 +56,7 @@ module Commands
           end
         end
         c.row do |row|
+          row.button(label: '🔮 Talk to Covar', style: :primary, custom_id: "eros:talk:covar:#{event.user.id}")
           row.button(label: 'Shop', style: :secondary, custom_id: "eros:shop:cat:weapon:#{event.user.id}")
           row.button(label: 'Equipment', style: :secondary, custom_id: "eros:cshop:equipment:#{event.user.id}")
         end

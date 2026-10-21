@@ -134,11 +134,30 @@ module ErosUI
     end
   end
 
+  # One shop item as a Discord section: the item's text with its own Buy
+  # button sitting beside it as the section accessory.
+  def attach_shop_item_section(container, item, player:, category:, page:, owner_id:)
+    owned = player.owns_equipment?(item.id) && item.type != 'special'
+    tag = owned ? ' _(owned)_' : ''
+    mods = Engine::Treasure.format_stat_changes(item.stat_modifiers)
+    content = "**#{item.name}** (#{item.cost} LP)#{tag} — _#{item.description}_"
+    content += "\n#{mods}" unless mods.to_s.empty? || mods == '_none_'
+
+    container.section do |section|
+      section.text_display(content: content)
+      section.button(
+        label: owned ? 'Owned' : 'Buy',
+        style: owned ? :secondary : :success,
+        custom_id: "eros:shop:buy:#{item.id}:#{category}:#{page}:#{owner_id}",
+        disabled: owned || player.lp < item.cost.to_i
+      )
+    end
+  end
+
   def attach_shop_buttons(container, shop, owner_id)
     category = Engine::Shop.normalize_category(shop[:category] || shop['category'])
     page = (shop[:page] || shop['page']).to_i
     pages = [(shop[:pages] || shop['pages']).to_i, 1].max
-    items = Array(shop[:items] || shop['items'])
 
     container.row do |row|
       Engine::Shop::CATEGORIES.each do |cat|
@@ -154,23 +173,6 @@ module ErosUI
     container.row do |row|
       row.button(label: "🍓 Berry's Quests", style: :primary, custom_id: "eros:quests:view:#{owner_id}")
       row.button(label: "Syn's Parlour", style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
-    end
-
-    items.each_slice(5) do |slice|
-      container.row do |row|
-        slice.each do |item|
-          id = item[:id] || item['id']
-          name = item[:name] || item['name']
-          cost = item[:cost] || item['cost']
-          label = "#{name} · #{cost} LP"
-          label = "#{name[0, 40]}… · #{cost}" if label.length > 80
-          row.button(
-            label: label,
-            style: :success,
-            custom_id: "eros:shop:buy:#{id}:#{category}:#{page}:#{owner_id}"
-          )
-        end
-      end
     end
 
     return if pages <= 1

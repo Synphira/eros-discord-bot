@@ -28,8 +28,7 @@ module Commands
           shop: {
             category: category,
             page: page,
-            pages: pages,
-            items: items.map { |i| { id: i.id, name: i.name, cost: i.cost } }
+            pages: pages
           }
         }
       ) do |c|
@@ -49,12 +48,9 @@ module Commands
           c.text_display(content: '_Nothing in this aisle._')
         else
           items.each do |item|
-            owned = player.owns_equipment?(item.id) && item.type != 'special'
-            tag = owned ? ' _(owned)_' : ''
-            mods = Engine::Treasure.format_stat_changes(item.stat_modifiers)
-            c.text_display(
-              content: "• **#{item.name}**#{tag} — _#{item.description}_\n" \
-                       "  #{mods} · **#{item.cost}** LP"
+            ErosUI.attach_shop_item_section(
+              c, item,
+              player: player, category: category, page: page, owner_id: event.user.id
             )
           end
         end
@@ -65,7 +61,7 @@ module Commands
         end
 
         c.separator(divider: false, spacing: :small)
-        c.text_display(content: '-# Category tabs · Buy buttons · Prev/Next · or `e,buy` / `e,sell` by name')
+        c.text_display(content: '-# Category tabs · each item has its own Buy button · Prev/Next · or `e,buy` / `e,sell` by name')
       end
     end
 

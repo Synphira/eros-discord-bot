@@ -11,13 +11,15 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Added
 
+- **Covar Zephyren keeps the Cursed Shop**: the Cursed Shop now has its incubus keeper — talk to him across 8 lore topics, and after hearing out 5 different topics he will drain your lust to zero for free (his breasts or cock, dominant; his ass, submissive) at no defiance cost. Syn and Berry also gain a Covar topic once you've torn free living gear. Synced from the bot.
 - **Talk to Syn and Berry**: Talk buttons on the Quests and Parlour screens open a conversation with either fairy — 17 topics including all seven bosses, unlocked as you defeat or satisfy them and experience the tower. Synced from the bot.
 - **Remove ALL curses button**: the Curses screen now offers a **Remove ALL N curses (X LP)** purge at 50 LP per curse, with the total shown up front and the button greyed out when you can't afford it. Suppressed curses are left untouched. Synced from the bot.
 
 ### Changed
 
+- **Shop buys sit beside the gear**: items now read **Name (cost LP)** with a plain **Buy** button beside each one; owned and unaffordable items are greyed out. Synced from the bot.
 - **Floor 20 has a new boss: the Verdant Dryad** replaces the Ancient Treant, with all-new scenes; same stats, plant typing and trophy. Synced from the bot.
-- **Chimera fusion has its own screen**: the Hybrid Forms view now shows a **Fuse a Chimera…** button instead of the fusion picks inline; the fusion screen keeps your current chimera and both picks, with a back button. Synced from the bot.
+- **Chimeras have their own screen**: the Hybrid Forms view no longer shows your chimera's card, deepening, or fusion picks — just a **🧬 Chimera…** button. The Chimera screen holds your current chimera, taking it or returning to human, its deepening, and the fusion picks. Synced from the bot.
 - **The Milking Station milks everyone now**: "Be milked" no longer requires breasts — the sleeve pump handles cocks, and everyone else gets a turn in the frame too. Synced from the bot.
 
 ### Fixed

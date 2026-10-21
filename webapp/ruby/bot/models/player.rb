@@ -128,12 +128,16 @@ class Player < Sequel::Model(:players)
   end
 
   # Specific people may wear the resident they're based on.
-  RESERVED_NAME_OWNERS = { 'berry' => 325_471_423_508_250_625 }.freeze
+  RESERVED_NAME_OWNERS = {
+    'berry' => 325_471_423_508_250_625,
+    'covar' => 452_679_089_929_846_784,
+    'covar zephyren' => 452_679_089_929_846_784
+  }.freeze
 
   # Names of the tower's own — fairies, the goddess, residents, and bosses.
   # Only the developer may wear one (Syn is based on them, after all).
   def self.reserved_character_names
-    names = %w[syn berry eros]
+    names = %w[syn berry eros covar] + ['covar zephyren']
     if defined?(Engine::NPCSystem) && Engine::NPCSystem.const_defined?(:NPCS)
       names += Engine::NPCSystem::NPCS.values.map { |n| n[:name] }
     end

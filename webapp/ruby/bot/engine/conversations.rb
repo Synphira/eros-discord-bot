@@ -24,6 +24,16 @@ module Engine
         intro: '_Syn sets her needle down, folds her inked arms, and looks at you properly for once — heavy-lidded, ' \
                'violet-eyed, amused. "Questions, darling? I do love being studied. Try not to waste the rare ' \
                'occasion when I\'m awake for it."_'
+      },
+      'covar' => {
+        name: 'Covar Zephyren',
+        emoji: '🔮',
+        heading: 'Talking with Covar Zephyren',
+        intro: '_Behind the cursed counter stands **Covar Zephyren** — one of the first delvers ever to walk ' \
+               'these halls, and proof of what they do to a person. The tower remade him an incubus: curved ' \
+               'horns, a restless tail, a handsome face — and a pair of large, heavy breasts that strain the ' \
+               'open front of his shirt every time he leans on the counter, which he does often, and on ' \
+               'purpose. "Browse, ask, touch the merchandise," he says, grinning. "Some of it touches back."_'
       }
     }.freeze
 
@@ -95,6 +105,106 @@ module Engine
         syn: '"My Goddess," Syn says, simply, and for once there is no tease anywhere in her. "I helped build ' \
              'this place to show her what my faith looks like: visitors tempted, unraveled, and driven into ' \
              'depravity, floor by floor, all of it hers. Judge the work kindly, darling. It was made with love."'
+      }
+    }.freeze
+
+    # Covar's own topics. He is not bound by the fairies' careful language:
+    # he loves this place openly and says so — he just has his own reasons.
+    COVAR_TOPICS = [
+      {
+        key: 'his_arrival', label: 'How he got here', question: 'You were one of the first delvers?',
+        covar: '"First handful through the doors," Covar says, with real pride. "Came down here with a sword, ' \
+               'a dour attitude, and a body I\'d never once questioned. The tower questioned it for me. Horns ' \
+               'first, then the tail, then—" he gestures at his chest, which needs no gesturing at, "—the rest ' \
+               'of the redesign. I panicked for about a day. Then I caught my reflection enjoying itself, and ' \
+               'I had to be honest about a few things."'
+      },
+      {
+        key: 'why_stay', label: 'Why he stays', question: 'Why stay and run this shop?',
+        covar: '"People assume I\'m trapped," Covar says, offended on the tower\'s behalf. "I\'m not trapped, ' \
+               'I\'m *settled*. Up here I\'m wanted, I\'m fed, I\'m looked at the way I always secretly hoped ' \
+               'someone would look at me. The tower changed me — good. It changed me into someone who stays. ' \
+               'Why would I leave a place that made me more myself?"'
+      },
+      {
+        key: 'cursed_gear', label: 'Cursed & living gear', question: 'Why cursed gear?',
+        covar: 'His whole face lights up — the obsessive\'s glow. "Because living gear *remembers* you. Clean ' \
+               'steel forgets. A cursed piece learns your heat, your habits, how you beg—" he catches himself, ' \
+               'unrepentant, "—how you wear it. Syn made the first pieces, did you know that? I just… collect ' \
+               'them. Catalogue them. Find them good homes. Every piece in this shop is waiting for its person."'
+      },
+      {
+        key: 'the_fairies', label: 'Syn & Berry', question: 'What about Syn and Berry?',
+        covar: '"Family," Covar says simply. "Syn\'s my big sis — she made the first living gear and taught ' \
+               'me everything: how it thinks, how to catalogue it, how to tell a shy piece from a hungry one. ' \
+               'Berry\'s sweet as her name and treats me like a brother she has to feed. We don\'t see each ' \
+               'other often — the shop\'s far and they\'re busy — but when we do, it\'s home. Don\'t tell Syn ' \
+               'I called her sis to a customer. She\'ll pretend to hate it and preen for a week."'
+      },
+      {
+        key: 'his_body', label: 'His changed body', question: 'Do you like what you became?',
+        covar: '"Like?" He leans on the counter, and his chest does something deliberate. "Sweetheart, I ' \
+               '*adore* what I became. The tower took a man who was afraid of his own appetites and gave him a ' \
+               'body that has them on display. Breasts, cock, tail — a full menu, and every plate generous. ' \
+               'Half my customers come in just to look. I charge them in conversation."'
+      },
+      {
+        key: 'customers', label: 'His customers', question: 'Who buys from you?',
+        covar: '"Everyone, eventually," Covar says. "They come in pretending disgust — \'oh no, cursed, how ' \
+               'terrible\' — and they leave with something that has opinions about their skin. Then they come ' \
+               'back. The gear chooses as much as the delver does, you know. I just introduce them and take ' \
+               'the credit. It\'s matchmaking, really. With teeth."'
+      },
+      {
+        key: 'delving_advice', label: 'Advice for delvers', question: 'Any advice for delving?',
+        covar: '"Practical, then." He counts on long fingers. "One: living gear costs LP to tear free, so ' \
+               'don\'t wear what you can\'t afford to remove. Two: every curse you carry makes the floors ' \
+               'bolder — purge or suppress before a boss, not after. Three: if a chest smiles at you, it has ' \
+               'already decided. Four—" his grin turns wicked, "—when you\'re too wound up to think, you know ' \
+               'where my counter is."'
+      },
+      {
+        key: 'the_goddess', label: 'Eros', question: 'What about the one at the top?',
+        covar: 'His voice drops, and for once there is no grin in it. "She remade me. Maybe not with her own ' \
+               'hands — but this place is hers, and it decided I was worth improving. I\'ve never met her. I ' \
+               'don\'t need to. Every morning I wake up in this body, in this shop, in these halls, and I say ' \
+               'thank you. That\'s not captivity, delver. That\'s gratitude with a pulse."'
+      }
+    ].freeze
+
+    # Taking Covar to bed: unlocked after hearing enough of him out. He is
+    # dominant with his breasts or his cock — and deliciously submissive
+    # when a delver takes his ass instead.
+    COVAR_SEX_TOPICS_REQUIRED = 5
+
+    COVAR_SEX = {
+      'breasts' => {
+        label: 'His breasts', button: '🍒 Take his breasts',
+        text: 'Covar does not wait to be asked twice. He hauls you in against that impossible chest and ' \
+              'keeps you there, one hand firm at the back of your head, the other guiding yours up to knead ' \
+              'the heavy weight of him. "There you go," he purrs, all dominance and warmth, setting the pace ' \
+              'himself — your mouth on his nipple, his tail curling possessively round your waist. He feeds ' \
+              'you his breasts until you are flushed, aching, and entirely his, and only when you are shaking ' \
+              'does he let you spill your orgasm against him. He holds you through it, smug as a cat.'
+      },
+      'cock' => {
+        label: 'His cock', button: '🍆 Take his cock',
+        text: 'He turns you against his own counter with an incubus\'s certainty, the bell above his shop ' \
+              'door politely ignored. "My counter, my rules," Covar growls, and takes you the way the tower ' \
+              'taught him to want people — firmly, thoroughly, one hand spread between your shoulders to ' \
+              'keep you exactly where he wants you. He fucks you until your knees forget their duties and ' \
+              'your orgasm tears out of you, and his follows with a groan he does not bother to hide. "There," ' \
+              'he says, breathless and pleased. "Drained. You\'re welcome."'
+      },
+      'ass' => {
+        label: 'His ass', button: '🍑 Fuck his ass',
+        text: 'The moment you make it clear which of you will be doing the taking, the great incubus melts. ' \
+              '"Oh," Covar breathes, already bending over his own counter, tail lashing with eagerness, "oh, ' \
+              'it has been a *while*." The dom of the cursed shop begs beautifully — please, and more, and ' \
+              'don\'t stop — until you take his ass and reduce him to a whimpering, grateful mess clutching ' \
+              'the counter edge. Your orgasm wrings a second, helpless one out of him. Afterwards he stays ' \
+              'folded there a moment, laughing weakly. "Come back any time," he says. "Please. That\'s not ' \
+              'shop talk."'
       }
     }.freeze
 
@@ -203,6 +313,17 @@ module Engine
         syn: '"Again, but deeper," Syn murmurs. "The tower remembers what you were, and asks what you\'ll be ' \
              'this time. Most delvers call it a cycle. I call it another sitting. The portrait is never ' \
              'finished, darling — it just gets more honest."'
+      },
+      {
+        key: 'covar', label: 'Covar Zephyren', question: 'What about Covar at the Cursed Shop?',
+        unlock: { requirement: { mimics_removed_count: 1 } },
+        unlock_text: 'Tear free a piece of living gear',
+        berry: '"Covar?" Berry\'s face goes soft at once. "Oh, he\'s sweet. Tower\'s own family, that one — ' \
+               'we don\'t see him often, the Cursed Shop keeps him buried, but he\'s one of ours. If you go ' \
+               'by, sugar, tell him Berry says to eat something that isn\'t shop stock."',
+        syn: '"My little brother," Syn says, with unguarded fondness. "Not by blood — by obsession. The boy ' \
+             'lives for cursed and living gear, and I made the first of it, so who else was going to teach ' \
+             'him? He catalogues my work like scripture, darling. It\'s the most flattering haunting I own."'
       }
     ].freeze
 
@@ -253,7 +374,7 @@ module Engine
     end
 
     # All topics for the select menu: general topics first, then boss topics
-    # in floor order. Sixteen topics today — safely inside Discord's limit
+    # in floor order. Eighteen topics today — safely inside Discord's limit
     # of 25 options per select menu, with room to grow.
     def topics(player)
       general = TOPICS.map { |topic| present(player, topic) }
@@ -267,8 +388,38 @@ module Engine
       general + bosses
     end
 
-    def topics_for(player, _person)
+    def topics_for(player, person)
+      return COVAR_TOPICS.map { |topic| present(player, topic) } if normalize_person(person) == 'covar'
+
       topics(player)
+    end
+
+    def covar_topics_heard(player)
+      Array(player.tracker_hash['covar_topics_heard']).map(&:to_s) & COVAR_TOPICS.map { |t| t[:key] }
+    end
+
+    def note_covar_topic!(player, key)
+      player.remember!('covar_topics_heard', key.to_s)
+    end
+
+    def covar_sex_unlocked?(player)
+      covar_topics_heard(player).size >= COVAR_SEX_TOPICS_REQUIRED
+    end
+
+    def covar_sex(player, part)
+      spec = COVAR_SEX[part.to_s]
+      return { ok: false, message: 'Covar raises an eyebrow. "Pick a part of me, delver."' } unless spec
+      unless covar_sex_unlocked?(player)
+        return { ok: false,
+                 message: "Covar smiles and shakes his head. \"Get to know me first — " \
+                          "#{covar_topics_heard(player).size}/#{COVAR_SEX_TOPICS_REQUIRED} conversations. " \
+                          'I like to be courted."' }
+      end
+
+      cleared = player.lust.to_i
+      player.update(lust: 0)
+      player.bump_tracker!('covar_trysts')
+      { ok: true, part: part.to_s, lust_cleared: cleared, text: spec[:text] }
     end
 
     def available_topics(player, person)
@@ -277,7 +428,7 @@ module Engine
 
     def answer(player, person, key)
       person = normalize_person(person)
-      topic = topics(player).find { |t| t[:key] == key.to_s }
+      topic = topics_for(player, person).find { |t| t[:key] == key.to_s }
       return { ok: false, message: 'They have nothing to say about that.' } unless topic
       unless topic[:unlocked]
         return { ok: false, topic: topic, message: "🔒 **#{topic[:label]}** — #{unlock_hint(player, topic)}" }

@@ -138,8 +138,16 @@ module Eros
       when 'talk_topic'
         result = Engine::Conversations.answer(@player, @talk_person, arg.to_s)
         if result[:ok]
+          Engine::Conversations.note_covar_topic!(@player, arg.to_s) if @talk_person == 'covar'
           spec = Engine::Conversations.person(@talk_person)
           say("**#{spec[:name]} on #{result[:topic][:label]}**", result[:text])
+        else
+          say(result[:message])
+        end
+      when 'covar_sex'
+        result = Engine::Conversations.covar_sex(@player, arg.to_s)
+        if result[:ok]
+          say(result[:text], "**Lust drained: #{result[:lust_cleared]} → 0** — and your defiance never wavered.")
         else
           say(result[:message])
         end
@@ -528,9 +536,9 @@ module Eros
       end
       sections = Engine::Shop.stock_for(@shop_cat).map do |item|
         owned = item.type != 'special' && @player.owns_equipment?(item.id)
-        { text: "**#{item.name}** — #{item.cost} LP#{owned ? ' _(owned)_' : ''}\n_#{item.description}_#{stats_of(item)}",
-          actions: [btn(owned ? 'Owned' : "Buy (#{item.cost})", 'buy', arg: item.id, style: 'success',
-                                                                disabled: owned || @player.lp < item.cost.to_i)] }
+        { text: "**#{item.name}** (#{item.cost} LP)#{owned ? ' _(owned)_' : ''}\n_#{item.description}_#{stats_of(item)}",
+          actions: [btn(owned ? 'Owned' : 'Buy', 'buy', arg: item.id, style: 'success',
+                                                  disabled: owned || @player.lp < item.cost.to_i)] }
       end
       intro = { text: "_**Berry** zips between the shelves on iridescent wings, seed-freckles on her cheeks and a " \
                       "ledger under one arm. \"Welcome in, sugar! I run the shop, my wife Syn runs the parlour bench, " \
@@ -540,6 +548,8 @@ module Eros
     end
 
     def cursed_shop_view
+      return talk_view if @show_talk
+
       items = Engine::Treasure.all_mimic_templates.filter_map { |t| ::Equipment.first(name: t[:name]) }
       unlocked = @player.cursed_shop_unlocks
       sections = items.map do |item|
@@ -557,9 +567,14 @@ module Eros
           { text: "◇ ??? (#{item.slot}) — _find it in a chest, wear it, and tear it free to unlock_" }
         end
       end
-      intro = { text: '_Living gear you have worn and torn free remembers you. Call it back for free; removing it ' \
-                      "again costs its usual LP._\n-# Unlocked #{(unlocked & items.map(&:name)).size}/#{items.size}" }
-      { title: 'Cursed Shop', sections: [intro] + sections, actions: [back_row] }
+      intro = { text: '_The counter is manned by **Covar Zephyren**, an incubus with curved horns, a lashing ' \
+                      'tail, and a pair of large breasts making a warm spectacle of his open shirt. He was one ' \
+                      'of the first delvers in these halls; the tower remade him, and he stayed — happily — to ' \
+                      'mind the living gear. "Call it back for free," he says. "Removing it again costs its ' \
+                      "usual LP. Conversation's free too — I charge in stories.\"_\n" \
+                      "-# Unlocked #{(unlocked & items.map(&:name)).size}/#{items.size}",
+                actions: [btn('🔮 Talk to Covar', 'talk_open', arg: 'covar', style: 'primary')] }
+      { title: 'Cursed Shop — Covar Zephyren', sections: [intro] + sections, actions: [back_row] }
     end
 
     def gear_view
@@ -672,9 +687,9 @@ module Eros
       owned = @player.unlocked_transformations
       if @show_fusion
         sections = chimera_sections(active, owned, fusion: true)
-        sections << { text: '_Pick a primary and a secondary above, then fuse them._',
-                      actions: [btn('◀ Back to forms', 'chimera_close', style: 'secondary')] }
-        return { title: 'Chimera Fusion', sections: sections, actions: [back_row] }
+        sections << { text: '_Pick a primary and a secondary below, then fuse them._',
+                      actions: [btn('◀ Back to Hybrid Forms', 'chimera_close', style: 'secondary')] }
+        return { title: 'Chimera', sections: sections, actions: [back_row] }
       end
       sections = Engine::TransformationSystem.visible(@player).map do |key, t|
         effects = Engine::TransformationSystem.effect_lines(t).map { |l| "• #{l}" }.join("\n")
@@ -690,8 +705,8 @@ module Eros
         end
       end
       sections = [{ text: '_No hybrid forms are within reach yet._' }] if sections.empty?
-      sections += mutation_sections(active)
-      sections += chimera_sections(active, owned)
+      sections += mutation_sections(active) unless active.to_s == Engine::TransformationSystem::CHIMERA_KEY
+      sections += chimera_link_sections(owned)
       { title: 'Hybrid Forms', sections: sections, actions: [back_row] }
     end
 
@@ -715,7 +730,16 @@ module Eros
       sections
     end
 
+    def chimera_link_sections(owned)
+      return [] unless Engine::TransformationSystem.chimera_combo(@player) || owned.size >= 2
+
+      [{ text: '**Chimera** — your fused form, taking it, deepening it, and weaving a new one all live on the Chimera screen.',
+         actions: [btn('🧬 Chimera…', 'chimera_open', style: 'primary')] }]
+    end
+
     def chimera_sections(active, owned, fusion: false)
+      return chimera_link_sections(owned) unless fusion
+
       ts = Engine::TransformationSystem
       sections = []
       if (form = ts.chimera_form(@player))
@@ -725,12 +749,9 @@ module Eros
                             "_#{form[:description]}_\n#{effects}",
                       actions: current ? [btn('Return to human', 'hybrid', arg: '')]
                                        : [btn('Take your Chimera', 'hybrid', arg: ts::CHIMERA_KEY, style: 'primary')] }
+        sections += mutation_sections(active) if current
       end
       return sections if owned.size < 2
-      unless fusion
-        return sections << { text: "**Fuse a Chimera** (#{ts::FUSION_COST} LP) — weave two of your forms into one.",
-                             actions: [btn('🧬 Fuse a Chimera…', 'chimera_open', style: 'primary')] }
-      end
 
       name_of = ->(k) { ts.get(k)&.dig(:name) || '—' }
       pick_a = @chimera_picks['primary'].to_s
@@ -752,13 +773,18 @@ module Eros
     def talk_view
       spec = Engine::Conversations.person(@talk_person)
       topics = Engine::Conversations.topics_for(@player, @talk_person)
-      sections = [{
-        text: "## #{spec[:emoji]} #{spec[:heading]}\n#{spec[:intro]}",
-        actions: [btn('🍓 Talk to Berry', 'talk_person', arg: 'berry',
-                      style: @talk_person == 'berry' ? 'primary' : 'secondary', disabled: @talk_person == 'berry'),
-                  btn('🖤 Talk to Syn', 'talk_person', arg: 'syn',
-                      style: @talk_person == 'syn' ? 'primary' : 'secondary', disabled: @talk_person == 'syn')]
-      }]
+      switcher =
+        if @talk_person == 'covar'
+          [btn('🔮 Covar Zephyren', 'talk_person', arg: 'covar', style: 'primary', disabled: true),
+           btn('🍓 Talk to Berry', 'talk_person', arg: 'berry', style: 'secondary'),
+           btn('🖤 Talk to Syn', 'talk_person', arg: 'syn', style: 'secondary')]
+        else
+          [btn('🍓 Talk to Berry', 'talk_person', arg: 'berry',
+                style: @talk_person == 'berry' ? 'primary' : 'secondary', disabled: @talk_person == 'berry'),
+           btn('🖤 Talk to Syn', 'talk_person', arg: 'syn',
+                style: @talk_person == 'syn' ? 'primary' : 'secondary', disabled: @talk_person == 'syn')]
+        end
+      sections = [{ text: "## #{spec[:emoji]} #{spec[:heading]}\n#{spec[:intro]}", actions: switcher }]
       topics.each do |topic|
         if topic[:unlocked]
           sections << { text: "**#{topic[:label]}** — #{topic[:question]}",
@@ -767,10 +793,33 @@ module Eros
           sections << { text: "🔒 **#{topic[:label]}** — #{Engine::Conversations.unlock_hint(@player, topic)}" }
         end
       end
-      sections << { text: '_Their answers change with who you ask. Berry and Syn agree about very little._',
-                    actions: [btn('◀ Back', 'talk_close', style: 'secondary'),
-                              btn('🍓 Quest Board', 'nav', arg: 'quests', style: 'secondary'),
-                              btn('Parlour', 'nav', arg: 'parlour', style: 'secondary')] }
+      if @talk_person == 'covar'
+        if Engine::Conversations.covar_sex_unlocked?(@player)
+          buttons = Engine::Conversations::COVAR_SEX.map do |part, s|
+            btn(s[:button], 'covar_sex', arg: part, style: 'danger')
+          end
+          sections << { text: '_Covar has stopped pretending this is only conversation. "You know me well ' \
+                              'enough now, delver. If you\'re wound too tight to think — pick a part of me. ' \
+                              'I\'ll drain that lust right out of you. No defiance, no charge."_',
+                        actions: buttons }
+        else
+          heard = Engine::Conversations.covar_topics_heard(@player).size
+          sections << { text: "-# Get to know Covar: **#{heard}/#{Engine::Conversations::COVAR_SEX_TOPICS_REQUIRED}** " \
+                              'conversations heard. He likes to be courted before he is climbed.' }
+        end
+      end
+      closing =
+        if @talk_person == 'covar'
+          { text: '_He charges in stories._',
+            actions: [btn('◀ Cursed Shop', 'talk_close', style: 'secondary'),
+                      btn('Shop', 'nav', arg: 'shop', style: 'secondary')] }
+        else
+          { text: '_Their answers change with who you ask. Berry and Syn agree about very little._',
+            actions: [btn('◀ Back', 'talk_close', style: 'secondary'),
+                      btn('🍓 Quest Board', 'nav', arg: 'quests', style: 'secondary'),
+                      btn('Parlour', 'nav', arg: 'parlour', style: 'secondary')] }
+        end
+      sections << closing
       { title: spec[:heading], sections: sections, actions: [back_row] }
     end
 

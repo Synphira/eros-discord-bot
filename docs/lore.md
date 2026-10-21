@@ -79,6 +79,19 @@ The Alpha Beast is the exception to their disagreement: both Syn and Berry adore
 
 The unlock is based on the bosses the player has defeated or satisfied (the `bosses_seen` record). Conversations can be repeated freely; whether later cycles add new variants still needs to be decided. General topics also unlock from experience — first monster defeated, first trap, first curse, first mark, first hybrid form, first altar offering, first completed cycle.
 
+## Covar Zephyren — Keeper of the Cursed Shop
+
+Covar Zephyren was one of the first delvers to enter the tower. The tower changed him into an incubus: he is male, with curved horns, a tail, and a pair of large breasts. Unlike most changed delvers, he loves what he became and chooses to stay, running the Cursed Shop and caring for its cursed and living gear.
+
+His view of the tower is shaped by his transformation. Where others see a trap, he sees a place that made him more himself — he is openly fond of the tower, grateful to Eros for his new body, and settled rather than imprisoned.
+
+Relationships:
+
+- **Syn** is like a big sister to him. She created the first cursed/living gear and taught him how it works, which feeds his obsession with collecting, cataloguing, and rehoming it. Syn returns the affection and thinks of him as a little brother.
+- **Berry** thinks he is sweet and views him like family, even though they do not see each other often. Covar likes both fairies and considers their rare visits a taste of home.
+
+Covar proves his trust gradually: after a delver has genuinely conversed with him (five different topics), he will take them to bed for free, draining their lust to zero without costing defiance. He is dominant when a delver chooses his breasts or his cock, and submissive when a delver fucks his ass.
+
 ## Berry's Views on the Bosses
 
 ### Mimic Broodmother

@@ -45,7 +45,7 @@ module Commands
           ['/equipment', 'e,equipment', 'Your gear, trophy and inventory'],
           ['/equip · /unequip', 'e,equip [item] · e,unequip [item]', 'Wear or take off gear (one trophy at a time)'],
           ['/remove', 'e,remove [item]', 'Tear off living gear for LP'],
-          ['/cursedshop', 'e,cursedshop', 'Take back living gear you have torn free before, for free'],
+          ['/cursedshop', 'e,cursedshop', "Covar Zephyren's counter: take back living gear you have torn free, for free — talk to him, too"],
           ['/parlour', 'e,parlour', "Syn's permanent tattoos and piercings"],
           ['/quests', 'e,quests', "Berry's quest board: errands for bonus Lust Points"]
         ]
