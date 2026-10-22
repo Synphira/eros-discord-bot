@@ -50,6 +50,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
+- **Your keepsakes get a Collections page**: the profile nav gains a **Collections** button opening the full collection, five keepsakes to a page with paging, each with its own **Pin/Unpin** toggle. Pin up to **three** favourites — those are the ones your `/profile` shelf displays (before you've chosen, it shows your three most recent). The Collections page also settles any keepsakes owed from finished stories and bosses already met.
 - **The keepsake shelf settles its debts**: the three once-ever storylines now leave keepsakes — **Syn & Berry's second wedding** (a pressed petal from Berry's second bouquet), **Madame Vex's** ending (a seam of the Original's own thread), and **Sister Nectar's** ending (an amended hymn sheet) — alongside the seven wandering NPC stories and the boss/relic mementos. Players who finished any of these before the shelf existed (including bosses already met) receive theirs automatically the next time they open their own `/profile` — nobody's history goes unkept.
 
 ### Fixed

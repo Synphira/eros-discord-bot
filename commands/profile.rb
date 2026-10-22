@@ -61,11 +61,11 @@ module Commands
                    "**Achievements** #{target.earned_achievements.size}/#{Engine::TitleSystem.visible_achievements(target).size} · " \
                    "**Hybrid forms** #{target.unlocked_transformations.size}/#{Engine::TransformationSystem.visible(target).size}"
         )
-        keepsakes = Array(target.tracker_hash['keepsakes']).map(&:to_s)
+        keepsakes = target.keepsakes
         if keepsakes.any?
-          shown = keepsakes.last(5).join(' · ')
-          more = keepsakes.size > 5 ? " · _+#{keepsakes.size - 5} more_" : ''
-          c.text_display(content: "**Keepsakes** #{shown}#{more}")
+          shown = target.displayed_keepsakes.join(' · ')
+          hint = target.keepsake_pins.any? ? '' : ' _(your latest — pin favourites in Collections)_'
+          c.text_display(content: "**Keepsakes** #{shown}#{hint}")
         end
         if news.any?
           c.separator(divider: true, spacing: :small)
@@ -75,6 +75,56 @@ module Commands
           c.text_display(content: '-# Unnamed delvers are hidden from the leaderboard — press **Rename** to choose a name.')
         end
         attach_nav(c, event.user.id, :profile, rename: own) if own
+      end
+    end
+
+    KEEPSAKES_PER_PAGE = 5
+
+    def show_collections(event, notice: nil, page: 0)
+      player = ErosHelpers.require_player(event) or return
+      if (defined?(Engine::Residents) && defined?(Engine::Quests) && defined?(Engine::BossFights))
+        Engine::Residents.backfill_story_keepsakes!(player)
+        Engine::Quests.backfill_wedding_keepsake!(player)
+        Engine::BossFights.backfill_mementos!(player)
+        player.refresh
+      end
+      all = player.keepsakes
+      pins = player.keepsake_pins
+      pages = [(all.size.to_f / KEEPSAKES_PER_PAGE).ceil, 1].max
+      page = page.to_i.clamp(0, pages - 1)
+      slice = all.slice(page * KEEPSAKES_PER_PAGE, KEEPSAKES_PER_PAGE) || []
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(
+          content: "## Collections — #{player.display_name}\n" \
+                   "_#{all.size} keepsake#{'s' unless all.size == 1} · **#{pins.size}/#{Player::KEEPSAKE_PIN_LIMIT} pinned** to your profile shelf_"
+        )
+        c.text_display(content: notice) if notice
+        if all.empty?
+          c.text_display(
+            content: '_Nothing kept yet. Admirers leave parting gifts as they wander off, finished stories ' \
+                     'leave something small behind, and every boss and relic leaves a memento the first time you meet._'
+          )
+        else
+          lines = slice.each_with_index.map do |text, i|
+            n = (page * KEEPSAKES_PER_PAGE) + i + 1
+            pins.include?(text) ? "**#{n}.** 📌 #{text}" : "**#{n}.** #{text}"
+          end
+          c.text_display(content: lines.join("\n"))
+          c.separator(divider: true, spacing: :small)
+          c.text_display(content: '-# Pin up to three favourites — those are the ones your profile shows.')
+          slice.each_with_index do |text, i|
+            index = (page * KEEPSAKES_PER_PAGE) + i
+            c.row do |row|
+              label = "#{pins.include?(text) ? '📌 Unpin' : 'Pin'} ##{index + 1}: #{text}"
+              row.button(label: label[0, 80], style: pins.include?(text) ? :primary : :secondary,
+                         custom_id: "eros:keepsakes:pin:#{index}:#{page}:#{event.user.id}")
+            end
+          end
+        end
+
+        attach_pager(c, 'eros:keepsakes:page', page, pages, event.user.id) if pages > 1
+        attach_nav(c, event.user.id, :collections)
       end
     end
 
@@ -288,11 +338,13 @@ module Commands
           row.button(label: label, style: key == current ? :primary : :secondary, custom_id: id)
         end
       end
-      return unless rename
-
       container.row do |row|
-        row.button(label: 'Rename', style: :success, custom_id: "eros:profile:rename:#{owner_id}")
-        row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
+        row.button(label: 'Collections', style: current == :collections ? :primary : :secondary,
+                   custom_id: "eros:collections:view:#{owner_id}")
+        if rename
+          row.button(label: 'Rename', style: :success, custom_id: "eros:profile:rename:#{owner_id}")
+          row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
+        end
       end
     end
 
@@ -300,6 +352,33 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Profile.show_profile(event)
+    end
+
+    button(custom_id: /^eros:collections:view:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Profile.show_collections(event)
+    end
+
+    button(custom_id: /^eros:keepsakes:page:-?\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      page = event.custom_id[/\Aeros:keepsakes:page:(-?\d+):\d+\z/, 1].to_i
+      Commands::Profile.show_collections(event, page: page)
+    end
+
+    button(custom_id: /^eros:keepsakes:pin:\d+:\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      index, page = event.custom_id.match(/\Aeros:keepsakes:pin:(\d+):(\d+):\d+\z/).captures.map(&:to_i)
+      player = Player[event.user.id]
+      next unless player
+
+      text = player.keepsakes[index]
+      result = text ? player.toggle_keepsake_pin!(text) : { ok: false, message: 'That keepsake is gone.' }
+      player.refresh
+      Commands::Profile.show_collections(event, page: page,
+                                         notice: "#{result[:ok] ? '📌' : '❌'} #{result[:message]}")
     end
 
     button(custom_id: /^eros:profile:rename:\d+$/) do |event|

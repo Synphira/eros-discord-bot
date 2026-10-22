@@ -789,6 +789,41 @@ class Player < Sequel::Model(:players)
     text.to_s
   end
 
+  KEEPSAKE_PIN_LIMIT = 3
+
+  # The three keepsakes pinned to the profile shelf (chosen on the
+  # Collections page). Pins for keepsakes no longer owned are ignored.
+  def keepsake_pins
+    saved = tracker_hash['keepsakes_pinned']
+    pins = saved.is_a?(Array) ? saved.map(&:to_s) : []
+    pins & keepsakes
+  end
+
+  def toggle_keepsake_pin!(text)
+    text = text.to_s
+    return { ok: false, message: 'That keepsake is not in your collection.' } unless keepsakes.include?(text)
+
+    pins = keepsake_pins
+    if pins.include?(text)
+      pins -= [text]
+      set_tracker!('keepsakes_pinned', pins)
+      { ok: true, pinned: false, message: "**#{text}** comes off the shelf." }
+    elsif pins.size >= KEEPSAKE_PIN_LIMIT
+      { ok: false, message: "Your shelf holds **#{KEEPSAKE_PIN_LIMIT}** — unpin one before pinning another." }
+    else
+      pins += [text]
+      set_tracker!('keepsakes_pinned', pins)
+      { ok: true, pinned: true, message: "**#{text}** goes on the shelf. (#{pins.size}/#{KEEPSAKE_PIN_LIMIT})" }
+    end
+  end
+
+  # What the profile actually shows: your pins, or — before you've
+  # chosen — the three most recent arrivals.
+  def displayed_keepsakes
+    pins = keepsake_pins
+    (pins.any? ? pins : keepsakes.last(KEEPSAKE_PIN_LIMIT)).first(KEEPSAKE_PIN_LIMIT)
+  end
+
   def reconcile_encounter!
     data = encounter_data
     if data
