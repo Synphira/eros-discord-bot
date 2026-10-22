@@ -63,7 +63,7 @@ module Commands
         )
         keepsakes = target.keepsakes
         if keepsakes.any?
-          shown = target.displayed_keepsakes.join(' · ')
+          shown = target.displayed_keepsakes.map { |k| Player.keepsake_emoji(k) }.join(' ')
           hint = target.keepsake_pins.any? ? '' : ' _(your latest — pin favourites in Collections)_'
           c.text_display(content: "**Keepsakes** #{shown}#{hint}")
         end
@@ -108,7 +108,7 @@ module Commands
         else
           lines = slice.each_with_index.map do |text, i|
             n = (page * KEEPSAKES_PER_PAGE) + i + 1
-            pins.include?(text) ? "**#{n}.** 📌 #{text}" : "**#{n}.** #{text}"
+            pins.include?(text) ? "**#{n}.** 📌 #{Player.keepsake_emoji(text)} #{text}" : "**#{n}.** #{Player.keepsake_emoji(text)} #{text}"
           end
           c.text_display(content: lines.join("\n"))
           c.separator(divider: true, spacing: :small)

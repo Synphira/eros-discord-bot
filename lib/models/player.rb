@@ -791,6 +791,27 @@ class Player < Sequel::Model(:players)
 
   KEEPSAKE_PIN_LIMIT = 3
 
+  # The profile shelf shows icons, not sentences: one emoji per
+  # keepsake, matched by its most telling word (first match wins).
+  KEEPSAKE_EMOJI = [
+    ['second bouquet', '💐'], ['bouquet', '🌸'], ['black honey', '🍯'], ['honey', '🍯'],
+    ['cream', '🥛'], ['pink ribbon', '🎀'], ['court ribbon', '🎀'], ['cold to the touch', '❄️'],
+    ['ribbon', '🎀'], ['latex', '🕯️'], ['spare charms', '🧿'], ['buckle', '🔗'],
+    ['thread', '🧵'], ['hymn sheet', '🎶'], ['polish cloth', '🧽'], ['signet', '💍'],
+    ['pressed leaf', '🍃'], ['library card', '📖'], ['shed fang', '🦷'], ['sucker-mark', '🐙'],
+    ['mirror', '🪞'], ['tassel', '🎐'], ['cork', '🍾'], ['warm grit', '🪨'],
+    ['grave-cold coin', '🌑'], ['coin', '🪙'], ['dark water', '💧'], ['tuft of fur', '🐾'],
+    ['black scale', '🐉'], ['shed scale', '🦎'], ['shell fragment', '🐚'], ['feather', '🪶'],
+    ['tail-hair', '🐴'], ['stone chip', '🪨'], ['bone bead', '🦴'], ['pearl', '🦪'],
+    ['never wilts', '🌹'], ['glowing jelly', '🧪'], ['black petal', '🥀'], ['brass key', '🗝️'],
+    ['river stone', '🌊']
+  ].freeze
+
+  def self.keepsake_emoji(text)
+    pair = KEEPSAKE_EMOJI.find { |needle, _| text.to_s.downcase.include?(needle) }
+    pair ? pair[1] : '✨'
+  end
+
   # The three keepsakes pinned to the profile shelf (chosen on the
   # Collections page). Pins for keepsakes no longer owned are ignored.
   def keepsake_pins
