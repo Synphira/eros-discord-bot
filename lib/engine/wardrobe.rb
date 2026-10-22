@@ -51,7 +51,7 @@ module Engine
       'hand_of_the_maker' => {
         name: "The Maker's Own", bonus_name: 'Hand of the Maker',
         pieces: ["Syn's Smudged Tiara", "Syn's Lace Scraps", "Syn's Garter of Vials",
-                 "Syn's Smoked-Glass Wings"],
+                 "Syn's Smoked-Glass Wings", "Syn's Belled Heels", "Syn's Tower-Script Thong"],
         effects: { 'satisfy_bonus' => 0.08, 'victory_lp_bonus' => 3, 'submit_lp_bonus' => 3 },
         blurb: 'Tiara, lace, garter, and wings, worn as their maker wears them: the tower ' \
                'recognises its first seamstress, and everything in it behaves accordingly.'
@@ -87,7 +87,16 @@ module Engine
       { name: "Syn's Smoked-Glass Wings", type: 'accessory', slot: 'accessory', rarity: 5,
         description: 'Drooping wings of smoked glass that catch candlelight like held breath. ' \
                      'Heavy-lidded, like their owner.',
-        stat_modifiers: { 'appearance' => 9, 'agility' => 2, 'dodge_bonus' => 0.05, 'dev_only' => true } }
+        stat_modifiers: { 'appearance' => 9, 'agility' => 2, 'dodge_bonus' => 0.05, 'dev_only' => true } },
+      { name: "Syn's Belled Heels", type: 'armor', slot: 'feet', rarity: 5,
+        description: 'Impossibly tall heels with a small bell at each ankle strap, matching the ' \
+                     'one in her ear. Every step announces her; the parlour hears its slut coming ' \
+                     'and starts smiling early.',
+        stat_modifiers: { 'appearance' => 9, 'agility' => 1, 'submit_lp_bonus' => 1, 'dev_only' => true } },
+      { name: "Syn's Tower-Script Thong", type: 'armor', slot: 'groin', rarity: 5,
+        description: 'A scrap of black lace scripted where only the tower and its favourites will ' \
+                     'ever read it: property, claimed and catalogued. She wears her own label.',
+        stat_modifiers: { 'appearance' => 11, 'lust_mult' => 1.05, 'submit_lp_bonus' => 1, 'dev_only' => true } }
     ].freeze
 
     def sync_dev_gear!
