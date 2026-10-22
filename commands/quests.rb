@@ -80,6 +80,7 @@ module Commands
         c.row do |row|
           row.button(label: '🍓 Talk to Berry', style: :primary, custom_id: "eros:talk:berry:#{event.user.id}")
           row.button(label: '🖤 Talk to Syn', style: :secondary, custom_id: "eros:talk:syn:#{event.user.id}")
+          row.button(label: 'All Shops', style: :secondary, custom_id: "eros:shop:menu:#{event.user.id}")
         end
       end
     end

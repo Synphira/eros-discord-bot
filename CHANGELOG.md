@@ -20,6 +20,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 - **Threat rebalanced around the wardrobe**: LP's contribution to threat now caps lower (45% instead of 60%), so a fat purse alone no longer makes you the tower's top priority — what you wear can matter more than what you hold. Curses still weigh in, and worn Appearance (up to 40%) stands beside them. The status screen's threat line now shows the Appearance contribution.
 - **The bot keeps to NSFW channels in servers**: inside a server, commands and panels now only answer in NSFW channels — prefix commands are ignored silently elsewhere, and slash commands/buttons get a private note pointing at NSFW channels (or DMs). Direct messages are unaffected: the tower answers there as always.
 - **Prefix commands work in DMs now**: `e,explore`, `e,buy`, and every other `e,` command respond in direct messages with the bot, not just in server channels.
+- **Shop browsing loops properly now**: Syn's Parlour and Berry's Quest Board both carry an **All Shops** button back to the main shop menu, like Covar's counter and the Residents already did — no more dead ends while wandering the counters.
 
 ### Fixed
 
