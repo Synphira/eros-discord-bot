@@ -25,6 +25,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - **`e,buy` works again**: buying by name silently failed for every item — potions included (the Becoming draughts, tonics, and elixirs). The shop buttons were unaffected. An exact name now also wins over a partial match, so `e,buy draught` can't hand you the wrong bottle.
 - **The Pale Cartographer's sketches are exact now**: the three rooms he draws are the rooms you meet, in order. Altars, wandering souls, and tower events no longer step in front of a sketched room (a boss floor, a bottled sanctuary, and the tower's guaranteed stairs still take precedence — without consuming the sketch), a sketched descent can no longer dissolve into an empty room if your threat shifted after he drew it, and he has stopped hedging: no more "Probably."
+- **NSFW gate now honours age-restricted servers**: in a server Discord has age-restricted as a whole, every channel counts as NSFW even though each channel's own toggle reads off — the bot answers there again. Threads and forum posts also count when their parent channel is marked NSFW (Discord doesn't flag the thread itself). Blocked attempts now leave a `[channel-gate]` line in the bot console naming the channel type and flags, for diagnosing any channel shape that still misreads.
 
 ## 2026-10-21
 

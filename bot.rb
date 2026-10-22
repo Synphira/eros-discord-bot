@@ -68,7 +68,10 @@ ErrorReporter.attach(bot)
 # through ErosHelpers.guard_channel!, which can answer privately.)
 module ErosPrefixGate
   def execute_command(name, event, arguments, chained = false, check_permissions = true)
-    return nil if ErosHelpers.channel_blocked?(event)
+    if ErosHelpers.channel_blocked?(event)
+      ErosHelpers.log_blocked!(event, "prefix command #{name}")
+      return nil
+    end
 
     super
   end
