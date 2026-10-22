@@ -53,6 +53,12 @@ module Commands
                    "**Achievements** #{target.earned_achievements.size}/#{Engine::TitleSystem.visible_achievements(target).size} · " \
                    "**Hybrid forms** #{target.unlocked_transformations.size}/#{Engine::TransformationSystem.visible(target).size}"
         )
+        keepsakes = Array(target.tracker_hash['keepsakes']).map(&:to_s)
+        if keepsakes.any?
+          shown = keepsakes.last(5).join(' · ')
+          more = keepsakes.size > 5 ? " · _+#{keepsakes.size - 5} more_" : ''
+          c.text_display(content: "**Keepsakes** #{shown}#{more}")
+        end
         if news.any?
           c.separator(divider: true, spacing: :small)
           c.text_display(content: news.join("\n"))

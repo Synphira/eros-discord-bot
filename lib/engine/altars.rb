@@ -32,6 +32,40 @@ module Engine
       attention(player)
     end
 
+    # Her arrivals rotate: a goddess who always enters the same way
+    # becomes furniture. One variant is reserved for the corrupted —
+    # she notices what the tower is finishing in them.
+    VISIT_PROSE = {
+      lp: [
+        'A white tentacle curls down from the dark, crimson suckers kissing your cheek, and drops a ' \
+        'pouch of lust-light into your hands before withdrawing.',
+        'Every candle in the room bows toward the same empty corner at once. When the flames straighten, ' \
+        'a pouch of lust-light sits at your feet, still warm, and the corner is just a corner again.'
+      ],
+      favour: [
+        'Warmth pours over you as invisible hands — and one very visible tentacle — straighten your ' \
+        'clothes, stroke your hair, and send you on glowing.',
+        'Her attention runs over you like a tailor\'s hands over good cloth — smoothing, approving, ' \
+        'lingering at the seams. You leave wearing the day better than you arrived in it.'
+      ],
+      purge: [
+        '"This one doesn\'t suit you, pet." A tentacle plucks the **%<name>s** curse off you like a ' \
+        'thread from a dress, and it dissolves into rose smoke.',
+        'A sucker seals over the brand of the **%<name>s** and simply drinks it out of your skin, ' \
+        'unhurried and obscene, until nothing is left but a kiss-shaped mark that fades by the next room.'
+      ],
+      heal: [
+        'Her hands cup your face and her red eyes soften — just slightly. "Rest, pet. You please me."',
+        'You do not see her arrive; you only notice that you are sitting, that your shoulders have come ' \
+        'down, and that a white tentacle is stroking your hair with infinite, proprietorial patience.'
+      ]
+    }.freeze
+
+    CORRUPT_VISIT_PROSE = 'The air smells of roses left somewhere warm. Her interest, when it lands on ' \
+                          'the corrupted, is not the fondness she shows the clean — it is the attention ' \
+                          'of a collector recognising her own later work. "Look at you," Eros murmurs, ' \
+                          'from everywhere at once. "The tower is finishing what I start, pet."'
+
     def visit!(player, log)
       visits = player.tracker('eros_visits') + 1
       player.set_tracker!('eros_visits', visits)
@@ -39,26 +73,26 @@ module Engine
         log << "_She comes the way weather returns to a favourite field — without announcement and " \
                "entirely on purpose. Visit **#{visits}**, pet. She is keeping count too._"
       end
+      if Engine::Corruption.level(player) >= 50 && rand < 0.5
+        log << "🌹 **Eros visits.** #{CORRUPT_VISIT_PROSE}"
+      end
       case rand(3)
       when 0
         player.gain_lp!(40)
-        log << '🌹 **Eros visits.** A white tentacle curls down from the dark, crimson suckers kissing your ' \
-               'cheek, and drops a pouch of lust-light into your hands before withdrawing. **+40 LP** ' \
-               "\"For being such a good pet,\" a voice purrs from everywhere."
+        log << "🌹 **Eros visits.** #{VISIT_PROSE[:lp].sample} **+40 LP** " \
+               '"For being such a good pet," a voice purrs from everywhere.'
       when 1
         Engine::FetishEvents.apply_condition!(player, BLESSING, log)
-        log << '🌹 **Eros visits.** Warmth pours over you as invisible hands — and one very visible tentacle — ' \
-               'straighten your clothes, stroke your hair, and send you on glowing. **Eros\'s Favour** settles on you.'
+        log << "🌹 **Eros visits.** #{VISIT_PROSE[:favour].sample} **Eros's Favour** settles on you."
       else
         curse = player.active_curses.sample
         if curse
           player.drop_curse!(curse.name)
-          log << "🌹 **Eros visits.** \"This one doesn't suit you, pet.\" A tentacle plucks the **#{curse.name}** " \
-                 'curse off you like a thread from a dress, and it dissolves into rose smoke. **Curse purged, free.**'
+          log << "🌹 **Eros visits.** #{format(VISIT_PROSE[:purge].sample, name: curse.name)} " \
+                 '**Curse purged, free.**'
         else
           gained = player.heal_defiance!(30)
-          log << '🌹 **Eros visits.** Her hands cup your face and her red eyes soften — just slightly. ' \
-                 "\"Rest, pet. You please me.\" **+#{gained} Defiance**."
+          log << "🌹 **Eros visits.** #{VISIT_PROSE[:heal].sample} **+#{gained} Defiance**."
         end
       end
     end

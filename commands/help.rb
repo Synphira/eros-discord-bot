@@ -40,7 +40,7 @@ module Commands
       'gear' => {
         label: 'Gear & Shops', emoji: '🛍️', blurb: 'Shop, equipment, living gear and the parlour',
         commands: [
-          ['/shop', 'e,shop [category]', 'Browse the shop by category'],
+          ['/shop', 'e,shop [category]', 'The Shops menu — pick a counter (gear, potions, cursed gear, quests, parlour), or jump straight to an aisle'],
           ['/buy · /sell', 'e,buy [item] · e,sell [item]', 'Buy a shop item or sell normal gear by name'],
           ['/equipment', 'e,equipment', 'Your gear, trophy and inventory'],
           ['/equip · /unequip', 'e,equip [item] · e,unequip [item]', 'Wear or take off gear (one trophy at a time)'],

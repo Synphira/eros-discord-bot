@@ -45,6 +45,12 @@ module Commands
         if (regard = Engine::Regard.line(player, :cursed))
           c.text_display(content: regard)
         end
+        if player.tracker_hash['vex_ending'].to_s == 'mannequin'
+          c.text_display(
+            content: '_Covar\'s smile does not reach his eyes. "Vex\'s back room is very quiet these days," ' \
+                     'he says. "Tearing free costs **+50%** now. Call it a grief tax."_'
+          )
+        end
         c.separator(divider: true, spacing: :small)
         c.text_display(
           content: "Your Lust Points: **#{player.lp}** · Unlocked **#{unlocked_total}/#{stock_names.size}** pieces"
@@ -96,7 +102,7 @@ module Commands
         c.row do |row|
           row.button(label: '🔮 Talk to Covar', style: :primary, custom_id: "eros:talk:covar:#{event.user.id}")
           row.button(label: '🛏️ Go to bed with Covar', style: :danger, custom_id: "eros:cshop:bed:#{event.user.id}")
-          row.button(label: 'Shop', style: :secondary, custom_id: "eros:shop:cat:weapon:#{event.user.id}")
+          row.button(label: 'All Shops', style: :secondary, custom_id: "eros:shop:menu:#{event.user.id}")
           row.button(label: 'Equipment', style: :secondary, custom_id: "eros:cshop:equipment:#{event.user.id}")
         end
 
@@ -129,6 +135,9 @@ module Commands
                    'nearby settles, politely, into sleep._'
         )
         c.text_display(content: notice) if notice
+        if (milestone = Engine::Conversations.covar_milestone_line(player))
+          c.text_display(content: milestone)
+        end
 
         if unlocked
           trysts = player.tracker('covar_trysts')
@@ -165,7 +174,7 @@ module Commands
         c.row do |row|
           row.button(label: '🔮 Talk to Covar', style: :primary, custom_id: "eros:talk:covar:#{event.user.id}")
           row.button(label: '◀ Cursed Shop', style: :secondary, custom_id: "eros:cshop:open:#{event.user.id}")
-          row.button(label: 'Shop', style: :secondary, custom_id: "eros:shop:cat:weapon:#{event.user.id}")
+          row.button(label: 'All Shops', style: :secondary, custom_id: "eros:shop:menu:#{event.user.id}")
         end
       end
     end

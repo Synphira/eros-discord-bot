@@ -35,10 +35,17 @@ module Commands
                    'be taken or shed at a cycle\'s start — floor 1, before you delve; once you climb, they are ' \
                    'locked in until you clear the tower.'
         )
+        c.text_display(
+          content: '_The truly devoted may also swear up to **2 Oaths** — extra torments beyond the three, ' \
+                   'worth **+10% LP each**. Oaths torment exactly like burdens, but devotion is its own ' \
+                   'category: they never count toward Burdens Carried honours._'
+        )
         c.text_display(content: notice) if notice
+        sworn = Engine::Burdens.oaths(player)
         lines = Engine::Burdens::BURDENS.map do |key, spec|
           on = active.include?(key)
-          "#{on ? '⛓️' : '▫️'} **#{spec[:name]}**#{on ? ' _(carried)_' : ''} — #{spec[:description]}"
+          oath = sworn.include?(key)
+          "#{on ? '⛓️' : oath ? '📜' : '▫️'} **#{spec[:name]}**#{on ? ' _(carried)_' : oath ? ' _(oath)_' : ''} — #{spec[:description]}"
         end
         c.text_display(content: lines.join("\n"))
         c.text_display(
@@ -51,6 +58,30 @@ module Commands
             row.button(label: "#{on ? '✓ ' : ''}#{spec[:name]}", style: on ? :danger : :secondary,
                        custom_id: "eros:burden:toggle:#{key}:#{event.user.id}",
                        disabled: !changeable)
+          end
+        end
+        if active.any?
+          c.separator(divider: true, spacing: :small)
+          c.text_display(
+            content: '_Or let Eros shuffle a carried burden into a different one — never one you already ' \
+                     "carry. Shuffling costs **#{Engine::Burdens.reroll_price(player)} LP** and climbs " \
+                     "#{Engine::Burdens::REROLL_STEP} LP with every shuffle this cycle._"
+          )
+          c.row do |row|
+            active.each do |key|
+              row.button(label: "🎲 Reroll: #{Engine::Burdens::BURDENS[key][:name]}", style: :secondary,
+                         custom_id: "eros:burden:reroll:#{key}:#{event.user.id}",
+                         disabled: !changeable || player.lp < Engine::Burdens.reroll_price(player))
+            end
+          end
+        end
+        c.row do |row|
+          Engine::Burdens::BURDENS.each do |key, spec|
+            oath = sworn.include?(key)
+            row.button(label: "#{oath ? '✓ ' : ''}📜 #{spec[:name]}", style: oath ? :danger : :secondary,
+                       custom_id: "eros:burden:oath:#{key}:#{event.user.id}",
+                       disabled: !changeable || active.include?(key) ||
+                                 (!oath && sworn.size >= Engine::Burdens::MAX_OATHS))
           end
         end
         c.row do |row|
@@ -81,6 +112,30 @@ module Commands
       result = Engine::Burdens.toggle!(player, key)
       player.refresh
       Commands::Status.burdens(event, notice: result[:ok] ? "✅ #{result[:message]}" : "❌ #{result[:message]}")
+    end
+
+    button(custom_id: /^eros:burden:oath:[a-z_]+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      key = event.custom_id[/\Aeros:burden:oath:([a-z_]+):\d+\z/, 1]
+      result = Engine::Burdens.toggle_oath!(player, key)
+      player.refresh
+      Commands::Status.burdens(event, notice: result[:ok] ? "📜 #{result[:message]}" : "❌ #{result[:message]}")
+    end
+
+    button(custom_id: /^eros:burden:reroll:[a-z_]+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      key = event.custom_id[/\Aeros:burden:reroll:([a-z_]+):\d+\z/, 1]
+      result = Engine::Burdens.reroll!(player, key)
+      player.refresh
+      Commands::Status.burdens(event, notice: result[:ok] ? "🎲 #{result[:message]}" : "❌ #{result[:message]}")
     end
 
     button(custom_id: /^eros:status:burdens:\d+$/) do |event|

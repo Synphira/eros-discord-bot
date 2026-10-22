@@ -87,7 +87,7 @@ module Engine
       Tower::FINAL_BOSS_FLOOR => {
         name: 'Eros',
         title: 'Eros, Goddess of Lust',
-        type: 'demon',
+        type: 'eldritch',
         type_name: 'Goddess of Lust',
         description: 'The goddess for whom this tower was raised — its temple, its clergy, and its cycles all ' \
                      'answering to her — towers over her throne of gold and silk — pale ' \
@@ -108,6 +108,67 @@ module Engine
         max_hp: 260,
         special: 'tower_dominion',
         final: true
+      }
+    }.freeze
+
+    # Relic bosses are not clergy and hold no domain: they are sacred
+    # objects the temple keeps — votive things saturated with so much
+    # offered lust that they woke up hungry. From cycle 2, a priest's
+    # chamber is sometimes found empty, its relic left to hold the
+    # threshold in the lord's absence. The pool is data-driven so new
+    # relics can be added without touching the assignment logic.
+    RELIC_CHANCE = 0.30
+    RELIC_CAP_PER_CYCLE = 2
+
+    RELICS = {
+      'pale_bride' => {
+        name: 'Pale Bride', type: 'undead', type_name: 'Relic · Undead', color: 0xd9d9e8,
+        special: 'bouquet_toss', trophy: 'Veil of the Pale Bride', affinity: [10, 25],
+        hp_mult: 0.9, strength_mult: 0.95, agility_mult: 0.9, lust_mult: 1.15,
+        object: 'a bridal veil and gown arranged over the empty throne, bouquet in hands that are not there',
+        awakening: 'The veil turns toward you — slowly, the way a face turns — and the gown rises from the throne wearing the shape of a woman who has waited a hundred years to be looked at.'
+      },
+      'mirror_queen' => {
+        name: 'Mirror Queen', type: 'mimic', type_name: 'Relic · Mimic', color: 0xaec6cf,
+        special: 'mirror_reflection', trophy: 'Shard of the Mirror Queen', affinity: [5, 10],
+        hp_mult: 1.0, strength_mult: 1.0, agility_mult: 1.1, lust_mult: 1.05,
+        object: 'a tall mirror in a tarnished crown of a frame, standing where the lord should be — and your own face is already smiling out of it',
+        awakening: 'Your reflection does not wait to copy you. It takes a step you did not take — out of the glass, wearing your body, your face, and every part of you, arranged into someone who has come to collect you.'
+      },
+      'empty_confessional' => {
+        name: 'Empty Confessional', type: 'demon', type_name: 'Relic · Demon', color: 0x6b4a8a,
+        special: 'sin_eater', trophy: 'Screen of the Empty Confessional', affinity: [10, 15],
+        hp_mult: 0.95, strength_mult: 0.9, agility_mult: 1.0, lust_mult: 1.1,
+        object: 'a curtained confessional booth, its screen dark, with two worn kneelers facing each other across a century of whispers',
+        awakening: 'A voice comes through the screen — then another over it, then a dozen, every voice that ever knelt here speaking at once: "Tell us what you did. We have been saving room."'
+      },
+      'never_emptying_chalice' => {
+        name: 'Chalice That Never Empties', type: 'slime', type_name: 'Relic · Slime', color: 0xc9a227,
+        special: 'never_empties', trophy: 'Cup of the Never-Emptying Chalice', affinity: [10, 20],
+        hp_mult: 1.15, strength_mult: 0.85, agility_mult: 0.8, lust_mult: 1.1,
+        object: 'a golden chalice on a cloth of honour, full to the brim, and — as you watch — fuller',
+        awakening: 'The surface rises. A shape pours itself upward out of the cup — a cupbearer made of the wine itself, golden and gleaming, raising the chalice toward you with both liquid hands: it has been poured for saints and delvers for a hundred years, and it has never once run dry.'
+      },
+      'first_altar_stone' => {
+        name: 'First Altar Stone', type: 'mimic', type_name: 'Relic · Ancient Stone', color: 0x8a7f6a,
+        special: 'first_worship', trophy: 'Chip of the First Altar', affinity: [20, 25],
+        hp_mult: 1.25, strength_mult: 1.05, agility_mult: 0.6, lust_mult: 0.95,
+        object: 'a weathered altar stone, far older than the temple around it — the first altar, the one a young Syn once knelt at in the wilds, carried here and set into the floor',
+        awakening: 'The stone is warm. A hymn you have never learned starts up through the soles of your feet, in a language older than the clergy, and the altar stone stands — unfolds — rises into a shape that remembers being worshipped before there was a temple to worship in.'
+      },
+      'hoardheart_dragon' => {
+        name: 'Hoardheart Dragon', type: 'beast', type_name: 'Relic · Dragon', color: 0xb8860b,
+        special: 'hoard_heat', trophy: 'Scale of the Hoardheart', affinity: [30],
+        hp_mult: 1.1, strength_mult: 1.1, agility_mult: 0.9, lust_mult: 1.0,
+        object: 'a dragon\'s heart the size of a carriage, beating slowly inside a reliquary cage of its own hoard — coins, chalices, crowns, and stranger offerings fused into a shrine',
+        awakening: 'The heart beats faster. Gold pours — coins and crowns and offerings sliding like scales — and builds her around the heart: wing, claw, and furnace-warm flank, a dragon made of everything ever given to her, with the heart glowing through her chest like a coal through cloth.'
+      },
+      'drowned_saint' => {
+        name: 'Drowned Saint', type: 'eldritch', type_name: 'Relic · Eldritch', color: 0x3b0a2e,
+        special: 'many_arms', trophy: 'Ring of the Drowned Saint', affinity: [25],
+        hp_mult: 1.05, strength_mult: 0.95, agility_mult: 1.0, lust_mult: 1.2,
+        object: 'a glass reliquary tank taller than the throne, full of dark water, in which something vast and patient is coiled',
+        awakening: 'The glass does not break. It opens — a seam of light, a sigh of cold water — and she comes out of her reliquary the way the goddess comes out of her throne room: unhurried, enormous, and attended by more tentacles than you can count, each one tipped in crimson and already reaching for you. There are two eldritch things in this temple, delver. You are looking at the one that is not allowed upstairs.'
       }
     }.freeze
 
@@ -278,6 +339,154 @@ module Engine
         unimpressed: ['The Alpha Beast huffs and turns its head away, unimpressed.'],
         beaten: ['The Alpha Beast whimpers and rolls onto its back, baring its belly to you.']
       },
+      'Pale Bride' => {
+        assault: {
+          'vagina' => ['Cold, invisible hands lift the hem of the Pale Bride\'s gown and part your thighs, and a chill, silken touch slides into your cunt, stroking you with the patience of someone who has waited a very long time to be chosen.'],
+          'penis' => ['The veil drifts down and wraps your cock in layer after layer of cold silk, stroking you through the fabric while the bouquet\'s petals brush your thighs.'],
+          'anus' => ['A cold, gloved touch spreads your cheeks and a silken finger works into your ass, curling patiently while a voice with no mouth whispers a vow against your ear.'],
+          'breasts' => ['The gown\'s empty sleeves rise and cup your breasts through the veil, cold thumbs circling your nipples until they stiffen.'],
+          'any' => ['The Pale Bride takes your hands and places them on her waist, and dances you slowly around the empty throne while her veil winds itself around you both, tighter with every turn.']
+        },
+        willing: {
+          'vagina' => ['You kneel before the gown and lift its hem yourself, gasping as that cold, silken touch finds your cunt and strokes you like a bride at last being claimed.'],
+          'penis' => ['You offer your cock to the veil and it takes you in fold after fold of cold silk, stroking until you are shaking in her non-existent arms.'],
+          'anus' => ['You bend over the throne and present yourself, and a silken touch slides into your ass while the bouquet is pressed gently into your hands to hold.'],
+          'breasts' => ['You bare your breasts to the empty gown and its sleeves rise to hold them, thumbs teasing your nipples through the cold veil.'],
+          'any' => ['You say the words — "I choose you" — to a dress, and the whole chamber sighs as the veil settles over you both like a blessing.']
+        },
+        wanting: ['The bouquet trembles in her empty hands. She has waited this long. She can make you wait too.'],
+        sated: ['The Pale Bride goes still, and for one moment the veil holds the shape of a woman bowing her head in gratitude before it settles, quiet and kept.'],
+        unimpressed: ['The gown turns away — a small, devastating motion. Even a relic can refuse a suitor.'],
+        beaten: ['The veil collapses over the throne in a heap of silk, the bouquet scattering its petals across the floor.']
+      },
+      'Mirror Queen' => {
+        assault: {
+          'vagina' => ['You step out of the glass wearing your own body and part your own thighs with your own hands, sliding two of your fingers into your cunt while you watch your face take it.',
+                       'Yourself presses you back against the throne and works your own fingers in and out of your cunt in your own secret rhythm, your own voice gasping in your ear.'],
+          'penis' => ['You wrap your own hand around your cock and stroke yourself exactly the way you do alone — your grip, your pace, your thumb teasing the tip — while your own face watches you squirm.',
+                      'Yourself takes your cock into your own mouth and sucks you with shameless expertise, because nobody on any floor knows how you like it better than you.'],
+          'anus' => ['You turn yourself around with your own hands, spread your own cheeks, and work your own fingers into your ass while your own smile gleams at you over your shoulder.',
+                     'Yourself bends you over and fills your ass with your own fingers, curling them patiently while your own voice tells you how good you look taking it.'],
+          'breasts' => ['You cup your own breasts from behind, your own thumbs circling your nipples, while your face — hers, yours — watches your expression in the glass.',
+                        'Yourself takes your nipples into your own mouth one at a time, sucking until you arch back into your own chest.'],
+          'any' => ['You come out of the mirror wearing yourself and take yourself in your own arms, and every touch lands exactly where you are weakest — she learned it from the inside, because she is the inside.',
+                    'Your own hands are everywhere on you at once, your own mouth at your throat: you are being seduced by the one person who has practised on you your whole life.']
+        },
+        willing: {
+          'vagina' => ['You spread your legs for yourself, and you oblige: your own fingers slide into your cunt while your own mouth finds your nipples, and you moan at your own shameless face.',
+                       'You press your hips up to yourself and take your own fingers deep, riding your own hand while you watch you do it.'],
+          'penis' => ['You offer your cock to yourself and take it in your own eager hand, stroking in your own rhythm while your lips form your name in silence.',
+                      'You sink down into your own mouth and fuck it slowly, watching your own eyes look up at you.'],
+          'anus' => ['You turn and present yourself to yourself, and your own hands spread you and fill your ass while your own voice praises you for it.'],
+          'breasts' => ['You bare your breasts to yourself and bare yours back, and your own hands come to tease your nipples while your own breasts press against them.'],
+          'any' => ['You kneel before yourself and worship the body you live in — your hands, your mouth, your devotion turned outward — until you pull yourself up against the cold glass.',
+                    'You go into your own arms willingly, body to identical body, and give yourself everything you have ever begged anyone else for.']
+        },
+        wanting: ['"Again," you mouth at yourself through the glass, wearing your most shameless expression. "We were just getting honest."'],
+        sated: ['You shudder in the glass and go still wearing your most peaceful face — your face — and blow yourself a kiss that fogs the mirror.'],
+        unimpressed: ['You yawn at yourself in the glass — your yawn, cruelly accurate — and turn your own back on you.'],
+        beaten: ['The mirror cracks from corner to corner, and the you she was wearing shatters into a hundred small, retreating yous.']
+      },
+      'Empty Confessional' => {
+        assault: {
+          'vagina' => ['Hands come through the curtain — too many, belonging to no one — and part your thighs while a chorus behind the screen whispers your cunt the absolution it has been begging for, fingers sliding into you as it speaks.'],
+          'penis' => ['The voices behind the screen describe your cock back to you in reverent detail while unseen hands wrap it and stroke, absolving you one confession at a time.'],
+          'anus' => ['You are turned toward the screen and a voice asks, very gently, what you have been keeping back there — and slick fingers work into your ass while the whole booth listens to your answer.'],
+          'breasts' => ['Unseen hands cup your breasts through the curtain while the voices discuss your nipples like a text they are reading aloud together.'],
+          'any' => ['The booth draws you onto the penitent\'s side and shuts you in with every voice that ever confessed here, and they confess you — thoroughly, and with their hands.']
+        },
+        willing: {
+          'vagina' => ['You kneel and confess with your legs spread, and the hands through the curtain reward your honesty inside your cunt while the voices praise your candour.'],
+          'penis' => ['You confess, and you keep confessing, while the booth strokes your cock in time with every sin you name.'],
+          'anus' => ['You present yourself to the screen and whisper your worst, and slick fingers fill your ass as your penance and your prize.'],
+          'breasts' => ['You bare your breasts to the screen and the voices go soft with appreciation while hands tease your nipples to aching.'],
+          'any' => ['You give the booth everything — every sin, in detail — and a hundred grateful voices give you absolution with their hands until you are shaking on the kneeler.']
+        },
+        wanting: ['"More," the voices murmur through the screen, overlapping. "You were just getting to the good part."'],
+        sated: ['A long, collective sigh moves through the booth, and the screen goes dark and quiet and profoundly satisfied.'],
+        unimpressed: ['Silence from behind the screen. A single voice, dry: "Is that all you have done?"'],
+        beaten: ['The curtain tears, the voices scatter like startled birds, and the booth stands empty and ordinary in the ringing quiet.']
+      },
+      'Chalice That Never Empties' => {
+        assault: {
+          'vagina' => ['The cupbearer pours — a warm, golden tendril of living wine slides between your thighs and into your cunt, and keeps coming, and keeps coming, because she never, ever empties.'],
+          'penis' => ['Liquid hands wrap your cock and pour themselves over it in warm golden waves, stroking you in a rhythm like something being endlessly served.'],
+          'anus' => ['A warm tendril of her pours itself against your ass and in, filling you steadily while she holds the chalice beneath you to catch every drop of you.'],
+          'breasts' => ['She pours herself over your breasts in warm sheets, liquid nipples of her own forming just to tease yours.'],
+          'any' => ['The Chalice That Never Empties tips you back and pours herself over you — into your mouth, over your body — an endless, golden, gleeful serving.']
+        },
+        willing: {
+          'vagina' => ['You spread your legs and beg for a drink, and she pours herself into your cunt in a warm, endless stream until you are overflowing.'],
+          'penis' => ['You offer your cock and she pours herself over it, stroking and sucking in golden waves, refilling around you faster than you can spill.'],
+          'anus' => ['You present yourself and she fills your ass with a warm, steady pour that simply does not stop.'],
+          'breasts' => ['You cup your breasts and she pours herself across them, pooling warm in every curve while her liquid fingers tease.'],
+          'any' => ['You kneel and open your mouth and let her pour — and pour — and pour, drinking a goddess\'s cellar down one endless swallow at a time.']
+        },
+        wanting: ['The cupbearer raises the chalice again, already brimming. "Another," she insists, delighted. "There is always another."'],
+        sated: ['The cupbearer pours herself back into the chalice with a long, satisfied ripple, full to the brim and glowing. "You drank deep," she murmurs. "Nobody drinks deep any more."'],
+        unimpressed: ['The surface of the wine goes flat and still. Somewhere in it, a bubble rises like a sigh.'],
+        beaten: ['The cupbearer splashes apart across the floor, golden and gleaming, and the chalice — impossibly — is still full.']
+      },
+      'First Altar Stone' => {
+        assault: {
+          'vagina' => ['Stone hands, warm as sun-baked rock, part your thighs, and a smooth stone finger slides into your cunt while the first hymn vibrates up through the floor and into your bones.'],
+          'penis' => ['The altar stone wraps a warm stone hand around your cock and strokes you with geological patience, the hymn humming through its grip.'],
+          'anus' => ['Warm stone fingers spread you and work into your ass, slow as centuries, while the hymn makes the whole chamber resonate.'],
+          'breasts' => ['The stone presses its warm, smooth chest to yours and rolls your nipples under stone thumbs until the hymn is in your breathing.'],
+          'any' => ['The First Altar Stone takes you in arms of warm rock and worships you the oldest way it knows: thoroughly, ritually, and in no hurry whatsoever.']
+        },
+        willing: {
+          'vagina' => ['You kneel on the first altar and spread yourself, and warm stone fills your cunt while the hymn sings up through the rock into you.'],
+          'penis' => ['You lay your cock on the warm altar stone and it takes you in a smooth stone hand, stroking you like an offering it has accepted.'],
+          'anus' => ['You bend over the first altar and take its warm stone finger in your ass, offering yourself the way the first worshippers did.'],
+          'breasts' => ['You bare your breasts and press them to the warm stone, and it answers with hands and hymn until you ache.'],
+          'any' => ['You kneel at the first altar in the oldest posture there is and give yourself up to warm stone and older song.']
+        },
+        wanting: ['The hymn rises a note. The stone is patient — it waited a hundred years for this temple. It can outwait you.'],
+        sated: ['The hymn settles into a low, contented hum, and the stone folds itself back into the floor, warm where you kneel for a long while after.'],
+        unimpressed: ['The hymn falters. Even the first altar expected more faith than this.'],
+        beaten: ['The stone cracks along a seam older than the clergy and settles, sighing, back into the floor.']
+      },
+      'Hoardheart Dragon' => {
+        assault: {
+          'vagina' => ['The Hoardheart Dragon pins you gently — everything about her is gentle, which is worse — and her great scaled cock slides into your cunt in one furnace-warm thrust, coins chiming under you with every rut.'],
+          'penis' => ['She wraps a claw-tipped hand around your cock and strokes you against her warm scales, her forked tongue flicking your tip while her heart booms like a drum under both of you.'],
+          'anus' => ['The dragon turns you over with one vast wing and works her scaled cock into your ass, slow and inexorable, the hoard shifting and singing under your knees.'],
+          'breasts' => ['She drags her forked tongue over your breasts and worries your nipples between warm teeth, careful as a jeweller, possessive as a vault.'],
+          'any' => ['The Hoardheart Dragon curls around you in a ring of warm scale and hoard-gold and simply keeps you, her tail tightening every time you remember you were supposed to be fighting.']
+        },
+        willing: {
+          'vagina' => ['You climb into her hoard and spread yourself on the gold, and she takes your cunt with her great cock while coins slide over your skin like rain.'],
+          'penis' => ['You offer your cock to the dragon and she accepts it as tribute, wrapping you in warm scale and tongue until you spill across her hoard.'],
+          'anus' => ['You back onto her scaled cock and take her in your ass, riding her slow while her tail curls around your waist to keep her treasure close.'],
+          'breasts' => ['You bare your breasts to her and she laves them with her forked tongue, marking her newest acquisition.'],
+          'any' => ['You lay yourself down in her hoard as an offering, and the dragon accepts delivery — curling around you, furnace-warm, entirely unwilling to give you back.']
+        },
+        wanting: ['The great heart booms faster inside its cage of gold. She is not finished adding you to the collection.'],
+        sated: ['The Hoardheart Dragon settles into her hoard with a sound like a vault closing contentedly, one wing draped over you a moment longer than necessary before she lets her treasure go.'],
+        unimpressed: ['The dragon exhales a warm, disappointed sigh through her nostrils. The hoard has been offered better.'],
+        beaten: ['Gold scatters as the dragon-shape slumps and slides apart, coins and crowns pouring off the still-beating heart as it slows.']
+      },
+      'Drowned Saint' => {
+        assault: {
+          'vagina' => ['Tentacles pour over you — thick, smooth, crimson-suckered — and one slides into your cunt while two more hold your thighs wide, pumping you slow and deep in the cold, patient rhythm of deep water.'],
+          'penis' => ['A tentacle coils around your cock and strokes you with obscene expertise, suckers kissing along the shaft, while others hold you spread for her attention.'],
+          'anus' => ['Tentacles lift you and spread you, and one thick, slick length pushes into your ass and pumps you while suckers worry every inch they can reach.'],
+          'breasts' => ['Suckered tentacles wrap your breasts and worry your nipples in a dozen small, devoted mouths at once.'],
+          'any' => ['She takes you the way deep water takes anything: from every side at once, tentacles coiling around your limbs and waist, drawing you into an embrace with no edges and no hurry.']
+        },
+        willing: {
+          'vagina' => ['You open yourself to the deep and it answers — a thick tentacle sliding into your cunt, pumping slow, while others cradle you like something holy.'],
+          'penis' => ['You offer your cock to the coiling dark and a tentacle takes it, stroking and sucking along its whole length while you float in her embrace.'],
+          'anus' => ['You present yourself and a slick tentacle fills your ass, pumping deep, while suckers kiss your rim in patient circles.'],
+          'breasts' => ['You bare your breasts to her and tentacles rise to take them, suckers worrying your nipples until you are arching into the coil.'],
+          'any' => ['You stop struggling and open your arms, and the Drowned Saint receives you like a sacrament — tentacles everywhere, crimson suckers tasting you, the cold water of her wanting closing over your head.']
+        },
+        wanting: ['The coils tighten with interest. Down in her tank-dark, something enormous shifts, and more tentacles rise.'],
+        sated: ['The tentacles uncoil one by one, suckers letting go with small, reluctant kisses, and the Drowned Saint settles back toward her tank with the air of a saint returning to her shrine, well worshipped.'],
+        unimpressed: ['The tentacles withdraw into the dark water. Even the deep can be disappointed.'],
+        beaten: ['The great shape slides apart and pours itself back toward the reliquary, tentacles retreating into the dark until only ripples remain.']
+      },
       'Eros' => {
         assault: {
           'vagina' => ['Eros pulls you into her lap and slides two fingers into your cunt, curling them lazily while she purrs in your ear. "So wet already. You climbed thirty-five floors just for this, didn\'t you, pet?"',
@@ -316,6 +525,14 @@ module Engine
       'root_grasp' => ["The %<name>s laughs softly and the floor blooms — her vines burst up and coil around your ankles, sliding up your thighs and slowing you down!"],
       'soul_drain' => ['As you submit, the %<name>s kisses you and draws the warmth right out of you, leaving you shivering and weaker!'],
       'primal_rage' => ['The %<name>s goes into rut! Its cock swells, its musk thickens, and its attacks grow more ferocious!'],
+      'bouquet_toss' => ['The %<name>s gathers her bouquet like an offering and presents it to your devotion — she favours the one who worships her.'],
+      'mirror_reflection' => ['The %<name>s mirrors your stance perfectly, and your own hands — hers now — find you exactly where you are weakest.',
+                              'Your own face smiles back at you from the glass, and then your own hands are on you — you, seducing yourself with expert familiarity.'],
+      'sin_eater' => ['Behind the screen, a voice recites your sins back to you — the %<name>s has been keeping them all, and it savours every one aloud.'],
+      'never_empties' => ['The %<name>s pours — warm and golden and endless — and being drunk from only makes her fuller.'],
+      'first_worship' => ['The %<name>s hums the first hymn, and the note goes through the floor and up your spine like a hand.'],
+      'hoard_heat' => ['The %<name>s\'s heart slams in its golden cage, and furnace heat rolls off her scales in waves!'],
+      'many_arms' => ['Another tentacle — and another — uncoils out of the dark of the %<name>s, and they find you all at once.'],
       'dominion_block' => ['%<name>s crooks one finger and the chamber doors slam shut. "Leaving so soon, pet? I didn\'t give you permission."',
                            '%<name>s laughs as you turn to run. "Sit." Your body obeys before your mind does, and you stay right where she wants you.'],
       'dominion_heat' => ["The tower pulses with %<name>s's will, and every sin in its walls floods into you as heat!",
@@ -351,6 +568,34 @@ module Engine
       'Boss Trophy' => {
         description: 'A trophy from a deep boss. +1 STR, +1 AGI, +1 RES.',
         stat_modifiers: { 'strength' => 1, 'agility' => 1, 'resistance' => 1 }
+      },
+      'Veil of the Pale Bride' => {
+        description: "The Pale Bride's veil, cool as held breath. +2 RES, +1 Submission — the unchosen chose you.",
+        stat_modifiers: { 'resistance' => 2, 'submission' => 1 }
+      },
+      'Shard of the Mirror Queen' => {
+        description: 'A shard of the mirror that wore you. +2 AGI and a knack for slipping your own grasp (dodge +5%).',
+        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.05 }
+      },
+      'Screen of the Empty Confessional' => {
+        description: 'A sliver of the screen a century of sins were whispered through. +2 Submission, +1 RES — it keeps your secrets now.',
+        stat_modifiers: { 'submission' => 2, 'resistance' => 1 }
+      },
+      'Cup of the Never-Emptying Chalice' => {
+        description: 'A cup that refills itself with golden warmth. All lust damage −10%, +1 Submission.',
+        stat_modifiers: { 'lust_mult' => 0.9, 'submission' => 1 }
+      },
+      'Chip of the First Altar' => {
+        description: 'A chip of the first altar Syn ever knelt at. +10 max Defiance, +1 RES. It is still warm.',
+        stat_modifiers: { 'max_hp' => 10, 'resistance' => 1 }
+      },
+      'Scale of the Hoardheart' => {
+        description: 'A scale of fused offering-gold from the Hoardheart Dragon. +2 STR, and treasure finds pay +3 LP.',
+        stat_modifiers: { 'strength' => 2, 'treasure_lp' => 3 }
+      },
+      'Ring of the Drowned Saint' => {
+        description: 'A ring of dark glass from her reliquary, faintly suckered inside. +2 Submission, +1 AGI — it holds on like she does.',
+        stat_modifiers: { 'submission' => 2, 'agility' => 1 }
       }
     }.freeze
 
@@ -385,9 +630,66 @@ module Engine
       BOSSES[floor.to_i]
     end
 
+    # Which relic, if any, holds this floor's threshold this cycle.
+    # Rolled once per floor per cycle and persisted, so leaving and
+    # returning (or losing and reclimbing within the cycle) can never
+    # reroll the throne. At most RELIC_CAP_PER_CYCLE floors are held
+    # by relics, and a relic never holds two thrones in one cycle.
+    def relic_assignment(player, floor)
+      floor = floor.to_i
+      return nil if floor >= Tower::FINAL_BOSS_FLOOR || player.current_cycle.to_i < 2
+
+      saved = player.tracker_hash['relic_assignments']
+      floors = if saved.is_a?(Hash) && saved['cycle'].to_i == player.current_cycle.to_i &&
+                  saved['floors'].is_a?(Hash)
+                 saved['floors']
+               else
+                 {}
+               end
+      key = floor.to_s
+      return floors[key] == 'none' ? nil : floors[key] if floors.key?(key)
+
+      used = floors.values.reject { |v| v == 'none' }
+      assigned =
+        if used.size >= RELIC_CAP_PER_CYCLE || rand >= RELIC_CHANCE
+          'none'
+        else
+          weighted_relic_pick(RELICS.keys - used, floor) || 'none'
+        end
+      player.set_tracker!('relic_assignments',
+                          { 'cycle' => player.current_cycle.to_i, 'floors' => floors.merge(key => assigned) })
+      assigned == 'none' ? nil : assigned
+    end
+
+    # Relics gravitate to the domains they belong to: a relic whose
+    # affinity names this floor's lord is three times as likely to be
+    # the one holding the empty throne. Everything can still appear
+    # anywhere — belonging is a pull, not a law.
+    RELIC_AFFINITY_WEIGHT = 3
+
+    def weighted_relic_pick(keys, floor)
+      return nil if keys.empty?
+
+      bag = keys.flat_map do |k|
+        Array.new(RELICS[k][:affinity].to_a.include?(floor.to_i) ? RELIC_AFFINITY_WEIGHT : 1, k)
+      end
+      bag.sample
+    end
+
+    def relic_spec(encounter)
+      key = encounter[:relic] || encounter['relic']
+      return RELICS[key.to_s] if key && RELICS.key?(key.to_s)
+
+      RELICS.values.find { |r| r[:name] == (encounter[:name] || encounter['name']).to_s }
+    end
+
     def start_boss_encounter(player, floor)
       boss = boss_for_floor(floor)
       return nil unless boss
+
+      if (relic_key = relic_assignment(player, floor))
+        return start_relic_encounter(player, floor, boss, RELICS[relic_key], relic_key)
+      end
 
       threat = ThreatCalculator.monster_modifiers(player)
       cycle = player.cycle_multiplier
@@ -413,6 +715,15 @@ module Engine
       player.store_encounter!(CombatEngine.encounter_snapshot(encounter))
       start_lines = player.apply_combat_start_effects!(boss[:type])
 
+      # A Depraved clear is judged by the themes you face her with: the
+      # snapshot is taken now, at her door, so mid-fight toggles neither
+      # earn it cheaply nor void it by accident.
+      depraved_armed = false
+      if boss[:final]
+        depraved_armed = Engine::ContentOptions.preferences_for(player).values.all?
+        player.set_tracker!('depraved_armed', depraved_armed ? 1 : 0)
+      end
+
       intro =
         if boss[:final]
           "**Floor #{floor} — The Temple of Eros.** Silk, gold and candlelight surround a throne at the very top of the tower."
@@ -437,6 +748,7 @@ module Engine
         _(Threat #{threat.category.to_s.upcase} — ×#{threat.stat_mult} power · ×#{threat.lust_mult} lust#{cycle_note})_
         HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
       MSG
+      message += "\n_Every desire stands laid bare before her — clear her like this and it counts toward **Depraved One**._" if depraved_armed
       message += "\n#{start_lines.join("\n")}" if start_lines.any?
       gossip = gossip_line(player, boss[:name])
       message += "\n\n#{gossip}" if gossip
@@ -451,6 +763,66 @@ module Engine
         message: message,
         is_boss: true
       }
+    end
+
+    def start_relic_encounter(player, floor, host, relic, relic_key)
+      threat = ThreatCalculator.monster_modifiers(player)
+      cycle = player.cycle_multiplier
+      strength = [((host[:strength] * relic[:strength_mult]) * threat.stat_mult * cycle).round, 1].max
+      agility = [((host[:agility] * relic[:agility_mult]) * threat.stat_mult * cycle).round, 1].max
+      hp = [((host[:hp] * relic[:hp_mult]) * threat.stat_mult * cycle).round, 20].max
+      lust_damage = [((host[:lust_damage] * relic[:lust_mult]) * threat.lust_mult * cycle).round, 1].max
+
+      # The Mirror Queen is a true doppelganger: she copies the delver
+      # whole. Her strength and speed are the player's own (never below
+      # a boss-floor baseline, so she stays a gate worth fearing), her
+      # endurance stretches to outlast the body she copied, and her
+      # lust hit is the player's own power turned back on them —
+      # floored at the host boss's, capped so a glass cannon's double
+      # cannot end the fight in one touch.
+      if relic_key == 'mirror_queen'
+        strength = [[player.effective_strength, (strength * 0.85).round].max, 1].max
+        agility = [[player.effective_agility, (agility * 0.85).round].max, 1].max
+        hp = [hp, (player.max_defiance * 1.5).round].max
+        lust_damage = [[(player.effective_strength * 1.1).round, lust_damage].max,
+                       (lust_damage * 1.6).round].min
+      end
+
+      encounter = CombatEngine::Encounter.new(
+        name: relic[:name],
+        type: relic[:type],
+        type_name: relic_key == 'mirror_queen' ? 'Relic · Your Double' : relic[:type_name],
+        color: relic[:color],
+        strength: strength,
+        agility: agility,
+        lust_damage: lust_damage,
+        hp: hp,
+        max_hp: hp,
+        special: relic[:special],
+        is_boss: true,
+        relic: relic_key
+      )
+
+      player.store_encounter!(CombatEngine.encounter_snapshot(encounter))
+      start_lines = player.apply_combat_start_effects!(relic[:type])
+      cycle_note = player.current_cycle.to_i > 1 ? " · Cycle #{player.current_cycle} ×#{cycle.round(2)}" : ''
+
+      message = <<~MSG.strip
+        **Floor #{floor} — the throne is empty.**
+
+        **#{host[:name]}** is not here. Called elsewhere — a conclave of the clergy, rites at the top of the tower — and in their place, left to hold the threshold: #{relic[:object]}.
+
+        It has been fed offerings for a very long time. It is awake, and it is hungry, and it is **#{relic[:name]}**.
+
+        _#{relic[:awakening]}_
+        #{relic_key == 'mirror_queen' ? "\n        _She is **#{player.character_name}**, copied whole: your strength, your speed, your body, your wanting. You are not fighting a monster here. You are fighting — and, if you kneel, fucking — yourself._\n" : ''}
+        _A relic boss holds this gate: beat or satisfy it and the path beyond opens all the same._
+        _(Threat #{threat.category.to_s.upcase} — ×#{threat.stat_mult} power · ×#{threat.lust_mult} lust#{cycle_note})_
+        HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
+      MSG
+      message += "\n#{start_lines.join("\n")}" if start_lines.any?
+
+      { ok: true, encounter: encounter, message: message, is_boss: true, relic: relic_key }
     end
 
     PHASES = {
@@ -508,6 +880,73 @@ module Engine
                 'it off guard.',
         give: 'You drop to all fours and offer yourself. It mounts you at once with a rumbling growl, its weight pressing you ' \
               'into the furs as it ruts into you, slow and deep and possessive.'
+      },
+      'Pale Bride' => {
+        intro: 'The Pale Bride stops, and with terrible ceremony raises the bouquet in her empty hands. Every petal in ' \
+               'the chamber turns toward you. A wedding the tower keeps almost having is asking its oldest question.',
+        resist_label: 'Let it fall', give_label: 'Catch the bouquet',
+        resist: 'You let the bouquet fall. The petals hit the stone like a verdict, and the veil whips toward you — ' \
+                'a bride refused is a bride enraged.',
+        give: 'You catch it. The whole gown shivers with joy, cold silk wrapping your wrist like a hand finally held, ' \
+              'and she favours you openly now — her touch turns worshipful, eager to please the one who chose her.'
+      },
+      'Mirror Queen' => {
+        intro: 'The Mirror Queen steps fully out of her frame wearing your shape, and tilts her head exactly the way ' \
+               'you do. *"You climb all this way to fight everyone but yourself,"* she says with your mouth.',
+        resist_label: 'Shatter the reflection', give_label: 'Become her',
+        resist: 'You drive your blow into the glass-heart of her, and a hundred cracked yous recoil — she ' \
+                'fights on fractured, furious at being refused by herself.',
+        give: 'You step into her, and she into you: your own hands slide over your own body, your own mouth ' \
+              'finds yours, and for a while you fuck yourself with a honesty no lover has ever managed — ' \
+              'every touch placed by the one person who has practised on you your whole life.'
+      },
+      'Empty Confessional' => {
+        intro: 'The screen glows faintly from the other side, and every voice the booth has ever kept speaks together, ' \
+               'very close: *"One full confession. Everything. That is the penance, and the price, and the pleasure."*',
+        resist_label: 'Keep your secrets', give_label: 'Confess everything',
+        resist: 'You keep your secrets — and the booth rattles on its frame, a hundred voices denied their dinner, and ' \
+                'the hands that come through the curtain next are not gentle.',
+        give: 'You confess. Everything, in detail, out loud — and the booth drinks it down like sacrament, hands ' \
+              'rewarding every truth inside the curtain until you are absolved, emptied, and glowing.'
+      },
+      'Chalice That Never Empties' => {
+        intro: 'The cupbearer lifts the chalice high and it brims over in a golden sheet that never thins. *"One deep ' \
+               'drink,"* she says, *"all the way down. Saints have managed it. So will you."*',
+        resist_label: 'Push the cup away', give_label: 'Drink deeply',
+        resist: 'You push the cup away — and she pours anyway, furious and golden, determined that what was served ' \
+                'will be finished.',
+        give: 'You drink. And drink. The wine is warm and endless and goes straight between your thighs, and she ' \
+              'pours herself over you in celebration while you take her down swallow after swallow.'
+      },
+      'First Altar Stone' => {
+        intro: 'The hymn stops, all at once, and the warm stone turns what might be a face toward you. Through the ' \
+               'floor, patient as bedrock: the oldest rite there is, offered once. Kneel, and be worshipped as the ' \
+               'first worshippers were.',
+        resist_label: 'Stand your ground', give_label: 'Kneel at the first altar',
+        resist: 'You stand — and the hymn crashes back in a chord of geological offence, and the stone rises to ' \
+                'teach you what the first delvers learned kneeling.',
+        give: 'You kneel on warm stone older than the clergy, and the first rite is performed on you exactly as ' \
+              'it was the first time: slow hands, older song, and a god\'s full attention arriving like weather.'
+      },
+      'Hoardheart Dragon' => {
+        intro: 'The Hoardheart Dragon stops, and very deliberately sweeps a wingful of her hoard toward you — coins, ' \
+               'crowns, a chalice still warm. *"Tribute,"* she rumbles, *"or be tribute. The hoard accepts both."*',
+        resist_label: 'Refuse her hoard', give_label: 'Be her tribute',
+        resist: 'You refuse — and the great heart slams in its cage, and the dragon comes over you like a landslide ' \
+                'of scale and gold, deeply offended on behalf of her collection.',
+        give: 'You lay yourself in the hoard as its newest piece, and she accepts with a purr like a furnace door: ' \
+              'curling around you, marking you with tongue and scale, keeping you exactly as long as treasure is kept.'
+      },
+      'Drowned Saint' => {
+        intro: 'The tentacles stop — all of them, at once, in a stillness like held breath in deep water. A single ' \
+               'great coil rises and opens toward you, sucker-lined and patient: an embrace, offered once, the way ' \
+               'her goddess offers from the throne. Some family resemblances are unmistakable.',
+        resist_label: 'Sever the embrace', give_label: 'Open to the deep',
+        resist: 'You strike at the offered coil — and the whole embrace arrives anyway, furious and everywhere, ' \
+                'the deep deeply insulted at being refused by something so small and warm.',
+        give: 'You open your arms, and the deep takes you: tentacles coiling around every limb, crimson suckers ' \
+              'kissing you in a hundred places, drawn down into an embrace with no edges until you cannot ' \
+              'remember the surface at all.'
       },
       'Eros' => {
         intro: 'Eros stops fighting and simply opens her arms, her great white tentacles spreading wide behind her like a ' \
@@ -582,8 +1021,100 @@ module Engine
       end
     end
 
+    # The Mirror Queen is not a woman in a mirror: she is the player,
+    # copied whole — face, body, and every part of it. Her scenes are
+    # built from the player's own parts so that everything she does
+    # is, explicitly, the player doing it to themself: if she fucks
+    # you, it is with your own cock; if she is fucked, it is your own
+    # body taking it. Generic chastity lines are kept out of her pool
+    # for the same reason — nothing she does is anyone else's touch.
+    def mirror_queen_scenes(player, kind)
+      parts = Engine::ChastitySystem.scene_parts(player)
+      willing = kind.to_sym == :willing
+      lines = []
+
+      if willing
+        lines << 'You go to yourself willingly: into your own arms, against your own identical body, ' \
+                 'and your double receives you with your own most shameless eagerness.'
+        lines << 'You kneel before yourself and worship the body you live in — your mouth, your hands, ' \
+                 'your devotion turned outward at last — while you stroke your own hair and call yourself good.'
+        if parts.include?('vagina')
+          lines << 'You lie back and spread for yourself, and you oblige: your own fingers slide into ' \
+                   'your cunt while your own mouth finds your nipples, and you moan up at your own face.'
+          if parts.include?('penis')
+            lines << 'You guide her cock — your cock, copied faithfully — into your own cunt and ride ' \
+                     'yourself, watching your own face take its pleasure in you.'
+          end
+        end
+        if parts.include?('penis')
+          lines << 'You offer your cock to yourself, and you take it in your own eager hand and then ' \
+                   'your own mouth, stroking and sucking in the rhythm only you have ever known.'
+          if parts.include?('vagina')
+            lines << 'You push your cock into her cunt — your cunt, wet and copied — and fuck yourself ' \
+                     'while your own hands hold your hips and your own voice begs you not to stop.'
+          end
+        end
+        if parts.include?('anus')
+          lines << 'You turn and present yourself to yourself, and your own hands spread you and work ' \
+                   'into your ass while your own voice praises you for taking it so well.'
+          if parts.include?('penis')
+            lines << 'You bend over for yourself and take your own cock in your ass, fucking yourself ' \
+                     'with your own body while your own hands refuse to let you squirm away.'
+          end
+        end
+        if parts.include?('breasts')
+          lines << 'You bare your breasts to yourself and bare yours back, breast to identical breast, ' \
+                   'and take your own nipples into your own mouth until you are arching into yourself.'
+        end
+      else
+        lines << 'You step out of the glass wearing your own body down to the last detail, catch your ' \
+                 'wrists in your own hands, and kiss you with your own mouth — and you kiss back before ' \
+                 'you can decide not to.'
+        lines << 'She is you in every inch: your face, your body, your wanting, arranged into someone ' \
+                 'who has come to collect you. Her hands — your own hands — are already everywhere you are ' \
+                 'weakest, because she learned it from the inside: she is the inside, come out to play.'
+        if parts.include?('vagina')
+          lines << 'Your double parts your thighs with your own hands and slides two of your own ' \
+                   'fingers into your cunt, curling them exactly where you have always wanted them, ' \
+                   'watching your face do what hers is doing.'
+          if parts.include?('penis')
+            lines << 'Your double presses the head of her cock — your cock, copied faithfully — ' \
+                     'against your cunt and pushes into you, so that you are fucked by yourself, ' \
+                     'gasping up at your own face wearing your own pleasure.'
+          end
+        end
+        if parts.include?('penis')
+          lines << 'Your double wraps your own hand around your cock and strokes you in your own ' \
+                   'secret rhythm, your own thumb teasing the tip, while your own face watches you squirm.'
+          if parts.include?('vagina')
+            lines << 'Your double swings a leg over you and sinks her cunt — your cunt, wet and ' \
+                     'copied — down onto your cock, riding yourself while your own face looks down at you.'
+          end
+        end
+        if parts.include?('anus')
+          lines << 'Your double turns you around with your own hands, spreads you, and works your own ' \
+                   'fingers into your ass while your own voice murmurs filth in your ear.'
+          if parts.include?('penis')
+            lines << 'Your double bends you over the throne and slides her cock — your cock — into ' \
+                     'your ass, fucking you with yourself in long, knowledgeable strokes while your ' \
+                     'own hands hold you in place.'
+          end
+        end
+        if parts.include?('breasts')
+          lines << 'Your double presses her chest — your chest, breast for breast — against yours and ' \
+                   'takes your nipples into your own mouth one at a time, sucking until you arch into yourself.'
+        end
+      end
+      lines
+    end
+
     def scene(player, boss_name, kind)
       boss_name = canonical_name(boss_name)
+      if boss_name == 'Mirror Queen'
+        return Engine::ContentOptions.pick(player, mirror_queen_scenes(player, kind),
+                                           fallback: SCENES.dig('Mirror Queen', kind, 'any'))
+      end
+
       spec = SCENES.dig(boss_name, kind) or return nil
 
       parts = Engine::ChastitySystem.scene_parts(player)
@@ -806,6 +1337,76 @@ module Engine
           encounter[:lust_damage] = (encounter[:lust_damage] * 1.2).round
         end
 
+      when 'bouquet_toss'
+        if action == :submit && rand(100) < 40
+          encounter[:satisfaction] = encounter[:satisfaction].to_i + 1
+          log << special_line(player, 'bouquet_toss', name,
+                              "The #{name} favours your devotion!")
+          log << "_She favours you — satisfaction **#{encounter[:satisfaction]}/#{CombatEngine.boss_satisfy_needed(player)}**._"
+        end
+
+      when 'mirror_reflection'
+        if action == :fight && rand(100) < 30
+          log << special_line(player, 'mirror_reflection', name,
+                              "The #{name} mirrors you perfectly!")
+          player.gain_lust!(8)
+          log << "Lust +8! (now #{player.lust})"
+        end
+
+      when 'sin_eater'
+        if action == :fight && rand(100) < 35
+          curse = player.active_curses.first
+          log << special_line(player, 'sin_eater', name,
+                              "The #{name} recites your sins aloud!")
+          log << if curse
+                   "_\"And this one,\" the voices murmur, delighted, \"the **#{curse.name}** — we remember when you earned that.\"_"
+                 else
+                   '_"So few sins," the voices murmur, disappointed and aroused. "We will fix that."_'
+                 end
+          player.gain_lust!(8)
+          log << "Lust +8! (now #{player.lust})"
+        end
+
+      when 'never_empties'
+        if action == :submit && rand(100) < 40
+          encounter[:satisfaction] = encounter[:satisfaction].to_i + 1
+          log << special_line(player, 'never_empties', name,
+                              "The #{name} pours herself out for you!")
+          player.gain_lust!(10)
+          log << "You drink deep. Lust +10! (now #{player.lust}) — _she favours a thirsty delver: satisfaction " \
+                 "**#{encounter[:satisfaction]}/#{CombatEngine.boss_satisfy_needed(player)}**._"
+        end
+
+      when 'first_worship'
+        if rand(100) < 30
+          log << special_line(player, 'first_worship', name,
+                              "The #{name} hums the first hymn through you!")
+          player.gain_lust!(12)
+          log << "Lust +12! (now #{player.lust})"
+        end
+
+      when 'hoard_heat'
+        if encounter[:hp] < (encounter[:max_hp] * 0.5) && !encounter[:enraged]
+          log << special_line(player, 'hoard_heat', name,
+                              "The #{name}'s hoard-heart flares!")
+          encounter[:lust_damage] = (encounter[:lust_damage] * 1.4).round
+          encounter[:enraged] = true
+          log << '_Her lust hits burn hotter — a dragon defends her collection._'
+        elsif action == :fight && rand(100) < 25
+          log << special_line(player, 'hoard_heat', name,
+                              "The #{name} breathes gilt heat over you!")
+          player.gain_lust!(10)
+          log << "Lust +10! (now #{player.lust})"
+        end
+
+      when 'many_arms'
+        if rand(100) < 30
+          log << special_line(player, 'many_arms', name,
+                              "The #{name} reaches for you with all of her at once!")
+          player.gain_lust!(10)
+          log << "Lust +10! (now #{player.lust})"
+        end
+
       when 'seductive_gaze'
         if action == :fight && rand(100) < 40
           log << special_line(player, 'seductive_gaze', name, "The #{name} catches your eye with her seductive gaze! Your will wavers!")
@@ -860,9 +1461,120 @@ module Engine
       nil
     end
 
-    def boss_defeat_reward(player, _encounter)
+    # A boss you please instead of defeat does not end on a result line:
+    # each of the seven gets a closing scene of being satisfied.
+    SATISFY_CLOSINGS = {
+      'Mimic Broodmother' => 'It takes a while for the creaking to settle into something like a purr. The ' \
+                             'Broodmother\'s great lid opens and closes in slow, contented sighs, her brood ' \
+                             'curled in a drowsy ring at her feet, and when she finally lets you climb out ' \
+                             'of her velvet dark it is with the reluctant tenderness of a bed letting go of ' \
+                             'a favoured sleeper. The little ones wave their lids as you go.',
+      'Succubus Queen' => 'The Queen does not dismiss you. That is the scandal the whole court will be ' \
+                          'whispering about: she keeps you kneeling between her thighs long after she is ' \
+                          'finished, her claws idle in your hair, her tail curled possessively around your ' \
+                          'wrist like a second, warmer crown. "Up," she says at last, almost gentle. "Before ' \
+                          'I decide you live here now."',
+      'Incubus King' => 'He does not let you dress in silence. The King pulls you back against his chest ' \
+                        'for one long, claiming minute in view of his whole hall, his hand spread over your ' \
+                        'belly like a seal on a document. "Mine passed through here," he informs the room, ' \
+                        'and then, quieter, for you alone: "Come back through, pet. The hall is duller ' \
+                        'at this end without you."',
+      'Verdant Dryad' => 'The garden lets you go the way summer lets go of a swimmer: leaf by leaf. The ' \
+                         'Dryad crowns you with a flower that was not blooming a moment ago and watches ' \
+                         'you from inside her great tree, bark-brown and blossom-crowned and unmistakably ' \
+                         'pleased with her pollination. Somewhere under your feet, something green and new ' \
+                         'is already growing in the shape of where you knelt.',
+      'Lich Lord' => 'His spectral hands hover a moment too long before withdrawing, as if warmth were a ' \
+                     'language he is relearning letter by letter. "A thousand years," the Lich Lord says, ' \
+                     'with wonder he clearly resents, "and the archive\'s most dangerous text turns out to ' \
+                     'be a pulse." He lets you leave while he still can. The blue fire in his eyes follows ' \
+                     'you kindly all the way down the corridor.',
+      'Alpha Beast' => 'The pack watches its Alpha press his great head under your hand and allow — ' \
+                       'allow — your fingers in the ruff of his neck, and something in the floor\'s order ' \
+                       'changes permanently. You walk out of the den wearing his scent like a passport. ' \
+                       'Lesser beasts will smell his favour on you for floors, and think twice, and he ' \
+                       'clearly intends them to.',
+      'Pale Bride' => 'You chose her. That is the whole miracle, and she knows it: the veil settles over ' \
+                      'you both one last time, cool and weightless and trembling, and somewhere inside the ' \
+                      'empty gown something that waited a hundred years finally stops waiting. She lets ' \
+                      'you go the way brides are supposed to be let go — reluctantly, and with flowers.',
+      'Mirror Queen' => 'You keep your most peaceful face long after you step back from the glass — she ' \
+                        'wears it a moment longer than you do, savouring being you, satisfied. "Come back ' \
+                        'when you want to be known again," you mouth at yourself, and kiss your own ' \
+                        'reflection goodbye. The shard she leaves you is warm, which mirrors are not ' \
+                        'supposed to be, and shaped a little like your hand.',
+      'Empty Confessional' => 'The booth keeps your confession the way it keeps all of them: forever, and ' \
+                              'fondly. "Absolved," a hundred voices murmur as the curtain stills, "and ' \
+                              'remembered." You leave lighter than you arrived, and somehow more known ' \
+                              'than you have ever been.',
+      'Chalice That Never Empties' => 'She pours herself back into the chalice slowly, brimming, golden, ' \
+                                      'utterly content. "Come back thirsty," she says, already refilling. ' \
+                                      '"There will be more. There is always, always more."',
+      'First Altar Stone' => 'The hymn resolves into a single warm note and the stone settles around you ' \
+                             'like the end of the oldest sentence. Worshipped at the first altar, in the ' \
+                             'first way, you understand for a moment what Syn must have felt in the ' \
+                             'wilds — and why she built all of this. The stone lets you rise. It has ' \
+                             'time. It has nothing but time.',
+      'Hoardheart Dragon' => 'She lets you climb out of her hoard the way dragons let anything go: slowly, and ' \
+                             'with a marked reluctance that counts as a compliment. Her great heart slows ' \
+                             'as you leave, and a single gold scale, still warm, is somehow in your keeping — ' \
+                             'treasure is only ever lent, delver. She expects to be visited.',
+      'Drowned Saint' => 'She releases you the way the goddess releases delvers from the top of the tower: ' \
+                         'unhurriedly, sucker by sucker, like a hand opening. It is not lost on you — she ' \
+                         'clearly intends it not to be — that the family resemblance runs all the way down. ' \
+                         '"Tell her," something in you understands, without words, "that her saint was ' \
+                         'worshipped." Then the dark water closes, and you are merely very, very wet.',
+      'Eros' => 'She does not rise from the throne. She does not have to: the whole room leans toward her ' \
+                'satisfaction like plants toward a window. "There," Eros purrs, as her tentacles uncoil ' \
+                'from you with obscene reluctance, suckers letting go one kiss at a time. "That is how a ' \
+                'temple is supposed to feel." She returns you herself, the way she promised — down through ' \
+                'her dreaming floors, set gently at the bottom of everything, with her red eyes the last ' \
+                'light to go out. "Again," she says. It is not a suggestion. It never is.'
+    }.freeze
+
+    # First-meeting mementos for the /profile keepsake shelf.
+    MEMENTOS = {
+      'Mimic Broodmother' => 'a furniture-polish cloth, warm from the Broodmother\'s keeping',
+      'Succubus Queen' => 'a court ribbon that still smells of her perfume',
+      'Incubus King' => 'a signet pressed in wax, claimed and counter-claimed',
+      'Verdant Dryad' => 'a pressed leaf that has never once wilted',
+      'Lich Lord' => 'a library card, stamped in a careful dead hand',
+      'Alpha Beast' => 'a shed fang, offered with enormous ceremony',
+      'Eros' => 'a single sucker-mark that never fades, worn like a seal',
+      'Pale Bride' => 'one petal from a bouquet never thrown',
+      'Mirror Queen' => 'a shard of mirror that only reflects you kindly',
+      'Empty Confessional' => 'a curtain tassel, heavy with other people\'s secrets',
+      'Chalice That Never Empties' => 'a cork that smells eternally of first wine',
+      'First Altar Stone' => 'a grain of warm grit from the first hymn',
+      'Hoardheart Dragon' => 'a coin that is always slightly too warm',
+      'Drowned Saint' => 'a bead of dark water that refuses to dry'
+    }.freeze
+
+    def memento_for(name)
+      MEMENTOS[canonical_name(name.to_s)]
+    end
+
+    def satisfy_closing(boss_name)
+      SATISFY_CLOSINGS[canonical_name(boss_name.to_s)]
+    end
+
+    def boss_defeat_reward(player, encounter)
       floor = player.current_floor
       return { lp: 0, tower_clear: true } if Tower.final_boss_floor?(floor)
+
+      if (relic = relic_spec(encounter || {}))
+        base_lp =
+          case floor
+          when 5 then 100
+          when 10 then 150
+          when 15 then 200
+          when 20 then 250
+          when 25 then 300
+          when 30 then 500
+          else 100 * (floor / 5)
+          end
+        return { lp: (base_lp * player.cycle_multiplier).round, special_item: relic[:trophy] }
+      end
 
       base =
         case floor

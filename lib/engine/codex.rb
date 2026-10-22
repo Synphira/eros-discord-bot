@@ -72,6 +72,66 @@ module Engine
       }
     }.freeze
 
+    RELIC_FRAGMENTS = {
+      'Pale Bride' => {
+        title: 'The Pale Bride — The Unclaimed Veil', emoji: '👰',
+        text: 'Not clergy, not a ghost exactly: a bridal veil and gown that were offered to the ' \
+              'goddess by someone who waited to be chosen and never was. Decades of offerings fed ' \
+              'into it until the devotion outlived the devotee and learned to want back. When a ' \
+              'throne stands empty, she holds it — still waiting to be picked, and no longer ' \
+              'willing to be passed over quietly.'
+      },
+      'Empty Confessional' => {
+        title: 'The Empty Confessional — The Kept Sins', emoji: '🪟',
+        text: 'A confessional booth from the older worship, carried into the temple when the clergy ' \
+              'built around the old site. A century of delvers knelt at its screen and whispered ' \
+              'everything — and the booth kept it all, every sin filed in the dark behind the ' \
+              'curtain, until the keeping itself learned to speak. It does not forgive, exactly. ' \
+              'Forgiveness was never the part it practised.'
+      },
+      'Chalice That Never Empties' => {
+        title: 'The Chalice That Never Empties — The Pouring', emoji: '🍷',
+        text: 'Poured at altars since before the clergy had names for what they served, and never ' \
+              'once drained: every offering ever tipped into it stayed, and learned, and became ' \
+              'her. She is not the wine and not the cup. She is the pouring — the temple\'s oldest ' \
+              'argument that devotion, properly given, only ever makes more of itself.'
+      },
+      'First Altar Stone' => {
+        title: 'The First Altar Stone — The Beginning', emoji: '🪨',
+        text: 'The oldest thing in the temple: the ruined altar a young, drifting Syn found in the ' \
+              'wilds and knelt at, where the dreams began. The clergy carried it into the finished ' \
+              'temple and set it in a floor like a foundation stone. It remembers being worshipped ' \
+              'before there was anything to worship in — before the clergy, before the cycles, ' \
+              'arguably before the goddess was listening. It is patient the way bedrock is patient.'
+      },
+      'Hoardheart Dragon' => {
+        title: 'The Hoardheart Dragon — The Collection', emoji: '🐉',
+        text: 'Dragons do not worship the way people do. One of the first delvers\' offerings to the ' \
+              'young temple was a dragon\'s heart, given freely by something ancient that wanted to ' \
+              'see what the goddess would build. The clergy caged it in a reliquary of its own hoard, ' \
+              'and a century of offerings poured in around it — coins, crowns, chalices, delvers — ' \
+              'until the hoard learned to be her body. She is not a dragon kept by the temple. She is ' \
+              'what the temple\'s giving looks like, given scales.'
+      },
+      'Drowned Saint' => {
+        title: 'The Drowned Saint — The Other Eldritch', emoji: '🐙',
+        text: 'There are exactly two eldritch things in the temple: the goddess at the top, and this. ' \
+              'What she was before the reliquary — a god of some drowned place, a piece of Eros shed ' \
+              'and kept, a saint who drowned praying — the clergy either never knew or agreed never ' \
+              'to write down. She is kept below, in dark water, and worshipped carefully. The family ' \
+              'resemblance to the throne is obvious to anyone who survives both. Nobody who survives ' \
+              'both talks about it the same way again.'
+      },
+      'Mirror Queen' => {
+        title: 'The Mirror Queen — The Reflection', emoji: '🪞',
+        text: 'A tall mirror from the older worship that stood on this site before the temple, ' \
+              'which has reflected ten thousand delvers and, once or twice, the goddess herself. ' \
+              'It kept every face it was ever shown and learned to wear them. She is not a queen; ' \
+              'the crown is part of the frame. What she rules is the moment a delver recognises ' \
+              'their own wanting looking back.'
+      }
+    }.freeze
+
     def revealed?(player)
       player.tracker('temple_revealed').positive?
     end
@@ -114,6 +174,15 @@ module Engine
         end
         list << entry(boss_name.downcase.gsub(/[^a-z]+/, '_'), frag[:emoji], frag[:title],
                       unlocked: unlocked, hint: "Face #{boss_name} (win or yield) to earn this fragment", text: text)
+      end
+
+      relic_seen = Array(player.tracker_hash['relic_bosses_seen']).map(&:to_s)
+      RELIC_FRAGMENTS.each do |relic_name, frag|
+        unlocked = relic_seen.include?(relic_name)
+        list << entry(relic_name.downcase.gsub(/[^a-z]+/, '_'), frag[:emoji], frag[:title],
+                      unlocked: unlocked,
+                      hint: 'Face her when a throne stands empty (cycle 2+, boss floors)',
+                      text: unlocked ? frag[:text] : nil)
       end
 
       list << entry(
@@ -189,6 +258,63 @@ module Engine
 
     def find(player, key)
       entries(player).find { |e| e[:key] == key.to_s }
+    end
+
+    # --- event index ---------------------------------------------------
+    # Every random, fetish, and timed event the tower can produce, with
+    # how often this delver has lived it. Counts only accrue from the
+    # day the index opened — no retroactive credit, by design.
+
+    def seen_events(player)
+      saved = player.tracker_hash['events_seen']
+      saved.is_a?(Hash) ? saved.transform_keys(&:to_s) : {}
+    end
+
+    def event_catalog(player)
+      seen = seen_events(player)
+      keys = (Engine::RandomEvents::EVENT_KEYS + ['feather_array']).uniq
+      keys.map do |key|
+        if Engine::FetishEvents.event?(key)
+          spec = Engine::FetishEvents::EVENTS[key]
+          name = spec[:name]
+          tag = spec[:tag]
+        elsif key == 'feather_array'
+          name = 'Feather Array'
+          tag = 'tickling'
+        else
+          name = Engine::RandomEvents.event_meta(key)[:name]
+          tag = Engine::RandomEvents::EVENT_TAGS[key]
+        end
+        count = seen[key].to_i
+        { key: key, name: name, tag: tag, seen: count, hint: event_hint(tag, count) }
+      end
+    end
+
+    # Witnessing half — then all — of the tower's repertoire pays.
+    EVENT_MILESTONES = { 50 => 100, 100 => 250 }.freeze
+
+    def claim_event_milestones!(player)
+      catalog = event_catalog(player)
+      return [] if catalog.empty?
+
+      seen_pct = (catalog.count { |e| e[:seen].positive? } * 100.0 / catalog.size).round
+      claimed = Array(player.tracker_hash['codex_milestone_claims']).map(&:to_i)
+      fresh = EVENT_MILESTONES.reject { |pct, _| seen_pct < pct || claimed.include?(pct) }
+      return [] if fresh.empty?
+
+      player.set_tracker!('codex_milestone_claims', claimed + fresh.keys)
+      fresh.map do |pct, lp|
+        player.gain_lp!(lp)
+        "📖 **Event Index #{pct}% complete** — the tower rewards a thorough witness: **+#{lp} LP**."
+      end
+    end
+
+    def event_hint(tag, count)
+      return nil if count.positive?
+      return 'Wander, and let the tower find you.' if tag.nil?
+
+      label = Engine::ContentOptions.preference(tag)&.dig(:label) || tag.to_s.tr('_', ' ')
+      "Behind the **#{label}** toggle in `/options` — enable it and wander."
     end
   end
 end

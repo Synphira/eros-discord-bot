@@ -5,6 +5,12 @@ module Commands
     module Shop
       extend Discordrb::EventContainer
 
+      button(custom_id: /^eros:shop:menu:\d+$/) do |event|
+        next unless ErosHelpers.assert_button_owner!(event)
+
+        Commands::Shop.menu(event)
+      end
+
       button(custom_id: /^eros:shop:cat:(weapon|armor|accessory|special):\d+$/) do |event|
         next unless ErosHelpers.assert_button_owner!(event)
 

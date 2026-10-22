@@ -89,7 +89,7 @@ module Commands
         bits = []
         bits << '[EQUIPPED]' if equipped_ids.include?(item.id)
         bits << '[CURSED]' if item.cursed
-        bits << "remove #{item.removal_cost} LP" if item.cursed
+        bits << "remove #{player.cursed_removal_cost(item)} LP" if item.cursed
         status = bits.empty? ? '' : " #{bits.join(' · ')}"
         effects = item.stat_modifiers.empty? ? '' : "\n#{Engine::Treasure.format_stat_changes(item.stat_modifiers)}"
         "**#{item.name}**#{status}\n_#{item.description}_#{effects}"

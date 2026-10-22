@@ -9,9 +9,63 @@ module Commands
 
     module_function
 
-    def run(event, category: 'weapon', page: 0, notice: nil)
+    def run(event, category: nil, page: 0, notice: nil)
+      return menu(event, notice: notice) if category.nil?
+
       player = ErosHelpers.require_player(event) or return
       show(event, player, category: category, page: page, notice: notice)
+    end
+
+    # The storefront menu: each shop is a section with its own Visit
+    # button, so new shops join this list instead of Berry's shelves.
+    def menu(event, notice: nil)
+      player = ErosHelpers.require_player(event) or return
+      unlocked = (player.cursed_shop_unlocks & Commands::CursedShop.stock_names).size
+      total = Commands::CursedShop.stock_names.size
+
+      shops = [
+        ["Berry's Gear",
+         'Weapons, armour, and accessories in clean steel and soft lies — Berry\'s own counter. ' \
+         'No living gear; she has standards.',
+         "eros:shop:cat:weapon:#{event.user.id}"],
+        ["Berry's Potions",
+         'Draughts and elixirs, growth and shrinking tonics, and the Becoming draughts. ' \
+         'Everything is drunk on the spot — no takeaway.',
+         "eros:shop:cat:special:#{event.user.id}"],
+        ['Cursed Gear — Covar',
+         "Living gear that remembers being worn. Call back what you have torn free " \
+         "(**#{unlocked}/#{total}** pieces unlocked), or talk to the keeper.",
+         "eros:cshop:open:#{event.user.id}"],
+        ["Berry's Quests",
+         'Errands from the quest board. Berry pays in Lust Points and opinions.',
+         "eros:quests:view:#{event.user.id}"],
+        ["Syn's Parlour",
+         'Syn\'s bench behind the curtain: ink, marks, and designs that unlock with your themes.',
+         "eros:parlour:view:#{event.user.id}"],
+        ['The Residents',
+         'The tower\'s settled souls and their trades: Madame Vex, who listens to living gear; Pip, who ' \
+         'worships the traps; Sister Nectar of the milking shrine; and the Pale Cartographer, who reads ' \
+         'the dreaming land.',
+         "eros:residents:view:#{event.user.id}"]
+      ]
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(content: '## The Shops')
+        c.text_display(
+          content: '_A strawberry-bright fairy zips overhead on iridescent wings, seed-freckles on her cheeks ' \
+                   'and a ledger under one arm. "Welcome in, sugar!" **Berry** chirps. "Pick a counter — ' \
+                   'mine are the tidy ones."_'
+        )
+        c.text_display(content: notice) if notice
+        c.text_display(content: "Your Lust Points: **#{player.lp}**")
+        shops.each do |name, blurb, custom_id|
+          c.section do |section|
+            section.text_display(content: "**#{name}**\n#{blurb}")
+            section.button(label: 'Visit', style: :primary, custom_id: custom_id)
+          end
+        end
+        c.text_display(content: '-# Or `e,buy` / `e,sell` by name from anywhere.')
+      end
     end
 
     def show(event, player, category: 'weapon', page: 0, notice: nil)
@@ -20,6 +74,7 @@ module Commands
       page = [[page.to_i, 0].max, pages - 1].min
       items = Engine::Shop.page_items(category, page)
       label = Engine::Shop::CATEGORY_LABELS[category]
+      potions = category == 'special'
 
       ErosUI.reply_v2(
         event,
@@ -32,25 +87,24 @@ module Commands
           }
         }
       ) do |c|
-        c.text_display(content: "## Syn & Berry's — Shop")
+        c.text_display(content: potions ? "## Berry's Potions" : "## Berry's Gear")
         c.text_display(
-          content: '_A strawberry-bright fairy zips between the shelves on iridescent wings, seed-freckles on her ' \
-                   'cheeks and a ledger under one arm. "Welcome in, sugar!" **Berry** chirps. "I run the shop, my ' \
-                   'wife Syn runs the parlour bench through that curtain, and everything here is clean steel and ' \
-                   'soft lies — no living gear at my counter. Errands? Oh, I have errands. Press **Berry\'s Quests**."_'
+          content: if potions
+                     '_Berry wipes a row of bright bottles. "Potions are drunk on the spot, sugar — no ' \
+                       'takeaway. The body tonics do one size at a time, and those Becoming draughts? Pick ' \
+                       'the shape you want to keep, darling — those changes are for good."_'
+                   else
+                     '_Berry pats the counter. "Clean steel and soft lies, sugar — no living gear at my ' \
+                       'counter. That wriggling nonsense is Covar\'s department, through the Shops menu."_'
+                   end
         )
         if (regard = Engine::Regard.line(player, :shop))
           c.text_display(content: regard)
         end
         c.separator(divider: true, spacing: :small)
         aisle = "**#{label}** — page **#{page + 1}/#{pages}** · Your Lust Points: **#{player.lp}**"
-        if category == 'special' && (theme = Engine::Shop::POTION_PAGE_LABELS[page])
+        if potions && (theme = Engine::Shop::POTION_PAGE_LABELS[page])
           aisle = "**#{label} · #{theme}** — page **#{page + 1}/#{pages}** · Your Lust Points: **#{player.lp}**"
-        end
-        if category == 'special'
-          aisle += "\n_Berry wipes a row of bright bottles. \"Potions are drunk on the spot, sugar — no takeaway. " \
-                   'The body tonics do one size at a time, and those Becoming draughts? Pick the shape you ' \
-                   'want to keep, darling — those changes are for good."_'
         end
         c.text_display(content: aisle)
 
@@ -71,7 +125,10 @@ module Commands
         end
 
         c.separator(divider: false, spacing: :small)
-        c.text_display(content: '-# Category tabs · each item has its own Buy button · Prev/Next · or `e,buy` / `e,sell` by name')
+        c.text_display(
+          content: potions ? '-# Shelf tabs · each potion is drunk where you stand · All Shops to switch counter'
+                           : '-# Category tabs · each item has its own Buy button · Prev/Next · All Shops to switch counter'
+        )
       end
     end
 

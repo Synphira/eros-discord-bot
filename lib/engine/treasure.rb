@@ -539,7 +539,9 @@ module Engine
       mimic = rand <= mimic_chance(level) if mimic.nil?
       if mimic && eligible_mimic_templates(player).empty?
         # No cursed gear matches this delver's tastes, so the chest itself
-        # rears up as a mimic to fight instead of binding them.
+        # rears up as a mimic to fight instead of binding them. The chest
+        # was still opened — it counts toward chest totals either way.
+        player.bump_tracker!('treasure_found')
         monster = Engine::MonsterTypes.generate_monster(level, player: player, type: :mimic)
         ambush = ['The lid snaps open on a mouth full of golden teeth — no gear in here matches your tastes, ' \
                   'so the chest itself lunges! **Chest Mimic!**']

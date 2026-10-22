@@ -290,6 +290,78 @@ module Engine
         ]
       },
 
+      'beekeeper' => {
+        name: 'Tobin', title: 'the Beekeeper',
+        stages: [
+          {
+            floors: (5..9),
+            intro: 'The corridor smells of warm honey and beeswax. A broad, calm man in a veil that he wears ' \
+                   'pushed up like a hat is tending a wall of hives the size of wardrobes, while Giant Bees the ' \
+                   'size of cats drift between them in slow, contented arcs. "Mind the girls," Tobin says, ' \
+                   'without looking up. "They are sweet as anything, and curious about strangers. Both things ' \
+                   'can be true at once."',
+            choices: [
+              { key: 'buy', label: 'Buy honey (15 LP)', text: 'A jar of the good stuff', cost: 15, heal: 15, set: 'bought',
+                scenes: ['He draws a jar off the comb like it was poured yesterday — dark, warm, luminous. ' \
+                         '"Heart-honey," Tobin says. "Steadies the will. The girls make it from whatever ' \
+                         'this place flowers with, and I do not ask what that is." The first spoonful ' \
+                         'spreads calm through you like sunrise.'] },
+              { key: 'help', label: 'Help tend the hives', text: 'Work a frame or two', lp: 20, lust: 10, set: 'helped',
+                scenes: ['You hold frames while Tobin works, and the girls inspect you — walking your arms ' \
+                         'in velvet feet, tasting your warmth with curious tongues, approving of you in a ' \
+                         'low, collective hum that goes through your ribs like a held note.',
+                         '"They like you," Tobin says, paying you without ceremony. "That is rarer than ' \
+                         'it sounds, and it counts for more."' ] },
+              { key: 'poke', label: 'Tease a forager', text: 'Careless, and you know it', lust: 18, set: 'stung',
+                condition: { key: 'bee_warmth', name: 'Bee-Warm', floors: 2,
+                             effects: { 'lust_mult' => 1.1 } },
+                scenes: ['You tease the wrong antenna. The kiss she gives you back is warm, immediate, ' \
+                         'and astonishingly thorough — a spreading golden heat that settles low in your ' \
+                         'belly and stays there, humming. "There it is," Tobin says mildly. "Curious, ' \
+                         'like I said."'] }
+            ]
+          },
+          {
+            floors: (12..17), after: %w[helped bought stung],
+            intro: 'One of Tobin\'s hives has gone quiet, and quiet, in a wall of humming, is the loudest thing ' \
+                   'there is. The girls circle it in worried, looping flights. "Queen\'s gone still," Tobin ' \
+                   'says. "Could be she\'s sleeping. Could be she\'s something else now. The hive needs an ' \
+                   'answer, and my hands have answered too many times — they need a stranger\'s."',
+            choices: [
+              { key: 'smoke', label: 'Smoke them calm', text: 'Slow, careful, beekeeper\'s work', lp: 30, lust: 15, set: 'smoked',
+                scenes: ['You work the smoker in slow drifts while the girls settle, heavy and drowsy, and ' \
+                         'Tobin lifts the still queen out with both hands like a sleeping child. "Resting," ' \
+                         'he decides, with enormous relief. "Just resting. You\'ve a beekeeper\'s patience, ' \
+                         'friend."' ] },
+              { key: 'reach', label: 'Reach in barehanded', text: 'Faster. Stickier. Worse idea', set: 'reached',
+                fight: { type: :beast, name: 'Giant Bee',
+                         text: 'Your bare hand goes into a queenless-tempered hive, and the hive gives its ' \
+                               'answer all at once — a Giant Bee, furious and gorgeous, comes out wearing ' \
+                               'your scent like an accusation.' } }
+            ]
+          },
+          {
+            floors: (20..26), after: %w[smoked reached],
+            intro: 'The hive you saved sings differently now — Tobin swears you can hear which one it is from ' \
+                   'three corridors away. He is holding a small pot of honey so dark it is nearly black. ' \
+                   '"Once a tower, a hive decides a person is *theirs*," he says. "Eat, and you\'ll always ' \
+                   'smell faintly of the apiary. Bees — and things that think like bees — will know you."',
+            choices: [
+              { key: 'accept', label: 'Eat the black honey', text: 'Become the hive\'s own', lp: 40, lust: 20, set: 'hive_friend',
+                condition: { key: 'hive_sweet', name: 'Hive-Sweet', floors: 4,
+                             effects: { 'beast_lust_mult' => 0.85, 'beast_submit_lp' => 2 } },
+                scenes: ['The black honey tastes of flowers that do not grow anywhere and of being, ' \
+                         'thoroughly and collectively, approved of. Somewhere in the wall a hundred wings ' \
+                         'change key. "There," Tobin says, like a man closing a good book. "You\'re one of ' \
+                         'ours now. Whatever that turns out to mean, it means it kindly."'] },
+              { key: 'refuse', label: 'Decline, kindly', text: 'Some families are enough', lust: 8, set: 'declined',
+                scenes: ['Tobin shrugs and seals the pot away without a flicker of offence. "Hive keeps, ' \
+                         'all the same. You know where the sweetness lives, if the tower ever changes your mind."'] }
+            ]
+          }
+        ]
+      },
+
       'milking_station' => {
         name: 'Milking Station', title: nil, tag: 'lactation', repeatable: true,
         stages: [
@@ -449,10 +521,25 @@ module Engine
       Hash(player.tracker_hash[FINISHED_KEY])
     end
 
+    # A finished story leaves something small behind for the shelf.
+    STORY_KEEPSAKES = {
+      'mira' => 'a stoppered vial of Mira\'s cream, labelled in her own hand',
+      'lillia' => 'a pink ribbon off Lillia\'s armour',
+      'elara' => 'a candle-end of Sister Elara\'s latex, still warm',
+      'marcus' => 'one of Marcus\'s spare charms (he has hundreds)',
+      'thomas' => 'a buckle off Thomas\'s breastplate, faintly bite-marked',
+      'alex' => 'a smooth, tentacle-polished ribbon from Alex\'s nest',
+      'beekeeper' => 'a thumb-sized pot of Tobin\'s black honey'
+    }.freeze
+
     def record_finished!(player, id, log)
       counts = finished_counts(player)
       player.set_tracker!(FINISHED_KEY, counts.merge(id => counts[id].to_i + 1))
       player.bump_tracker!('npc_stories_finished')
+      if (keepsake = STORY_KEEPSAKES[id.to_s])
+        player.add_keepsake!(keepsake)
+        log << "_Kept, for the shelf: #{keepsake}._"
+      end
       log << "_#{npc(id)[:name]}'s story is over for this run — you may cross paths again in a future run._"
     end
 
@@ -593,6 +680,11 @@ module Engine
       end
 
       apply_rewards!(player, opt, log)
+      if id == 'milking_station' && opt[:key] == 'become' && player.tracker('nectar_met').positive?
+        player.bump_tracker!('nectar_milkings')
+        log << '_Sister Nectar works your frame herself today — she gets around; you have stopped asking ' \
+               'how. "There\'s my regular," she says, to the room at large._'
+      end
       player.bump_tracker!('npc_encounters') unless opt[:key] == 'leave'
       { ok: true }
     end

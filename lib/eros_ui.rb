@@ -178,7 +178,7 @@ module ErosUI
     content =
       if unlocked || owned
         "**#{item.name}** (Free)#{owned ? ' _(already bound)_' : ''} — _#{item.description}_\n" \
-          "#{mods} · removal #{item.removal_cost.to_i} LP" \
+          "#{mods} · removal #{player.cursed_removal_cost(item)} LP" \
           "#{block_reason ? "\n_Sealed: #{block_reason}._" : ''}"
       else
         "**???** (#{item.slot}) — _find it in a chest, wear it, and tear it free to unlock it_"
@@ -199,37 +199,45 @@ module ErosUI
     category = Engine::Shop.normalize_category(shop[:category] || shop['category'])
     page = (shop[:page] || shop['page']).to_i
     pages = [(shop[:pages] || shop['pages']).to_i, 1].max
+    potions = category == 'special'
 
+    # Each shopfront shows only its own shelves: Gear gets the gear
+    # categories, Potions gets its themed shelves as page tabs.
     container.row do |row|
-      Engine::Shop::CATEGORIES.each do |cat|
-        row.button(
-          label: Engine::Shop::CATEGORY_LABELS[cat],
-          style: cat == category ? :primary : :secondary,
-          custom_id: "eros:shop:cat:#{cat}:#{owner_id}"
-        )
+      if potions
+        Engine::Shop::POTION_PAGE_LABELS.each_with_index do |theme, i|
+          row.button(
+            label: theme,
+            style: i == page ? :primary : :secondary,
+            custom_id: "eros:shop:page:special:#{i}:#{owner_id}"
+          )
+        end
+      else
+        %w[weapon armor accessory].each do |cat|
+          row.button(
+            label: Engine::Shop::CATEGORY_LABELS[cat],
+            style: cat == category ? :primary : :secondary,
+            custom_id: "eros:shop:cat:#{cat}:#{owner_id}"
+          )
+        end
       end
-      row.button(label: 'Cursed', style: :danger, custom_id: "eros:cshop:open:#{owner_id}")
     end
 
     container.row do |row|
-      row.button(label: "🍓 Berry's Quests", style: :primary, custom_id: "eros:quests:view:#{owner_id}")
-      row.button(label: "Syn's Parlour", style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
-    end
+      row.button(label: 'All Shops', style: :primary, custom_id: "eros:shop:menu:#{owner_id}")
+      unless potions
+        row.button(
+          label: '◀ Prev',
+          style: :secondary,
+          custom_id: "eros:shop:page:#{category}:#{[page - 1, 0].max}:#{owner_id}"
+        ) if page.positive?
 
-    return if pages <= 1
-
-    container.row do |row|
-      row.button(
-        label: '◀ Prev',
-        style: :secondary,
-        custom_id: "eros:shop:page:#{category}:#{[page - 1, 0].max}:#{owner_id}"
-      ) if page.positive?
-
-      row.button(
-        label: 'Next ▶',
-        style: :secondary,
-        custom_id: "eros:shop:page:#{category}:#{[page + 1, pages - 1].min}:#{owner_id}"
-      ) if page < pages - 1
+        row.button(
+          label: 'Next ▶',
+          style: :secondary,
+          custom_id: "eros:shop:page:#{category}:#{[page + 1, pages - 1].min}:#{owner_id}"
+        ) if page < pages - 1
+      end
     end
   end
 

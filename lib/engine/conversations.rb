@@ -300,9 +300,18 @@ module Engine
       {
         key: 'why_stay', label: 'Why he stays', question: 'Why stay and run this shop?',
         covar: '"People assume I\'m trapped," Covar says, offended on the tower\'s behalf. "I\'m not trapped, ' \
-               'I\'m *settled*. Up here I\'m wanted, I\'m fed, I\'m looked at the way I always secretly hoped ' \
-               'someone would look at me. The tower changed me — good. It changed me into someone who stays. ' \
-               'Why would I leave a place that made me more myself?"'
+               'I\'m *settled*. But the shop?" He sobers, which on him looks like weather changing. "You have ' \
+               'to understand what I used to watch. Delvers, green as spring, wearing living pieces they ' \
+               'couldn\'t read — getting them torn off by strangers, ripped free in a panic, left tattered ' \
+               'on dungeon floors like wedding clothes in a ditch. Nobody *loved* them. Nobody even tried. ' \
+               'The pieces remembered being worn, and then they remembered being ruined, and I couldn\'t ' \
+               'sleep for it." He taps the counter, steady now. "So I honed myself. Learned every seam, ' \
+               'every temperament, every word a piece needs to hear to let go kindly. Now delvers pay me LP ' \
+               'and I take their living clothing off *properly* — intact, unhurried, unhurt — and the pieces ' \
+               'they leave behind come here, to be catalogued and fed and matched to someone who\'ll keep ' \
+               'them. Because that\'s the other thing nobody asks: how else do I feed the ones they leave ' \
+               'behind? LP is just love with paperwork, delver. This shop is an orphanage that pays for ' \
+               'itself, and I am its extremely handsome mother."'
       },
       {
         key: 'cursed_gear', label: 'Cursed & living gear', question: 'Why cursed gear?',
@@ -310,6 +319,25 @@ module Engine
                'steel forgets. A cursed piece learns your heat, your habits, how you beg—" he catches himself, ' \
                'unrepentant, "—how you wear it. Syn made the first pieces, did you know that? I just… collect ' \
                'them. Catalogue them. Find them good homes. Every piece in this shop is waiting for its person."'
+      },
+      {
+        key: 'vex_dress', label: "Madame Vex's dress", question: "What about the dress Madame Vex wears?",
+        covar: '"I would never dare remove the dress," Covar says, with the gravity of a man discussing ' \
+               'scripture. "It\'s Syn\'s first ever work, and just look at it—" he does a special gay wave ' \
+               'at the memory of it, wrist and all, "—it\'s *magnificent*. If I tried to part the two, the ' \
+               'heartbreak of the dress would be too much to bear. After all, they have been with each other ' \
+               'for years. I cannot let her first work die — not after what happened to the tiara..."',
+        covar_after: '"Don\'t." The grin is simply gone, which on Covar is like the lights going out. "Do you ' \
+                     'have any idea what you did? That dress was *Syn\'s first work*. Her first. It wore one ' \
+                     'woman for decades, it learned her, it *loved* her after its fashion — and now it sits ' \
+                     'on a mannequin like a — like an exhibit. You killed such an amazing dress." He presses ' \
+                     'both palms flat on the counter, collecting himself, and fails. "I had plans, you know. ' \
+                     'Years of plans. I was going to breed accessories to match it — gloves that had learned ' \
+                     'its seams, a collar raised on its hems, little courtiers for the original\'s court. ' \
+                     'There was going to be a whole *lineage*. And now—" He looks toward the back room, and ' \
+                     'his voice does something complicated. "She\'s free. I know she\'s free. That is the ' \
+                     'worst part of you, delver: I cannot even be properly furious. Give me the counter ' \
+                     'between us a while longer."'
       },
       {
         key: 'the_fairies', label: 'Syn & Berry', question: 'What about Syn and Berry?',
@@ -645,6 +673,32 @@ module Engine
       { ok: true, part: part.to_s, lust_cleared: cleared, text: covar_text(player, part, spec) }
     end
 
+    # The bead curtain should feel like a relationship, not a vending
+    # machine: at 1 / 5 / 10 / 25 trysts the counter talk changes, once.
+    COVAR_MILESTONES = {
+      1 => '_Afterwards, Covar props himself on an elbow and grins like a man keeping a new secret. ' \
+           '"First time behind my curtain," he says. "The gear pretends to sleep, you know. It never ' \
+           'does. Neither do I, the first time."_',
+      5 => '_"Five," Covar says, before you ask, and taps the headboard where five small notches have ' \
+           'appeared that were not there before. "I keep count of the ones who come back, delver. ' \
+           'Customers come once. You\'re becoming furniture." He says it like a promotion._',
+      10 => '_"Ten times," Covar says, and produces — from where, in a bed, there is no saying — two cups ' \
+            'of something that steams. "Staff discount. Drink. The gear by the door has started making ' \
+            'room for your boots, have you noticed? It approves of you. It is an excellent judge."_',
+      25 => '_"Twenty-five." Covar says it to the ceiling, a little wonderingly. "Syn asked after you by ' \
+            'name, you know. Berry has opinions. Eros—" he catches himself and laughs, low and genuinely ' \
+            'happy. "Careful, delver. Keep coming back and the shop will start calling you family. Keep ' \
+            'coming back after that and it\'ll be true."_'
+    }.freeze
+
+    def covar_milestone_line(player)
+      reached = COVAR_MILESTONES.keys.select { |m| player.tracker('covar_trysts') >= m }.max
+      return nil unless reached && player.tracker('covar_milestone_seen') < reached
+
+      player.set_tracker!('covar_milestone_seen', reached)
+      COVAR_MILESTONES[reached]
+    end
+
     # His cock goes where the delver's body invites it: pussy when they have
     # one free, ass otherwise. The other two options are already explicit.
     def covar_text(player, part, spec)
@@ -688,6 +742,12 @@ module Engine
       revealed = REVEALED_GENERAL.dig(topic[:key], person.to_sym) if revealed_now
       full = revealed || topic[:"revealed_#{person}"] if revealed_now
       full = (full || topic[person.to_sym]).to_s
+      # Covar has one topic he feels differently about once the dress
+      # has been persuaded off Vex and onto the mannequin.
+      if person == 'covar' && topic[:key] == 'vex_dress' &&
+         player.tracker_hash['vex_ending'].to_s == 'mannequin'
+        full = topic[:covar_after].to_s
+      end
 
       # The fairies remember being asked: first answer in full, repeats in
       # a shorter familiar version (revealed repeats keep the long form,

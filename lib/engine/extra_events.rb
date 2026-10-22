@@ -95,6 +95,11 @@ module Engine
       end
 
       bump_trackers!(player, type)
+      if type.to_s == 'milking_shrine' && player.tracker('nectar_met').positive?
+        player.bump_tracker!('nectar_milkings')
+        log << { scene: 'Sister Nectar herself adjusts the cups before they seal — the keeper of this ' \
+                        'shrine, somehow already here. "Arrive tense," she murmurs, "leave drained."' }
+      end
       case type
       when 'milking_shrine' then milking!(player, parts, level, log)
       when 'swelling_fountain' then swelling!(player, level, log)

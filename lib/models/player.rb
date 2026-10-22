@@ -224,6 +224,8 @@ class Player < Sequel::Model(:players)
       Array(tracker_hash['bosses_seen']).map { |n| Engine::BossFights.canonical_name(n) }.uniq.size
     when :royal_demons_cleared
       (Array(tracker_hash['bosses_seen']) & ['Succubus Queen', 'Incubus King']).size
+    when :unique_relic_bosses
+      Array(tracker_hash['relic_bosses_seen']).map(&:to_s).uniq.size
     when :mimics_removed_count then cursed_shop_unlocks.size
     when :cursed_gear_collection_complete
       names = Engine::Treasure.all_mimic_templates.map { |t| t[:name].to_s }
@@ -238,6 +240,7 @@ class Player < Sequel::Model(:players)
       # (and cap at 3), so the current list can no longer reach 6.
       Engine::Admirers.career_kinds(self)
     when :burdens_carried then Array(tracker_hash['cycle_burdens']).size
+    when :oaths_carried then Array(tracker_hash['oath_burdens']).size
     when :is_developer then Engine::Dev.owner?(discord_id) ? 1 : 0
     when :is_bug_tester then Engine::Dev.bug_tester?(discord_id) ? 1 : 0
     when :pure_title then earned_titles.include?('pure') ? 1 : 0
@@ -470,7 +473,7 @@ class Player < Sequel::Model(:players)
     Engine::Weekly.effects.each { |key, value| bags[key.to_s] << value }
     Engine::Marks.effects(self).each { |key, value| bags[key.to_s] << value }
     equipped_items.each do |item|
-      item.stat_modifiers.each { |key, value| bags[key.to_s] << value if gear_bag_key?(key) }
+      gear_effects_for(item).each { |key, value| bags[key.to_s] << value if gear_bag_key?(key) }
     end
     bags
   end
@@ -770,6 +773,20 @@ class Player < Sequel::Model(:players)
 
   def clear_event!
     update(active_event: nil)
+  end
+
+  # The keepsake shelf on /profile: small, display-only mementos from
+  # admirers, finished NPC stories, and first boss meetings.
+  def keepsakes
+    saved = tracker_hash['keepsakes']
+    saved.is_a?(Array) ? saved.map(&:to_s) : []
+  end
+
+  def add_keepsake!(text)
+    list = keepsakes
+    list << text.to_s
+    set_tracker!('keepsakes', list)
+    text.to_s
   end
 
   def reconcile_encounter!
@@ -1335,12 +1352,20 @@ class Player < Sequel::Model(:players)
     { ok: true, message: "Unequipped **#{item.name}**!" }
   end
 
+  # Covar has not forgiven delvers who talked Madame Vex's piece onto
+  # the mannequin: with her freed, his tear-free prices carry a grudge.
+  def cursed_removal_cost(item)
+    cost = item.removal_cost.to_i
+    tracker_hash['vex_ending'].to_s == 'mannequin' ? (cost * 1.5).ceil : cost
+  end
+
   def remove_cursed_equipment!(equipment_id)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
     return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `e,unequip`." } unless item.cursed
 
-    cost = item.removal_cost.to_i
+    surcharge = tracker_hash['vex_ending'].to_s == 'mannequin'
+    cost = cursed_removal_cost(item)
     unless spend_lp!(cost)
       return {
         ok: false,
@@ -1356,7 +1381,8 @@ class Player < Sequel::Model(:players)
     unlock = first_time ? "\n_**#{item.name}** is now available for free in the Cursed Shop (`/cursedshop`)._" : ''
     {
       ok: true,
-      message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free.#{unlock}"
+      message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free.#{unlock}" \
+               "#{surcharge ? "\n_Covar's surcharge is in there — he has not forgiven you for retiring Vex, and his prices say so._" : ''}"
     }
   end
 
@@ -1409,8 +1435,20 @@ class Player < Sequel::Model(:players)
     equipment_dataset.where(Sequel[:player_equipment][:is_equipped] => true).all
   end
 
+  # A living piece Madame Vex has renegotiated carries this delver's own
+  # temperament, stored per-player — the shared template keeps its own.
+  def gear_effects_for(item)
+    base = item.stat_modifiers
+    return base unless item.cursed
+
+    overrides = tracker_hash['gear_refits']
+    return base unless overrides.is_a?(Hash) && overrides[item.name].is_a?(Hash)
+
+    overrides[item.name]
+  end
+
   def equipment_effect_values(key)
-    equipped_items.map { |item| item.stat_modifiers[key.to_s] }.compact
+    equipped_items.map { |item| gear_effects_for(item)[key.to_s] }.compact
   end
 
   def equipment_effect_sum(key)

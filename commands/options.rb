@@ -19,7 +19,16 @@ module Commands
 
     PER_PAGE = 5
 
+    # The Desire Magnet's kinds: every pool type (eldritch is not a
+    # kind that wanders, and the tower will not be magnetised to it).
+    MAGNET_KINDS = %w[beast demon slime undead plant mimic].freeze
+
     module_function
+
+    def magnet_kind(player)
+      kind = player.tracker_hash['desire_magnet'].to_s
+      MAGNET_KINDS.include?(kind) ? kind : nil
+    end
 
     # The options home: one button per family of toggles, with its tally.
     def show(event, notice: nil)
@@ -42,6 +51,23 @@ module Commands
               style: :primary,
               custom_id: "eros:opts:group:#{group}:#{event.user.id}"
             )
+          end
+        end
+        magnet = magnet_kind(player)
+        c.text_display(
+          content: "**🧲 Desire Magnet** — the tower approves of honesty: " \
+                   "#{magnet ? "you are honest about **#{Engine::MonsterTypes.fetch(magnet)[:name]}**, and they find you more often" : 'no favourite chosen — the tower guesses'}. " \
+                   'Costs nothing. Changes nothing but the odds of being found by what you already want.'
+        )
+        c.row do |row|
+          row.string_select(custom_id: "eros:opts:magnet:#{event.user.id}", placeholder: 'Choose a favourite monster kind…',
+                            min_values: 1, max_values: 1) do |menu|
+            menu.option(label: 'No favourite — let the tower guess', value: 'none', default: magnet.nil?)
+            MAGNET_KINDS.each do |kind|
+              menu.option(label: Engine::MonsterTypes.fetch(kind)[:name], value: kind,
+                          description: Engine::MonsterTypes.fetch(kind)[:description][0, 100],
+                          default: magnet == kind)
+            end
           end
         end
         c.text_display(
@@ -124,6 +150,22 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: '## Fetish Options')
         c.text_display(content: message)
+      end
+    end
+
+    string_select(custom_id: /^eros:opts:magnet:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      kind = Array(event.values).first.to_s
+      if Commands::Options::MAGNET_KINDS.include?(kind)
+        player.set_tracker!('desire_magnet', kind)
+        Commands::Options.show(event, notice: "_🧲 Desire Magnet set to **#{Engine::MonsterTypes.fetch(kind)[:name]}** — they will find you more often._")
+      else
+        player.set_tracker!('desire_magnet', '')
+        Commands::Options.show(event, notice: '_🧲 Desire Magnet cleared — the tower guesses again._')
       end
     end
 

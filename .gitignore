@@ -1,5 +1,6 @@
 # Ignore local secrets and SQLite data files
 .env
+IDEAS.txt
 db/*.db
 db/*.db-*
 vendor/bundle/

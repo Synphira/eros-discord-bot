@@ -69,6 +69,54 @@ module Engine
                    scene: 'You carefully weave around the drifting clothes. They droop sadly back onto their hangers as you leave.' },
         fight: { name: 'Clothing Mimic', label: 'Rip it apart', type: :mimic, text: 'The outfit lunges — it was a mimic all along!' }
       },
+      'dressing_room' => {
+        name: 'The Dressing Room', tag: 'living_clothing', tracker: 'living_clothing_events',
+        blurb: 'a rack of gowns is already holding one up to you.',
+        intro: 'A fitting room with no door and excellent lighting. The rack along the wall is not waiting ' \
+               'to be browsed — it is browsing *you*, gowns and suits sliding along the rail to get a better ' \
+               'look, hems lifting in appraisal. The outfits choose here. You are simply the occasion.',
+        accept: {
+          label: 'Let them choose', text: 'Stand still and be dressed',
+          scenes: ['The montage is not dignified and does not ask to be. A gown pours itself over your head ' \
+                   'while a suit argues with it in rustling silk, both of them on you at once, layers ' \
+                   'negotiating your waist, your chest, the exact betraying line of you. A corset wins. ' \
+                   'It usually does.',
+                   'Gloves smooth you down like you are being prepared for presentation, because you are. ' \
+                   'Every piece that settles decides something small about how you will move, and begs to ' \
+                   'be moved in — a shorter stride, a sway, a hand that keeps finding reasons to touch what ' \
+                   'it is wearing. Nothing stays on you. That is not the arrangement. You leave *worn*.'],
+          parts: {
+            'penis' => 'Something silky keeps measuring you through every fitting, patient as a tailor, and never once writes the number down.',
+            'vagina' => 'Every hem in the room agrees about you at a length just past decent, and the agreement is unanimous and final.',
+            'breasts' => 'Three necklines audition against your chest in quick succession. The lowest one gets the part.'
+          },
+          lp: 5, lust: 12,
+          condition: { key: 'worn_by_the_room', name: 'Worn by the Room', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.1, 'submit_lp_bonus' => 2, 'agility' => -1 } }
+        },
+        alt: {
+          label: 'Ask for the frills', text: 'The full pretty fitting (Sissification)', needs_tag: 'sissification',
+          scenes: ['The rack rustles with professional delight. What comes off the rail is lace, ribbon, and ' \
+                   'intent: stockings rolled up your legs by hands that are mostly sleeve, a skirt that ' \
+                   'twirls itself once to check the swish, bows pinned by drifting gloves.',
+                   'A floating mirror gives the lessons while the clothes hold you in position — curtsy, ' \
+                   'lashes, the kneel, the thank-you — and dresses you again between each one so the lesson ' \
+                   'settles. By the end the room applauds in soft fabric, and you are curtsying to an empty ' \
+                   'doorway before you catch yourself.'],
+          parts: {
+            'penis' => 'Silky panties are eased up and settled with a pat, the lace a constant, encouraging friction every time the skirt swishes.',
+            'vagina' => 'The lace panties cling, already damp, and the whole rack sighs at how well the fitting is going.',
+            'breasts' => 'A padded lace bra lifts and frames you to the mirror\'s exacting, delighted standard.'
+          },
+          lp: 6, lust: 12,
+          condition: { key: 'sissified', name: 'Sissified', floors: 3,
+                       effects: { 'submission' => 1, 'agility' => 1, 'strength' => -1 } }
+        },
+        decline: { label: 'Back out', text: 'Keep your own clothes on', lust: 3,
+                   scene: 'You back out under a rain of disappointed rustling. Something small and silky ' \
+                           'follows you to the threshold and has to be gently discouraged.' },
+        fight: { name: 'Wardrobe Mimic', label: 'Tear the rack down', type: :mimic, text: 'The whole rack lunges — of course it does. It was furniture, and hungry.' }
+      },
       'beast_taming' => {
         name: 'Beast Taming', tag: 'petplay', tracker: 'petplay_events',
         blurb: 'a leather collar hangs from a hook.',
@@ -500,6 +548,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Walk off the stage', lust: 2,
                    scene: 'You slip away before anyone can place a bid. The crowd groans.' },
+        outbid: { label: 'Outbid the room', text: 'Buy your own evening back and walk free (costs LP, deeper = pricier)' },
         fight: { name: 'Demon Auctioneer', label: 'Fight the auctioneer', type: :demon, text: 'The auctioneer snarls and lunges!' }
       },
       'strap_on_chamber' => {
@@ -1078,6 +1127,7 @@ module Engine
         list << choice_button('accept', spec[:accept], :primary) if option_allowed?(player, spec[:accept])
         list << choice_button('alt', spec[:alt], :primary) if spec[:alt] && option_allowed?(player, spec[:alt])
         list << choice_button('fight', spec[:fight], :danger) if spec[:fight]
+        list << choice_button('outbid', spec[:outbid], :success) if spec[:outbid]
       end
       list << choice_button('decline', spec[:decline], :secondary)
       list
@@ -1123,6 +1173,22 @@ module Engine
         { ok: true, fight: spec[:fight][:type], monster_name: spec[:fight][:name] }
       when 'decline'
         decline!(player, key, spec, level, log)
+      when 'outbid'
+        return { ok: false, retry: true } unless spec[:outbid]
+
+        cost = 30 + (level.to_i * 2)
+        unless player.spend_lp!(cost)
+          return { ok: false, retry: true,
+                   message: "The auctioneer spreads his hands. \"The room's bid stands at **#{cost} LP**, " \
+                            'specimen. Come back richer — or step up."' }
+        end
+
+        log << { scene: 'You raise your own hand, and the room goes deliciously quiet. The auctioneer ' \
+                        'stares, then laughs like a struck bell. "Sold!" he cries, to the only bidder who ' \
+                        'was ever going to win. "To the specimen, for one evening, unshared!" The crowd ' \
+                        'applauds your audacity all the way to the door.' }
+        log << "You buy your own evening back for **#{cost} LP** and walk free on your own chain."
+        { ok: true }
       when 'accept', 'alt'
         opt = spec[choice.to_sym]
         return { ok: false, retry: true } unless available?(player, key) && option_allowed?(player, opt)
@@ -1188,6 +1254,12 @@ module Engine
       apply_condition!(player, opt[:condition], log) if opt[:condition]
       Array(spec[:tracker]).each { |t| player.bump_tracker!(t) }
       player.bump_tracker!('fetish_events_accepted')
+      if _key.to_s == 'milking_chamber' && player.tracker('nectar_met').positive?
+        player.bump_tracker!('nectar_milkings')
+        log << { scene: 'Sister Nectar is somehow already in the stall, sleeves rolled, checking the ' \
+                        'cups like a priestess inspecting a font. "My stall, my keeping," she says, and ' \
+                        'works the pumps herself. "Arrive tense, darling."' }
+      end
     end
 
     def apply_condition!(player, cond, log, parts: [], remove_parts: [])
@@ -1322,7 +1394,8 @@ module Engine
       when 'dodge_bonus' then "dodge #{pct.(value)}"
       when /_dodge_bonus\z/ then "dodge #{label} #{pct.(value)}"
       when 'trap_avoid_bonus' then "trap avoidance #{pct.(value)}"
-      when 'damage_reduction' then "damage taken ×#{value}"
+      when 'damage_reduction' then "lust damage taken ×#{value}"
+      when /_damage_mult\z/ then "lust taken #{label} ×#{value}"
       when 'intimidate_chance' then "intimidate #{pct.(value)}"
       when 'crit_chance' then "crit chance #{pct.(value)}"
       when 'victory_lp_bonus' then "+#{value} LP per fight ended"

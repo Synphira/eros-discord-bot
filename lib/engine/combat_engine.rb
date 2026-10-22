@@ -38,7 +38,7 @@ module Engine
 
     Encounter = Struct.new(
       :name, :type, :type_name, :color, :strength, :agility, :lust_damage, :hp, :max_hp,
-      :special, :enraged, :is_boss, :elite,
+      :special, :enraged, :is_boss, :elite, :relic,
       keyword_init: true
     )
 
@@ -66,10 +66,13 @@ module Engine
         enraged: h[:enraged] || h['enraged'],
         is_boss: h[:is_boss] || h['is_boss'],
         elite: h[:elite] || h['elite'],
+        relic: h[:relic] || h['relic'],
         phase: h[:phase] || h['phase'],
         satisfaction: (h[:satisfaction] || h['satisfaction']).to_i,
         negation_used: h[:negation_used] || h['negation_used'],
-        pliant: (h[:pliant] || h['pliant']).to_f
+        pliant: (h[:pliant] || h['pliant']).to_f,
+        tangled: h[:tangled] || h['tangled'],
+        gaze_averted: h[:gaze_averted] || h['gaze_averted']
       }
     end
 
@@ -97,14 +100,28 @@ module Engine
       )
 
       snapshot = self.class.encounter_snapshot(encounter)
+      snapshot[:tangled] = true if template[:tangled] || template['tangled']
+      snapshot[:gaze_averted] = true if template[:gaze_averted] || template['gaze_averted']
       start_lines = @player.apply_combat_start_effects!(type)
       Engine::TransformationSystem.combat_start!(@player, snapshot, start_lines)
       Engine::Admirers.intervene_start!(@player, snapshot, start_lines)
+      if @player.tracker('bottled_ceremony').positive?
+        @player.bump_tracker!('bottled_ceremony', -1)
+        snapshot[:pliant] = snapshot[:pliant].to_f + 0.25
+        start_lines << '🍵 _You unstopper the **Bottled Ceremony** and offer the tea first, like a good ' \
+                       'guest. The foe drinks — and the heat that was meant for you spreads through ' \
+                       'them instead, leaving them pliant and far easier to satisfy._'
+      end
       encounter.agility = snapshot[:agility]
       encounter.strength = snapshot[:strength]
       encounter.lust_damage = snapshot[:lust_damage]
       @player.store_encounter!(snapshot)
       message = build_start_message(encounter)
+      if snapshot[:tangled]
+        message += "\n\n_Strings rain down from the dark above her and settle around your wrists and " \
+                   'ankles — the Marionette Mistress\'s opening courtesy. Your first move will be spent ' \
+                   'sawing yourself free._'
+      end
       message += "\n\n#{start_lines.join("\n")}" if start_lines.any?
       {
         ok: true,
@@ -145,6 +162,14 @@ module Engine
         end
       end
 
+      if enc[:tangled] && %i[fight submit].include?(action.to_sym)
+        # The Marionette Mistress's strings eat your first real move:
+        # you spend it sawing free while she takes her turn.
+        enc[:tangled] = false
+        log << { scene: 'The strings sing tight and puppet your limbs into a little bow you did not ' \
+                        'agree to. You spend your move sawing at silk-strong cords with everything you ' \
+                        'have, and come free snapping and furious — while she arranges the stage.' }
+      else
       case action.to_sym
       when :fight
         broken = apply_fight!(enc, log)
@@ -168,6 +193,7 @@ module Engine
       when :blocked
       else
         return { ok: false, error: :unknown_action, log: ['Unknown action.'] }
+      end
       end
 
       return finish_victory!(enc, log) if enc[:hp] <= 0
@@ -216,16 +242,21 @@ module Engine
         enraged: encounter[:enraged] || encounter['enraged'],
         is_boss: encounter[:is_boss] || encounter['is_boss'],
         elite: encounter[:elite] || encounter['elite'],
+        relic: encounter[:relic] || encounter['relic'],
         phase: encounter[:phase] || encounter['phase'],
         negation_used: encounter[:negation_used] || encounter['negation_used'],
         satisfaction: (encounter[:satisfaction] || encounter['satisfaction']).to_i,
-        pliant: (encounter[:pliant] || encounter['pliant']).to_f
+        pliant: (encounter[:pliant] || encounter['pliant']).to_f,
+        tangled: encounter[:tangled] || encounter['tangled'],
+        gaze_averted: encounter[:gaze_averted] || encounter['gaze_averted']
       }
     end
 
     def player_hit_damage(enc)
       base = @player.effective_strength - (enc[:agility] / 2)
       base = base.round
+      # Fighting a Basilisk with your eyes averted: you land less.
+      base = [(base * 0.75).round, 1].max if enc[:gaze_averted]
       base = 1 if base < 1
       base + @player.equipment_effect_sum('damage').round +
         @player.curse_effect_sum("#{enc[:type]}_thorns").round
@@ -602,7 +633,11 @@ module Engine
       lust_hit = monster_lust_hit(enc)
       @player.gain_lust!(lust_hit)
 
-      log << "The #{enc[:name]} closes in and gets its hands on you!"
+      log << if enc[:name] == 'Mirror Queen'
+               'You close in on yourself, wearing your own body, your own hands already reaching!'
+             else
+               "The #{enc[:name]} closes in and gets its hands on you!"
+             end
       assault_scene = (enc[:is_boss] && Engine::BossFights.scene(@player, enc[:name], :assault)) ||
                       MonsterScenes.generate_assault(@player, enc[:name], monster_type: enc[:type])
       log << { scene: assault_scene }
@@ -641,12 +676,27 @@ module Engine
       if is_boss
         @player.bump_tracker!('bosses_defeated')
         @player.bump_tracker!('bosses_satisfied') if satisfied
-        @player.remember!('bosses_seen', Engine::BossFights.canonical_name(enc[:name].to_s))
-        @player.remember!('bosses_satisfied_names', Engine::BossFights.canonical_name(enc[:name].to_s)) if satisfied
+        first_meeting_key = enc[:relic] ? 'relic_bosses_seen' : 'bosses_seen'
+        first_meeting = !Array(@player.tracker_hash[first_meeting_key]).map(&:to_s)
+                                       .include?(Engine::BossFights.canonical_name(enc[:name].to_s))
+        if enc[:relic]
+          # Relic bosses are tracked apart from the clergy: they must
+          # never inflate the "all 7 tower bosses" count.
+          @player.bump_tracker!('relic_bosses_defeated')
+          @player.remember!('relic_bosses_seen', Engine::BossFights.canonical_name(enc[:name].to_s))
+          @player.remember!('relic_bosses_satisfied', Engine::BossFights.canonical_name(enc[:name].to_s)) if satisfied
+        else
+          @player.remember!('bosses_seen', Engine::BossFights.canonical_name(enc[:name].to_s))
+          @player.remember!('bosses_satisfied_names', Engine::BossFights.canonical_name(enc[:name].to_s)) if satisfied
+        end
         boss_line!(enc, :beaten, log) unless satisfied
         note_broodmother_feat!(enc, log, satisfied: satisfied)
+        if first_meeting && (memento = Engine::BossFights.memento_for(enc[:name]))
+          @player.add_keepsake!(memento)
+          log << "_Kept, for the shelf: #{memento}._"
+        end
         reward = Engine::BossFights.boss_defeat_reward(@player, enc)
-        return finish_tower_clear!(enc, log) if reward[:tower_clear]
+        return finish_tower_clear!(enc, log, satisfied: satisfied) if reward[:tower_clear]
 
         lp = reward[:lp].to_i
         lp = (lp * BOSS_SATISFY_LP_MULT).round if satisfied
@@ -654,6 +704,9 @@ module Engine
         if satisfied
           log << "You satisfied the #{enc[:name]}! You gain **#{lp}** Lust Points " \
                  "_(×#{BOSS_SATISFY_LP_MULT} for winning through submission)_!"
+          if (closing = Engine::BossFights.satisfy_closing(enc[:name]))
+            log << { scene: closing }
+          end
           roll_curse!(enc, log, CURSE_CHANCE_BOSS,
                       "Even satisfied, the #{enc[:name]} does not let you leave unmarked")
         else
@@ -693,6 +746,12 @@ module Engine
         @player.bump_tracker!('monsters_killed')
         Engine::TransformationSystem.record_deepen!(@player, log)
         Engine::Admirers.gift!(@player, log)
+        if enc[:name].to_s.include?('Champagne Slime')
+          bonus = 10 + @player.current_floor.to_i
+          @player.gain_lp!(bonus)
+          log << "🍾 _The Champagne Slime goes out like a cork — a fountain of golden fizz that rains " \
+                 "pure celebration over you. **+#{bonus} LP**._"
+        end
         log << { scene: MonsterScenes.combat_line(@player, :victory, enc[:name], enc[:type]) }
         if @player.curse_effect_flag?("#{enc[:type]}_no_lp")
           log << "You defeated the #{enc[:name]}! You gain no Lust Points due to your curse."
@@ -733,8 +792,15 @@ module Engine
       log << 'The remaining mimics bow to you, recognizing you as one of their own.'
     end
 
-    def finish_tower_clear!(enc, log)
-      @player.bump_tracker!('depraved_tower_clears') if Engine::ContentOptions.preferences_for(@player).values.all?
+    def finish_tower_clear!(enc, log, satisfied: false)
+      if @player.tracker('depraved_armed').positive?
+        @player.bump_tracker!('depraved_tower_clears')
+        log << '_Every desire laid bare before her — this clear counts toward **Depraved One**._'
+      end
+      @player.set_tracker!('depraved_armed', 0)
+      if satisfied && (closing = Engine::BossFights.satisfy_closing(enc[:name]))
+        log << { scene: closing }
+      end
       clear = @player.complete_cycle!
       log << "**#{enc[:name]} yields!** The Endless Ruins shudder — you have conquered the goddess's tower!"
       log << "Tower clear reward: **+#{clear[:lp]} LP**."
@@ -748,7 +814,13 @@ module Engine
     end
 
     def finish_defeat!(enc, log)
+      if enc[:name].to_s.include?('Champagne Slime')
+        log << { scene: 'She does not finish you so much as toast you — raised, golden, and entirely ' \
+                        'the centrepiece, while the tower applauds in fizz. You are, regrettably, delicious.' }
+        Engine::Altars.gain_attention!(@player, 3, log)
+      end
       log << { scene: MonsterScenes.combat_line(@player, :defeated, enc[:name], enc[:type]) }
+      @player.set_tracker!('depraved_armed', 0)
       result = @player.apply_defeat_curse!(monster_type: enc[:type])
       loss = @player.reset_run!
       @player.clear_encounter!

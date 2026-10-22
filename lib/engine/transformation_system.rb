@@ -18,7 +18,7 @@ module Engine
         name: 'Puppy', group: 'Beast',
         description: "You've developed canine features — floppy ears, a wagging tail, and an eager-to-please heart",
         appearance: ['floppy ears', 'wagging tail', 'keen nose', 'padded palms'],
-        buff: 'Canine Loyalty', buff_description: '+25% damage resistance, +15% LP gain from submission',
+        buff: 'Canine Loyalty', buff_description: 'Take 25% less lust damage, +15% LP gain from submission',
         effects: { 'damage_reduction' => 0.75, 'submit_lp_mult' => 1.15 }
       ),
       'hucow' => {
@@ -27,7 +27,7 @@ module Engine
         requirement: { being_milked_events: 3, lactation_events: 3, weight_gain_events: 3 },
         appearance: ['multiple breasts', 'udder', 'small horns', 'cow tail'],
         events: { 'lactation' => 35, 'weight_gain' => 25 },
-        buff: 'Bovine Endurance', buff_description: '+30% damage resistance, +20% LP from being milked',
+        buff: 'Bovine Endurance', buff_description: 'Take 30% less lust damage, +20% LP from being milked',
         effects: { 'damage_reduction' => 0.7, 'lactation_event_lp_mult' => 1.2 }
       },
       'harpy' => {
@@ -47,7 +47,7 @@ module Engine
         description: 'Your body has become partially gelatinous and amorphous',
         requirement: { slime_submissions: 10, inflation_events: 3 },
         appearance: ['semi-translucent skin', 'amorphous limbs', 'no fixed shape'],
-        buff: 'Amorphous Form', buff_description: '+20% damage resistance, can squeeze through small openings',
+        buff: 'Amorphous Form', buff_description: 'Take 20% less lust damage, can squeeze through small openings',
         effects: { 'damage_reduction' => 0.8 },
         special_event: 'Absorption',
         special_event_description: "When struck, you sometimes partially absorb the attacker and regain defiance",
@@ -95,7 +95,7 @@ module Engine
         description: "You've become one with the plant life of the tower",
         requirement: { plant_submissions: 10, objectification_events: 3 },
         appearance: ['bark skin', 'leaves in hair', 'root-like feet'],
-        buff: 'Plant Resilience', buff_description: '+25% damage resistance, heal 5 defiance at the start of each fight',
+        buff: 'Plant Resilience', buff_description: 'Take 25% less lust damage, heal 5 defiance at the start of each fight',
         effects: { 'damage_reduction' => 0.75, 'combat_start_regen' => 5 },
         special_event: 'Root Network',
         special_event_description: "Sometimes the tower's roots warn you about a foe, lowering its AGI for the fight",
@@ -119,7 +119,7 @@ module Engine
         description: "You've become more object than person, with porcelain skin and jointed limbs",
         requirement: { objectification_events: 5, petplay_events: 3, mind_control_events: 3 },
         appearance: ['porcelain skin', 'jointed limbs', 'glass eyes'],
-        buff: "Doll's Stillness", buff_description: '+20% damage resistance, can feign death',
+        buff: "Doll's Stillness", buff_description: 'Take 20% less lust damage, can feign death',
         effects: { 'damage_reduction' => 0.8 },
         special_event: 'Toy Box',
         special_event_description: 'Sometimes you go perfectly still as a toy, and the monster loses interest for a turn',
@@ -132,7 +132,7 @@ module Engine
         requirement: { objectification_events: 10, slavery_events: 5, bondage_events: 3 },
         appearance: ['wood-like skin', 'functional shape'],
         events: { 'objectification' => 40, 'slavery' => 30, 'bondage' => 25 },
-        buff: 'Functional Form', buff_description: '+30% damage resistance, can feign death perfectly',
+        buff: 'Functional Form', buff_description: 'Take 30% less lust damage, can feign death perfectly',
         effects: { 'damage_reduction' => 0.7 },
         special_event: 'Furniture Surprise',
         special_event_description: 'Sometimes you trap the monster inside your furniture form, stopping its attack',
@@ -168,7 +168,7 @@ module Engine
         description: 'Your skin has become shiny and synthetic, erasing your human features',
         requirement: { latex_events: 10, mind_control_events: 3 },
         appearance: ['rubber skin', 'featureless face', 'seamless body'],
-        buff: 'Synthetic Skin', buff_description: '+25% damage resistance, immune to corrosion (half lust from slimes)',
+        buff: 'Synthetic Skin', buff_description: 'Take 25% less lust damage, immune to corrosion (half lust damage from slimes)',
         effects: { 'damage_reduction' => 0.75, 'slime_lust_mult' => 0.5 },
         special_event: 'Living Latex',
         special_event_description: 'Sometimes your skin wraps around the monster, restraining it for a turn',
@@ -180,7 +180,7 @@ module Engine
         description: "You've become a hybrid of slime and rubber properties",
         requirement: { latex_events: 7, inflation_events: 3, slime_submissions: 7 },
         appearance: ['shiny translucent skin', 'amorphous shape'],
-        buff: 'Elastic Form', buff_description: '+20% damage resistance, can stretch limbs',
+        buff: 'Elastic Form', buff_description: 'Take 20% less lust damage, can stretch limbs',
         effects: { 'damage_reduction' => 0.8 },
         special_event: 'Encase',
         special_event_description: 'Sometimes you encase the monster in your rubbery body, crushing it',
@@ -194,7 +194,7 @@ module Engine
         appearance: ['feathered wings', 'soft halo', 'radiant skin'],
         monster_rate: 0.7,
         event_rate: 1.35,
-        buff: 'Divine Presence', buff_description: '+20% damage resistance, +15% chance to intimidate monsters',
+        buff: 'Divine Presence', buff_description: 'Take 20% less lust damage, +15% chance to intimidate monsters',
         effects: { 'damage_reduction' => 0.8, 'intimidate_chance' => 0.15 },
         special_event: 'Divine Intervention',
         special_event_description: 'When your defiance runs low, your light sometimes flares, driving the monster back and restoring you',
@@ -207,7 +207,7 @@ module Engine
         requirement: { tentacle_events: 8, possession_events: 3 },
         appearance: ['tentacle hair', 'suckered fingertips', 'star-flecked eyes', 'a whispering second shadow'],
         events: { 'tentacles' => 35 },
-        buff: 'Beloved of the Deep', buff_description: '+20% seduction chance, +15% damage resistance — and Eros looks at you differently',
+        buff: 'Beloved of the Deep', buff_description: '+20% seduction chance, take 15% less lust damage — and Eros looks at you differently',
         effects: { 'satisfy_bonus' => 0.2, 'damage_reduction' => 0.85 },
         special_event: 'Grasping Devotion',
         special_event_description: 'Sometimes your tentacle hair lashes out on its own, weakening the monster for the rest of the fight',
@@ -255,7 +255,7 @@ module Engine
         description: 'Scales, gem-bright eyes, and a possessive certainty that every shining thing is yours',
         requirement: { treasure_found: 25 },
         appearance: ['scaled forearms', 'curved horns', 'gem-bright eyes', 'smoke on your breath'],
-        buff: 'Hoard Sense', buff_description: '+3 LP from treasure, +15% damage resistance',
+        buff: 'Hoard Sense', buff_description: '+3 LP from treasure, take 15% less lust damage',
         effects: { 'treasure_lp' => 3, 'damage_reduction' => 0.85 },
         special_event: 'Territorial Roar',
         special_event_description: 'Sometimes your roar reminds the monster whose hoard this is, stunning it',
@@ -267,7 +267,7 @@ module Engine
         description: 'Stone skin and statuesque patience — you were made to be looked at, and to outlast it',
         requirement: { exhibitionism_events: 6, objectification_events: 5 },
         appearance: ['smooth stone skin', 'small folded wings', 'chiseled features', 'a perch-worthy stillness'],
-        buff: 'Living Statue', buff_description: '+35% damage resistance, +10% chance monsters back off',
+        buff: 'Living Statue', buff_description: 'Take 35% less lust damage, +10% chance monsters back off',
         effects: { 'damage_reduction' => 0.65, 'intimidate_chance' => 0.1 },
         special_event: 'Statue Stillness',
         special_event_description: 'Sometimes you simply become a statue, and the monster loses its turn to confusion',
@@ -280,7 +280,7 @@ module Engine
         requirement: { plant_submissions: 8, aphrodisiac_events: 5 },
         appearance: ['mushroom-cap hair', 'spore-dusted skin', 'glowing gill patterns'],
         events: { 'aphrodisiacs' => 30 },
-        buff: 'Spore Cloud', buff_description: '+15% seduction chance, +15% damage resistance',
+        buff: 'Spore Cloud', buff_description: '+15% seduction chance, take 15% less lust damage',
         effects: { 'satisfy_bonus' => 0.15, 'damage_reduction' => 0.85 },
         special_event: 'Intoxicating Spores',
         special_event_description: 'Sometimes your spores intoxicate the monster, weakening it for the rest of the fight',
@@ -316,7 +316,7 @@ module Engine
         description: 'Horns, muscle, and a labyrinth hunger — the maze of the tower answers to you now',
         requirement: { being_milked_events: 5, beast_submissions: 10 },
         appearance: ['broad curved horns', 'a heavy gold nose ring', 'corded muscle under soft hide'],
-        buff: 'Labyrinth Bulk', buff_description: '+25% damage resistance, +10% surprise-hit chance',
+        buff: 'Labyrinth Bulk', buff_description: 'Take 25% less lust damage, +10% surprise-hit chance',
         effects: { 'damage_reduction' => 0.75, 'crit_chance' => 0.1 },
         special_event: 'Crushing Charge',
         special_event_description: 'Sometimes you simply charge, and the monster folds',
@@ -328,7 +328,7 @@ module Engine
         description: 'Wound brass, perfect posture, and a devotion to service that ticks in perfect time',
         requirement: { maid_events: 5, objectification_events: 5 },
         appearance: ['brass key turning slowly at your back', 'porcelain-smooth joints', 'a frilled apron worn over plate'],
-        buff: 'Perfect Service', buff_description: '+15% trap avoidance, +20% damage resistance',
+        buff: 'Perfect Service', buff_description: '+15% trap avoidance, take 20% less lust damage',
         effects: { 'trap_avoid_bonus' => 0.15, 'damage_reduction' => 0.8 },
         special_event: 'Service Interruption',
         special_event_description: 'Sometimes you curtsey so perfectly the monster forgets its turn',
@@ -340,7 +340,7 @@ module Engine
         description: 'Glazed, posed, and priceless — a work of art the tower keeps putting on display',
         requirement: { objectification_events: 8, exhibitionism_events: 5 },
         appearance: ['glazed porcelain skin', 'painted lashes', 'fine cracks healed with gold'],
-        buff: 'Priceless Object', buff_description: '+30% damage resistance, +10% chance monsters back off',
+        buff: 'Priceless Object', buff_description: 'Take 30% less lust damage, +10% chance monsters back off',
         effects: { 'damage_reduction' => 0.7, 'intimidate_chance' => 0.1 },
         special_event: 'Gallery Stillness',
         special_event_description: 'Sometimes you hold your pose, and the monster cannot bring itself to mar the art',
@@ -375,7 +375,8 @@ module Engine
     }.freeze
 
     MONSTER_LABELS = {
-      beast: 'Beast', demon: 'Demon', slime: 'Slime', undead: 'Undead', plant: 'Plant', mimic: 'Mimic'
+      beast: 'Beast', demon: 'Demon', slime: 'Slime', undead: 'Undead', plant: 'Plant', mimic: 'Mimic',
+      eldritch: 'Eldritch'
     }.freeze
 
     SKIP_KINDS = %i[stun thrall drain crush divine].freeze
@@ -553,7 +554,7 @@ module Engine
 
     GROUP_AFFINITIES = {
       'Beast' => 'beast', 'Demon' => 'demon', 'Plant' => 'plant', 'Supernatural' => 'undead',
-      'Eldritch' => 'mimic', 'Arachnid' => 'beast', 'Dragon' => 'beast', 'Stone' => 'undead',
+      'Eldritch' => 'eldritch', 'Arachnid' => 'beast', 'Dragon' => 'beast', 'Stone' => 'undead',
       'Object' => 'mimic', 'Synthetic' => 'slime', 'Holy' => 'demon', 'Fae' => 'demon'
     }.freeze
 

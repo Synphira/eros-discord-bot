@@ -82,7 +82,8 @@ module Engine
 
     # One explored room passes: every admirer's remaining rooms tick down,
     # and any that reach zero lose your scent and vanish. Returns the
-    # departed admirers' display names so the caller can say goodbye.
+    # departed as { name:, type: } entries so the caller can say goodbye
+    # (and roll parting gifts while the names are still known).
     def tick_rooms!(player)
       owned = types(player)
       return [] if owned.empty?
@@ -97,13 +98,125 @@ module Engine
       end
       names = player.tracker_hash[NAMES_TRACKER]
       names = names.is_a?(Hash) ? names.transform_keys(&:to_s) : {}
-      departed_names = departed.map { |type| names[type] || type }
       player.update(trackers: player.tracker_hash.merge(
                       TYPES_TRACKER => kept,
                       NAMES_TRACKER => names.reject { |k, _| departed.include?(k) },
                       ROOMS_TRACKER => rooms.reject { |k, _| departed.include?(k) }
                     ))
-      departed_names
+      departed.map { |type| { name: names[type] || type, type: type } }
+    end
+
+    # Farewells by monster kind: players grow attached by design, so the
+    # leaving should sound like the creature doing it.
+    FAREWELLS = {
+      'beast' => [
+        'The **%<name>s** circles you one last time, presses its head hard against your hip to leave its ' \
+        'scent on you like a signature, and lopes into the dark without looking back. Pack manners.',
+        'Somewhere behind you, a howl rises — fond, unhurried, and already farther away than it should ' \
+        'be. The **%<name>s** has taken the memory of your scent with it, and gone.'
+      ],
+      'demon' => [
+        'The **%<name>s** blows you a kiss that lands warm and entirely on purpose. "Do call again, ' \
+        'mortal," it purrs, and is gone between one breath and the next.',
+        '"You were *fun*, pet." The **%<name>s** traces one claw down your cheek as it backs into the ' \
+        'shadows. "Hell keeps what it likes. It just doesn\'t keep it long."'
+      ],
+      'slime' => [
+        'The **%<name>s** leaves a damp, affectionate handprint on your thigh that takes an hour to ' \
+        'fade, and oozes away backward, watching you until the corridor takes it.',
+        'A small, perfect bubble of the **%<name>s** stays jiggling on your shoulder for three rooms ' \
+        'before it pops. The rest of it has long since poured itself elsewhere.'
+      ],
+      'undead' => [
+        'The **%<name>s** lingers at the edge of the candlelight longer than the living ever would. ' \
+        'Then the light moves, and it is politely, finally, nowhere.',
+        'For a dozen rooms the cold at your back keeps pace with you. Then, mid-step, it simply stops ' \
+        'keeping pace. The **%<name>s** has remembered somewhere else to be dead.'
+      ],
+      'plant' => [
+        'A flower you do not remember picking is tucked behind your ear. The **%<name>s** withdraws root ' \
+        'by root, unhurried, like it expects to bloom wherever you go next.',
+        'Petals, all the way down the corridor behind you, in a line that ends abruptly. The ' \
+        '**%<name>s** has rooted itself somewhere new and let the wind do the goodbye.'
+      ],
+      'mimic' => [
+        'Something in the room behind you creaks shut, slowly, like applause. The **%<name>s** is ' \
+        'already pretending to be furniture somewhere else.',
+        'The **%<name>s** leaves the way it arrived: as an object you trusted. A door you pass twice ' \
+        'is, the second time, only a door.'
+      ]
+    }.freeze
+
+    def farewell_line(entry)
+      lines = FAREWELLS[entry[:type].to_s] || FAREWELLS['beast']
+      format(lines.sample, name: entry[:name] || entry[:type])
+    end
+
+    KEEPSAKES = {
+      furred: 'a pressed tuft of fur', scaled: 'a shed scale, still warm', chitin: 'a polished shell fragment',
+      feathered: 'a long, perfect feather', equine: 'a braided tail-hair band', stone: 'a smooth stone chip',
+      brute: 'a carved bone bead', hellish: 'a black scale, faintly warm', aquatic: 'a pearl of river-glass',
+      fae: 'a flower that never wilts', gelatinous: 'a vial of glowing jelly',
+      spectral: 'a ribbon that stays cold to the touch', corporeal: 'a grave-cold coin',
+      floral: 'a pressed black petal', object: 'a tiny brass key', smooth: 'a smooth river stone'
+    }.freeze
+
+    # When an admirer wanders off for good, it may leave something
+    # behind: LP, or a keepsake for the profile shelf. Eviction by a
+    # newcomer (record_satisfaction!) is a different cruelty and gets
+    # no gift — being driven off is not a farewell.
+    def parting_gift!(player, entry)
+      roll = rand
+      return nil if roll >= 0.60
+
+      name = entry[:name] || entry[:type]
+      if roll < 0.25
+        lp = 15 + (player.current_floor.to_i * 2)
+        player.gain_lp!(lp)
+        "_Before it goes, the **#{name}** presses a parting gift on you — **+#{lp} LP**, still warm._"
+      elsif roll < 0.45
+        keepsake = KEEPSAKES[MonsterTypes.family_for(name, entry[:type])] || KEEPSAKES[:smooth]
+        text = "#{keepsake} (from a #{name})"
+        player.add_keepsake!(text)
+        "_Before it goes, the **#{name}** leaves you #{keepsake}. It goes on your keepsake shelf._"
+      else
+        tonic_gift_line(player, name) || begin
+          lp = 10 + (player.current_floor.to_i * 2)
+          player.gain_lp!(lp)
+          "_Before it goes, the **#{name}** presses a parting gift on you — **+#{lp} LP**, still warm._"
+        end
+      end
+    end
+
+    # The rarest farewell: a stoppered tonic, one size step in whichever
+    # direction your enabled themes allow — or nothing to change, in
+    # which case the admirer makes do with LP like everyone else.
+    def tonic_gift_line(player, name)
+      growth = Engine::ContentOptions.enabled?(player, 'growth')
+      shrinking = Engine::ContentOptions.enabled?(player, 'shrinking')
+      return nil unless growth || shrinking
+
+      options = []
+      Engine::ContentOptions.applicable_sizes(player).each_key do |part|
+        if growth
+          old, nxt = Engine::ContentOptions.step_size(player, part, 1)
+          options << [part, 1, old, nxt] if nxt != old
+        end
+        if shrinking
+          old, nxt = Engine::ContentOptions.step_size(player, part, -1)
+          options << [part, -1, old, nxt] if nxt != old
+        end
+      end
+      return nil if options.empty?
+
+      part, delta, old, nxt = options.sample
+      sizes = player.body_sizes.is_a?(Hash) ? player.body_sizes.dup : {}
+      player.update(body_sizes: sizes.merge(part => nxt))
+      player.bump_tracker!(delta.positive? ? 'body_growth_events' : 'body_reduction_events')
+      label = Engine::ContentOptions::BODY_SIZES[part][:label].downcase
+      "_Before it goes, the **#{name}** leaves a stoppered tonic at your feet. You drink it on " \
+        "principle — monsters rarely poison sentimentally — and your **#{label}** " \
+        "#{delta.positive? ? 'swells' : 'shrinks'} a step (#{old} → #{nxt}) before the taste fades._"
     end
 
     def record_satisfaction!(player, enc, log)
@@ -118,6 +231,9 @@ module Engine
       if admirer?(player, type)
         # Pleasing it again reminds it why it follows you: full lifespan anew.
         set_rooms_left!(player, type, LIFESPAN_ROOMS)
+        log << "_Pleasing the **#{enc[:name]}** reminds your admirer what it was about to forget — it " \
+               'presses back into your scent, rescued from wandering off, and settles in for another ' \
+               "#{LIFESPAN_ROOMS} rooms._"
         return
       end
       return unless count(player, type) >= THRESHOLD
@@ -148,8 +264,46 @@ module Engine
       log << "_Somewhere in the dark, your #{name_for(player, others.first) || 'other admirer'} makes a jealous noise._"
     end
 
+    # A blown kiss kept from a Kiss Ward lands on the next monster met:
+    # admirer progress for its kind, or a refreshed lifespan if its kind
+    # already adores the delver.
+    def apply_kiss_ward!(player, enc, lines)
+      return unless player.tracker('kiss_ward').positive?
+
+      player.set_tracker!('kiss_ward', 0)
+      type = enc[:type].to_s
+      return if type.empty?
+
+      if admirer?(player, type)
+        set_rooms_left!(player, type, LIFESPAN_ROOMS)
+        lines << "The kiss you blew down the corridor finds an old flame — the **#{enc[:name]}** catches it, " \
+                 'melts, and remembers exactly why it follows you. _(admirer refreshed)_'
+      else
+        player.bump_tracker!("admirer_#{type}")
+        lines << "The kiss you blew down the corridor lands squarely on the **#{enc[:name]}** — it starts " \
+                 'this encounter thoroughly charmed. _(admirer progress +1)_'
+      end
+    end
+
+    # Alarm Bells, sprung earlier, announce the delver into their next
+    # fight: an audience gathers, the monster performs for it, and the
+    # delver starts the encounter already warm under the attention.
+    def apply_alarm_bells!(player, enc, lines)
+      return unless player.tracker('alarm_bells').positive?
+
+      player.set_tracker!('alarm_bells', 0)
+      player.gain_lust!(12)
+      enc[:pliant] = enc[:pliant].to_f + 0.10
+      lines << 'Your bells arrive before you do — bright, musical, unignorable. The **' + enc[:name].to_s +
+               '** is already posing when you round the corner, and half the corridor has gathered in ' \
+               'the doorways to watch. It performs for them. It performs *through* you. ' \
+               '_(Watched: lust +12, and the crowd makes it eager to please)_'
+    end
+
     # Called when a fight starts: a kindred admirer may hamper its own kind.
     def intervene_start!(player, enc, lines)
+      apply_alarm_bells!(player, enc, lines)
+      apply_kiss_ward!(player, enc, lines)
       type = enc[:type].to_s
       if admirer?(player, type) && rand < 0.35
         enc[:strength] = [(enc[:strength].to_i * 0.85).round, 1].max

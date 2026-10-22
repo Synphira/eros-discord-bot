@@ -89,6 +89,9 @@ module Engine
         description: 'Drink on the spot: −40 lust.' },
       { name: 'Bottled Sanctuary', type: 'special', slot: 'consumable', cost: 75, rarity: 3,
         description: 'Your next exploration is safe: no monsters, traps, or events.' },
+      { name: 'Bottled Ceremony', type: 'special', slot: 'consumable', cost: 60, rarity: 3,
+        description: 'Carry it (up to 3): your next monster starts charmed by the tea — far easier ' \
+                     'to satisfy. Berry also bottles what delvers decant at tea ceremonies.' },
       { name: 'Potion of Purity', type: 'special', slot: 'consumable', cost: 500, rarity: 3,
         description: 'Drink on the spot: washes away all of your corruption.' },
       { name: 'Potion of Depravity', type: 'special', slot: 'consumable', cost: 10, rarity: 3,
@@ -146,14 +149,16 @@ module Engine
 
     # The Potions aisle is shelved by theme — each list is exactly one page.
     POTION_PAGES = [
-      ['Cooling Elixir', 'Defiance Draught', 'Bottled Sanctuary', 'Potion of Purity', 'Potion of Depravity'],
+      ['Cooling Elixir', 'Defiance Draught', 'Potion of Purity', 'Potion of Depravity'],
       ['Breast Growth Tonic', 'Cock Growth Tonic', 'Butt Growth Tonic'],
       ['Breast Shrinking Tonic', 'Cock Shrinking Tonic', 'Butt Shrinking Tonic'],
       ['Male Becoming Draught', 'FtM Becoming Draught', 'Female Becoming Draught', 'MtF Becoming Draught',
-       'Hermaphrodite Becoming Draught']
+       'Hermaphrodite Becoming Draught'],
+      ['Bottled Sanctuary', 'Bottled Ceremony']
     ].freeze
 
-    POTION_PAGE_LABELS = ['Draughts & Elixirs', 'Growth Tonics', 'Shrinking Tonics', 'Becoming Draughts'].freeze
+    POTION_PAGE_LABELS = ['Draughts & Elixirs', 'Growth Tonics', 'Shrinking Tonics', 'Becoming Draughts',
+                          'Bottled Curios'].freeze
 
     CATEGORIES = %w[weapon armor accessory special].freeze
 
@@ -281,6 +286,18 @@ module Engine
           player.spend_lp!(item.cost)
           player.update(sanctuary: true)
           return { ok: true, message: 'You drink from the bottled sanctuary. Your next exploration will be safe!' }
+        when 'Bottled Ceremony'
+          held = player.tracker('bottled_ceremony')
+          if held >= 3
+            return { ok: false, error: :full, message: 'You already carry 3 Bottled Ceremonies — ' \
+                                                      'Berry refuses to let you slosh.' }
+          end
+
+          player.spend_lp!(item.cost)
+          player.bump_tracker!('bottled_ceremony')
+          return { ok: true, message: "Berry stoppers the little vial with ceremony. **Bottled Ceremony " \
+                                      "carried (#{held + 1}/3)** — your next monster starts charmed by " \
+                                      'the tea and far easier to satisfy.' }
         when 'Defiance Draught'
           if player.defiance >= player.max_defiance
             return { ok: false, error: :full, message: 'Your defiance is already full.' }
