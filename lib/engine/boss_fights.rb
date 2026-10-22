@@ -724,19 +724,37 @@ module Engine
         player.set_tracker!('depraved_armed', depraved_armed ? 1 : 0)
       end
 
-      intro =
-        if boss[:final]
-          "**Floor #{floor} — The Temple of Eros.** Silk, gold and candlelight surround a throne at the very top of the tower."
-        else
-          "**Floor #{floor}** — the air grows heavy."
-        end
+      cycle_note = player.current_cycle.to_i > 1 ? " · Cycle #{player.current_cycle} ×#{cycle.round(2)}" : ''
+      intro = "**Floor #{floor}** — the air grows heavy."
       warning =
         if boss[:final]
           'This is the goddess herself. Defeat or satisfy her, and she will return you herself to begin the next cycle.'
         else
           "This foe is far more dangerous than any you've faced before."
         end
-      cycle_note = player.current_cycle.to_i > 1 ? " · Cycle #{player.current_cycle} ×#{cycle.round(2)}" : ''
+
+      combat_banner = <<~MSG.strip
+        #{warning}
+        _(Threat #{threat.category.to_s.upcase} — ×#{threat.stat_mult} power · ×#{threat.lust_mult} lust#{cycle_note})_
+        HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
+      MSG
+      combat_banner += "\n_Every desire stands laid bare before her — clear her like this and it counts toward **Depraved One**._" if depraved_armed
+      combat_banner += "\n#{start_lines.join("\n")}" if start_lines.any?
+
+      if boss[:final]
+        # The goddess gets a curtain, not a wall: her dialogue stands
+        # alone behind a Continue button, and the fight only begins
+        # when the delver has actually read her.
+        player.set_tracker!('eros_intro_pending', 1)
+        return {
+          ok: true,
+          encounter: encounter,
+          message: eros_dialogue(player, floor, boss),
+          combat_message: combat_banner,
+          pre_fight: true,
+          is_boss: true
+        }
+      end
 
       message = <<~MSG.strip
         #{intro}
@@ -744,18 +762,10 @@ module Engine
         You stand before **#{boss[:title] || boss[:name]}**!
         _#{boss[:description]}_
 
-        #{warning}
-        _(Threat #{threat.category.to_s.upcase} — ×#{threat.stat_mult} power · ×#{threat.lust_mult} lust#{cycle_note})_
-        HP #{hp}/#{hp} · STR #{strength} · AGI #{agility} · Lust hit #{lust_damage}
+        #{combat_banner}
       MSG
-      message += "\n_Every desire stands laid bare before her — clear her like this and it counts toward **Depraved One**._" if depraved_armed
-      message += "\n#{start_lines.join("\n")}" if start_lines.any?
       gossip = gossip_line(player, boss[:name])
       message += "\n\n#{gossip}" if gossip
-      if boss[:final]
-        regard = eros_regard_lines(player)
-        message += "\n\n#{regard.join("\n")}" if regard.any?
-      end
 
       {
         ok: true,
@@ -763,6 +773,35 @@ module Engine
         message: message,
         is_boss: true
       }
+    end
+
+    # Her arrival, unhurried: the temple, the throne, and everything
+    # she has to say before a single blow is struck.
+    def eros_dialogue(player, floor, boss)
+      parts = [
+        "**Floor #{floor} — The Temple of Eros.** Silk, gold and candlelight surround a throne at the very top of the tower.",
+        "You stand before **#{boss[:title] || boss[:name]}**!",
+        "_#{boss[:description]}_"
+      ]
+      gossip = gossip_line(player, boss[:name])
+      parts << gossip if gossip
+      regard = eros_regard_lines(player)
+      parts << regard.join("\n") if regard.any?
+      parts.join("\n\n")
+    end
+
+    # The fight-facing half of a boss arrival: stakes and numbers,
+    # shown when combat actually begins.
+    def boss_combat_banner(encounter)
+      enc = encounter.is_a?(Hash) ? encounter.transform_keys(&:to_sym) : encounter
+      name = enc[:name] || enc.name
+      hp = enc[:max_hp] || enc.max_hp
+      cur = enc[:hp] || enc.hp
+      str = enc[:strength] || enc.strength
+      agi = enc[:agility] || enc.agility
+      lust = enc[:lust_damage] || enc.lust_damage
+      "This is the goddess herself. Defeat or satisfy her, and she will return you herself to begin the next cycle.\n" \
+        "**#{name}** HP `#{cur}/#{hp}` · STR `#{str}` · AGI `#{agi}` · Lust hit `#{lust}`"
     end
 
     def start_relic_encounter(player, floor, host, relic, relic_key)

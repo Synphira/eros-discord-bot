@@ -11,6 +11,13 @@ module Commands
 
       player = ErosHelpers.require_player(event) or return
 
+      if player.tracker('eros_intro_pending').positive?
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: 'Eros is speaking. Hear her first — `/explore`, then **Continue**.')
+        end
+        return
+      end
+
       enc = Eros.encounter_for(player)
       unless enc
         ErosUI.reply_v2(event, ephemeral: true) do |c|
@@ -45,6 +52,7 @@ module Commands
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
           ErosUI.append_action_log(c, result[:log])
+          dress_ask_button(c, player, result[:encounter], event.user.id)
         end
         return
       end
@@ -53,6 +61,7 @@ module Commands
         Eros.clear_encounter!(player)
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
           ErosUI.append_action_log(c, result[:log])
+          dress_ask_button(c, player, result[:encounter], event.user.id)
         end
         return
       end
@@ -77,6 +86,34 @@ module Commands
                    "STR `#{enc[:strength]}` · Your Defiance `#{player.defiance}/#{player.max_defiance}` · " \
                    "Lust `#{player.lust}`"
         )
+      end
+    end
+
+    # While Vex is exiled, two of the clergy can be asked about the
+    # dress — but only here, on the screen where they have just been
+    # defeated or satisfied.
+    def dress_ask_button(container, player, enc, owner_id)
+      return unless enc && Engine::Residents.dress_counsel_available?(player, enc[:name].to_s)
+
+      who = enc[:name].to_s == 'Succubus Queen' ? 'queen' : 'lich'
+      container.row do |row|
+        row.button(label: "🪡 Ask the #{enc[:name]} about the dress", style: :danger,
+                   custom_id: "eros:dress:ask:#{who}:#{owner_id}")
+      end
+    end
+
+    button(custom_id: /^eros:dress:ask:(queen|lich):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      who = event.custom_id[/\Aeros:dress:ask:(queen|lich):\d+\z/, 1]
+      result = Engine::Residents.dress_counsel!(player, who)
+      player.refresh
+      ErosUI.reply_v2(event, ephemeral: true) do |c|
+        c.text_display(content: result[:ok] ? "_#{result[:message]}_" : result[:message])
+        c.text_display(content: '-# Covar will want to hear this. The work continues at his counter (`/cursedshop` → **Restore the Dress**).') if result[:ok]
       end
     end
 

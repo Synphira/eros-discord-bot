@@ -21,9 +21,20 @@ module Commands
                    'proudly, and with opinions._'
         )
         Engine::Residents::RESIDENTS.each do |id, spec|
+          exiled = id.to_s == 'vex' && Engine::Residents.vex_exiled?(player)
+          blurb = if exiled
+                    'Her back room at the Cursed Shop stands empty under a sheet. Covar threw her out, and ' \
+                    'the whole tower is pretending not to listen.'
+                  elsif id.to_s == 'vex' && Engine::Residents.vex_restored?(player)
+                    'Back in business in a rundown room with a kettle and strong opinions. Her fees have ' \
+                    'doubled — rent, she says, and she will itemise it.'
+                  else
+                    spec[:blurb]
+                  end
           c.section do |section|
-            section.text_display(content: "**#{spec[:name]}** — _#{spec[:title]}_\n#{spec[:blurb]}")
-            section.button(label: 'Visit', style: :primary, custom_id: "eros:resident:show:#{id}:#{event.user.id}")
+            section.text_display(content: "**#{spec[:name]}** — _#{spec[:title]}_\n#{blurb}")
+            section.button(label: exiled ? 'Gone' : 'Visit', style: :primary,
+                           custom_id: "eros:resident:show:#{id}:#{event.user.id}", disabled: exiled)
           end
         end
         c.row do |row|
@@ -37,6 +48,29 @@ module Commands
       spec = Engine::Residents.resident(id)
       return hub(event, notice: 'That resident has wandered off.') unless spec
 
+      if id.to_s == 'vex' && Engine::Residents.vex_exiled?(player)
+        ErosUI.reply_v2(event, colour: COLOUR) do |c|
+          c.text_display(content: '## Madame Vex — the Listener')
+          c.text_display(content: notice) if notice
+          c.text_display(
+            content: '_The back room at the Cursed Shop is empty. Her bench stands under a sheet, her ' \
+                     'chair is pushed in with terrible neatness, and there is a Covar-shaped silence where ' \
+                     'the listening used to be. He threw her out the day the Original went onto the ' \
+                     'mannequin — salvaged the dress himself and refuses, point blank, to let anyone near ' \
+                     'her until it is whole again._'
+          )
+          c.text_display(
+            content: '_If anyone is going to fix this, it is apparently you. Covar is behind his counter, ' \
+                     'charging double and daring the tower to comment._'
+          )
+          c.row do |row|
+            row.button(label: 'Cursed Shop', style: :primary, custom_id: "eros:cshop:open:#{event.user.id}")
+            row.button(label: 'Residents', style: :secondary, custom_id: "eros:residents:view:#{event.user.id}")
+          end
+        end
+        return
+      end
+
       Engine::Residents.mark_met!(player, id)
       owner = event.user.id
 
@@ -44,6 +78,14 @@ module Commands
         c.text_display(content: "## #{spec[:name]} — #{spec[:title]}")
         c.text_display(content: notice) if notice
         c.text_display(content: spec[:intro])
+        if id.to_s == 'vex' && Engine::Residents.vex_restored?(player)
+          c.text_display(
+            content: '_The new room is rundown and entirely hers: a kettle, a worktable, a sign in her own ' \
+                     'hand. The Original is gone from her — worn now, gloriously, by her landlord — and she ' \
+                     'has opinions about the arrangement that she delivers like weather. Her fees have ' \
+                     'doubled. Rent, she says. Kettle. Standards._'
+          )
+        end
 
         topics = Engine::Residents.topics(id)
         if topics.any?
@@ -82,11 +124,14 @@ module Commands
         return
       end
 
+      restored = Engine::Residents.vex_restored?(player)
       c.text_display(
         content: '**Her bench** — negotiate a worn piece off intact ' \
-                 "(**from #{Engine::Residents::NEGOTIATE_MIN} LP** — twice its tear-free price, so the piece " \
+                 "(**from #{Engine::Residents::NEGOTIATE_MIN * (restored ? 2 : 1)} LP** — " \
+                 "#{restored ? 'four times' : 'twice'} its tear-free price, so the piece " \
                  'survives), or refit its ' \
-                 "temperament (**#{Engine::Residents::REFIT_COST} LP**, once per piece)."
+                 "temperament (**#{Engine::Residents::REFIT_COST} LP**, once per piece)." \
+                 "#{restored ? ' _Her fees doubled with the new room — rent, she says._' : ''}"
       )
       worn.each do |item|
         refitted = Engine::Residents.refitted_names(player).include?(item.name)

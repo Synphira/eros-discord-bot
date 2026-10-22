@@ -10,6 +10,11 @@ module Commands
     def run(event)
       player = ErosHelpers.require_player(event) or return
 
+      if player.tracker('eros_intro_pending').positive? && Eros.encounter_for(player)
+        show_eros_intro(event, player)
+        return
+      end
+
       if (enc = Eros.encounter_for(player))
         spec = (enc[:phase] || enc['phase']).to_s == 'pending' && Engine::BossFights.phase(enc[:name] || enc['name'])
         if spec
@@ -39,7 +44,9 @@ module Commands
 
       case result.kind
       when :monster, :boss
-        if result.kind == :boss
+        if result.kind == :boss && result.boss_intro
+          show_eros_intro(event, player, message: result.message, colour: result.colour)
+        elsif result.kind == :boss
           enc = result.monster
           enc = Engine::CombatEngine.encounter_snapshot(enc) unless enc.is_a?(Hash)
           Eros.set_encounter!(player, enc.merge(is_boss: true))
@@ -137,11 +144,59 @@ module Commands
       end
     end
 
+    # The goddess, before the fight: her dialogue alone, with one way
+    # forward. Reaching her stores the encounter, but combat does not
+    # begin until Continue is pressed.
+    def show_eros_intro(event, player, message: nil, colour: 0x5c0a2e)
+      boss = Engine::BossFights.boss_for_floor(player.current_floor)
+      message ||= Engine::BossFights.eros_dialogue(player, player.current_floor, boss)
+      ErosUI.reply_v2(event, colour: colour) do |c|
+        c.text_display(content: message)
+        c.separator(divider: true, spacing: :small)
+        c.text_display(content: '_She is in no hurry. Neither, until you have heard her, are you._')
+        c.row do |row|
+          row.button(label: '▶ Continue', style: :danger,
+                     custom_id: "eros:boss:continue:#{event.user.id}")
+        end
+      end
+    end
+
+    def show_eros_combat(event, player)
+      enc = Eros.encounter_for(player)
+      unless enc
+        ErosUI.reply_v2(event, ephemeral: true) do |c|
+          c.text_display(content: 'She is no longer waiting. Use `/explore` to climb again.')
+        end
+        return
+      end
+
+      player.set_tracker!('eros_intro_pending', 0)
+      ErosUI.reply_v2(event, colour: 0x5c0a2e, with_actions: :combat) do |c|
+        c.text_display(content: Engine::BossFights.boss_combat_banner(enc))
+        c.separator(divider: true, spacing: :small)
+        c.text_display(
+          content: '**Boss fight!** Choose **Fight**, **Flee**, or **Submit**.' \
+                   "\n-# Submitting is a gamble: land #{Engine::CombatEngine.boss_satisfy_needed(player)} successful " \
+                   "submits to satisfy the boss for ×#{Engine::CombatEngine::BOSS_SATISFY_LP_MULT} LP — " \
+                   "but it keeps attacking and you can't dodge while submitting."
+        )
+      end
+    end
+
     def show_submission(event)
       ErosUI.reply_v2(event, colour: 0x444444, with_actions: :submission) do |c|
         c.text_display(content: '## Submission')
         c.text_display(content: 'You lost all defiance and gave into your desires. The tower forever ravages you.')
       end
+    end
+
+    button(custom_id: /^eros:boss:continue:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      Commands::Explore.show_eros_combat(event, player)
     end
 
     button(custom_id: /^eros:defeat_continue:\d+$/) do |event|

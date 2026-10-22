@@ -45,11 +45,24 @@ module Commands
         if (regard = Engine::Regard.line(player, :cursed))
           c.text_display(content: regard)
         end
-        if player.tracker_hash['vex_ending'].to_s == 'mannequin'
+        if Engine::Residents.vex_restored?(player)
           c.text_display(
-            content: '_Covar\'s smile does not reach his eyes. "Vex\'s back room is very quiet these days," ' \
-                     'he says. "Tearing free costs **+50%** now. Call it a grief tax."_'
+            content: '_Covar is wearing the Original today — Syn\'s first work, restored, seams singing in ' \
+                     'a new key around horns and tail and that impossible chest, and he turns once for you ' \
+                     'without being asked. "It needed a body that would show it off," he says. "It had one ' \
+                     'for decades. Now it has a louder one." Prices, you note, are his own kind ones again._'
           )
+        elsif Engine::Residents.vex_exiled?(player)
+          c.text_display(
+            content: '_Covar\'s smile does not reach his eyes. He threw Vex out of the back room the day ' \
+                     'her dress went onto the mannequin, and the dress now stands salvaged under every ' \
+                     'light he owns. "Tearing free costs **double** now," he says. "Call it grief. Help ' \
+                     'me make the dress whole again and I\'ll forgive the arithmetic."_'
+          )
+          c.row do |row|
+            row.button(label: '🪡 Restore the Dress', style: :danger,
+                       custom_id: "eros:cshop:dress:#{event.user.id}")
+          end
         end
         c.separator(divider: true, spacing: :small)
         c.text_display(
@@ -108,6 +121,55 @@ module Commands
 
         c.separator(divider: false, spacing: :small)
         c.text_display(content: '-# Category tabs · each piece has its own Take button · Prev/Next')
+      end
+    end
+
+    # Restore the Dress: Covar's restoration quest, run from his counter
+    # while Vex is exiled. Steps claim here; the two counsels are earned
+    # on boss victory screens.
+    def dress_quest(event, notice: nil)
+      player = ErosHelpers.require_player(event) or return
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(content: "## 🪡 Restore the Dress — #{player.display_name}")
+        c.text_display(content: notice) if notice
+        if Engine::Residents.vex_restored?(player)
+          c.text_display(
+            content: '_The Original hangs — no. It does not hang. It is being *worn*, at the counter, by ' \
+                     'an incubus who turns in it like a weather system. The dress is whole, the shop is ' \
+                     'forgiven, and Madame Vex keeps her own rooms again across the tower._'
+          )
+        elsif !Engine::Residents.vex_exiled?(player)
+          c.text_display(content: '_There is no dress to restore. Vex is in the back room, the Original is on its rightful shoulders, and Covar is insufferable about it._')
+        else
+          step = Engine::Residents.restoration_step(player)
+          c.text_display(
+            content: "_Step **#{step + 1}/#{Engine::Residents::RESTORATION.size}** — " \
+                     'the Original stands salvaged under Covar\'s lights, seams remembering a shape._'
+          )
+          spec = Engine::Residents.restoration_current(player)
+          if spec
+            done, target = Engine::Residents.restoration_progress(player)
+            progress = spec[:finale] ? '' : " — **#{done}/#{target}**"
+            c.text_display(content: "**#{spec[:name]}**#{progress}\n#{spec[:text]}")
+            if spec[:finale]
+              c.row do |row|
+                row.button(label: '🪡 Begin the Fitting', style: :danger,
+                           custom_id: "eros:dress:finale:#{event.user.id}")
+              end
+            else
+              ready = Engine::Residents.restoration_complete?(player)
+              c.row do |row|
+                row.button(label: 'Claim', style: :primary,
+                           custom_id: "eros:dress:claim:#{event.user.id}", disabled: !ready)
+              end
+            end
+          end
+        end
+        c.row do |row|
+          row.button(label: '◀ Cursed Shop', style: :secondary, custom_id: "eros:cshop:open:#{event.user.id}")
+          row.button(label: '🔮 Talk to Covar', style: :primary, custom_id: "eros:talk:covar:#{event.user.id}")
+        end
       end
     end
 
@@ -269,6 +331,34 @@ module Commands
 
       match = event.custom_id.match(/\Aeros:cshop:page:(weapon|armor|accessory):(\d+):(\d+)\z/)
       Commands::CursedShop.run(event, category: match[1], page: match[2].to_i)
+    end
+
+    button(custom_id: /^eros:cshop:dress:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::CursedShop.dress_quest(event)
+    end
+
+    button(custom_id: /^eros:dress:claim:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      result = Engine::Residents.claim_restoration!(player)
+      player.refresh
+      Commands::CursedShop.dress_quest(event, notice: "#{result[:ok] ? '✅' : '❌'} #{result[:message]}")
+    end
+
+    button(custom_id: /^eros:dress:finale:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      result = Engine::Residents.finish_restoration!(player)
+      player.refresh
+      Commands::CursedShop.dress_quest(event, notice: "#{result[:ok] ? '' : '❌ '}#{result[:message]}")
     end
 
     button(custom_id: /^eros:cshop:bed:\d+$/) do |event|

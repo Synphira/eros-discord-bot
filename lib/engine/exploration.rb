@@ -10,7 +10,7 @@ module Engine
   class Exploration
     RoomResult = Struct.new(
       :kind, :message, :colour, :with_actions, :monster, :trap, :broken,
-      :event_result, keyword_init: true
+      :event_result, :boss_intro, keyword_init: true
     )
 
     TREASURE_LP = 10
@@ -432,7 +432,8 @@ module Engine
             kind: :boss,
             monster: boss[:encounter],
             colour: colour,
-            with_actions: true,
+            with_actions: !boss[:pre_fight],
+            boss_intro: boss[:pre_fight] ? true : false,
             message: boss[:message]
           )
         end

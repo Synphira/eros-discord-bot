@@ -797,6 +797,7 @@ class Player < Sequel::Model(:players)
     ['second bouquet', '💐'], ['bouquet', '🌸'], ['black honey', '🍯'], ['honey', '🍯'],
     ['cream', '🥛'], ['pink ribbon', '🎀'], ['court ribbon', '🎀'], ['cold to the touch', '❄️'],
     ['ribbon', '🎀'], ['latex', '🕯️'], ['spare charms', '🧿'], ['buckle', '🔗'],
+    ['spare button', '🪡'],
     ['thread', '🧵'], ['hymn sheet', '🎶'], ['polish cloth', '🧽'], ['signet', '💍'],
     ['pressed leaf', '🍃'], ['library card', '📖'], ['shed fang', '🦷'], ['sucker-mark', '🐙'],
     ['mirror', '🪞'], ['tassel', '🎐'], ['cork', '🍾'], ['warm grit', '🪨'],
@@ -1408,11 +1409,17 @@ class Player < Sequel::Model(:players)
     { ok: true, message: "Unequipped **#{item.name}**!" }
   end
 
-  # Covar has not forgiven delvers who talked Madame Vex's piece onto
-  # the mannequin: with her freed, his tear-free prices carry a grudge.
+  # While Madame Vex is exiled from his back room (her story's
+  # mannequin ending, before the dress is restored), Covar's grief is
+  # priced in: tear-free removal costs double. The restoration of the
+  # dress lifts the grudge and prices return to normal.
+  def vex_exiled_for_pricing?
+    tracker_hash['vex_ending'].to_s == 'mannequin' && !tracker('vex_restoration_done').positive?
+  end
+
   def cursed_removal_cost(item)
     cost = item.removal_cost.to_i
-    tracker_hash['vex_ending'].to_s == 'mannequin' ? (cost * 1.5).ceil : cost
+    vex_exiled_for_pricing? ? cost * 2 : cost
   end
 
   def remove_cursed_equipment!(equipment_id)
@@ -1420,7 +1427,7 @@ class Player < Sequel::Model(:players)
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
     return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `e,unequip`." } unless item.cursed
 
-    surcharge = tracker_hash['vex_ending'].to_s == 'mannequin'
+    surcharge = vex_exiled_for_pricing?
     cost = cursed_removal_cost(item)
     unless spend_lp!(cost)
       return {
@@ -1438,7 +1445,7 @@ class Player < Sequel::Model(:players)
     {
       ok: true,
       message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free.#{unlock}" \
-               "#{surcharge ? "\n_Covar's surcharge is in there — he has not forgiven you for retiring Vex, and his prices say so._" : ''}"
+               "#{surcharge ? "\n_That's Covar's grief pricing — double, while Vex sits exiled from his back room and her dress stands empty. Restore the dress and he'll forgive the arithmetic._" : ''}"
     }
   end
 

@@ -337,7 +337,14 @@ module Engine
                      'There was going to be a whole *lineage*. And now—" He looks toward the back room, and ' \
                      'his voice does something complicated. "She\'s free. I know she\'s free. That is the ' \
                      'worst part of you, delver: I cannot even be properly furious. Give me the counter ' \
-                     'between us a while longer."'
+                     'between us a while longer."',
+        covar_restored: '"Careful," Covar says, turning once in it — Syn\'s first work, restored, worn at his ' \
+                        'own counter like a coronation. "You\'re looking at history, and history is ' \
+                        '*fitted*. She came to the shop, you know. My big sis. Stood in that door and went ' \
+                        'quiet as a held breath — her first masterpiece, alive, and better than she left ' \
+                        'it, on her favourite disaster." He smooths a seam with something perilously like ' \
+                        'reverence. "Vex has her own rooms again. Wears her freedom well. And the Original ' \
+                        'has me. Everyone, at last, is being worn by the right thing."'
       },
       {
         key: 'the_fairies', label: 'Syn & Berry', question: 'What about Syn and Berry?',
@@ -743,10 +750,14 @@ module Engine
       full = revealed || topic[:"revealed_#{person}"] if revealed_now
       full = (full || topic[person.to_sym]).to_s
       # Covar has one topic he feels differently about once the dress
-      # has been persuaded off Vex and onto the mannequin.
-      if person == 'covar' && topic[:key] == 'vex_dress' &&
-         player.tracker_hash['vex_ending'].to_s == 'mannequin'
-        full = topic[:covar_after].to_s
+      # has been persuaded off Vex and onto the mannequin — and
+      # differently again once he is wearing it himself.
+      if person == 'covar' && topic[:key] == 'vex_dress'
+        if player.tracker('vex_restoration_done').positive?
+          full = topic[:covar_restored].to_s
+        elsif player.tracker_hash['vex_ending'].to_s == 'mannequin'
+          full = topic[:covar_after].to_s
+        end
       end
 
       # The fairies remember being asked: first answer in full, repeats in
