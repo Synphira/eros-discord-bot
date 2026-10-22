@@ -593,7 +593,10 @@ module ErosUI
       lines = conditions.map do |c|
         floors = c['floors'].to_i
         duration = c['key'] == Engine::Corruption::KEY ? 'until defeat' : "#{floors} floor#{'s' unless floors == 1}"
-        "• **#{c['name']}** — #{c['summary']} _(#{duration})_"
+        # Recompute from effects when possible: summaries stored by older
+        # versions can contain raw effect keys.
+        summary = c['effects'] ? Engine::FetishEvents.describe_effects(c['effects']) : c['summary']
+        "• **#{c['name']}** — #{summary} _(#{duration})_"
       end
       container.text_display(content: lines.join("\n"))
     end

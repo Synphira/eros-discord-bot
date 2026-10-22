@@ -17,8 +17,11 @@ module Commands
                     placeholder: 'More fetish events (opt-in)' }
     }.freeze
 
+    PER_PAGE = 5
+
     module_function
 
+    # The options home: one button per family of toggles, with its tally.
     def show(event, notice: nil)
       player = ErosHelpers.require_player(event) or return
       prefs = Engine::ContentOptions.preferences_for(player)
@@ -30,41 +33,62 @@ module Commands
                    'toned down; **opt-in** themes add new random events when enabled._'
         )
         c.text_display(content: notice) if notice
-
-        GROUPS.each do |group, spec|
-          on = spec[:keys].select { |k| prefs[k] }
-          summary = on.empty? ? '_none_' : on.map { |k| Engine::ContentOptions.preference(k)[:label] }.join(', ')
-          c.text_display(content: "**#{spec[:title]} enabled:** #{summary}")
-          c.row do |row|
-            row.string_select(
-              custom_id: "eros:opts:#{group}:#{event.user.id}",
-              placeholder: spec[:placeholder],
-              min_values: 0,
-              max_values: spec[:keys].size
-            ) do |menu|
-              spec[:keys].each do |key|
-                p = Engine::ContentOptions.preference(key)
-                menu.option(label: p[:label], value: key, description: p[:description][0, 100], default: prefs[key])
-              end
-            end
+        c.text_display(content: 'Pick a family to fine-tune its toggles:')
+        c.row do |row|
+          GROUPS.each do |group, spec|
+            on = spec[:keys].count { |k| prefs[k] }
+            row.button(
+              label: "#{spec[:title]} · #{on}/#{spec[:keys].size} on",
+              style: :primary,
+              custom_id: "eros:opts:group:#{group}:#{event.user.id}"
+            )
           end
-        end
-
-        sizes = Engine::ContentOptions.applicable_sizes(player)
-        unless sizes.empty?
-          c.separator(divider: true, spacing: :small)
-          current = sizes.keys.map do |part|
-            "#{sizes[part][:label]} **#{Engine::ContentOptions.size_label(part, Engine::ContentOptions.size_of(player, part))}**"
-          end
-          c.text_display(content: "**Body:** #{current.join(' · ')}")
-          c.text_display(
-            content: '_Sizes are no longer picked here — the tower insists you earn your shape. Berry sells ' \
-                     'growth and shrinking tonics (and a certain draught) in the shop\'s **Potions** aisle._'
-          )
         end
         c.text_display(
           content: '-# Changes save instantly. Quick toggle: `e,fetish_options <option> <on/off>`.'
         )
+      end
+    end
+
+    # One page of a family's toggles: five themes, each with its own
+    # button — lit and checked when on, grey when off.
+    def show_group(event, group, page: 0, notice: nil)
+      player = ErosHelpers.require_player(event) or return
+      spec = GROUPS[group.to_s] or return show(event, notice: notice)
+      prefs = Engine::ContentOptions.preferences_for(player)
+      pages = [(spec[:keys].size.to_f / PER_PAGE).ceil, 1].max
+      page = page.to_i % pages
+      slice = spec[:keys].slice(page * PER_PAGE, PER_PAGE) || []
+      on = spec[:keys].count { |k| prefs[k] }
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(content: "## Content Options — #{spec[:title]} (#{on}/#{spec[:keys].size} on)")
+        c.text_display(content: notice) if notice
+        lines = slice.map do |key|
+          p = Engine::ContentOptions.preference(key)
+          "#{prefs[key] ? '✅' : '⬜'} **#{p[:label]}** — #{p[:description]}"
+        end
+        c.text_display(content: lines.join("\n"))
+        c.row do |row|
+          slice.each do |key|
+            p = Engine::ContentOptions.preference(key)
+            row.button(
+              label: "#{prefs[key] ? '✅' : '⬜'} #{p[:label]}",
+              style: prefs[key] ? :success : :secondary,
+              custom_id: "eros:opts:toggle:#{group}:#{page}:#{key}:#{event.user.id}"
+            )
+          end
+        end
+        c.row do |row|
+          row.button(label: '◀ Prev', style: :secondary, custom_id: "eros:opts:page:#{group}:#{page - 1}:#{event.user.id}")
+          row.button(label: "Page #{page + 1}/#{pages}", style: :secondary,
+                     custom_id: "eros:opts:page:#{group}:info:#{event.user.id}", disabled: true)
+          row.button(label: 'Next ▶', style: :secondary, custom_id: "eros:opts:page:#{group}:#{page + 1}:#{event.user.id}")
+        end
+        c.row do |row|
+          row.button(label: '◀ All Categories', style: :primary, custom_id: "eros:opts:home:#{event.user.id}")
+        end
+        c.text_display(content: '-# Press a theme to switch it on or off. Changes save instantly.')
       end
     end
 
@@ -111,7 +135,43 @@ module Commands
 
       group = event.custom_id[/\Aeros:opts:(core|body|kink|fetish):\d+\z/, 1]
       Commands::Options.set_group!(player, group, Array(event.values))
-      Commands::Options.show(event, notice: '_Preferences saved._')
+      Commands::Options.show_group(event, group, notice: '_Preferences saved._')
+    end
+
+    button(custom_id: /^eros:opts:home:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Options.show(event)
+    end
+
+    button(custom_id: /^eros:opts:group:(core|body|kink|fetish):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      group = event.custom_id[/\Aeros:opts:group:(core|body|kink|fetish):\d+\z/, 1]
+      Commands::Options.show_group(event, group)
+    end
+
+    button(custom_id: /^eros:opts:page:(core|body|kink|fetish):-?\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      _, group, page = event.custom_id.match(/\Aeros:opts:page:(core|body|kink|fetish):(-?\d+):\d+\z/).to_a
+      Commands::Options.show_group(event, group, page: page.to_i)
+    end
+
+    button(custom_id: /^eros:opts:toggle:(core|body|kink|fetish):\d+:[a-z_]+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      _, group, page, key = event.custom_id.match(/\Aeros:opts:toggle:(core|body|kink|fetish):(\d+):([a-z_]+):\d+\z/).to_a
+      next unless Commands::Options::GROUPS.dig(group, :keys)&.include?(key)
+
+      prefs = Engine::ContentOptions.preferences_for(player)
+      Engine::ContentOptions.set!(player, key, !prefs[key])
+      label = Engine::ContentOptions.preference(key)[:label]
+      Commands::Options.show_group(event, group, page: page.to_i,
+                                   notice: "_#{prefs[key] ? '⬜' : '✅'} **#{label}** is now **#{prefs[key] ? 'off' : 'on'}**._")
     end
 
     application_command(:options) { |event| Commands::Options.show(event) }

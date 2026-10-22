@@ -27,15 +27,24 @@ module Engine
       Array(player.tracker_hash[TYPES_TRACKER]).map(&:to_s)
     end
 
-    # How many admirers you have right this moment, and how many you have
-    # ever had (legacy saves predate the total, so never show fewer than
-    # the ones currently following).
+    # How many admirers you have right this moment.
     def current_count(player)
       types(player).size
     end
 
+    # Monster kinds ever won — the per-kind satisfaction counters never
+    # decrease, so this remembers wins from before the lifetime total
+    # tracker existed, when admirers could not wander off yet.
+    def career_kinds(player)
+      MonsterTypes::TYPES.keys.count { |t| count(player, t) >= THRESHOLD }
+    end
+
+    # How many admirers you have ever had. The stored total counts every
+    # win (including re-winning a kind after it wandered off); the career
+    # kinds and current followers floor it, so a save that predates the
+    # stored total never shows fewer than the wins it can prove.
     def total(player)
-      [player.tracker(TOTAL_TRACKER), current_count(player)].max
+      [player.tracker(TOTAL_TRACKER), career_kinds(player), current_count(player)].max
     end
 
     def rooms_left(player, type)
@@ -101,6 +110,10 @@ module Engine
       type = enc[:type].to_s
       return if type.empty?
 
+      # Lifetime admirers before this satisfaction lands — captured now
+      # because the per-kind counter bump below would otherwise let the
+      # career-kinds floor count the win that is about to happen twice.
+      lifetime_before = total(player)
       player.bump_tracker!("admirer_#{type}")
       if admirer?(player, type)
         # Pleasing it again reminds it why it follows you: full lifespan anew.
@@ -117,12 +130,16 @@ module Engine
                'which slinks away with a last, longing look.'
       end
 
+      # Count the win against the true lifetime total (which may be
+      # floored by career kinds on older saves), never from a bare
+      # counter that started at zero when the tracker was introduced.
+      new_total = lifetime_before + 1
       player.update(trackers: player.tracker_hash.merge(
                       TYPES_TRACKER => types(player) + [type],
                       NAMES_TRACKER => (player.tracker_hash[NAMES_TRACKER] || {}).merge(type => enc[:name].to_s),
                       ROOMS_TRACKER => rooms_hash(player).merge(type => LIFESPAN_ROOMS)
                     ))
-      player.bump_tracker!(TOTAL_TRACKER)
+      player.set_tracker!(TOTAL_TRACKER, new_total)
       log << "**A monster has become your admirer!** The **#{enc[:name]}** you pleased so thoroughly now " \
              "follows your scent through the tower. Its kind will go easier on you — and it leaves gifts."
       others = types(player) - [type]

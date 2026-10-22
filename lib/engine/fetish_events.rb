@@ -1314,18 +1314,29 @@ module Engine
       when 'satisfy_bonus' then "satisfy #{pct.(value)}"
       when 'submit_lp_bonus' then "+#{value} LP on submit"
       when /_submit_lp\z/ then "+#{value} LP submitting #{label}"
+      when 'submit_lp_mult' then "submit LP ×#{value}"
       when 'no_flee' then "can't flee"
+      when 'no_trap_dodge' then 'traps always catch you'
+      when 'defiance_cap' then "max Defiance capped at #{value}"
       when 'flee_bonus' then "flee #{pct.(value)}"
       when 'dodge_bonus' then "dodge #{pct.(value)}"
       when /_dodge_bonus\z/ then "dodge #{label} #{pct.(value)}"
+      when 'trap_avoid_bonus' then "trap avoidance #{pct.(value)}"
+      when 'damage_reduction' then "damage taken ×#{value}"
+      when 'intimidate_chance' then "intimidate #{pct.(value)}"
+      when 'crit_chance' then "crit chance #{pct.(value)}"
       when 'victory_lp_bonus' then "+#{value} LP per fight ended"
       when 'hit_lp' then "+#{value} LP per hit taken"
       when 'explore_lp' then "+#{value} LP per floor"
       when 'treasure_lp' then "+#{value} LP from treasure"
       when 'healing_mult' then "healing ×#{value}"
       when 'encounter_rate' then "monster rooms ×#{value}"
+      when /_encounter_rate\z/ then "#{label.sub('vs ', '')} encounters ×#{value}"
       when 'deny_climax' then 'orgasms denied'
-      else "#{key} #{value}"
+      else
+        # Never leak a raw snake_case key into player-facing text.
+        human = key.tr('_', ' ')
+        value == true ? human : "#{human} #{value}"
       end
     end
   end
