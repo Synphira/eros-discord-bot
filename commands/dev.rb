@@ -146,6 +146,11 @@ module Commands
 
     def give_curse(event, player, name)
       Engine::CurseCatalog.sync_to_db!
+      if name.strip.casecmp?('all')
+        added = Curse.all.count { |curse| player.afflict!(curse) }
+        return reply(event, "Afflicted with **every curse in the catalogue** — #{added} newly applied. (Yes, all of them. Dev tools.)")
+      end
+
       curse = Curse.where(Sequel.ilike(:name, "%#{name}%")).first
       return reply(event, "No curse matching `#{name}`.") if name.empty? || curse.nil?
 
