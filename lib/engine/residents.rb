@@ -428,7 +428,7 @@ module Engine
     }.freeze
 
     def pip_beat_available?(player, threshold)
-      player.tracker('traps_triggered') >= threshold
+      player.tracker('traps_triggered') >= threshold.to_i
     end
 
     def read_pip_beat!(player, threshold)
