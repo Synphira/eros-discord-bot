@@ -96,8 +96,8 @@ module Engine
         { key: 'the_dreaming', label: 'The dreaming land',
           text: '"Rooms are rolled out of the domain\'s sleep, one at a time, as you walk." His pen never ' \
                 'stops. "But sleep leans before it falls. Three rooms ahead, the lean is legible: a hunger, ' \
-                'a mechanism, a gleam. Stronger powers — bosses, altars, her — keep their own counsel and ' \
-                'override me without apology. I find that honest of them."' },
+                'a mechanism, a gleam — and what I draw is what you meet. Only the floor lords keep their ' \
+                'own counsel and override me without apology. I find that honest of them."' },
         { key: 'the_margins', label: 'The margins',
           text: '"The maps have margins, and the margins have you in them." For the first time he looks up, ' \
                 'and his eyes are the grey of pencil lead. "Everyone I sketch goes in the margin. It is not ' \
@@ -529,6 +529,114 @@ module Engine
     # Vex works out of her own rundown room, and rent is merciless:
     # her fee doubles, permanently, and she will itemise whose fault
     # that is. While she is exiled the bench is simply closed.
+    # --- Madame Vex's outfit counter -------------------------------------
+    # Mundane (not living) clothes cut by the tower's own seamstress,
+    # sold from beside her bench. Every piece dresses the delver down
+    # the tower's favourite road: it raises their appearance — and so
+    # their threat — and pays them for submitting in it. The counter is
+    # open whenever Vex is receiving; after her restoration the stock
+    # doubles, because the new room has a proper rack. Rent.
+
+    VEX_OUTFITS = [
+      { name: 'Ribbon-Bound Harness', slot: 'chest', type: 'armor', cost: 60, tier: :basic,
+        description: 'Ribbons where armour ought to be. It holds nothing back and promises everything.',
+        stat_modifiers: { 'appearance' => 10, 'satisfy_bonus' => 0.05, 'submit_lp_bonus' => 1, 'lust_mult' => 1.05 } },
+      { name: 'Bell Collar of the Willing', slot: 'accessory', type: 'accessory', cost: 45, tier: :basic,
+        description: 'A collar with a small, bright bell. Everyone will hear what you are.',
+        stat_modifiers: { 'appearance' => 7, 'submission' => 1, 'submit_lp_bonus' => 1 } },
+      { name: 'Split-Skirt Silks', slot: 'legs', type: 'armor', cost: 55, tier: :basic,
+        description: 'Silk split to the hip on both sides. Walking is a statement; running is a confession.',
+        stat_modifiers: { 'appearance' => 10, 'satisfy_bonus' => 0.04, 'submit_lp_bonus' => 1, 'lust_mult' => 1.05 } },
+      { name: 'Barefoot Anklets', slot: 'feet', type: 'armor', cost: 35, tier: :basic,
+        description: 'Fine chains for bare feet. Shoes are for people with somewhere respectable to be.',
+        stat_modifiers: { 'appearance' => 6, 'submit_lp_bonus' => 1, 'explore_lp' => 1 } },
+      { name: 'Veil of Display', slot: 'head', type: 'armor', cost: 40, tier: :basic,
+        description: 'A veil that covers nothing that matters. It frames; it does not hide.',
+        stat_modifiers: { 'appearance' => 7, 'satisfy_bonus' => 0.03, 'victory_lp_bonus' => 1 } },
+      { name: "The Devotee's Habit", slot: 'chest', type: 'armor', cost: 110, tier: :restored,
+        description: 'Cut like a nun\'s habit by someone who had read the scripture and chosen the other side.',
+        stat_modifiers: { 'appearance' => 14, 'satisfy_bonus' => 0.08, 'submit_lp_bonus' => 2,
+                          'lust_mult' => 1.10, 'submission' => 1 } },
+      { name: 'Gilded Offering Collar', slot: 'accessory', type: 'accessory', cost: 90, tier: :restored,
+        description: 'Gold, heavy, and engraved with a price the whole corridor can read.',
+        stat_modifiers: { 'appearance' => 11, 'submit_lp_bonus' => 2, 'victory_lp_bonus' => 2 } },
+      { name: 'Confession Heels', slot: 'feet', type: 'armor', cost: 70, tier: :restored,
+        description: 'Heels tall enough to change your posture and your intentions. Every step announces you.',
+        stat_modifiers: { 'appearance' => 10, 'satisfy_bonus' => 0.05, 'submit_lp_bonus' => 2, 'agility' => -1 } },
+      { name: 'Crown of Petals and Chains', slot: 'head', type: 'armor', cost: 85, tier: :restored,
+        description: 'Flowers threaded through fine chain. A crown for being looked at in.',
+        stat_modifiers: { 'appearance' => 11, 'submission' => 1, 'satisfy_bonus' => 0.05, 'victory_lp_bonus' => 1 } }
+    ].freeze
+
+    def vex_outfit_stock(player)
+      restored = vex_restored?(player)
+      VEX_OUTFITS.select { |spec| spec[:tier] == :basic || restored }
+    end
+
+    def sync_vex_outfits!
+      VEX_OUTFITS.each do |spec|
+        record = ::Equipment.find_or_create(name: spec[:name]) do |e|
+          e.type = spec[:type]
+          e.slot = spec[:slot]
+        end
+        record.type = spec[:type]
+        record.slot = spec[:slot]
+        record.description = spec[:description]
+        record.stat_modifiers = spec[:stat_modifiers]
+        record.cost = spec[:cost]
+        record.rarity = 3
+        record.cursed = false
+        record.violation_type = nil
+        record.removal_cost = 0
+        record.save_changes
+      end
+    end
+    module_function :sync_vex_outfits!
+
+    def vex_outfit_record(spec)
+      ::Equipment.where(name: spec[:name], cursed: false).first
+    end
+
+    def vex_outfit_price(player, spec)
+      [(spec[:cost] * Engine::ThreatCalculator.price_multiplier(player)).round, 1].max
+    end
+
+    def buy_vex_outfit!(player, equipment_id)
+      if vex_exiled?(player)
+        return { ok: false,
+                 message: 'There is no counter. Vex is exiled, and her rack stands empty under the same ' \
+                          'sheet as her bench.' }
+      end
+
+      sync_vex_outfits!
+      item = ::Equipment[equipment_id.to_i]
+      spec = item && VEX_OUTFITS.find { |s| s[:name] == item.name }
+      return { ok: false, message: 'Vex does not sell that. Her eyebrow says so.' } unless spec
+      unless vex_outfit_stock(player).include?(spec)
+        return { ok: false, message: '"Not yet, delver. That rack opens when I have a room worth ' \
+                                     'hanging it in." She does not elaborate. The kettle does, at length.' }
+      end
+      return { ok: false, message: "You already own **#{item.name}**." } if player.owns_equipment?(item.id)
+
+      price = vex_outfit_price(player, spec)
+      unless player.spend_lp!(price)
+        return { ok: false, message: "\"Cash first, poetry later. **#{price} LP**, delver — you have " \
+                                     "#{player.lp}.\"" }
+      end
+
+      grant = player.grant_equipment!(item, auto_equip: false)
+      unless grant[:ok]
+        player.refund_lp!(price)
+        return grant
+      end
+
+      player.bump_tracker!('vex_outfits_bought')
+      { ok: true,
+        message: "Vex fits **#{item.name}** to you with a tailor's hands and a listener's silence. " \
+                 "\"There,\" she says at last. \"Now the tower can read you properly.\" " \
+                 "_(**#{price} LP** — equip it from `e,equipment`.)_" }
+    end
+
     def negotiate_cost(player, item)
       base = [NEGOTIATE_MIN, item.removal_cost.to_i * 2].max
       vex_restored?(player) ? base * 2 : base
@@ -772,7 +880,7 @@ module Engine
       player.check_progress!
       { ok: true, queue: queue,
         message: "He draws without looking at the page. \"Three rooms of lean,\" he says. " \
-                 "#{queue.map { |k| SKETCH_LABELS[k] }.join(', then ')}. Probably.\" " \
+                 "#{queue.map { |k| SKETCH_LABELS[k] }.join(', then ')}. Exactly.\" " \
                  "_(#{price} LP — the sketch holds for this floor, this cycle.)_" }
     end
 

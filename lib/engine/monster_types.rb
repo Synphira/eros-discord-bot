@@ -202,6 +202,9 @@ module Engine
           weight *= Engine::Biomes.monster_weight(player, type)
         end
         weight *= Engine::Weekly.monster_weight(type)
+        # Appearance: the lustier kinds find a provocative — or
+        # depraved — looking delver more often. Being seen is a lure.
+        weight *= ThreatCalculator.encounter_weight(player, type) if player
         # Desire Magnet: the tower approves of honesty. A delver's
         # chosen kind simply turns up more often.
         weight *= 1.5 if player && player.tracker_hash['desire_magnet'].to_s == type.to_s

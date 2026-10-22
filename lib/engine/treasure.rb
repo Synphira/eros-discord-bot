@@ -734,7 +734,8 @@ module Engine
       'strength' => 'STR', 'agility' => 'AGI', 'resistance' => 'RES', 'submission' => 'Submission',
       'damage' => 'damage', 'max_hp' => 'max defiance', 'defiance_regen' => 'defiance per combat round',
       'victory_lp_bonus' => 'LP per victory', 'explore_lp' => 'LP per room explored', 'treasure_lp' => 'LP from chests',
-      'hit_lp' => 'LP when a monster gets its hands on you', 'submit_lp_bonus' => 'LP when you submit'
+      'hit_lp' => 'LP when a monster gets its hands on you', 'submit_lp_bonus' => 'LP when you submit',
+      'appearance' => 'Appearance'
     }.freeze
     PERCENT_LABELS = {
       'flee_bonus' => 'flee chance', 'crit_chance' => 'surprise-hit chance (double damage)',

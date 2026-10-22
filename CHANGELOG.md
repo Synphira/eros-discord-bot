@@ -6,6 +6,26 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-22
+
+### Added
+
+- **Appearance: your threat is how you look now.** Threat is no longer just your LP and curses — what you wear is a first-class author of it. Every piece of gear carries an **Appearance** reading (Madame Vex's clothes and anything living carry a lot; Berry's chaste steel and hoods carry less than none), and the threat meter doubles as the tower's appearance meter: **Presentable → Provocative → Depraved**. A full revealing outfit on an empty purse already reads Provocative; dressing down pulls you back. Your reading stands beside your gear on the equipment menu.
+- **Madame Vex sells clothes now**: a rack beside her bench (9 pieces: harnesses, collars, silks, heels, a certain habit) — cut to be *read* in. They occupy your normal gear slots, raise your Appearance and threat, and pay for submissive play: monsters are easier to satisfy, submitting pays better, and your lust runs hotter in them. She sells the basic rack whenever she is receiving, and the stock doubles after her restoration — the new room has a proper rack. While she is exiled, the rack stands under the sheet with everything else.
+- **The tower reacts to how you look.** At Provocative and Depraved: monsters remark on you when they find you and come easier to satisfy (and hit harder — a higher threat is a higher threat), the lustier kinds (demons, slime, beasts) find you more often, admirers are courted halfway by the outfit alone, everything you earn pays 5–10% more LP, Berry quietly knocks 5–10% off her prices "for the view", the clergy notice you before you speak (their greetings change with your look, as do the Residents'), and every boss appraises you before the fight. Living gear reads heavily too: each cursed piece worn adds a large chunk of Appearance.
+- **Saved outfits**: the equipment menu gains an **Outfits** button — save what you are wearing into one of 3 slots and load it back on the fly. If living gear is in the way, the slot lists exactly what loading will tear off and what it costs in cursed removal (destroyed as usual) before you commit; if you can't pay, it refuses and names the price. Your trophy is never part of an outfit.
+
+### Changed
+
+- **Threat rebalanced around the wardrobe**: LP's contribution to threat now caps lower (45% instead of 60%), so a fat purse alone no longer makes you the tower's top priority — what you wear can matter more than what you hold. Curses still weigh in, and worn Appearance (up to 40%) stands beside them. The status screen's threat line now shows the Appearance contribution.
+- **The bot keeps to NSFW channels in servers**: inside a server, commands and panels now only answer in NSFW channels — prefix commands are ignored silently elsewhere, and slash commands/buttons get a private note pointing at NSFW channels (or DMs). Direct messages are unaffected: the tower answers there as always.
+- **Prefix commands work in DMs now**: `e,explore`, `e,buy`, and every other `e,` command respond in direct messages with the bot, not just in server channels.
+
+### Fixed
+
+- **`e,buy` works again**: buying by name silently failed for every item — potions included (the Becoming draughts, tonics, and elixirs). The shop buttons were unaffected. An exact name now also wins over a partial match, so `e,buy draught` can't hand you the wrong bottle.
+- **The Pale Cartographer's sketches are exact now**: the three rooms he draws are the rooms you meet, in order. Altars, wandering souls, and tower events no longer step in front of a sketched room (a boss floor, a bottled sanctuary, and the tower's guaranteed stairs still take precedence — without consuming the sketch), a sketched descent can no longer dissolve into an empty room if your threat shifted after he drew it, and he has stopped hedging: no more "Probably."
+
 ## 2026-10-21
 
 ### Added

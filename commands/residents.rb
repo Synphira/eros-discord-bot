@@ -78,6 +78,18 @@ module Commands
         c.text_display(content: "## #{spec[:name]} — #{spec[:title]}")
         c.text_display(content: notice) if notice
         c.text_display(content: spec[:intro])
+        case Engine::ThreatCalculator.calculate(player).category
+        when :high
+          c.text_display(
+            content: '_The greeting dies on its way out. What you are wearing has already introduced ' \
+                     'you — thoroughly, and at volume._'
+          )
+        when :medium
+          c.text_display(
+            content: '_You are looked over once, with professional interest. The outfit registers. ' \
+                     'So does its intent._'
+          )
+        end
         if id.to_s == 'vex' && Engine::Residents.vex_restored?(player)
           c.text_display(
             content: '_The new room is rundown and entirely hers: a kettle, a worktable, a sign in her own ' \
@@ -98,7 +110,9 @@ module Commands
         end
 
         case id.to_s
-        when 'vex' then vex_services(c, player, owner)
+        when 'vex'
+          vex_services(c, player, owner)
+          vex_outfit_counter(c, player, owner)
         when 'pip' then pip_services(c, player, owner)
         when 'nectar' then nectar_services(c, player, owner)
         when 'cartographer' then cartographer_services(c, player, owner)
@@ -142,6 +156,40 @@ module Commands
           row.button(label: "Refit: #{item.name}"[0, 80], style: :secondary,
                      custom_id: "eros:resident:vex:refit:#{item.id}:#{owner}",
                      disabled: refitted || player.lp < Engine::Residents::REFIT_COST)
+        end
+      end
+    end
+
+    def vex_outfit_counter(c, player, owner)
+      c.separator(divider: true, spacing: :small)
+      Engine::Residents.sync_vex_outfits!
+      restored = Engine::Residents.vex_restored?(player)
+      stock = Engine::Residents.vex_outfit_stock(player)
+      c.text_display(
+        content: '**Her rack** — clothes, not living gear: cut by her own hand to be *read* in. Every ' \
+                 'piece raises your **Appearance** (and so your threat), makes monsters easier to ' \
+                 'satisfy, and pays better when you submit. The tower rewards being looked at.' \
+                 "#{restored ? ' _The new room has a proper rack — the stock has doubled. Rent has its privileges._' : ''}"
+      )
+      entries = stock.filter_map do |spec|
+        record = Engine::Residents.vex_outfit_record(spec)
+        next unless record
+
+        owned = player.owns_equipment?(record.id)
+        price = Engine::Residents.vex_outfit_price(player, spec)
+        mods = Engine::Treasure.format_stat_changes(spec[:stat_modifiers])
+        { spec: spec, record: record, owned: owned, price: price,
+          line: "**#{spec[:name]}** (#{price} LP)#{owned ? ' _(owned)_' : ''} — _#{spec[:description]}_\n-# #{mods}" }
+      end
+      c.text_display(content: entries.map { |e| e[:line] }.join("\n\n"))
+      entries.each_slice(3) do |slice|
+        c.row do |row|
+          slice.each do |e|
+            row.button(label: (e[:owned] ? "Owned: #{e[:spec][:name]}" : "Buy: #{e[:spec][:name]}")[0, 80],
+                       style: e[:owned] ? :secondary : :success,
+                       custom_id: "eros:resident:vex:buy:#{e[:record].id}:#{owner}",
+                       disabled: e[:owned] || player.lp < e[:price])
+          end
         end
       end
     end
@@ -205,15 +253,16 @@ module Commands
       sketch_line =
         if queue
           "Current sketch: #{queue.map { |k| "#{Engine::Residents::SKETCH_ICONS[k]} #{Engine::Residents::SKETCH_LABELS[k]}" }.join(' · ')} " \
-          '— served room by room while the gates allow.'
+          '— served exactly, room by room.'
         else
           'No sketch in hand.'
         end
       price = Engine::Residents.sketch_price(player)
       c.text_display(
         content: "**His dictation** — a sketch of the next 3 rooms the land is dreaming " \
-                 "(**#{price} LP** at this depth). Bosses, altars, and events keep their own counsel and " \
-                 "override it without consuming it; descending voids it. _#{sketch_line}_"
+                 "(**#{price} LP** at this depth). What he draws is the room you get; only a boss floor, " \
+                 "a bottled sanctuary, or the tower's own guaranteed stairs override it without " \
+                 "consuming it, and descending voids it. _#{sketch_line}_"
       )
       c.row do |row|
         row.button(label: "Buy a sketch (#{price} LP)", style: :primary,
@@ -290,6 +339,18 @@ module Commands
 
       action, item_id = event.custom_id.match(/\Aeros:resident:vex:(off|refit):(\d+):\d+\z/).captures
       result = action == 'off' ? Engine::Residents.negotiate_off!(player, item_id) : Engine::Residents.refit!(player, item_id)
+      player.refresh
+      Commands::Residents.show(event, 'vex', notice: "#{result[:ok] ? '✅' : '❌'} #{result[:message]}")
+    end
+
+    button(custom_id: /^eros:resident:vex:buy:\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      item_id = event.custom_id[/\Aeros:resident:vex:buy:(\d+):\d+\z/, 1]
+      result = Engine::Residents.buy_vex_outfit!(player, item_id)
       player.refresh
       Commands::Residents.show(event, 'vex', notice: "#{result[:ok] ? '✅' : '❌'} #{result[:message]}")
     end

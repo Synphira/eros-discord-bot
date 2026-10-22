@@ -1093,7 +1093,7 @@ module Engine
 
     EFFECT_LABELS = {
       'strength' => 'STR', 'agility' => 'AGI', 'resistance' => 'RES', 'submission' => 'Submission',
-      'max_hp_bonus' => 'max defiance'
+      'max_hp_bonus' => 'max defiance', 'appearance' => 'Appearance'
     }.freeze
 
     module_function

@@ -764,6 +764,9 @@ module Engine
 
         #{combat_banner}
       MSG
+      if (appraisal = ThreatCalculator.boss_appraisal(player))
+        message += "\n\n#{appraisal}"
+      end
       gossip = gossip_line(player, boss[:name])
       message += "\n\n#{gossip}" if gossip
 
@@ -785,6 +788,9 @@ module Engine
       ]
       gossip = gossip_line(player, boss[:name])
       parts << gossip if gossip
+      if (appraisal = ThreatCalculator.boss_appraisal(player))
+        parts << appraisal
+      end
       regard = eros_regard_lines(player)
       parts << regard.join("\n") if regard.any?
       parts.join("\n\n")

@@ -19,8 +19,45 @@ module Engine
       return :regular if player.tracker('cycles_completed').positive? ||
                          Array(player.tracker_hash['bosses_satisfied_names']).size >= 2
       return :surrendered if player.tracker('climaxes_survived') >= 10
+      # Appearance is its own introduction: a depraved-looking delver
+      # is, at minimum, noticed by the clergy before a word is spoken.
+      return :noticed if Engine::ThreatCalculator.calculate(player).category == :high
 
       nil
+    end
+
+    # How each venue's keeper reacts to the way a delver is dressed,
+    # by appearance tier. At :high this replaces the usual recognition
+    # line — the look is the loudest thing in the room.
+    APPEARANCE_LINES = {
+      shop: {
+        medium: '_Berry looks up, takes in the outfit in one long professional sweep, and fans herself ' \
+                'with the ledger. "Well. Someone dressed to be *negotiated with*. Berry approves, sugar."_',
+        high: '_Berry\'s wings forget their rhythm entirely. "Sugar," she says, faint and delighted, ' \
+              '"you cannot walk into my tidy shop dressed like a confession and expect me to talk about ' \
+              '*prices* first." She talks about prices. Eventually._'
+      },
+      parlour: {
+        medium: '_Syn\'s tired eyes do a slow, appreciative circuit of you. "Careful, pet. Dress like ' \
+                'that in my parlour and the ink starts volunteering."_',
+        high: '_Syn sets the needle down. That has never happened. "Look at you," she says, low and ' \
+              'thoroughly pleased. "My temple\'s favourite sermon, and not a word wasted. Sit, pet. ' \
+              'Slowly. Let me appreciate the liturgy."_'
+      },
+      cursed: {
+        medium: '_Covar\'s grin arrives before he does. "Oh, the wardrobe\'s been *consulted*. ' \
+                'Vex\'s cutting, if I know ribbon-work. It suits you, delver. It suits you down to the floor."_',
+        high: '_Covar comes around the counter for a better look, tail lashing, entirely unprofessional. ' \
+              '"Gods below. You are not wearing that, delver — that is wearing *you*, and doing it ' \
+              'beautifully. Whatever you came for, the answer is yes."_'
+      }
+    }.freeze
+
+    def appearance_line(player, context)
+      category = Engine::ThreatCalculator.calculate(player).category
+      return nil if category == :low
+
+      APPEARANCE_LINES.dig(context.to_sym, category)
     end
 
     LINES = {
@@ -69,11 +106,18 @@ module Engine
     }.freeze
 
     # One recognition line for a venue (:shop, :parlour, :cursed), or nil.
+    # A depraved presentation speaks first; a provocative one speaks
+    # when nothing louder has already been earned.
     def line(player, context)
-      t = tier(player)
-      return nil unless t
+      if Engine::ThreatCalculator.calculate(player).category == :high &&
+         (seen = appearance_line(player, context))
+        return seen
+      end
 
-      LINES.dig(context.to_sym, t)
+      t = tier(player)
+      return LINES.dig(context.to_sym, t) if t
+
+      appearance_line(player, context)
     end
   end
 end

@@ -136,10 +136,12 @@ module Commands
       player = ErosHelpers.require_player(event) or return
       return missing_name(event, 'buy') if item_name.nil? || item_name.to_s.strip.empty?
 
-      item = ::Equipment
-             .where(Sequel.ilike(:name, "%#{item_name}%"), cursed: false)
-             .all
-             .find { |e| Engine::Shop.shop_item?(e) }
+      matches = ::Equipment
+                .where(cursed: false)
+                .where(Sequel.ilike(:name, "%#{item_name}%"))
+                .all
+                .select { |e| Engine::Shop.shop_item?(e) }
+      item = matches.find { |e| e.name.casecmp?(item_name.to_s.strip) } || matches.first
 
       unless item
         ErosUI.reply_v2(event, ephemeral: true) do |c|

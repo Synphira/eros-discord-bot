@@ -228,6 +228,14 @@ module Engine
       # career-kinds floor count the win that is about to happen twice.
       lifetime_before = total(player)
       player.bump_tracker!("admirer_#{type}")
+      # Appearance courts for you: a delver who looks like an invitation
+      # is halfway to an admirer before the first touch lands.
+      appearance = Engine::ThreatCalculator.calculate(player).category
+      if appearance == :high || (appearance == :medium && rand < 0.5)
+        player.bump_tracker!("admirer_#{type}")
+        log << '_Half the courting was done by what you are wearing — it remembers the look as fondly ' \
+               'as the touch. _(admirer progress +1 from your appearance)_'
+      end
       if admirer?(player, type)
         # Pleasing it again reminds it why it follows you: full lifespan anew.
         set_rooms_left!(player, type, LIFESPAN_ROOMS)

@@ -10,7 +10,7 @@ module Commands
 
     module_function
 
-    def run(event, view: :equipped, slot: nil)
+    def run(event, view: :equipped, slot: nil, notice: nil)
       player = ErosHelpers.require_player(event) or return
 
       equipped_ids = player.equipped_items.map(&:id)
@@ -23,12 +23,19 @@ module Commands
                      custom_id: "eros:equip:view:equipped:#{event.user.id}")
           row.button(label: "Inventory (#{player.equipment.size})", style: view == :inventory ? :primary : :secondary,
                      custom_id: "eros:equip:view:inventory:#{event.user.id}")
+          row.button(label: 'Outfits', style: view == :outfits ? :primary : :secondary,
+                     custom_id: "eros:equip:outfits:#{event.user.id}")
         end
+        c.text_display(content: notice) if notice
         c.separator(divider: true, spacing: :small)
 
         if view == :inventory
           render_inventory(c, player, by_slot, equipped_ids, slot, event.user.id)
+        elsif view == :outfits
+          render_outfits(c, player, event.user.id)
         else
+          c.text_display(content: Engine::ThreatCalculator.appearance_line(player))
+          c.separator(divider: true, spacing: :small)
           render_equipped(c, player, by_slot)
         end
 
@@ -37,6 +44,34 @@ module Commands
           content: '-# `e,equip` / `e,unequip` for normal gear · `e,remove [name]` to destroy cursed gear with LP · ' \
                    'one trophy at a time; trophies are lost on defeat.'
         )
+      end
+    end
+
+    def render_outfits(container, player, owner_id)
+      container.text_display(content: Engine::ThreatCalculator.appearance_line(player))
+      container.text_display(
+        content: '**Saved outfits** — save what you are wearing into a slot, then load it back whenever ' \
+                 'you like. Loading swaps the covered slots to the saved pieces. If living gear is in the ' \
+                 'way, loading tears it off and destroys it at its usual removal price — the cost is ' \
+                 'listed on the slot before you commit. Your trophy is never part of an outfit.'
+      )
+      (1..Player::OUTFIT_SLOT_COUNT).each do |slot|
+        items = player.saved_outfit(slot)
+        cost = items ? player.outfit_swap_cost(slot) : 0
+        lines = ["**Outfit #{slot}** — #{items ? items.map(&:name).join(', ') : '_empty_'}"]
+        if items && cost.positive?
+          names = player.outfit_swap_conflicts(slot).map { |i| i.name }.join(', ')
+          lines << "⚠️ Loading tears off **#{names}** — **#{cost} LP** in cursed removal."
+        end
+        container.text_display(content: lines.join("\n"))
+        container.row do |row|
+          row.button(label: "Save into #{slot}", style: :primary,
+                     custom_id: "eros:equip:outfit:save:#{slot}:#{owner_id}")
+          row.button(label: cost.positive? ? "Load #{slot} (#{cost} LP removal)"[0, 80] : "Load #{slot}",
+                     style: :success,
+                     custom_id: "eros:equip:outfit:load:#{slot}:#{owner_id}",
+                     disabled: items.nil?)
+        end
       end
     end
 
@@ -102,6 +137,25 @@ module Commands
 
       view = event.custom_id[/\Aeros:equip:view:(\w+):\d+\z/, 1].to_sym
       Commands::Equipment.run(event, view: view)
+    end
+
+    button(custom_id: /^eros:equip:outfits:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Equipment.run(event, view: :outfits)
+    end
+
+    button(custom_id: /^eros:equip:outfit:(save|load):[123]:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      action, slot = event.custom_id.match(/\Aeros:equip:outfit:(save|load):([123]):\d+\z/).captures
+      result = action == 'save' ? player.save_outfit!(slot.to_i) : player.load_outfit!(slot.to_i)
+      player.refresh
+      notice = "#{result[:ok] ? '✅' : '❌'} #{result[:message]}"
+      Commands::Equipment.run(event, view: :outfits, notice: notice)
     end
 
     string_select(custom_id: /^eros:equip:slot:\d+$/) do |event|

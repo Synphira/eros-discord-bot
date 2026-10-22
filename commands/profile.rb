@@ -12,6 +12,8 @@ module Commands
     module_function
 
     def show_profile(event, lookup: nil)
+      return if ErosHelpers.guard_channel!(event)
+
       if lookup && !lookup.strip.empty?
         target = Player.find_by_character_name(lookup)
         unless target
@@ -250,6 +252,8 @@ module Commands
     end
 
     def show_leaderboard(event, stat = nil, page: nil)
+      return if ErosHelpers.guard_channel!(event)
+
       keys = Engine::ProfileSystem::STATS.keys
       # Paging wraps: Next on the last ranking cycles back to the first.
       stat = page.nil? ? Engine::ProfileSystem.normalize_stat(stat) : keys[page.to_i % keys.size]

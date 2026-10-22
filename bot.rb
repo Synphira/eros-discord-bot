@@ -51,7 +51,7 @@ end
 
 CLIENT_ID = ENV['DISCORD_CLIENT_ID']
 
-intents = %i[servers server_messages]
+intents = %i[servers server_messages direct_messages]
 intents << :server_members if Presence.members_intent?
 
 bot = Discordrb::Commands::CommandBot.new(
@@ -61,6 +61,19 @@ bot = Discordrb::Commands::CommandBot.new(
   intents: intents
 )
 ErrorReporter.attach(bot)
+
+# Inside a server, prefix commands are only heard in NSFW channels;
+# anywhere else they are ignored in silence. Direct messages always
+# reach the tower. (Slash commands and components gate themselves
+# through ErosHelpers.guard_channel!, which can answer privately.)
+module ErosPrefixGate
+  def execute_command(name, event, arguments, chained = false, check_permissions = true)
+    return nil if ErosHelpers.channel_blocked?(event)
+
+    super
+  end
+end
+Discordrb::Commands::CommandBot.prepend(ErosPrefixGate)
 
 Dir[File.expand_path('commands/**/*.rb', __dir__)].sort.each { |path| require path }
 

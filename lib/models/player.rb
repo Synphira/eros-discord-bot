@@ -923,10 +923,102 @@ class Player < Sequel::Model(:players)
 
   def gain_lp!(amount)
     amount = amount.to_i
-    amount = (amount * Engine::Burdens.lp_multiplier(self)).round if amount.positive?
+    if amount.positive?
+      amount = (amount * Engine::Burdens.lp_multiplier(self)).round
+      # Being looked at pays: a provocative or depraved presentation
+      # earns a quiet cut of everything the tower hands out.
+      amount = (amount * Engine::ThreatCalculator.lp_multiplier(self)).round
+    end
     attrs = { lp: lp + amount }
     attrs[:trackers] = tracker_hash.merge('lp_earned' => tracker('lp_earned') + amount) if amount.positive?
     update(attrs)
+  end
+
+  # --- Saved outfits ---------------------------------------------------
+  # Up to three named-by-number sets of currently-worn gear, saved from
+  # the equipment menu and loaded back on the fly. The trophy never
+  # takes part: an outfit is what you wear, not what you display.
+
+  OUTFIT_SLOT_COUNT = 3
+
+  def outfit_slots
+    saved = tracker_hash['outfit_slots']
+    return {} unless saved.is_a?(Hash)
+
+    saved.transform_keys(&:to_s).transform_values { |ids| Array(ids).map(&:to_i) }
+  end
+
+  def saved_outfit(slot)
+    ids = outfit_slots[slot.to_s]
+    return nil if ids.nil? || ids.empty?
+
+    owned = equipment_dataset.all.to_h { |item| [item.id, item] }
+    ids.filter_map { |id| owned[id] }
+  end
+
+  def save_outfit!(slot)
+    worn = equipped_items.reject { |item| item.slot.to_s == TROPHY_SLOT }
+    return { ok: false, message: 'You are not wearing anything worth saving as an outfit.' } if worn.empty?
+
+    slots = outfit_slots.merge(slot.to_s => worn.map(&:id))
+    set_tracker!('outfit_slots', slots)
+    { ok: true, message: "Saved **Outfit #{slot}**: #{worn.map(&:name).join(', ')}." }
+  end
+
+  # Cursed pieces that loading this outfit would have to tear off: worn
+  # living gear whose slot the outfit covers with something else. Each
+  # costs its usual tear-free removal price, destroyed as usual.
+  def outfit_swap_conflicts(slot)
+    target = saved_outfit(slot)
+    return [] unless target
+
+    target_by_slot = target.to_h { |item| [item.slot.to_s, item] }
+    equipped_items.select do |item|
+      next false unless item.cursed
+
+      replacement = target_by_slot[item.slot.to_s]
+      replacement && replacement.id != item.id
+    end
+  end
+
+  def outfit_swap_cost(slot)
+    outfit_swap_conflicts(slot).sum { |item| cursed_removal_cost(item) }
+  end
+
+  def load_outfit!(slot)
+    target = saved_outfit(slot)
+    return { ok: false, message: "Outfit #{slot} is empty — save what you are wearing into it first." } if target.nil?
+
+    conflicts = outfit_swap_conflicts(slot)
+    cost = conflicts.sum { |item| cursed_removal_cost(item) }
+    if cost.positive? && lp < cost
+      names = conflicts.map { |item| "**#{item.name}** (#{cursed_removal_cost(item)} LP)" }.join(', ')
+      return { ok: false, error: :insufficient_lp, cost: cost,
+               message: "Loading Outfit #{slot} means tearing off #{names} — **#{cost} LP** in all, " \
+                        "and you have #{lp}." }
+    end
+
+    spent = 0
+    conflicts.each do |item|
+      result = remove_cursed_equipment!(item.id)
+      spent += cursed_removal_cost(item) if result[:ok]
+      refresh
+    end
+
+    worn_now = equipped_items.reject { |item| item.slot.to_s == TROPHY_SLOT }
+    target_ids = target.map(&:id)
+    worn_now.each do |item|
+      next if target_ids.include?(item.id)
+      next unless target.any? { |t| t.slot.to_s == item.slot.to_s }
+
+      unequip_item(item.id) unless item.cursed
+    end
+    target.each { |item| equip_item(item.id) }
+    refresh
+
+    note = spent.positive? ? " The living gear in the way was torn off and destroyed (**#{spent} LP**)." : ''
+    { ok: true, cost: spent,
+      message: "You change into **Outfit #{slot}**: #{target.map(&:name).join(', ')}.#{note}" }
   end
 
   def refund_lp!(amount)

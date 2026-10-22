@@ -95,6 +95,8 @@ module Commands
     end
 
     def run(event, page: 'start', ephemeral: false)
+      return if ErosHelpers.guard_channel!(event)
+
       owner = event.user.id
       ErosUI.reply_v2(event, colour: COLOUR, ephemeral: ephemeral) do |c|
         if page == 'tutorial'

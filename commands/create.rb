@@ -10,6 +10,8 @@ module Commands
     module_function
 
     def show_menu(event)
+      return if ErosHelpers.guard_channel!(event)
+
       if Player[event.user.id]
         ErosUI.reply_v2(event, ephemeral: true) do |c|
           c.text_display(content: 'You already have a character! Use `/status` or `e,status`.')

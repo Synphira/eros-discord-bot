@@ -139,8 +139,10 @@ module ErosUI
   def attach_shop_item_section(container, item, player:, category:, page:, owner_id:)
     owned = player.owns_equipment?(item.id) && item.type != 'special'
     tag = owned ? ' _(owned)_' : ''
+    price = Engine::Shop.price_for(player, item)
+    price_tag = price < item.cost.to_i ? "#{price} LP _(was #{item.cost})_" : "#{item.cost} LP"
     mods = Engine::Treasure.format_stat_changes(item.stat_modifiers)
-    content = "**#{item.name}** (#{item.cost} LP)#{tag} — _#{item.description}_"
+    content = "**#{item.name}** (#{price_tag})#{tag} — _#{item.description}_"
     content += "\n#{mods}" unless mods.to_s.empty? || mods == '_none_'
 
     container.section do |section|
@@ -149,7 +151,7 @@ module ErosUI
         label: owned ? 'Owned' : 'Buy',
         style: owned ? :secondary : :success,
         custom_id: "eros:shop:buy:#{item.id}:#{category}:#{page}:#{owner_id}",
-        disabled: owned || player.lp < item.cost.to_i
+        disabled: owned || player.lp < price
       )
     end
   end
@@ -559,7 +561,8 @@ module ErosUI
     )
     container.text_display(
       content: "**Threat Level — #{threat_label(threat.category)}** #{threat_bar(threat.percent)}\n" \
-               "_LP contrib #{threat.lp_component}% · Curses +#{threat.curse_component}_"
+               "_LP contrib #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
+               "Appearance +#{threat.appearance_component}_"
     )
     if (chastity = Engine::ChastitySystem.description(player))
       container.text_display(content: "🔒 #{chastity}")

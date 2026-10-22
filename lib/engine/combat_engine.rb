@@ -525,7 +525,8 @@ module Engine
       # Submission still helps, but with diminishing returns, and each new
       # cycle makes the tower's creatures harder to please.
       chance = 0.15 + (@player.effective_submission * 0.055) + @player.curse_effect_sum('satisfy_bonus') +
-               enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc)
+               enc[:pliant].to_f + Engine::Elites.satisfy_bonus(enc) +
+               Engine::ThreatCalculator.satisfy_bonus(@player)
       chance += 0.08 if Engine::TransformationSystem.resonance?(@player, enc[:type])
       chance -= 0.05 * (@player.current_cycle.to_i - 1)
       chance -= 0.05 if enc[:is_boss]

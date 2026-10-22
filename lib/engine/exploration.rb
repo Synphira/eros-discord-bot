@@ -394,7 +394,9 @@ module Engine
     def projected_pool_kinds(count)
       threat = ThreatCalculator.calculate(@player)
       count.times.map do |i|
-        weights = pool_weights(threat, rooms_offset: i)
+        # The room counter ticks before each room is served, so the
+        # first sketched room is projected one room ahead of the count.
+        weights = pool_weights(threat, rooms_offset: i + 1)
         pick = rand(weights.values.sum)
         weights.find { |_, w| (pick -= w) < 0 }.first.to_s
       end
@@ -449,6 +451,23 @@ module Engine
       end
       note_room_explored!
 
+      # A Cartographer's sketch is served exactly as drawn, before the
+      # soft gates (manifestations, altars, NPCs, random events) roll:
+      # what he sketched is the room you get. Only the hard gates above
+      # (a boss floor, a bottled sanctuary, the guaranteed stairs)
+      # override it, and overriding never consumes the queue. A sketched
+      # descent is forced — he only draws stairs the land already leaned
+      # toward, so a threat shift since the purchase cannot swallow them.
+      if (sketched = Engine::Residents.consume_sketch!(@player))
+        return case sketched.to_sym
+               when :monster then monster_room
+               when :trap then trap_room
+               when :treasure then treasure_room
+               when :stairs then stairs_room(force: true)
+               else empty_room
+               end
+      end
+
       court = dreaming_court?
       return manifestation_room if court && rand < 0.12
 
@@ -462,17 +481,9 @@ module Engine
         return event_room(Engine::RandomEvents.start!(@player))
       end
 
-      # A Cartographer's sketch is served before the pool is rolled: the
-      # hard gates above (bosses, altars, events) have already had their
-      # chance to override it, and overriding never consumes the queue.
-      kind =
-        if (sketched = Engine::Residents.consume_sketch!(@player))
-          sketched.to_sym
-        else
-          weights = pool_weights(threat)
-          pick = rand(weights.values.sum)
-          weights.find { |_, w| (pick -= w) < 0 }.first
-        end
+      weights = pool_weights(threat)
+      pick = rand(weights.values.sum)
+      kind = weights.find { |_, w| (pick -= w) < 0 }.first
 
       case kind
       when :monster then monster_room
@@ -724,6 +735,7 @@ module Engine
           #{monster[:name].to_s.include?('Door Mimic') ? 'The door ahead of you opens its eyes. The exit was the monster, and it has been waiting with its handle politely still for someone to try to leave.' : ''}
           You encounter a **#{monster[:name]}** _(#{monster[:type_name]})_!
           _#{monster[:type_description]}_
+          #{Engine::ThreatCalculator.monster_opener(@player)}
           It looks hungry...
           HP #{monster[:hp]}/#{monster[:max_hp]} · STR #{monster[:strength]} · AGI #{monster[:agility]} · Lust hit #{monster[:lust_damage]}
           _Threat #{Engine::ThreatCalculator.calculate(@player).category.to_s.upcase} warps this foe._
