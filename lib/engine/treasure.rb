@@ -402,7 +402,7 @@ module Engine
         type: 'armor',
         slot: 'chest',
         description: 'Light padding — better than nothing.',
-        stat_modifiers: { 'resistance' => 1 },
+        stat_modifiers: { 'resistance' => 1, 'appearance' => -1 },
         cost: 0,
         rarity: 1
       },
@@ -423,19 +423,20 @@ module Engine
     CHEST_FINDS = [
       { name: "Old Champion's Sword", type: 'weapon', slot: 'weapon', cost: 60, rarity: 3,
         description: 'A notched blade from a delver who made it further than most.',
-        stat_modifiers: { 'strength' => 4, 'damage' => 2, 'crit_chance' => 0.05 } },
+        stat_modifiers: { 'strength' => 4, 'damage' => 2, 'crit_chance' => 0.05, 'appearance' => 1 } },
       { name: 'Ghostsilk Gloves', type: 'accessory', slot: 'accessory', cost: 60, rarity: 3,
         description: 'Gloves so light they seem to move a moment before you do.',
-        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.06 } },
+        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.06, 'appearance' => 1 } },
       { name: "Sister's Veil", type: 'armor', slot: 'head', cost: 60, rarity: 3,
-        description: 'A blessed veil left behind by some devout delver. Touches feel distant through it.',
-        stat_modifiers: { 'resistance' => 2, 'lust_resist' => 2 } },
+        description: 'A blessed veil left behind by some devout delver. Touches feel distant through it. ' \
+                     'The tower, unfortunately, reads devotion as an invitation.',
+        stat_modifiers: { 'resistance' => 2, 'lust_resist' => 2, 'appearance' => 5 } },
       { name: "Delver's Lucky Boots", type: 'armor', slot: 'feet', cost: 60, rarity: 3,
         description: 'Scuffed boots with a knack for kicking open loose floorboards.',
         stat_modifiers: { 'agility' => 2, 'treasure_lp' => 3, 'explore_lp' => 1 } },
       { name: 'Moonlit Mail', type: 'armor', slot: 'chest', cost: 60, rarity: 3,
         description: 'Fine silvered mail that stays cool no matter how hot things get.',
-        stat_modifiers: { 'resistance' => 4, 'max_hp' => 10, 'lust_resist' => 1 } }
+        stat_modifiers: { 'resistance' => 4, 'max_hp' => 10, 'lust_resist' => 1, 'appearance' => 1 } }
     ].freeze
 
     def sync_to_db!

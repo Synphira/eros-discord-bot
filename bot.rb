@@ -19,6 +19,7 @@ require_relative 'lib/engine/marks'
 require_relative 'lib/engine/quests'
 require_relative 'lib/engine/conversations'
 require_relative 'lib/engine/residents'
+require_relative 'lib/engine/wardrobe'
 require_relative 'lib/engine/codex'
 require_relative 'lib/engine/regard'
 require_relative 'lib/engine/biomes'
@@ -122,6 +123,7 @@ bot.ready do |_event|
     Engine::Shop.sync_to_db!
     Engine::Treasure.sync_to_db!
     Engine::BossFights.sync_trophies!
+    Engine::Wardrobe.sync_dev_gear!
     puts "Shop / treasure inventory synced (#{Equipment.count} items)."
   rescue StandardError => e
     warn "Curse catalog sync warning: #{e.message}"

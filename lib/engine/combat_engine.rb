@@ -599,7 +599,8 @@ module Engine
       return false if enc[:hp] <= 0
       return false if Engine::Dev.debug?(@player)
 
-      regen = @player.equipment_effect_sum('defiance_regen').round
+      regen = (@player.equipment_effect_sum('defiance_regen') +
+               Engine::Wardrobe.effect_sum(@player, 'defiance_regen')).round
       if regen.positive?
         gained = @player.heal_defiance!(regen)
         log << "Your gear restores **#{gained}** defiance. (now #{@player.defiance}/#{@player.max_defiance})" if gained.positive?

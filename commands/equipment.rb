@@ -92,6 +92,14 @@ module Commands
         lines << "_Lich's Phylactery: **#{player.phylactery_used ? 'spent this run' : 'ready'}**_"
       end
       container.text_display(content: lines.join("\n"))
+
+      sets = Engine::Wardrobe.active_sets(player)
+      return if sets.empty?
+
+      container.text_display(
+        content: (["**Something about the whole outfit…**"] +
+                  sets.map { |key, spec| Engine::Wardrobe.describe_set(key, spec) }).join("\n")
+      )
     end
 
     def render_inventory(container, player, by_slot, equipped_ids, slot, owner_id)

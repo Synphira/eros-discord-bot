@@ -472,6 +472,7 @@ class Player < Sequel::Model(:players)
     Engine::Burdens.effects(self).each { |key, value| bags[key.to_s] << value }
     Engine::Weekly.effects.each { |key, value| bags[key.to_s] << value }
     Engine::Marks.effects(self).each { |key, value| bags[key.to_s] << value }
+    Engine::Wardrobe.effects(self).each { |key, value| bags[key.to_s] << value }
     equipped_items.each do |item|
       gear_effects_for(item).each { |key, value| bags[key.to_s] << value if gear_bag_key?(key) }
     end
@@ -616,7 +617,8 @@ class Player < Sequel::Model(:players)
     cap = curse_effect_sum('defiance_cap').round
     return cap if cap.positive?
 
-    bonus = curse_effect_sum('max_hp_bonus') + equipment_effect_sum('max_hp')
+    bonus = curse_effect_sum('max_hp_bonus') + equipment_effect_sum('max_hp') +
+            Engine::Wardrobe.effect_sum(self, 'max_hp')
     [self.class.calculate_max_hp(level) + bonus.round, 1].max
   end
 
@@ -1458,6 +1460,12 @@ class Player < Sequel::Model(:players)
   def equip_item(equipment_id)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
+
+    if item.stat_modifiers['dev_only'] && !Engine::Dev.owner?(discord_id)
+      return { ok: false, error: :dev_only,
+               message: "**#{item.name}** stirs, recognises that you are not its maker, and will not " \
+                        'be worn. Some things have exactly one owner.' }
+    end
 
     current = equipment_for_slot(item.slot)
     if current

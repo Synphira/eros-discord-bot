@@ -175,6 +175,7 @@ module Commands
       Engine::Shop.sync_to_db!
       Engine::Treasure.sync_to_db!
       Engine::BossFights.sync_trophies!
+      Engine::Wardrobe.sync_dev_gear!
       item = ::Equipment.where(Sequel.ilike(:name, "%#{name}%")).first
       return reply(event, "No item matching `#{name}`.") if name.empty? || item.nil?
 

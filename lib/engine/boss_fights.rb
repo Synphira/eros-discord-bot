@@ -543,59 +543,59 @@ module Engine
     TROPHIES = {
       'Mimic Tongue Amulet' => {
         description: "An amulet made from a mimic's tongue. +2 Submission — monsters are far easier to satisfy.",
-        stat_modifiers: { 'submission' => 2 }
+        stat_modifiers: { 'submission' => 2, 'appearance' => 2 }
       },
       "Queen's Favor" => {
         description: 'A blessed token from the Succubus Queen. All lust damage −20%.',
-        stat_modifiers: { 'lust_mult' => 0.8 }
+        stat_modifiers: { 'lust_mult' => 0.8, 'appearance' => 2 }
       },
       "King's Crown" => {
         description: 'The Incubus King\'s crown. +3 STR, +3 AGI.',
-        stat_modifiers: { 'strength' => 3, 'agility' => 3 }
+        stat_modifiers: { 'strength' => 3, 'agility' => 3, 'appearance' => 3 }
       },
       'Treant Heartwood' => {
         description: 'A piece of living heartwood from the Dryad\'s tree. +10 max Defiance, +2 RES.',
-        stat_modifiers: { 'max_hp' => 10, 'resistance' => 2 }
+        stat_modifiers: { 'max_hp' => 10, 'resistance' => 2, 'appearance' => 1 }
       },
       "Lich's Phylactery" => {
         description: 'Once per run, survive a finishing blow with half your Defiance restored.',
-        stat_modifiers: { 'cheat_death' => true }
+        stat_modifiers: { 'cheat_death' => true, 'appearance' => 1 }
       },
       'Alpha Beast Trophy' => {
         description: 'Marks you as the apex predator. Monster encounters −30%.',
-        stat_modifiers: { 'encounter_rate' => 0.7 }
+        stat_modifiers: { 'encounter_rate' => 0.7, 'appearance' => 2 }
       },
       'Boss Trophy' => {
         description: 'A trophy from a deep boss. +1 STR, +1 AGI, +1 RES.',
-        stat_modifiers: { 'strength' => 1, 'agility' => 1, 'resistance' => 1 }
+        stat_modifiers: { 'strength' => 1, 'agility' => 1, 'resistance' => 1, 'appearance' => 2 }
       },
       'Veil of the Pale Bride' => {
         description: "The Pale Bride's veil, cool as held breath. +2 RES, +1 Submission — the unchosen chose you.",
-        stat_modifiers: { 'resistance' => 2, 'submission' => 1 }
+        stat_modifiers: { 'resistance' => 2, 'submission' => 1, 'appearance' => 4 }
       },
       'Shard of the Mirror Queen' => {
         description: 'A shard of the mirror that wore you. +2 AGI and a knack for slipping your own grasp (dodge +5%).',
-        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.05 }
+        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.05, 'appearance' => 2 }
       },
       'Screen of the Empty Confessional' => {
         description: 'A sliver of the screen a century of sins were whispered through. +2 Submission, +1 RES — it keeps your secrets now.',
-        stat_modifiers: { 'submission' => 2, 'resistance' => 1 }
+        stat_modifiers: { 'submission' => 2, 'resistance' => 1, 'appearance' => 3 }
       },
       'Cup of the Never-Emptying Chalice' => {
         description: 'A cup that refills itself with golden warmth. All lust damage −10%, +1 Submission.',
-        stat_modifiers: { 'lust_mult' => 0.9, 'submission' => 1 }
+        stat_modifiers: { 'lust_mult' => 0.9, 'submission' => 1, 'appearance' => 1 }
       },
       'Chip of the First Altar' => {
         description: 'A chip of the first altar Syn ever knelt at. +10 max Defiance, +1 RES. It is still warm.',
-        stat_modifiers: { 'max_hp' => 10, 'resistance' => 1 }
+        stat_modifiers: { 'max_hp' => 10, 'resistance' => 1, 'appearance' => 2 }
       },
       'Scale of the Hoardheart' => {
         description: 'A scale of fused offering-gold from the Hoardheart Dragon. +2 STR, and treasure finds pay +3 LP.',
-        stat_modifiers: { 'strength' => 2, 'treasure_lp' => 3 }
+        stat_modifiers: { 'strength' => 2, 'treasure_lp' => 3, 'appearance' => 2 }
       },
       'Ring of the Drowned Saint' => {
         description: 'A ring of dark glass from her reliquary, faintly suckered inside. +2 Submission, +1 AGI — it holds on like she does.',
-        stat_modifiers: { 'submission' => 2, 'agility' => 1 }
+        stat_modifiers: { 'submission' => 2, 'agility' => 1, 'appearance' => 3 }
       }
     }.freeze
 
