@@ -27,6 +27,14 @@ module Commands
       end
 
       news = own ? target.check_progress! : []
+      if own
+        # Once-ever stories finished before the shelf existed still
+        # owe their keepsakes; the shelf settles up on first sight.
+        Engine::Residents.backfill_story_keepsakes!(target)
+        Engine::Quests.backfill_wedding_keepsake!(target)
+        Engine::BossFights.backfill_mementos!(target)
+        target.refresh
+      end
 
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         title = target.active_title_name

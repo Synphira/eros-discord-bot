@@ -267,6 +267,27 @@ module Engine
       progress && progress[0] >= progress[1]
     end
 
+    # A finished Resident story is once-ever; it leaves a keepsake.
+    STORY_KEEPSAKES = {
+      'vex' => 'a seam of the Original\'s own thread, freely given',
+      'nectar' => 'a hymn sheet from the shrine, amended in Nectar\'s hand'
+    }.freeze
+
+    def grant_story_keepsake!(player, id)
+      keepsake = STORY_KEEPSAKES[id.to_s] or return nil
+      return nil if player.keepsakes.include?(keepsake)
+
+      player.add_keepsake!(keepsake)
+      keepsake
+    end
+
+    # For delvers who finished before the shelf existed.
+    def backfill_story_keepsakes!(player)
+      STORY_KEEPSAKES.each_key do |id|
+        grant_story_keepsake!(player, id) if player.tracker("#{id}_story_done").positive?
+      end
+    end
+
     def advance_story!(player, id, spec)
       step = story_step(player, id)
       player.set_tracker!("resident_#{id}_step", step + 1)
@@ -276,6 +297,7 @@ module Engine
       if story_done?(player, id)
         player.set_tracker!("#{id}_story_done", 1)
         player.bump_tracker!('npc_stories_finished')
+        grant_story_keepsake!(player, id)
       end
       player.check_progress!
     end
@@ -300,7 +322,8 @@ module Engine
 
       player.set_tracker!("#{id}_ending", ending_key.to_s)
       advance_story!(player, id, spec)
-      { ok: true, message: "#{ending[:text]}\n\n**Story finished: #{RESIDENTS[id.to_s][:name]}.** **+#{spec[:reward]} LP**." }
+      shelf = STORY_KEEPSAKES[id.to_s] ? "\n_Kept, for the shelf: #{STORY_KEEPSAKES[id.to_s]}._" : ''
+      { ok: true, message: "#{ending[:text]}\n\n**Story finished: #{RESIDENTS[id.to_s][:name]}.** **+#{spec[:reward]} LP**.#{shelf}" }
     end
 
     # --- Madame Vex: negotiation and refits ------------------------------

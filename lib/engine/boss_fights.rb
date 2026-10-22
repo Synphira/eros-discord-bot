@@ -1554,6 +1554,15 @@ module Engine
       MEMENTOS[canonical_name(name.to_s)]
     end
 
+    # For delvers who met the clergy before the shelf existed.
+    def backfill_mementos!(player)
+      seen = Array(player.tracker_hash['bosses_seen']) + Array(player.tracker_hash['relic_bosses_seen'])
+      seen.each do |name|
+        keepsake = memento_for(name)
+        player.add_keepsake!(keepsake) if keepsake && !player.keepsakes.include?(keepsake)
+      end
+    end
+
     def satisfy_closing(boss_name)
       SATISFY_CLOSINGS[canonical_name(boss_name.to_s)]
     end
