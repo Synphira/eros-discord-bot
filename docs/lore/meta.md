@@ -70,6 +70,10 @@ These are hooks for later development, not final specifications:
 - ~~Clergy relationship grid?~~ Written: private takes under each lord + summary table.
 - ~~Syn at the Saint’s glass?~~ Written: curiosity after the seal; resemblance + recognition smile; no words, only want; won’t return (afraid she’d say yes); Syn/Berry/Lich know; delver leaks via Lich/relic gossip.
 - ~~Wandering NPC afterlives?~~ Written: cozy corruption + per-character colour; soft home cameos; Mira shrine+staff; Lillia/Elara object echoes; Marcus random-succubus pet; Alex nest regular; see After lives.
+- ~~Boss victory / satisfy voices?~~ Written: defeat = system-generic; satisfy + returnee (filth) for six + Eros; returnee = met Eros **or** 3rd+ visit; hunger+amused mix; see Victory / satisfy voice bible in clergy.md.
+- ~~Cycle-depth ladder?~~ Written: rungs 1/2/5/10; dialogue+recognition+rumour+minor colour; reveal+soft-favourite hard locks; Syn hints at 5+ or favourite; per-character recognition; Syn sample per rung; see conversations.md.
+- ~~Eros floor-35 scene beats?~~ Written: greet (knows name/marks/Attention) → mark-trace (Syn hand / empty / Wedding Mark) → climax (surrender warm / win impressed) → dismiss-return (return is the gift); see temple.md.
+- ~~Named Syn-made minds?~~ Written: **Wander**, **Velvet**, **Click**, **Drip**, **Needlekin**; all defer to Original; Covar/Ask-about meet; whispers locked; see temple.md.
 
 ## Ideas to Build On Later
 

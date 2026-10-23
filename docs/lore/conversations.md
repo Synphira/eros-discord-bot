@@ -54,7 +54,32 @@ Once a delver has been returned from floor 35 and Syn has confirmed the truth (s
 
 The fairies **remember being asked**. A topic's first answer is the full one; asking again gets a shorter, familiar version — a summary with the warmth (or the barb) left in, and occasionally an acknowledgment that this delver has asked before. Nobody delivers the same speech twice at someone they recognise.
 
-Depth also grows with cycles as a **soft continuum** — every cycle a little more warmth and sharpness, not hard tier gates. Beyond the reveal variants, Syn and Berry stop treating the delver as a customer and start treating them as a regular: more history from Syn, more unguarded domestic truth from Berry, and opinions updated by everything the delver has survived. The conversation system should feel like a relationship with a memory, because in-world it is one.
+Depth also grows with cycles as a **soft continuum** — warmth and sharpness accumulate — with **named rungs** writers can aim at (not hard content walls except where noted).
+
+#### Cycle-depth ladder
+
+**Hard locks (stack):**
+- **Reveal** after first return from 35; clergy drop pretence from **cycle 2** for that delver — unchanged.
+- **Soft favourite** is **quest-gated** (second wedding), not cycle-gated. High cycles may warm adjacent lines; they do not grant guest-family status.
+
+**What deepens:** dialogue; clergy recognition (names, preferences); rumour density; **minor mechanical colour** notes only (greeting variants, cheaper ribbing, recognition flags) — not balance specs.
+
+**Syn launch/battery hints:** post-reveal **crumbs** allowed; clearer hints at **cycle 5+** *or* soft favourite; **never** spell soft apocalypse.
+
+**Recognition is per-character:** Berry warms fastest; Broodmother reads “brood” early; Lich stays cold-data longest; others sit between.
+
+| Rung | Unlocks / colour | Never unlocks |
+|------|------------------|---------------|
+| **Cycle 1** | Customer energy; pre-reveal euphemisms; first impressions | Temple word from fairies; launch talk; soft favourite |
+| **Cycle 2** | Reveal delivered; temple diction; clergy drop pretence; returnee nods start (if Eros met) | Soft favourite; apocalypse; Pip origin |
+| **Cycle 5** | Regular warmth; denser gossip; Syn battery/launch **hints** OK; clergy know preferences | Soft favourite (unless quest done); outside detail |
+| **Cycle 10** | Deep regular; rumour density high; almost family-adjacent tone from some clergy (still ≠ soft favourite) | Resident ending; sealed lore; soft apocalypse lecture |
+
+**Syn sample line per rung:**
+1. *“Cute first climb. Don’t tell me you’ve figured anything out yet.”*
+2. *“Welcome back. It’s a temple. I built it. She’s real. Keep climbing.”*
+3. *“Fifth loop and you’re still pretty. The place runs better with repeat sinners — ask me about the battery sometime.”*
+4. *“Ten. You’re furniture with a pulse. Favourite regular energy — not wife energy. Berry already clarified.”*
 
 ### After meeting Eros — expansion plan
 
@@ -62,7 +87,7 @@ Once a delver has met Eros (and Syn has confirmed the temple), conversations gro
 
 1. **Eros** and **the cycles** as plain topics — Syn may **hint** at the launch/battery; she never spells out soft apocalypse. Berry stays domestic about the goddess.
 2. **Residents** as Ask-about topics — **implementation priority #1** when expanding the menu (checklist below).
-3. Boss talk gains **“she sent you back”** colour: fairy addenda *and* victory-screen nods from lords who notice a thrice-returned delver.
+3. Boss talk gains **“she sent you back”** colour: fairy addenda *and* victory-screen nods from lords — see **Victory / satisfy voice bible** in `clergy.md` (satisfy + returnee; returnee = met Eros **or** 3rd+ visit to that lord).
 
 Menu organisation aims at **categories** (General / Clergy / Residents / Eros) rather than one flat list of 25.
 

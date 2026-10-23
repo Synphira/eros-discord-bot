@@ -18,6 +18,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 - **Lore / art:** after **Restore the Dress**, Covar **wears the Original** at the counter (bible aligned with the Fitting) — not kept on a stand.
 - **Lore:** **strange rooms** Ask-about beats locked — omnibus topic; Syn/Berry shorts for Confessor, False Exit, Tea, Mirror Duet, Gorgon Matron, Spring Keeper.
 - **Lore:** **soft-favourite dialogue rules** locked — Syn/Berry/Covar/Eros registers after the wedding quest; guest-family warmth with hard bounds (never outranks Berry; no sealed lore dumps; ≠ resident ending).
+- **Lore:** **boss satisfy / returnee victory voices** locked (six lords + Eros; defeat stays system-generic; returnee on met-Eros or 3rd+ visit) in `docs/lore/clergy.md`.
+- **Lore:** **cycle-depth ladder** locked (rungs 1/2/5/10; Syn samples; launch hints at 5+ or soft favourite) in `docs/lore/conversations.md`.
+- **Lore:** **Eros floor-35 scene beats** locked (greet → mark-trace → climax variants → dismiss-return; return is the gift) in `docs/lore/temple.md`.
+- **Lore:** named Syn-made living-gear minds locked — **Wander**, **Velvet**, **Click**, **Drip**, **Needlekin** (all defer to the Original) in `docs/lore/temple.md`.
 
 ## 2026-10-22
 

@@ -116,6 +116,26 @@ One signature line each. Register: **suggestive / in-character**, safe for polit
 
 Relic whispers: see Voice samples — Relics (pass 3).
 
+### Victory / satisfy voice bible
+
+**Defeat** lines stay **system-generic** (no per-lord defeat slate). This table locks **satisfy** and **returnee** only.
+
+**Returnee trigger:** whichever comes first — delver has **met Eros at least once**, *or* this is their **third+** visit to that lord.
+
+**Register:** full tower filth. **Tone:** mix per lord — hunger to keep + amused that she/the temple keeps giving them back.
+
+| Who | Satisfy | Returnee |
+|-----|---------|----------|
+| **Mimic Broodmother** | *“Good brood. Crawl back in — Mother isn’t finished tasting you.”* | *“She spat you out again? Fine. Get inside. I’ll keep what’s mine until she steals you upward.”* |
+| **Succubus Queen** | *“Look at me when you come. That’s how you choose a queen.”* | *“She keeps sending my toys home. Darling, I still want you on your knees — and I love that you remember.”* |
+| **Incubus King** | *“Beg for it again. Say whose cock ruined you.”* | *“Third time and you’re still dripping for me. She can have the climb — I already claimed the hole.”* |
+| **Verdant Dryad** | *“Stay. Let the roots take. You’re sweeter when you stop running.”* | *“My leaf came back. Plant yourself. I’ll mourn you again when she pulls you free.”* |
+| **Lich Lord** | *“Excellent data. And warmer than the last specimen. Don’t waste it.”* | *“Longitudinal study continues. She returns you; I take notes — and heat.”* |
+| **Alpha Beast** | *“…mate. Pack. Stay.”* (growl, rut-honest; scent-mark implied) | *“Good mate comes back. Weather. Rut again.”* (amused hunger; howl welcome) |
+| **Eros** | *“Surrender. That’s the offering. Again.”* | *“I sent you back full of me. Climb. Break. Bring it to my mouth once more.”* |
+
+Writers may shorten for UI chrome; do not sanitize the hunger or the amusement.
+
 ## Floors & Boss Domains
 
 The dungeon is built in seven five-floor stretches. Each stretch is the **domain** of the boss who waits at its end: a personal territory and mini-temple expressing that lord's particular style of temptation. The monsters, traps, and events inside a domain are not random infestation; the land itself serves its lord.

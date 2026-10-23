@@ -62,6 +62,19 @@ Floor 35 is the **throne and heart of the temple**: her throne set over the sour
 
 There is no exit at the top. Win against Eros or surrender to her, floor 35 ends the same way: **she returns you herself**, pleased, and the cycle takes you around again. The last thing a delver learns in a run is that reaching the goddess was never the way out. It is the reason there is no way out.
 
+### Floor 35 — scene beats
+
+Ordered beat sheet for the throne room. **No separate climax gift** — being returned *is* the gift. (Altar visit gifts stay on the floors below.)
+
+| Beat | Rule | Sample line |
+|------|------|-------------|
+| **Greet** | She already knows their **name**, **marks**, and **Attention** count — possessive bookkeeping, not small talk. | *“I counted your kneels. I read your skin. Come here.”* |
+| **Mark-trace** | If they wear Syn’s marks, she traces Syn’s handwriting (devotion + flirt with Syn through their body). Empty skin gets a hungry remark. **Wedding Mark / soft favourite** gets extra possessive amusement — guest-family noted, never mistaken for marrying Syn. | *Marked:* *“Syn’s hand. My favourite slut’s work on my property.”* · *Empty:* *“Bare. How brave. How unfinished.”* · *Wedding Mark:* *“Guest ribbon. Cute. You’re still mine to break.”* |
+| **Climax** | Same ending path; **different mouth**. **Surrender** → warmer possessiveness. **Win** → impressed hunger. | *Surrender:* *“Good. Give it. That’s the offering.”* · *Win:* *“You bit a goddess and lived. I’m keeping the bruise — and you.”* |
+| **Dismiss / return** | She sends them herself, pleased. Cycle takes them. Returnee colour on later climbs (see clergy victory bible). | *“I send you back full of me. Climb. Break. Bring it to my mouth again.”* |
+
+Approach colour for floors 31–34 stays as written (dreaming court); this sheet starts when they stand before the throne.
+
 ## Altars & Eros's Attention
 
 The altars were built by the clergy, as offering points raised throughout their temple — and Eros genuinely uses them. Of everything the clergy built on interpretation alone, the altars are where their faith turned out to be simply correct: kneel at one, and she can see you.
@@ -129,13 +142,25 @@ Deep variants keep the same angle (Syn’s Confessor flirt thickens; Berry’s T
 
 **Living gear took root.** Syn made the first cursed and living pieces by hand — collars, garments, and toys with appetites of their own. Then her designs **took root** in the dungeon's lust magic the way seeds copy a pattern: the place began producing living gear on its own in chests, mimic broods, and dark corners where desire pools.
 
-**Minds.** Only **Syn-made** pieces have real minds. Dungeon-grown stock is **feral** — appetite without the craftsperson's spark. The Original (Madame Vex's dress, later Covar's) sits at the top of that scale: first, most personlike, Syn's masterpiece. It bonds one wearer at a time. After the **Restore the Dress** quest, **Covar wears it** at the counter — a new chapter, not a lesser one; the dress is alive on him, not on a stand.
+**Minds.** Only **Syn-made** pieces have real minds. Dungeon-grown stock is **feral** — appetite without the craftsperson's spark. The Original (Madame Vex's dress, later Covar's) sits at the top of that scale: first, most personlike, Syn's masterpiece. It bonds one wearer at a time. After the **Restore the Dress** quest, **Covar wears it** at the counter — a new chapter, not a lesser one; the dress is alive on him, not on a stand. All other named Syn-made minds **defer to the Original** as eldest sibling.
 
 **Desire.** Gear wants to be **worn and used** — intimacy is its purpose. It remembers who wore it and resents removal. From the gear's view (and Covar's framing): negotiating a piece off intact is a **breakup**; tearing it free is **violence**. Temperaments can be refit (Vex's work); the want underneath stays.
 
 **Covar** collects, catalogues, and rehomes strays — matchmaker more than merchant. His goal is all of it at once: pair gear with delvers who will keep them happy; breed accessories to match Syn's masterworks (the old tiara plans and their cousins); shepherd a living wardrobe ecosystem. His own living accessories are spoiled pets that obey because he spoils them.
 
 **The fairies.** Berry wears **none** — the sensation on her skin creeps her out. She both **demands Syn stop making** living jewellery and is quietly glad when pieces leave ("fewer creepy things on my wife"). Syn focuses on **ink** now, but still occasionally fiddles with living jewellery — true **Syn-made minds**. The rings wander because she **underfeeds them attention** and they sulk-walk; they usually turn up on **Covar's counter**, where he sighs and shelves them. Soft cameo now; a **"return Syn's rings"** errand is fine later.
+
+#### Named Syn-made minds (bible faces)
+
+Five named minds beyond the Original. Spread: jewellery / garment / restraint / toy / problem child. Delvers meet them as **Covar counter flavour** and Syn/Berry **Ask-abouts** — not a separate bestiary dump. (Pale Bride remains a relic gone wrong, not this list.)
+
+| Name | Slot / type | Personality | Whisper (UI-safe) |
+|------|-------------|-------------|-------------------|
+| **Wander** | Jewellery (ring; ringleader of runaways) | Sulks when underfed attention; walks off; still calls the Original “eldest.” | *“She stopped looking. So I left.”* |
+| **Velvet** | Garment | Soft cling; wants to be draped and shown; jealous of bare skin, not of the Original. | *“Wear me where they can see.”* |
+| **Click** | Restraint (collar/cuffs family) | Obedience kink as identity; clicks shut happily; defers hard to eldest. | *“Ask. Then hold still.”* |
+| **Drip** | Toy | Eager, messy, no dignity; lives to be used; worships Original’s poise from the shelf. | *“Again. Please. Again.”* |
+| **Needlekin** | Problem child | Syn’s spare that **thinks it’s ink** — tries to mark wearers, confuses needle with self; Covar shelves it high. | *“I’m a line. Let me finish you.”* |
 
 ## Theology & the Cycles
 
