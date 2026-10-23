@@ -6,10 +6,24 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-23
+
+### Added
+
+- **Character bible (design docs):** Saint’s glass; NPC afterlives; pack faces; voice samples; **day-in-the-life** for Syn, Berry, Covar, Nectar, Vex, Fang, and Pip; **Berry dom / Syn sub** locked in `docs/lore.md` / `docs/art_reference.md`.
+
+### Changed
+
+- **Lore bible reorganised:** monolithic `docs/lore.md` split into [`docs/lore/`](docs/lore/README.md) by category (overview, clergy, Syn & Berry, temple systems, conversations, residents, wandering NPCs, relics, meta). `docs/lore.md` is now an index pointer.
+- **Lore / art:** after **Restore the Dress**, Covar **wears the Original** at the counter (bible aligned with the Fitting) — not kept on a stand.
+- **Lore:** **strange rooms** Ask-about beats locked — omnibus topic; Syn/Berry shorts for Confessor, False Exit, Tea, Mirror Duet, Gorgon Matron, Spring Keeper.
+- **Lore:** **soft-favourite dialogue rules** locked — Syn/Berry/Covar/Eros registers after the wedding quest; guest-family warmth with hard bounds (never outranks Berry; no sealed lore dumps; ≠ resident ending).
+
 ## 2026-10-22
 
 ### Added
 
+- **Character bible deepened (design docs):** build chapters + clergy grid; **Eros-asks-Syn beat** outlined (public surrender ask; Syn refuses; delver delivers no; Eros amused; marriage wins) in `docs/lore.md` / `docs/art_reference.md`.
 - **Appearance: your threat is how you look now.** Threat is no longer just your LP and curses — what you wear is a first-class author of it. Every piece of gear carries an **Appearance** reading (Madame Vex's clothes and anything living carry a lot; Berry's chaste steel and hoods carry less than none), and the threat meter doubles as the tower's appearance meter: **Presentable → Provocative → Depraved**. A full revealing outfit on an empty purse already reads Provocative; dressing down pulls you back. Your reading stands beside your gear on the equipment menu.
 - **Madame Vex sells clothes now**: a rack beside her bench (9 pieces: harnesses, collars, silks, heels, a certain habit) — cut to be *read* in. They occupy your normal gear slots, raise your Appearance and threat, and pay for submissive play: monsters are easier to satisfy, submitting pays better, and your lust runs hotter in them. She sells the basic rack whenever she is receiving, and the stock doubles after her restoration — the new room has a proper rack. While she is exiled, the rack stands under the sheet with everything else.
 - **The tower reacts to how you look.** At Provocative and Depraved: monsters remark on you when they find you and come easier to satisfy (and hit harder — a higher threat is a higher threat), the lustier kinds (demons, slime, beasts) find you more often, admirers are courted halfway by the outfit alone, everything you earn pays 5–10% more LP, Berry quietly knocks 5–10% off her prices "for the view", the clergy notice you before you speak (their greetings change with your look, as do the Residents'), and every boss appraises you before the fight. Living gear reads heavily too: each cursed piece worn adds a large chunk of Appearance.

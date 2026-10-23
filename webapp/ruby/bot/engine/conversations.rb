@@ -5,7 +5,7 @@ module Engine
   # Conversations with Syn and Berry. Topics unlock as a delver experiences
   # the tower: beating (or satisfying) a boss opens that boss as a topic with
   # both fairies, and each wife has very different things to say about them.
-  # Per the lore in docs/lore.md, neither fairy ever calls this place a
+  # Per the lore in docs/lore/ (see conversations.md / syn_and_berry.md), neither fairy ever calls this place a
   # dungeon, and neither confirms what it really is — yet.
   module Conversations
     PEOPLE = {
