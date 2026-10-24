@@ -74,9 +74,52 @@ class Player < Sequel::Model(:players)
   RUN_TRACKERS = %w[run_flee_attempts run_submissions run_floors_cleared run_climaxes climax_addicted floors_since_climax
                     corruption].freeze
 
+  # Dropped on /restart (legacy save), kept through defeat. berry_quests_completed stays.
+  CHARACTER_STORY_TRACKERS = %w[
+    berry_story_step berry_story_start syn_story_accepted berry_quests_active
+    covar_topics_heard
+    vex_story_done nectar_story_done vex_ending nectar_ending
+    vex_restoration_done vex_restoration_step vex_restoration_start
+    nectar_met
+    pip_beats_heard pip_milestones_heard pip_note_delivered pip_spotting pip_reviewed
+  ].freeze
+
+  CHARACTER_STORY_KEEPSAKES = [
+    "a pressed petal from Berry's second bouquet",
+    "a seam of the Original's own thread, freely given",
+    'a hymn sheet from the shrine, amended in Nectar\'s hand',
+    'a spare button off the restored Original'
+  ].freeze
+
+  def character_story_tracker_key?(key)
+    k = key.to_s
+    return true if CHARACTER_STORY_TRACKERS.include?(k)
+    return true if k.match?(/\Aresident_(?:met_)?[a-z]+\z/)
+    return true if k.match?(/\Aresident_[a-z]+_(?:step|start)\z/)
+
+    false
+  end
+
+  def legacy_trackers(source = nil)
+    data = (source || tracker_hash).reject { |k, _| RUN_TRACKERS.include?(k.to_s) || character_story_tracker_key?(k) }
+    if data.key?('marks_owned')
+      marks = Array(data['marks_owned']).map(&:to_s) - %w[wedding_mark]
+      data = data.merge('marks_owned' => marks)
+    end
+    if data.key?('keepsakes')
+      keeps = Array(data['keepsakes']).map(&:to_s) - CHARACTER_STORY_KEEPSAKES
+      data = data.merge('keepsakes' => keeps)
+      if data.key?('keepsakes_pinned')
+        pins = Array(data['keepsakes_pinned']).map(&:to_s) & keeps
+        data = data.merge('keepsakes_pinned' => pins)
+      end
+    end
+    data
+  end
+
   def save_legacy!
     row = {
-      trackers: JSON.generate(tracker_hash.reject { |k, _| RUN_TRACKERS.include?(k) }),
+      trackers: JSON.generate(legacy_trackers),
       titles: JSON.generate(earned_titles),
       achievements: JSON.generate(earned_achievements),
       selected_title: selected_title,
@@ -96,8 +139,9 @@ class Player < Sequel::Model(:players)
     row = DB[:legacy_progress].where(discord_id: discord_id).first
     return false unless row
 
+    raw = JSON.parse(row[:trackers].to_s.empty? ? '{}' : row[:trackers])
     restored = {
-      trackers: JSON.parse(row[:trackers].to_s.empty? ? '{}' : row[:trackers]),
+      trackers: legacy_trackers(raw),
       titles: JSON.parse(row[:titles].to_s.empty? ? '[]' : row[:titles]),
       achievements: JSON.parse(row[:achievements].to_s.empty? ? '[]' : row[:achievements]),
       selected_title: row[:selected_title],

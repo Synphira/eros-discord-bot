@@ -7,6 +7,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-24
+
+### Changed
+
+- **Restart story-quest wipe** (synced from bot): Syn wedding, Vex/Covar/resident stories reset on Restart; Berry quests completed still carries over. Defeat still leaves those stories intact.
+
 ## 2026-10-21
 
 ### Added

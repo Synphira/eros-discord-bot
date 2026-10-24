@@ -940,7 +940,8 @@ module Eros
                          end }
       restart = @confirm == :restart
       delete = @confirm == :delete_save
-      notes = '-# **Restart** erases this delver but keeps titles, achievements, records and options. ' \
+      notes = '-# **Restart** erases this delver but keeps titles, achievements, Berry quests completed, records and options. ' \
+              'Story quests (Syn wedding, Vex/Covar/residents) reset for the new delver — not on defeat. ' \
               '**Delete save** erases everything. Your save lives in this browser only; use **Export save** to ' \
               'back it up or move it to another device.'
       { title: 'Settings & stats', sections: [{ text: lines.join("\n") }, burden_section, { text: notes }],

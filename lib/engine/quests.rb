@@ -236,7 +236,7 @@ module Engine
               'kiss my wife and ask her to marry me all over again." Satisfy 1 boss.' }
     ].freeze
 
-    # The second wedding happens once, ever. It leaves a keepsake.
+    # The second wedding happens once per delver (resets on /restart, not defeat). It leaves a keepsake.
     WEDDING_KEEPSAKE = 'a pressed petal from Berry\'s second bouquet'
 
     def grant_wedding_keepsake!(player)

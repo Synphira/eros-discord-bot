@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-24
+
+### Changed
+
+- **/restart story-quest wipe:** Syn’s second wedding, Madame Vex / Covar / resident stories (and their keepsakes / Wedding Mark) now reset when you restart a delver. They still persist through defeat. **Berry’s total quests completed** (and titles/achievements) still carry over.
+
 ## 2026-10-23
 
 ### Added

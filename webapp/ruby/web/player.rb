@@ -40,7 +40,7 @@ class Player
 
   def save_legacy!
     Player.legacy = {
-      'trackers' => tracker_hash.reject { |k, _| RUN_TRACKERS.include?(k) },
+      'trackers' => legacy_trackers,
       'titles' => earned_titles,
       'achievements' => earned_achievements,
       'selected_title' => selected_title,
@@ -56,7 +56,7 @@ class Player
     return false unless row.is_a?(Hash)
 
     update(
-      trackers: row['trackers'] || {},
+      trackers: legacy_trackers(row['trackers'] || {}),
       titles: row['titles'] || [],
       achievements: row['achievements'] || [],
       selected_title: row['selected_title'],

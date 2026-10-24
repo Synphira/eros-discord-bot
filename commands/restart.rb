@@ -18,8 +18,10 @@ module Commands
                    "• Every curse (**#{player.active_curse_count}**) and all gear, cursed or not\n" \
                    "• Your character name, body sizes, and current cycle\n\n" \
                    "**Kept:** your **#{player.earned_titles.size}** titles, **#{player.earned_achievements.size}** " \
-                   'achievements, all achievement/title progress, your deepest-floor record, Cursed Shop unlocks, ' \
-                   "and your content options.\n\n" \
+                   'achievements, all achievement/title progress (including Berry quests completed), your ' \
+                   "deepest-floor record, Cursed Shop unlocks, and your content options.\n\n" \
+                   '**Fresh for the new delver:** Syn\'s second wedding, Madame Vex / Covar / resident stories, ' \
+                   "and related keepsakes — those reset on restart, not on defeat.\n\n" \
                    'You will then choose a new **body type** and **Submission** stance.'
         )
         c.separator(divider: true, spacing: :small)
