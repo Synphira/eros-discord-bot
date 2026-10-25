@@ -45,8 +45,9 @@ module Engine
         name: 'Syn',
         emoji: '🖤',
         heading: 'Talking with Syn',
-        intro: '_Syn sets her needle down, folds her inked arms, and looks at you properly — heavy-lidded, ' \
-               'violet-eyed, amused. "Questions, darling? I do love being studied. Try not to waste me."_'
+        intro: '_Syn sets her needle down, folds her inked arms, and looks you over like a catalogue page she ' \
+               'already wants to annotate — heavy-lidded, violet-eyed, smirking. "Go on. Ask me something ' \
+               'filthy or interesting. I charge more for boring."_'
       },
       'covar' => {
         name: 'Covar Zephyren',
@@ -198,7 +199,7 @@ module Engine
                'happens to have a floor. Did he wag for you? He wags when he\'s pleased. Nobody up here is ' \
                'allowed to be mean about him. That\'s a shop rule."',
         syn: '"My adorable puppy," Syn purrs. "I designed his floors wide so his pack can roam, and he repays ' \
-             'me by being enormous, loyal, and entirely without guile. Everyone up here schemes, darling. ' \
+             'me by being enormous, loyal, and entirely without guile. Everyone up here schemes. ' \
              'He just wants. It\'s refreshing."'
       },
       'eros' => {
@@ -207,7 +208,7 @@ module Engine
                'if she ever wished me to do anything — anything — I\'d already be doing it."',
         syn: '"My Goddess," Syn says, simply, and for once there is no tease anywhere in her. "I helped build ' \
              'this place to show her what my faith looks like: visitors tempted, unraveled, and driven into ' \
-             'depravity, floor by floor, all of it hers. Judge the work kindly, darling. It was made with love."'
+             'depravity, floor by floor, all of it hers. Judge the work kindly. It was made with love."'
       }
     }.freeze
 
@@ -217,7 +218,7 @@ module Engine
     # nouns finally allowed.
     REVEAL_SCENE =
       '_Syn looks at you for a long moment, then sets her needle down like a decision. "You\'ve been to ' \
-      'the top, darling. You\'ve met her, and she handed you back herself — so we stop lying to you now. ' \
+      'the top. You\'ve met her, and she handed you back herself — so we stop lying to you now. ' \
       'This is not a dungeon, and it never was. It is a **temple** — to Eros, built by me and six old ' \
       'friends of mine, floor by floor, to tempt the world into giving in to her. The cycles are hers: ' \
       'her answer to our work, and the reason nobody leaves unchanged. Ask me properly now. I built this ' \
@@ -230,7 +231,7 @@ module Engine
                'keep my opinion."',
         syn: '"My Broodmother of the first five floors," Syn says. "She kept me once, long before the ' \
              'temple — I bargained my way out of her, and when I built, I came back and offered her an ' \
-             'endless table instead. She is not tame, darling. She is employed. There is a difference, ' \
+             'endless table instead. She is not tame. She is employed. There is a difference, ' \
              'and the difference is architecture."'
       },
       'succubus_queen' => {
@@ -280,7 +281,7 @@ module Engine
         syn: '"You have met my Goddess," Syn says, and there is no tease anywhere in her. "I built her ' \
              'a temple out of my own past — every priest in it someone I had loved, owed, studied ' \
              'under, or escaped — and she answered by trapping the world in it with us. Judge the ' \
-             'work kindly, darling. It was made with love, and now you are part of it."'
+             'work kindly. It was made with love, and now you are part of it."'
       }
     }.freeze
 
@@ -291,7 +292,7 @@ module Engine
                'the shop at its heart and feed everyone who bleeds in. Welcome to church."',
         syn: '"My temple," Syn says simply. "To Eros, built by seven pairs of hands over decades — ' \
              'traps, spawning-spells, gardens, kennels, all of it ministry, all of it mine to finally ' \
-             'name. You have been in church since the doors closed behind you, darling."'
+             'name. You have been in church since the doors closed behind you."'
       },
       'cycles' => {
         berry: '"Her cycles, sugar," Berry says. "We built the temple; she answered it by making ' \
@@ -299,14 +300,14 @@ module Engine
                'that isn\'t romantic. It is simply also a cage."',
         syn: '"The cycles are hers," Syn says. "Not ours. We built a temple on dreams and signs, and ' \
              'when it stood finished, she laid the loop over it herself — our one proof she answered. ' \
-             'Every return is her hand on the back of your neck, darling. Gentle. Final."'
+             'Every return is her hand on the back of your neck. Gentle. Final."'
       },
       'covar' => {
         berry: '"Covar keeps the Cursed Shop for this temple," Berry says, "and he is family, sugar. ' \
                'Tower\'s own, remade by the place he serves. If the temple has a matchmaker, it\'s ' \
                'him, and yes, I still send food down."',
         syn: '"My little brother tends the temple\'s living gear," Syn says. "I made the first of it; ' \
-             'he made a ministry of collecting the rest. In a house built to change people, darling, ' \
+             'he made a ministry of collecting the rest. In a house built to change people, ' \
              'the boy who loves what it made of him might be its truest priest — don\'t tell the ' \
              'ordained ones I said so."'
       }
@@ -325,11 +326,11 @@ module Engine
       },
       'incubus_king' => {
         berry: '_"You satisfied him and walked out?" Berry looks almost impressed. "He\'ll be telling the court it was a royal visitation. Let him. You and I know who did the work."_',
-        syn: '_"You satisfied the King?" Syn laughs, delighted. "He\'ll have posed afterwards like it was his achievement. It never is, darling, and somehow he never learns."_'
+        syn: '_"You satisfied the King?" Syn laughs, delighted. "He\'ll have posed afterwards like it was his achievement. It never is, and somehow he never learns."_'
       },
       'verdant_dryad' => {
         berry: '_"You satisfied the Dryad?" Berry softens. "Then you smell of fruit and pollen for days and everybody\'s kind about it. That\'s her gift. One of them."_',
-        syn: '_"Satisfied my Dryad?" Syn murmurs. "Then the garden has your measure now, darling. She keeps what she pleases. Go back sometime — slowly."_'
+        syn: '_"Satisfied my Dryad?" Syn murmurs. "Then the garden has your measure now. She keeps what she pleases. Go back sometime — slowly."_'
       },
       'lich_lord' => {
         berry: '_"You satisfied the Lich." Berry shudders theatrically. "Warmth for the corpse, from my own customer. I\'ll be boiling the ledger tonight, sugar."_',
@@ -337,11 +338,11 @@ module Engine
       },
       'alpha_beast' => {
         berry: '_"You satisfied the big boy?" Berry beams. "Did he wag? He wags. You\'re pack-adjacent now, sugar — that\'s a real honour in this house."_',
-        syn: '_"You satisfied my puppy?" Syn purrs. "Then you\'ve been claimed in the honestest way this temple knows. He\'ll remember your scent forever, darling. So will I."_'
+        syn: '_"You satisfied my puppy?" Syn purrs. "Then you\'ve been claimed in the honestest way this temple knows. He\'ll remember your scent forever. So will I."_'
       },
       'eros' => {
         berry: '_Berry takes your hands, hushed. "You satisfied her. You. Sugar, do you understand what you did? Neither do I, and I\'ve believed in her my whole married life."_',
-        syn: '_Syn is quiet a moment. "You satisfied my Goddess," she says at last. "Whatever I built, I never built that. Some doors only open from your side, darling."_'
+        syn: '_Syn is quiet a moment. "You satisfied my Goddess," she says at last. "Whatever I built, I never built that. Some doors only open from your side."_'
       }
     }.freeze
 
@@ -349,7 +350,7 @@ module Engine
     # one; the fairies remember being asked).
     REPEAT_BOSS = {
       'broodmother' => { berry: '"Still hate her, still because of Syn. Some things are load-bearing, sugar."',
-                         syn: '"Still my favourite argument for fucking a mimic once, darling. The brood remembers you kindly."' },
+                         syn: '"Still my favourite argument for fucking a mimic once. The brood remembers you kindly."' },
       'succubus_queen' => { berry: '"Still flirting with my wife across the centuries. Still counting the jokes. Still losing."',
                             syn: '"My old friend, my fellow trapwright. Ask her about the work; she\'ll preen for a week."' },
       'incubus_king' => { berry: '"Still only bearable with Syn in the room. Some liturgies never change."',
@@ -359,34 +360,34 @@ module Engine
       'lich_lord' => { berry: '"Still dead, still creepy, still not invited to dinner."',
                        syn: '"My cold teacher. I owe him the craft; the company remains declined."' },
       'alpha_beast' => { berry: '"A puppy. A very good boy. This is the whole report, every time."',
-                         syn: '"My adorable puppy. Yes, he\'s still perfect. Next question, darling."' },
+                         syn: '"My adorable puppy. Yes, he\'s still perfect. Next question."' },
       'eros' => { berry: '"Still perfect, sugar. Some answers don\'t need updating."',
-                  syn: '"My Goddess. Everything else I say is footnotes, darling."' }
+                  syn: '"My Goddess. Everything else I say is footnotes."' }
     }.freeze
 
     REPEAT_GENERAL = {
-      'this_place' => { berry: '"Tower, floors, us in the middle. Still true, sugar."',
-                        syn: '"Old, deliberate, and full of purpose. The rest you climb for, darling."' },
+      'this_place' => { berry: '"Home, work, endless stairs. Still true, sugar."',
+                        syn: '"Still hungry. Still built to ruin you properly. Climb."' },
       'each_other' => { berry: '"Still mine, still trouble, still worth it."',
-                        syn: '"Still Berry. Still the dangerous one, whatever the needles suggest."' },
+                        syn: '"Still Berry. Still the one who makes me behave."' },
       'your_work' => { berry: '"Shop, board, ledger. The empire holds, sugar."',
-                       syn: '"I ink; she sells; you carry the evidence. Complete service, as ever."' },
+                       syn: '"I ink. She sells. You leave looking claimed. Same as ever."' },
       'monsters' => { berry: '"Still restocking themselves. I still don\'t ask the tower."',
-                      syn: '"My working hums along. The halls provide, darling."' },
+                      syn: '"Halls still grow teeth. Appetites still need bodies."' },
       'traps' => { berry: '"Still mostly my wife\'s fault. She\'s still proud."',
-                   syn: '"Still my workmanship. Changed, not just caught — remember?"' },
-      'curses' => { berry: '"Still purge, silence, or pay up front. The handwriting fades when you do."',
-                    syn: '"Still blessings, darling. Still beautiful. Your Lust Points still do not buy my approval."' },
-      'marks' => { berry: '"Still my wife\'s handwriting on you. She remembers her favourites."',
-                   syn: '"Still promises that survive you. The portrait continues, darling."' },
+                   syn: '"Still my workmanship. Sore, wet, smarter — remember?"' },
+      'curses' => { berry: '"Still purge, silence, or pay up front."',
+                    syn: '"Still pretty scribbles. Points still don\'t buy my approval."' },
+      'marks' => { berry: '"Still my wife\'s handwriting on you."',
+                   syn: '"Still ink that survives you getting broken. Good."' },
       'transformations' => { berry: '"Still growing on people. The book stays closed, sugar."',
-                             syn: '"The place, getting honest with you. It suits you, darling."' },
+                             syn: '"Desire still picking shapes. Still suits you."' },
       'altars' => { berry: '"Still kneel, offer, be seen. She knows her regulars."',
-                    syn: '"Still her favourite currency: being noticed back."' },
-      'cycles' => { berry: '"Still round again, prettier. The tower keeps its favourites."',
-                    syn: '"Another sitting, darling. The portrait is never finished."' },
+                    syn: '"Still her favourite: being worshipped on purpose."' },
+      'cycles' => { berry: '"Still round again, prettier."',
+                    syn: '"Another sitting. Still unfinished. Still watching."' },
       'covar' => { berry: '"Still sweet, still family, still not eating properly."',
-                   syn: '"My little brother of the cursed counter. Still cataloguing my scripture."' }
+                   syn: '"Little brother of the cursed counter. Still obsessed. Flattering."' }
     }.freeze
 
     # Covar's own topics. He is not bound by the fairies' careful language:
@@ -541,153 +542,148 @@ module Engine
       {
         key: 'this_place', label: 'This place', question: 'What is this place, really?',
         category: 'general', unlock: :always,
-        berry: '"This place?" Berry gestures at the shelves, the curtain, the ceiling far above. "It\'s the ' \
-               'tower, sugar. Floors going down, floors going up, and us in the middle keeping the lights on. ' \
-               'Don\'t go looking for a fancier name. The tower doesn\'t need one, and neither do you."',
-        syn: '"An old place," Syn says, turning a needle between her fingers. "Older than the shop. Built by ' \
-             'hands that knew exactly what they were doing — every floor, every door, every temptation placed ' \
-             'on purpose. That\'s all the history you get for free, darling. The rest you climb for."'
+        berry: '"This place?" Berry waves at the shelves like that settles it. "Home. Work. Stairs that never ' \
+               'quit. Call it whatever keeps you climbing, sugar — I\'m busy keeping the lights on."',
+        syn: '"Somewhere people come to get ruined properly." Syn spins a needle on her fingertip. "Old. ' \
+             'Hungry. Built to make you want the next door. You want a lecture? Climb higher and earn one."'
       },
       {
         key: 'each_other', label: 'Your wife', question: 'Tell me about your wife.',
         category: 'general', unlock: :always,
-        berry: '"Syn?" Berry\'s whole face goes soft and exasperated at once. "Platinum trouble. Sleeps through ' \
-               'stock day, flirts with the furniture, and puts marks on people that make my heart do stupid ' \
-               'things. She\'s mine, she\'s brilliant, and if you repeat any of that I\'ll deny it while smiling."',
-        syn: '"Berry," Syn says, and her usual smirk gives up entirely. "Strawberry-bright, keeps the books, ' \
-             'keeps me fed, keeps me honest — well. Keeps me. Everyone up here thinks I\'m the dangerous one ' \
-             'because of the needles. Darling, you have never seen my wife collect a debt."'
+        berry: '"Syn?" Soft and exasperated in the same breath. "Platinum disaster. Sleeps through stock day, ' \
+               'flirts with anything with a pulse, inks people until my heart does stupid things. She\'s mine. ' \
+               'Repeat that and I\'ll deny it while smiling."',
+        syn: '"Berry." The smirk softens, then turns wicked. "Feeds me. Owns me. Makes me be good when I\'m ' \
+             'spiraling. Everyone thinks the needles make me dangerous — you\'ve never watched my wife collect ' \
+             'a debt with that sunny little smile."'
       },
       {
         key: 'your_work', label: 'Your work here', question: 'What do you actually do here?',
         category: 'general', unlock: :always,
-        berry: '"I run the shop and the board," Berry says, tapping the ledger. "Gear out, Lust Points in, ' \
-               'errands posted, delvers paid. Syn does the permanent art through the curtain. Between us we ' \
-               'keep this place stocked, inked, and only mildly scandalous before breakfast."',
-        syn: '"I ink," Syn says. "Tattoos, piercings — marks that stay through defeat, through cycles, through ' \
-             'everything the floors can do to you. My wife sells you the tools. I make sure you carry the ' \
-             'memories in your skin. We\'re a complete service, darling."'
+        berry: '"Shop. Board. Ledger." She taps each like commandments. "Gear out, points in, errands posted. ' \
+               'Syn handles the permanent stuff through the curtain. I handle you behaving while you shop."',
+        syn: '"I put pretty permanent things on people who ask nicely — or pay loudly." A lazy glance at your ' \
+             'skin. "Berry sells the toys. I make sure you leave looking like someone\'s unfinished fantasy. ' \
+             'Hold still someday and I\'ll show you the difference."'
       },
       {
         key: 'monsters', label: 'The monsters', question: 'Where do all the monsters come from?',
         category: 'temple', unlock: { requirement: { monsters_killed: 1 } },
         unlock_text: 'Defeat a monster',
-        berry: '"They just keep coming, don\'t they?" Berry shrugs, unbothered. "Something up here likes the ' \
-               'floors stocked. I bottle what you bring back and I don\'t ask the tower questions it hasn\'t ' \
-               'answered for me. Safer that way. Probably."',
-        syn: '"The halls restock themselves," Syn says lightly. "An old working, woven deep — things with teeth ' \
-             'and appetites drawn in, shaped, and set loose where delvers walk. I may know a word or two of how ' \
-             'it\'s done. I may even have helped write it. Another time, darling."'
+        berry: '"They keep showing up, don\'t they?" Unbothered shrug. "Something likes the halls full. I ' \
+               'bottle what you drag back and I don\'t poke the why — safer for my blood pressure."',
+        syn: '"Appetites need bodies." She says it like pillow talk. "Someone taught the halls how to grow ' \
+             'teeth. Might\'ve been me. Might\'ve been a very long night. Ask again when you\'ve been bitten ' \
+             'somewhere interesting."'
       },
       {
         key: 'traps', label: 'The traps', question: 'Who set all these traps?',
         category: 'temple', unlock: { any: { 'traps_triggered' => 1, 'traps_avoided' => 1 } },
         unlock_text: 'Trigger or dodge a trap',
-        berry: 'Berry winces sympathetically. "Sprung one, did you? Half the clever cruelty in these halls has ' \
-               'my wife\'s fingerprints on it. She calls it her early work. I call it why the shop has a first-aid ' \
-               'tincture shelf. She\'s very proud. Don\'t encourage her."',
-        syn: 'Syn\'s eyes gleam. "You\'ve met my workmanship, then. Yes, darling, I helped design the traps — ' \
-             'the plates, the vines, the ones that hold you still and make a lesson of you. I had help, and ' \
-             'inspiration, but the philosophy is mine: a trap should leave you changed, not just caught."'
+        berry: 'Sympathetic wince. "Sprung one? Half that clever nastiness is my wife\'s early fun. She calls ' \
+               'it craftsmanship. I call it why we stock tinctures. Don\'t praise her — she\'ll design worse."',
+        syn: 'Eyes bright. "Felt that, did you? Good. A trap should leave you thinking about me for hours — ' \
+             'sore, wet, smarter. I had help with the hinges. The philosophy\'s mine: caught is boring. ' \
+             'Changed is art."'
       },
       {
         key: 'curses', label: 'Curses', question: 'What can you tell me about curses?',
         category: 'temple', unlock: { requirement: { curses_gained: 1 } },
         unlock_text: 'Be cursed once',
-        berry: '"Curses stick because this place likes leaving handwriting on people," Berry says. "You can pay ' \
-               'to purge one, silence one, or purge the whole pile at once if you\'re feeling flush. Syn will ' \
-               'call every one of them a blessing and glare at you for wanting them gone. Bring Lust Points, ' \
-               'sugar — that is the only language that has ever persuaded her to pick up the eraser."',
-        syn: '"A curse is a blessing with better handwriting," Syn says, tracing the air above your skin ' \
-             'without touching it. "Something here decided you were interesting and made art of you. Then ' \
-             'mortals come whining to me to smother it or scrape it off. I take their Lust Points, darling — ' \
-             'it is the only reason I agree to the vandalism. The points buy the deed. They never buy my approval."'
+        berry: '"They stick because this place likes souvenirs." Practical. "Pay me — well, pay her — to ' \
+               'purge one, hush one, or scrape the lot if you\'re flush. She\'ll call them blessings and glare. ' \
+               'Points talk louder than your whining, sugar."',
+        syn: 'She almost touches your skin, then doesn\'t. "Look at you — decorated. Something decided you ' \
+             'were worth scribbling on. Then you crawl in here begging me to erase the best parts. Fine. Pay. ' \
+             'I\'ll vandalise my favourite gallery. Don\'t expect me to like you for it."'
       },
       {
         key: 'marks', label: 'Marks', question: 'What do marks mean to you?',
         category: 'temple', unlock: { requirement: { marks_owned: 1 } },
         unlock_text: 'Wear one of Syn\'s marks',
-        berry: '"That\'s my wife\'s handwriting on you," Berry says, with proprietary pride. "She doesn\'t ink ' \
-               'just anyone, you know. Well. She inks anyone who pays. But she remembers the ones she likes, and ' \
-               'the tower remembers the marks even when a run doesn\'t."',
-        syn: '"A mark is a promise that survives you," Syn says. "Runs end. Floors reset. My ink stays. When ' \
-             'you wear enough of them, delver, people up here start to recognise what you\'re becoming. So do I."'
+        berry: '"That\'s her handwriting on you." Proprietary pride. "She\'ll ink anyone with coin — but she ' \
+               'remembers the ones she likes. So does this place, long after a run forgets your name."',
+        syn: '"Ink that survives you getting broken." Soft laugh. "Runs end. Bodies reset. My work stays — ' \
+             'little claims that say you knelt for me. Wear enough and even strangers will know you\'re ' \
+             'someone\'s unfinished page. Mine, preferably."'
       },
       {
         key: 'transformations', label: 'Hybrid forms', question: 'What are these hybrid forms?',
         category: 'temple', unlock: { requirement: { forms_unlocked: 1 } },
         unlock_text: 'Unlock a hybrid form',
-        berry: '"The tower grows on people," Berry says cheerfully. "Ears, tails, wings — I\'ve seen delvers ' \
-               'come back from the floors barely the shape they left in. Syn sketches every one. She has a whole ' \
-               'book. No, you may not see the book."',
-        syn: '"The forms are the place getting honest with you," Syn says. "It shows you the shape your desires ' \
-             'keep reaching for, and then — kind thing that it is — it lets you wear it. Fuse two together and ' \
-             'you\'re not just changed, darling. You\'re composed."'
+        berry: '"Ears. Tails. Wings. I\'ve seen delvers come back looking like the floors had opinions." ' \
+               'Cheerful. "Syn sketches every one. Whole book. No, you may not peek — that\'s wife privilege."',
+        syn: '"Desire picking a shape and the place saying yes." She looks almost hungry. "You stop pretending ' \
+             'you\'re only human. Fuse two and you\'re a composition — messy, gorgeous, mine to stare at. ' \
+             'Don\'t blush. You already did that when it happened."'
       },
       {
         key: 'altars', label: 'The altars', question: 'What are the altars about?',
         category: 'temple', unlock: { requirement: { eros_attention: 1 } },
         unlock_text: 'Gain Eros\'s Attention at an altar',
-        berry: 'Berry lowers her voice, just a little. "You\'ve knelt at one, then. Good. She notices devotion, ' \
-               'sugar — every offering, every prayer. Keep showing up. Being noticed by her is... well. It\'s ' \
-               'the whole point of being up here, if you ask me."',
-        syn: '"Attention is a currency older than Lust Points," Syn says. "Kneel, offer, be seen. She collects ' \
-             'devotion the way I collect marks, darling, and she always, always knows her regulars."'
+        berry: 'Voice dips. "You knelt. Good. She notices — offerings, prayers, the way you look when you mean ' \
+               'it. Keep showing up, sugar. Being seen by her is… half of why I stay soft about this place."',
+        syn: '"She likes being worshipped with an open mouth and an open schedule." Dry. Filthy fond. "Kneel. ' \
+             'Offer. Get noticed. Regulars get remembered — and she remembers skin the way I remember ink."'
       },
       {
         key: 'cycles', label: 'The cycles', question: 'What happens after the top?',
         category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
         unlock_text: 'Complete a cycle',
-        berry: '"You went all the way up and came back for more," Berry says, delighted. "See, that\'s the ' \
-               'thing about this place. It doesn\'t let favourites leave. The floors get bolder, the company ' \
-               'gets warmer, and you — you get to do it all again, prettier."',
-        syn: '"Again, but deeper," Syn murmurs. "The tower remembers what you were, and asks what you\'ll be ' \
-             'this time. Most delvers call it a cycle. I call it another sitting. The portrait is never ' \
-             'finished, darling — it just gets more honest."'
+        berry: '"You went up and came back for more." Delighted. "Favourites don\'t get to leave clean. Floors ' \
+               'get bolder, company gets warmer, and you get another chance to come home prettier."',
+        syn: '"Round two. Deeper bruises. Better stories." She tips her head. "Whatever you were, it asks what ' \
+             'you\'ll be next. I call it another sitting — you under my eyes until the portrait gets honest."'
       },
       {
         key: 'covar', label: 'Covar Zephyren', question: 'What about Covar at the Cursed Shop?',
         category: 'residents', unlock: { requirement: { mimics_removed_count: 1 } },
         unlock_text: 'Tear free a piece of living gear',
-        berry: '"Covar?" Berry\'s face goes soft at once. "Oh, he\'s sweet. Tower\'s own family, that one — ' \
-               'we don\'t see him often, the Cursed Shop keeps him buried, but he\'s one of ours. If you go ' \
-               'by, sugar, tell him Berry says to eat something that isn\'t shop stock."',
-        syn: '"My little brother," Syn says, with unguarded fondness. "Not by blood — by obsession. The boy ' \
-             'lives for cursed and living gear, and I made the first of it, so who else was going to teach ' \
-             'him? He catalogues my work like scripture, darling. It\'s the most flattering haunting I own."'
+        berry: '"Covar?" Soft immediately. "Sweet boy. Family. We don\'t see him enough — that shop eats his ' \
+               'hours. Tell him Berry said eat real food, not whatever the shelves are flirting with."',
+        syn: '"Little brother energy. Obsessed with my living toys." Fond, teasing. "I taught him. He ' \
+             'catalogues like it\'s devotion. Flattering little haunt — if he starts lecturing you about ' \
+             'gear sex, that\'s love, not a sales pitch."'
       },
       {
         key: 'resident_vex', label: 'Madame Vex', question: 'What about Madame Vex?',
         category: 'residents', unlock: { requirement: { resident_met_vex: 1 } },
         unlock_text: 'Meet Madame Vex',
-        berry: '"Vex is a friend," Berry says. "Listener, seamstress, the one who hears living gear complain. ' \
-               'She loved Covar like a son — which is why his exile hurt. Be kind when you sit with her, sugar."',
-        syn: '"The Original was my first living dress," Syn says, quieter. "Vex wore it for decades. Pride and ' \
-             'guilt live in the same seam. She listens better than I deserve, darling."'
+        berry: '"Vex is a friend," Berry says carefully. "Listens to living clothes better than most people ' \
+               'listen to friends. She loved Covar like a son — which is why it wrecked her when he threw her ' \
+               'out over that dress. Be kind when you sit with her, sugar."',
+        syn: '"I made a dress once that wouldn\'t shut up. She wore it for decades." Quieter, then a crooked ' \
+             'smile. "I still look at her like unfinished homework. She listens anyway. Don\'t make her ' \
+             'perform for you — she\'s had enough of that."'
       },
       {
         key: 'resident_pip', label: 'Pip', question: 'What about Pip the Trapwright?',
         category: 'residents', unlock: { requirement: { resident_met_pip: 1 } },
         unlock_text: 'Meet Pip',
-        berry: '"Put pants on," Berry says automatically. "Trapwright. Genius. No pants. Tell her I said so."',
-        syn: '"Trap fangirl," Syn purrs. "She loves my hinge-work more than I do. Origin sealed — ask about ' \
-             'traps instead. She\'ll redirect beautifully."'
+        berry: '"Pants," Berry says, automatic. "Tell her I said pants. Genius with hinges. Menace with ' \
+               'wardrobe. That\'s the whole briefing."',
+        syn: '"She moans over my plates like they\'re lovers." Purr. "Adorable. Useless at clothes. Ask where ' \
+             'she\'s from and she\'ll redirect so hard you\'ll be inside a trap before you finish the sentence. ' \
+             'Do it. It\'s funny."'
       },
       {
         key: 'resident_nectar', label: 'Sister Nectar', question: 'What about Sister Nectar?',
         category: 'residents', unlock: { requirement: { resident_met_nectar: 1 } },
         unlock_text: 'Meet Sister Nectar',
-        berry: '"Holy but weird," Berry says fondly. "Milking as worship. She means it. I nod politely and ' \
-               'send tense delvers her way."',
-        syn: '"Pope energy," Syn admits. "She looks at me like I ordained the dairy. Awkward. Sacred. Both."'
+        berry: '"Means every word of that holy dairy talk." Fond bafflement. "I send her the tense ones. She ' \
+               'empties them. I pretend it\'s normal. It is, up here."',
+        syn: '"She looks at me like I blessed the pumps." Winces, amused. "I didn\'t. I nod anyway. Sacred ' \
+             'awkward — hottest kind of awkward. Don\'t tell Berry I said hottest."'
       },
       {
         key: 'resident_fang', label: 'The Cartographer', question: 'What about the Cartographer?',
         category: 'residents', unlock: { requirement: { resident_met_cartographer: 1 } },
         unlock_text: 'Meet the Cartographer',
-        berry: '"Quiet map boy," Berry says. "Sweet. Lost. Don\'t let Pip distract him mid-sketch."',
-        syn: '"I tease him with floor secrets," Syn says. "He blushes and files them anyway. Cute. If you ' \
-             'catch him hovering a certain counter too long, don\'t ask — he\'ll invent a survey."'
+        berry: '"Soft. Lost. Good with corners." Berry softens. "Don\'t let Pip crash his sketch mid-line. And ' \
+               'if he keeps \'surveying\' one shop more than the others — you didn\'t hear it from me."',
+        syn: '"I feed him floor gossip he\'ll never fully get. He blushes and files it." Smirk. "Cute. If you ' \
+             'find him loitering somewhere with horns behind the counter, change the subject — he invents ' \
+             'excuses faster than maps."'
       },
       {
         key: 'strange_rooms', label: 'Strange rooms', question: 'What about the odd rooms — Confessor, Tea, doors…?',
@@ -695,46 +691,47 @@ module Engine
                                             'confessor_fights' => 1, 'gorgon_bargains' => 1, 'gorgon_negotiations' => 1,
                                             'spring_soaks' => 1 } },
         unlock_text: 'Meet a strange-room event',
-        berry: '"Hazard report," Berry says. "Tea\'s polite — I buy the leaves. Confessor and false doors ' \
-               'waste your afternoon. Gorgon and Spring? Almost people. Be gentle."',
-        syn: '"Land improvisations," Syn says. "If the booth sounded like me, that was me saying hi. Queen\'s ' \
-             'hinges on the fake exit. Dryad hospitality went mobile. Negotiate with stone — don\'t be rude."'
+        berry: '"Tea\'s polite — I buy the leaves. The rest?" She fans herself with the ledger. "Confessor ' \
+               'wastes an afternoon. Fake doors waste two. Gorgon and the spring girl almost count as people. ' \
+               'Be nicer than you feel."',
+        syn: '"The land showing off." Lazy shrug. "Sometimes a booth sounds like me saying hi. Sometimes a ' \
+             'door is the Queen\'s idea of a joke. Stone likes manners. Soft things like teeth. Negotiate."'
       },
       {
         key: 'resident_vex_deep', label: 'Madame Vex (her story)', question: 'After Vex\'s story…?',
         category: 'residents', unlock: { requirement: { vex_story_done: 1 } },
         unlock_text: 'Finish Madame Vex\'s story',
-        berry: '"She chose," Berry says, quieter. "Whatever ending you walked her into — she\'s still family. ' \
-               'Don\'t make me explain the kettle fees twice."',
-        syn: '"My handwriting on her skin and on that dress," Syn says. "You saw how the story ends. Pride ' \
-             'and guilt still share a seam. Treat her like a person, not a relic."'
+        berry: '"You walked that with her." Quieter. "Whatever she chose — she\'s still someone I like. Don\'t ' \
+               'make me explain her kettle prices twice if she\'s back on her feet."',
+        syn: '"You saw how it ended." Soft, then sharp. "She\'s not a museum piece. Talk to her like a person ' \
+             'who survived my early work — most people don\'t."'
       },
       {
         key: 'resident_pip_deep', label: 'Pip (milestones)', question: 'After hearing Pip\'s milestones…?',
         category: 'residents', unlock: { requirement: { pip_milestones_heard: 3 } },
         unlock_text: 'Hear all of Pip\'s trap milestones',
-        berry: '"She still needs pants," Berry insists. "Also she delivered something brave. Don\'t tease the ' \
-               'note if you saw it — that\'s sacred fangirl nonsense."',
-        syn: '"She documented my work like scripture and then did something foolish for the Queen," Syn ' \
-             'murmurs. "I\'m flattered. I\'m also never telling you her origin. Ask about hinges."'
+        berry: '"Pants. Still." Then softer. "She did something brave with those notes. Don\'t mock it — that\'s ' \
+               'sacred nonsense, and I\'ll defend sacred nonsense."',
+        syn: '"She wrote love letters to my hinges and then did something stupid-brave for the Queen." Pleased. ' \
+             '"Flattering. Her past stays sealed. Ask about plates. Or get caught again — she\'d like that."'
       },
       {
         key: 'resident_nectar_deep', label: 'Sister Nectar (her story)', question: 'After Nectar\'s story…?',
         category: 'residents', unlock: { requirement: { nectar_story_done: 1 } },
         unlock_text: 'Finish Sister Nectar\'s story',
-        berry: '"She meant every holy word," Berry says. "Weird. Warm. Send the tense ones — she\'ll empty ' \
-               'them properly."',
-        syn: '"She still looks at me like I ordained the dairy," Syn admits. "After her story, that look got ' \
-             'worse. I nod. I do not correct her. Awkward is sacred too."'
+        berry: '"She meant it. All of it." Soft laugh. "Weird. Warm. Send her anyone wound too tight — she\'ll ' \
+               'sort them."',
+        syn: '"That look she gives me got worse after." Dry. "I still don\'t correct her. Let her have the ' \
+             'theology. I\'ll keep the jokes for after service."'
       },
       {
         key: 'resident_fang_deep', label: 'The Cartographer (regular)', question: 'After buying his sketches…?',
         category: 'residents', unlock: { requirement: { sketches_bought: 5 } },
         unlock_text: 'Buy 5 Cartographer sketches',
-        berry: '"Quiet map boy\'s getting used to you," Berry says. "Don\'t let Pip distract him mid-page. ' \
-               'And no, I will not gossip about which shop he keeps \'surveying.\'"',
-        syn: '"He filed every secret I teased him with," Syn says, amused. "Regular customer energy. Purely ' \
-             'cartographic, he insists. Ears still pink."'
+        berry: '"He\'s getting used to you." Approval. "Still — if Pip barrels through mid-ink, protect the ' \
+               'page. And I am not discussing his favourite doorway."',
+        syn: '"He filed every scrap I teased him with." Amused. "Regular now. Still invents cartographic ' \
+             'reasons to blush. Adorable. Don\'t ruin it by naming anything."'
       }
     ].freeze
 
