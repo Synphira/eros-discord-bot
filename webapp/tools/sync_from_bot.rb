@@ -30,6 +30,7 @@ BOT_FILES = %w[
   lib/engine/altars.rb
   lib/engine/admirers.rb
   lib/engine/burdens.rb
+  lib/engine/support_tag.rb
   lib/engine/elites.rb
   lib/engine/title_system.rb
   lib/engine/transformation_system.rb

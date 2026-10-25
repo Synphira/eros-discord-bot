@@ -13,6 +13,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 - **Talk categories:** Talk now opens **General / Clergy / Residents / Temple**, then a topic dropdown per subject (Berry, Syn, Covar, residents).
 - **Victory Talk:** after defeating or satisfying a domain lord (or Eros), a **Talk** button lets you ask them a few questions on that screen only.
 - **More Ask-abouts:** resident topics (meet → short; story/milestones → deeper), Covar ask-abouts, and a **strange rooms** Temple topic once you’ve met those events.
+- **Support-server tag LP bonus:** equipping the support server’s Discord tag (`primary_guild`) grants **+10% LP** from all sources (stacks with burdens / appearance). Shown on `/status` when active. Override with `SUPPORT_GUILD_ID` / `SUPPORT_TAG_LP_MULT`.
 
 ### Added
 

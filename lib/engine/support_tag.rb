@@ -1,0 +1,99 @@
+# frozen_string_literal: true
+
+module Engine
+  # Discord server-tag perk: delvers who equip the support server's tag
+  # (User#primary_server / API primary_guild) earn a small LP bonus from
+  # every gain_lp! source. Detection is refreshed on each Discord
+  # interaction; the web build never observes a tag and stays at ×1.0.
+  module SupportTag
+    DEFAULT_GUILD_ID = 1_552_733_580_067_872_798
+    DEFAULT_MULT = 1.10
+
+    @lock = Mutex.new
+    @tagged = {}
+
+    module_function
+
+    def guild_id
+      raw = ENV['SUPPORT_GUILD_ID'].to_s.strip
+      raw = ENV['ERROR_GUILD_ID'].to_s.strip if raw.empty?
+      id = raw.empty? ? DEFAULT_GUILD_ID : raw.to_i
+      id.positive? ? id : DEFAULT_GUILD_ID
+    end
+
+    def lp_multiplier_value
+      raw = ENV['SUPPORT_TAG_LP_MULT'].to_s.strip
+      return DEFAULT_MULT if raw.empty?
+
+      mult = raw.to_f
+      mult.positive? ? mult : DEFAULT_MULT
+    end
+
+    def bonus_percent
+      ((lp_multiplier_value - 1.0) * 100).round
+    end
+
+    # Refresh from a Discordrb User (or anything with primary_server /
+    # primary_guild). Call on every player-facing interaction.
+    def observe!(user)
+      return unless user
+
+      id = user.respond_to?(:id) ? user.id.to_i : nil
+      return unless id&.positive?
+
+      set!(id, tagged_from_user?(user))
+    end
+
+    def tagged?(discord_id)
+      id = discord_id.to_i
+      return false unless id.positive?
+
+      @lock.synchronize { !!@tagged[id] }
+    end
+
+    def lp_multiplier(player)
+      id = player.respond_to?(:discord_id) ? player.discord_id : player
+      tagged?(id) ? lp_multiplier_value : 1.0
+    end
+
+    def status_footnote(player)
+      return nil unless tagged?(player.respond_to?(:discord_id) ? player.discord_id : player)
+
+      "-# Support tag equipped — **+#{bonus_percent}% LP** from all sources."
+    end
+
+    def tagged_from_user?(user)
+      target = guild_id
+
+      if user.respond_to?(:primary_server)
+        ps = user.primary_server
+        return false unless ps
+        return ps.server_id.to_i == target if ps.respond_to?(:server_id)
+      end
+
+      raw =
+        if user.respond_to?(:primary_guild)
+          user.primary_guild
+        elsif user.is_a?(Hash)
+          user['primary_guild'] || user[:primary_guild]
+        end
+      return false unless raw.is_a?(Hash)
+
+      enabled = raw['identity_enabled']
+      enabled = raw[:identity_enabled] if enabled.nil?
+      return false unless enabled
+
+      gid = (raw['identity_guild_id'] || raw[:identity_guild_id]).to_i
+      gid == target
+    end
+    private_class_method :tagged_from_user?
+
+    def set!(discord_id, tagged)
+      id = discord_id.to_i
+      return unless id.positive?
+
+      @lock.synchronize { @tagged[id] = !!tagged }
+    end
+    private_class_method :set!
+  end
+end

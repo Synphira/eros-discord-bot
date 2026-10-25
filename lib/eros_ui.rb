@@ -549,11 +549,13 @@ module ErosUI
                "**Submission** `#{player.effective_submission}` _(#{player.submission_display}, " \
                "base #{player.submission})_"
     )
-    container.text_display(
-      content: "**Defiance** `#{player.defiance}/#{player.max_defiance}`  ·  " \
-               "**Lust** `#{player.lust}`  ·  " \
-               "**LP** `#{player.lp}`"
-    )
+    lp_line = "**Defiance** `#{player.defiance}/#{player.max_defiance}`  ·  " \
+              "**Lust** `#{player.lust}`  ·  " \
+              "**LP** `#{player.lp}`"
+    if (tag_note = Engine::SupportTag.status_footnote(player))
+      lp_line = "#{lp_line}\n#{tag_note}"
+    end
+    container.text_display(content: lp_line)
     container.text_display(
       content: "**STR** #{player.effective_strength} _(base #{player.strength})_  ·  " \
                "**AGI** #{player.effective_agility} _(base #{player.agility})_  ·  " \
