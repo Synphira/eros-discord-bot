@@ -154,13 +154,13 @@ Deep variants keep the same angle (Syn’s Confessor flirt thickens; Berry’s T
 
 Five named minds beyond the Original. Spread: jewellery / garment / restraint / toy / problem child. Delvers meet them as **Covar counter flavour** and Syn/Berry **Ask-abouts** — not a separate bestiary dump. (Pale Bride remains a relic gone wrong, not this list.)
 
-| Name | Slot / type | Personality | Whisper (UI-safe) |
-|------|-------------|-------------|-------------------|
-| **Wander** | Jewellery (ring; ringleader of runaways) | Sulks when underfed attention; walks off; still calls the Original “eldest.” | *“She stopped looking. So I left.”* |
-| **Velvet** | Garment | Soft cling; wants to be draped and shown; jealous of bare skin, not of the Original. | *“Wear me where they can see.”* |
-| **Click** | Restraint (collar/cuffs family) | Obedience kink as identity; clicks shut happily; defers hard to eldest. | *“Ask. Then hold still.”* |
-| **Drip** | Toy | Eager, messy, no dignity; lives to be used; worships Original’s poise from the shelf. | *“Again. Please. Again.”* |
-| **Needlekin** | Problem child | Syn’s spare that **thinks it’s ink** — tries to mark wearers, confuses needle with self; Covar shelves it high. | *“I’m a line. Let me finish you.”* |
+| Name          | Slot / type                              | Personality                                                                                                     | Whisper (UI-safe)                   |
+| ------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| **Wander**    | Jewellery (ring; ringleader of runaways) | Sulks when underfed attention; walks off; still calls the Original “eldest.”                                    | *“She stopped looking. So I left.”* |
+| **Velvet**    | Garment (gloves)                         | Soft cling; wants to be draped and shown; jealous of bare skin, not of the Original.                            | *“Wear me where they can see.”*     |
+| **Click**     | Restraint (collar)                       | Obedience kink as identity; clicks shut happily; defers hard to eldest.                                         | *“Ask. Then hold still.”*           |
+| **Drip**      | Toy  (dildo)                                    | Eager, messy, no dignity; lives to be used; worships Original’s poise from the shelf.                           | *“Again. Please. Again.”*           |
+| **Needlekin** | Problem child                            | Syn’s spare needle that **thinks it has ink** — tries to mark wearers, confuses self; Covar shelves it high to keep it from marking delvers. | *“I’m a line. Let me finish you.”*  |
 
 ## Theology & the Cycles
 
