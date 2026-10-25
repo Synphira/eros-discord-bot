@@ -15,9 +15,34 @@ module Commands
         ErosUI.build_status_container(c, player)
         count = player.condition_list.size
         burden_count = Engine::Burdens.active(player).size
+        bonus_count = Engine::SupportBonuses.active_count(player)
         c.row do |row|
           row.button(label: "⛓️ Burdens (#{burden_count})", style: :primary, custom_id: "eros:status:burdens:#{event.user.id}")
+          row.button(label: "Bonuses (#{bonus_count})", style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
           row.button(label: "Conditions (#{count})", style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
+        end
+      end
+    end
+
+    def bonuses(event)
+      player = ErosHelpers.require_player(event) or return
+      bot = event.respond_to?(:bot) ? event.bot : nil
+      Engine::SupportBonuses.observe!(event.user, bot: bot, force: true)
+      player.refresh if player.respond_to?(:refresh)
+
+      ErosUI.reply_v2(event, colour: 0xf0c27f) do |c|
+        c.text_display(content: "## Bonuses — #{player.display_name}")
+        c.text_display(content: Engine::SupportBonuses.bonus_lines(player).join("\n"))
+        c.separator(divider: true, spacing: :small)
+        c.text_display(content: Engine::SupportBonuses.promo_text)
+        c.row do |row|
+          row.button(label: 'Join Support Server', style: :link,
+                     url: Engine::SupportBonuses::INVITE_URL)
+        end
+        c.row do |row|
+          row.button(label: 'Back to Status', style: :primary, custom_id: "eros:status:view:#{event.user.id}")
+          row.button(label: '⛓️ Burdens', style: :secondary, custom_id: "eros:status:burdens:#{event.user.id}")
+          row.button(label: 'Conditions', style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
         end
       end
     end
@@ -90,6 +115,7 @@ module Commands
         end
         c.row do |row|
           row.button(label: 'Back to Status', style: :primary, custom_id: "eros:status:view:#{event.user.id}")
+          row.button(label: 'Bonuses', style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
         end
       end
     end
@@ -102,6 +128,7 @@ module Commands
         ErosUI.build_conditions_container(c, player)
         c.row do |row|
           row.button(label: 'Back to Status', style: :primary, custom_id: "eros:status:view:#{event.user.id}")
+          row.button(label: 'Bonuses', style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
         end
       end
     end
@@ -146,6 +173,12 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Status.burdens(event)
+    end
+
+    button(custom_id: /^eros:status:bonuses:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Status.bonuses(event)
     end
 
     button(custom_id: /^eros:status:conditions:\d+$/) do |event|

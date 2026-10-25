@@ -13,7 +13,7 @@
   "bot/engine/altars.rb",
   "bot/engine/admirers.rb",
   "bot/engine/burdens.rb",
-  "bot/engine/support_tag.rb",
+  "bot/engine/support_bonuses.rb",
   "bot/engine/elites.rb",
   "bot/engine/title_system.rb",
   "bot/engine/transformation_system.rb",

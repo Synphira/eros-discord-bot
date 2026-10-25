@@ -26,7 +26,7 @@ require_relative 'lib/engine/biomes'
 require_relative 'lib/engine/altars'
 require_relative 'lib/engine/admirers'
 require_relative 'lib/engine/burdens'
-require_relative 'lib/engine/support_tag'
+require_relative 'lib/engine/support_bonuses'
 require_relative 'lib/engine/profile_system'
 require_relative 'lib/engine/threat_calculator'
 require_relative 'lib/engine/monster_types'
@@ -136,6 +136,7 @@ bot.ready do |_event|
 end
 
 Presence.install!(bot)
+Engine::SupportBonuses.install!(bot)
 
 puts 'Starting Endless Ruins of Sin Discord bot...'
 bot.run

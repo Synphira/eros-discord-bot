@@ -107,7 +107,10 @@ module ErosHelpers
   def require_player(event)
     return nil if guard_channel!(event)
 
-    Engine::SupportTag.observe!(event.user) if defined?(Engine::SupportTag)
+    if defined?(Engine::SupportBonuses)
+      bot = event.respond_to?(:bot) ? event.bot : nil
+      Engine::SupportBonuses.observe!(event.user, bot: bot)
+    end
 
     player = find_player(event.user.id)
     return player if player

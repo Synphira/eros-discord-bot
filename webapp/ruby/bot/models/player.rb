@@ -977,8 +977,8 @@ class Player < Sequel::Model(:players)
       # Being looked at pays: a provocative or depraved presentation
       # earns a quiet cut of everything the tower hands out.
       amount = (amount * Engine::ThreatCalculator.lp_multiplier(self)).round
-      # Support-server tag (Discord primary_guild) — small cut for the devoted.
-      amount = (amount * Engine::SupportTag.lp_multiplier(self)).round
+      # Support-server tag / booster — small cut for the devoted.
+      amount = (amount * Engine::SupportBonuses.lp_multiplier(self)).round
     end
     attrs = { lp: lp + amount }
     attrs[:trackers] = tracker_hash.merge('lp_earned' => tracker('lp_earned') + amount) if amount.positive?

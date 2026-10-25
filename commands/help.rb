@@ -6,7 +6,7 @@ module Commands
     extend Discordrb::Commands::CommandContainer
 
     COLOUR = 0x6b5b95
-    SUPPORT_URL = 'https://discord.gg/fXWCsyCUyU'
+    SUPPORT_URL = Engine::SupportBonuses::INVITE_URL
 
     # [slash, prefix, description]; slash nil = prefix only.
     PAGES = {
