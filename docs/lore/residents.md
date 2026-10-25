@@ -17,7 +17,7 @@ Relationships:
 - **Syn** is like a big sister to him. She created the first cursed/living gear and taught him how it works, which feeds his obsession with collecting, cataloguing, and rehoming it. Syn returns the affection and thinks of him as a **little brother** — which means they also butt heads and have petty arguments exactly like siblings: who left which piece on whose counter, whose dress is whose, whose fault the mannequin ending was. The fights are loud, short, and never about anything a stranger would understand as important.
 - **Berry** thinks he is sweet and views him like family, even though they do not see each other often. Covar likes both fairies and considers their rare visits a taste of home.
 - **Madame Vex** worked out of his back room and loved him like a son. He did **not** return that maternal bond: she was someone nice who worked well with him and the living gear. He cared more about her dress — Syn's Original — than about her. The exile after the mannequin ending is grief for the *dress* and for the disruption of his shop, not a son's rage at losing a mother. When the dress is restored, **he wears it** — peace with Vex (if it comes) does not mean giving the Original back; it lives on him now.
-- **Fang** (the Cartographer) has a crush on him; Covar does not know. Covar finds Fang cute and would date him if asked. Only Covar knows Fang's real name.
+- **Fang** (the Cartographer) has a crush on him; Covar does not know. Covar finds Fang cute and would date him if asked. Only Covar knows Fang's real name. **In-game text must never name the crush** — hint only (extra surveys of the counter, pink ears, “purely cartographic”).
 - **Sister Nectar** gets along with him; he likes visiting her shrine for milking and will not admit it.
 
 Covar proves his trust gradually: after a delver has genuinely conversed with him (five different topics), he will take them to bed for free, draining their lust to zero without costing defiance. His cock is for everyone and he is dominant with it; fucking his breasts (dominant) or his ass (submissive) requires the delver to have a penis.
@@ -30,7 +30,7 @@ Tone: **cozy domestic under tower filth** + **work comedy**. Must-haves: Syn or 
 Opens the cursed shop by talking to the stock. Spoils living accessories until they behave; shelves Syn’s latest runaway rings with a sibling sigh. Pre-restore: crop top, loincloth, mood-pets. Post-restore: **puts on the Original** like opening the shop — the dress settles, happy to be worn. Work comedy starts before customers: something is mating in the wrong bin again.
 
 **Peak — matchmaker counter**  
-Pairs gear with delvers who will keep them happy; catalogues; refuses bad homes. Soft command under warm shopkeeper voice. Syn drops by for a petty argument about whose piece is whose — loud, short, love underneath (post-restore she still ribs him for wearing her masterpiece to work). Alone beat: in a lull he smooths a seam on himself / listens to the dress breathe — pride and quiet, not a mannequin vigil. Fang may hover with a map; Covar finds him cute and still doesn’t notice the crush.
+Pairs gear with delvers who will keep them happy; catalogues; refuses bad homes. Soft command under warm shopkeeper voice. Syn drops by for a petty argument about whose piece is whose — loud, short, love underneath (post-restore she still ribs him for wearing her masterpiece to work). Alone beat: in a lull he smooths a seam on himself / listens to the dress breathe — pride and quiet, not a mannequin vigil. Fang may hover with a map; Covar finds him cute and still doesn’t clock why the boy keeps redrawing the counter.
 
 **Wind-down — keeper’s night**  
 Closes to anyone who isn’t gear. Feeds the difficult pieces; maybe slips to Nectar’s for a milking he won’t advertise. Sleep among soft rustles — dominant under soft even alone, telling a sulking harness it can stay on the hook *tonight*.
@@ -132,7 +132,7 @@ Last petitioners, inventory with Lacta, shrine lamps down. Uncomfortable if Vex 
 
 ### The Cartographer (Fang)
 
-A mortal who mapped too deep — absent-minded soft bookish young man, surprisingly handsome under the mess of maps. His room *is* the map. Soft and lost when he speaks. Wandered in and determined to chart the whole dungeon despite being told the rooms change constantly. Wants **Syn's floor secrets**; she teases him with them because she thinks it's cute. Shy around Covar (crush); finds Pip annoying and wishes she would wear pants; rarely speaks to Nectar, Vex, or Berry. Real name **Fang** — only Covar knows; he never bothers to tell anyone else. Delvers are the perfect survey crew.
+A mortal who mapped too deep — absent-minded soft bookish young man, surprisingly handsome under the mess of maps. His room *is* the map. Soft and lost when he speaks. Wandered in and determined to chart the whole dungeon despite being told the rooms change constantly. Wants **Syn's floor secrets**; she teases him with them because she thinks it's cute. Shy around Covar (writers: crush is real; **players only get hints** — never the word); finds Pip annoying and wishes she would wear pants; rarely speaks to Nectar, Vex, or Berry. Real name **Fang** — only Covar knows; he never bothers to tell anyone else. Delvers are the perfect survey crew.
 
 #### Day-in-the-life — Fang (three scenes)
 
@@ -142,7 +142,7 @@ Tone: **cozy domestic under tower filth** + **work comedy**. Must-haves: Syn or 
 Wakes under pinned sheets and string. Re-inks a corridor that moved overnight. Loses a boot in parchment. Work comedy already: Pip streaks past pantsless; he mutters about dress code and keeps drawing.
 
 **Peak — survey**  
-Charts with whoever will hold a corner. Syn teases floor secrets he’ll never fully get; he blushes and files them anyway. Berry may appear once — he goes quiet-map-boy and polite. Crush leak: invents an excuse to pass Covar’s counter (“purely cartographic”). Alone beat: stares at a blank wing of the map he can’t finish and admits, softly, that unfinished is the point — then pretends he didn’t.
+Charts with whoever will hold a corner. Syn teases floor secrets he’ll never fully get; he blushes and files them anyway. Berry may appear once — he goes quiet-map-boy and polite. Soft leak only: invents an excuse to pass Covar’s counter (“purely cartographic”) — never labelled. Alone beat: stares at a blank wing of the map he can’t finish and admits, softly, that unfinished is the point — then pretends he didn’t.
 
 **Wind-down — ink and almost**  
 Pins today’s lies over yesterday’s. Almost knocks on Covar’s door; doesn’t. Sleeps in the map-room lights, one hand on a compass that points nowhere useful.

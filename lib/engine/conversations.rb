@@ -685,8 +685,8 @@ module Engine
         category: 'residents', unlock: { requirement: { resident_met_cartographer: 1 } },
         unlock_text: 'Meet the Cartographer',
         berry: '"Quiet map boy," Berry says. "Sweet. Lost. Don\'t let Pip distract him mid-sketch."',
-        syn: '"I tease him with floor secrets," Syn says. "He blushes and files them anyway. Cute. Covar ' \
-             'doesn\'t know the crush yet — don\'t spoil it."'
+        syn: '"I tease him with floor secrets," Syn says. "He blushes and files them anyway. Cute. If you ' \
+             'catch him hovering a certain counter too long, don\'t ask — he\'ll invent a survey."'
       },
       {
         key: 'strange_rooms', label: 'Strange rooms', question: 'What about the odd rooms — Confessor, Tea, doors…?',
@@ -731,7 +731,7 @@ module Engine
         category: 'residents', unlock: { requirement: { sketches_bought: 5 } },
         unlock_text: 'Buy 5 Cartographer sketches',
         berry: '"Quiet map boy\'s getting used to you," Berry says. "Don\'t let Pip distract him mid-page. ' \
-               'And no, I will not gossip about the crush."',
+               'And no, I will not gossip about which shop he keeps \'surveying.\'"',
         syn: '"He filed every secret I teased him with," Syn says, amused. "Regular customer energy. Purely ' \
              'cartographic, he insists. Ears still pink."'
       }

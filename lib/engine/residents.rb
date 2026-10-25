@@ -34,7 +34,7 @@ module Engine
       'cartographer' => {
         name: 'The Pale Cartographer', title: 'Reader of the Dreaming Land', tag: nil,
         blurb: 'Fang does not map geography — the land re-dreams too fast. He reads the next three rooms and ' \
-               'sells the dream. Purely cartographic. (The crush on Covar is also purely cartographic.)',
+               'sells the dream. Purely cartographic. (He redraws one counter more often than the maps require.)',
         intro: '_White ink on black paper; rooms that do not exist yet. The Pale Cartographer does not look ' \
                'up. "The room moved again. Hold this corner — or ask. You walk a place that dreams itself. ' \
                'I take dictation. Purely cartographic."_'

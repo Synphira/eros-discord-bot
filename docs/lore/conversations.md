@@ -106,9 +106,9 @@ Menu organisation is **categories** (General / Clergy / Residents / Temple).
 - **Reveal variants:** yes — post-temple-reveal diction on fairy topics.
 - **Extras:** story-path hooks (restored Vex, Queen’s note for Pip, etc.), not boss-satisfy logic.
 
-**Syn’s angles:** Vex = Original pride/guilt · Pip = trap-fangirl cute · Nectar = pope-energy awkward · Fang = tease floor secrets · Covar = little brother · Lacta = Nectar’s spare.
+**Syn’s angles:** Vex = Original pride/guilt · Pip = trap-fangirl cute · Nectar = pope-energy awkward · Fang = tease floor secrets (hint the Covar orbit — never say crush) · Covar = little brother · Lacta = Nectar’s spare.
 
-**Berry’s angles:** Vex = friend she likes · Pip = put pants on · Nectar = holy but weird · Fang = quiet map boy · Covar = sweet family · Lacta = polite nod.
+**Berry’s angles:** Vex = friend she likes · Pip = put pants on · Nectar = holy but weird · Fang = quiet map boy (same hint rule) · Covar = sweet family · Lacta = polite nod.
 
 ### Do the Bosses Know?
 
