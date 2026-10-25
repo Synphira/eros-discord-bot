@@ -1,136 +1,186 @@
 # Endless Ruins of Sin
 
-**Endless Ruins of Sin** — a text-based endless dark fantasy roguelike Discord bot.
+> ## ⚠️ 18+ ONLY — EXPLICIT NSFW CONTENT
+>
+> **This Discord bot is for adults 18 years of age or older.**
+>
+> It is an **explicit erotic / pornographic** text game. Expect graphic sexual
+> descriptions, non-consent and dubious-consent themes, bondage, monsters,
+> transformation, corruption, and related fetish content.
+>
+> **If you are under 18, leave now.** Do not invite the bot, do not play, do not
+> read further. There is no “mostly SFW” mode — content toggles only filter
+> *which* adult themes appear, not whether the game is adult.
+>
+> Hosts: keep the bot in **NSFW / age-restricted** channels or DMs. Inside a
+> normal server channel that is not marked NSFW, the bot will refuse to answer.
 
-Descend an endless dungeon of rooms, traps, monsters, and bosses. Seek the **Seal of the Abyss**. Defeat resets your floor, level, and base stats; **LP**, **curses**, and **gear** carry over. High LP and curses raise your **Threat**, which makes foes stronger and more aggressive.
+---
+
+**Endless Ruins of Sin** is a text-based dark-fantasy **NSFW** roguelike Discord
+bot. You descend a lust-soaked tower of rooms, traps, monsters, and domain lords,
+climbing toward **Eros, Goddess of Lust**, on floor 35.
+
+Defeat sends you back to floor 1 with a new curse. **Lust Points (LP)**,
+**curses**, **living gear**, **marks**, **titles**, and long progress carry over.
+Clearing the tower starts a harder **cycle**. High LP and curses raise
+**Threat**, which makes the tower stronger and hornier.
+
+Support server: [discord.gg/fXWCsyCUyU](https://discord.gg/fXWCsyCUyU)
+
+---
+
+## What you play
+
+- **Explore** rooms: monsters, traps, treasure, events, stairs, altars, strange rooms.
+- **Combat:** Fight, Flee, or Submit. Lust builds; climax drains Defiance. At 0 Defiance you break.
+- **Bosses** every 5 floors (and Eros at 35). Defeat *or* satisfy them to clear the gate. After a clear you can **Talk** with that lord on the victory screen.
+- **Shops & residents:** Berry’s counter and quests, Syn’s parlour (marks), Covar’s Cursed Shop (living gear), plus residents like Madame Vex, Pip, Sister Nectar, and the Cartographer.
+- **Talk** with Syn, Berry, Covar, and residents (categories: General / Clergy / Residents / Temple). Clergy Talk is victory-only.
+- **Content options** (`/options`) — Core themes on by default; Bodies, Kinks, and Fetishes are opt-in. You choose intensity; you do **not** make the bot SFW.
+- **Support bonuses** (`/status` → Bonuses): wear this support server’s Discord **tag** for **+10% LP** from all sources; **server boosters** are detected (booster reward TBD). Works in DMs and other servers.
+
+---
 
 ## Stack
 
 - Ruby ≥ 3.1
-- [discordrb](https://github.com/shardlab/discordrb) — slash commands + buttons
-- [Sequel](https://github.com/jeremyevans/sequel) + SQLite
+- [discordrb](https://github.com/shardlab/discordrb) — slash commands, buttons, Components V2
+- [Sequel](https://github.com/jeremyevans/sequel) — **SQLite** (default) or **Postgres** via `DATABASE_URL`
 - dotenv
+
+---
 
 ## Setup
 
 ```bash
-# 1. Install dependencies
+# 1. Dependencies
 bundle install
 
-# 2. Configure secrets
+# 2. Secrets
 cp .env.example .env
-# Edit .env — set DISCORD_TOKEN and DISCORD_CLIENT_ID from the Discord Developer Portal
+# Set DISCORD_TOKEN and DISCORD_CLIENT_ID (Discord Developer Portal)
 
-# 3. Create / migrate the database
+# 3. Database
 bundle exec rake db:migrate
 
-# 4. Register slash commands once (not on every bot restart)
+# 4. Slash commands (once; not on every restart)
 bundle exec rake commands:register
-# Optional: instant guild sync while testing
+# Optional instant guild sync while testing:
 # DISCORD_GUILD_ID=your_guild_id bundle exec rake commands:register
 
-# 5. Invite the bot (OAuth2 URL generator: scopes bot + applications.commands)
+# 5. Invite the bot (OAuth2: scopes bot + applications.commands)
 # 6. Run
 bundle exec ruby bot.rb
 ```
 
+Invite the bot only into servers that can host **NSFW** play (age-restricted
+server and/or NSFW channels). Prefix commands are ignored outside NSFW channels
+in a guild; DMs are always allowed.
+
+Useful `.env` knobs (see `.env.example`): `BOT_PREFIX`, `DEVELOPER_ID`,
+`BUG_TESTER_IDS`, `ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`, support-server bonus
+ids, `DATABASE_URL` for Postgres.
+
+---
+
 ## Commands
 
-Slash and prefix share the same handlers (prefix defaults to `e,`, and `E,` also works for phones that auto-capitalise):
+Slash and prefix share the same handlers. Default prefix is `e,` (`E,` also
+works for phones that auto-capitalise).
 
 | Slash | Prefix | What it does |
 |-------|--------|--------------|
-| `/help` | `e,help` | Paged command list with a Tutorial and a Support server link |
-| `/create` · `/start` | `e,create` · `e,start` | Character creation — body type, then Submission attitude |
-| `/status` | `e,status` | Character sheet: stats, deepest floor, Threat (curses via `/curses`) |
-| `/explore` | `e,explore` | Room roll; monsters open **Fight / Flee / Submit** combat |
-| `/rest` | `e,rest` | Clear all lust and fully restore defiance; 5-minute cooldown |
-| `/curses` | `e,curses` | List active curses grouped by monster type |
-| `/removecurse` | `e,removecurse` · `e,removecurse N` | Purge a curse for **50 LP** (menu or number) |
-| `/suppresscurse` | `e,suppresscurse N` | Silence a curse for **25 LP**; it reactivates when you are defeated |
-| `/restart` | `e,restart` | New delver + body type (confirm button); titles, achievements, progress, Cursed Shop unlocks, and options are kept |
-| `/profile` · `/name` | `e,profile [name]` · `e,name [name]` | Character profile, lifetime stats, rename; look up others by character name |
-| `/parlour` | `e,parlour` | Syn & Berry's: Syn's permanent tattoos/piercings (small perks, shown on your profile; also a Profile button) |
-| `/quests` | `e,quests` | Berry's quest board: take up to 3 errands at a time for bonus Lust Points |
-| `/titles` · `/title` | `e,titles` · `e,title [name\|auto]` | Paged title list with a dropdown to equip |
-| `/transformation` | `e,transformation [name\|clear\|fuse A + B]` (`e,hybrid`) | Hybrid forms: unlock progress, switch forms, return to human, or fuse two unlocked forms into a Chimera (100 LP) |
-| `/achievements` | `e,achievements [category]` | Achievements by category (combat, submission, exploration, curses, lust, events, challenges) |
-| `/leaderboard` | `e,leaderboard [cycles\|depth\|kills\|lp]` | Top delvers (character names only) |
-| `/levelup` | `e,levelup [stat\|level]` | Stats cost 5 + current value; a Level costs 80% of all three, raises max defiance, and fully heals |
-| `/shop` | `e,shop [category]` | Berry's shop counter: browse by category — buy buttons, Prev/Next pages, and a button through to Berry's quests and Syn's parlour |
-| `/cursedshop` | `e,cursedshop` | Free living gear you have previously worn and torn free |
-| `/buy` · `/sell` | `e,buy` · `e,sell` | Buy / sell by name (cursed gear cannot be sold) |
-| `/equipment` | `e,equipment` | View gear, your trophy, and inventory |
-| `/equip` · `/unequip` | `e,equip` · `e,unequip` | Equip / unequip normal gear (one trophy at a time) |
-| `/remove` | `e,remove [item]` | Destroy cursed mimic gear for LP (unlocks it in the Cursed Shop) |
-| `/options` | `e,options` | Content preferences in four menus (Core on by default; Bodies, Kinks and Fetishes opt-in) plus body sizes |
-| `/fetish_options` | `e,fetish_options [option] [on/off]` | Toggle one theme by key or name; no arguments lists all 58 |
-| — | `e,sluttify [on/off]` | Turn every theme on or off at once (prefix only) |
-| `/fight` · `/flee` · `/submit` | `e,fight` · `e,flee` · `e,submit` | Combat actions (also buttons) |
+| `/help` | `e,help` | Paged command list, Tutorial, Support link |
+| `/create` · `/start` | `e,create` · `e,start` | Create a delver: body type, submission stance, name |
+| `/status` | `e,status` | Sheet, Threat, Burdens, **Bonuses**, Conditions |
+| `/explore` | `e,explore` | Next room |
+| `/rest` | `e,rest` | Clear lust + full Defiance; 5-minute cooldown |
+| `/fight` · `/flee` · `/submit` | `e,fight` · `e,flee` · `e,submit` | Combat (also buttons) |
+| `/levelup` | `e,levelup [stat\|level]` | Spend LP on STR / AGI / RES or a level |
+| `/curses` | `e,curses` | Syn’s curse ledger |
+| `/removecurse` | `e,removecurse [N]` | Purge a curse (**50 LP**) |
+| `/suppresscurse` | `e,suppresscurse [N]` | Silence a curse until defeat (**25 LP**) |
+| `/shop` | `e,shop [category]` | Shops menu (gear, potions, cursed, quests, parlour) |
+| `/buy` · `/sell` | `e,buy` · `e,sell` | Buy / sell by name (living gear cannot be sold) |
+| `/equipment` | `e,equipment` | Gear, trophy, inventory |
+| `/equip` · `/unequip` | `e,equip` · `e,unequip` | Wear / remove normal gear (one trophy at a time) |
+| `/remove` | `e,remove [item]` | Tear off living gear for LP (unlocks Cursed Shop) |
+| `/cursedshop` | `e,cursedshop` | Covar’s counter — free reclaim of torn living gear; Talk / bed |
+| `/parlour` | `e,parlour` | Syn’s permanent marks |
+| `/quests` | `e,quests` | Berry’s quest board (+ Talk to Syn / Berry) |
+| `/profile` · `/name` | `e,profile` · `e,name` | Profile / rename / look up by character name |
+| `/titles` · `/title` | `e,titles` · `e,title` | Equip titles |
+| `/achievements` | `e,achievements` | Achievements by category |
+| `/transformation` | `e,transformation` (`e,hybrid`) | Hybrid forms / Chimera fusion |
+| `/leaderboard` | `e,leaderboard` | Top delvers |
+| `/codex` | `e,codex` | Lore fragments earned in play |
+| `/options` | `e,options` | Adult content toggles (+ related menus) |
+| `/fetish_options` | `e,fetish_options` | Toggle one theme by key/name |
+| — | `e,sluttify [on/off]` | Every theme on or off (prefix only) |
+| `/restart` | `e,restart` | New delver + body type (confirm); titles/achievements/progress kept; story quests reset |
 
-`e,dev` commands (prefix only, locked to the developer's Discord ID in `DEVELOPER_ID` plus any bug testers listed in `BUG_TESTER_IDS`, comma-separated, both in `.env`) cover stat editing, item/curse grants, debug mode, and boss/cycle skips — `e,dev help` lists them.
+`e,dev` (prefix only) is locked to `DEVELOPER_ID` and `BUG_TESTER_IDS`. Run
+`e,dev help` for the list.
 
-Errors print as one readable block in the console, are appended to `logs/errors.log`, and are posted to `ERROR_CHANNEL_ID` (a channel in `ERROR_GUILD_ID`) when those are set in `.env`.
-
-Buttons are locked to the player who opened the panel. Button presses **edit** that panel in place; slash/prefix commands always send a **new** message.
+Buttons belong to the player who opened the panel. Button presses **edit** that
+panel; slash/prefix commands send a **new** message. Replies use Discord
+**Components V2** (containers + text displays).
 
 ### Character creation
 
-1. Pick a **body type** (1–5).
-2. Choose **Submission** attitude (Eager +3 → Resistant −3). This is a lasting character trait (not wiped on defeat).
+1. Pick a **body type**.
+2. Choose **Submission** attitude (Eager → Resistant). This trait lasts (not wiped on defeat).
+3. Name your delver.
 
-## Game mechanics
+---
 
-- **Threat %** = `(Current LP / Max LP Base × 100) + (Active Curses × 15)`  
-  Active = not suppressed. `Max LP Base` = 100.
-- **Threat categories**
-  - `:low` — &lt; 40
-  - `:medium` — 40 ≤ x &lt; 75
-  - `:high` — ≥ 75
-- **Threat scaling** — Higher Threat boosts monster HP/STR/AGI and lust damage, and biases explore toward more monster rooms. Bosses use the same multipliers.
-- **LP** — Currency for level-ups, shop gear, and curse removal. Also drives Threat.
-- **Rest** (`/rest` or button) — clears all lust and fully restores defiance; 5-minute cooldown, blocked in combat and events.
-- **Weekly modifiers** — Each week (from Monday) the tower runs one modifier, e.g. Heat Week, Hunting Season (3× elites), Full Moon (more beasts), Mimic Season or Generous Tower. It shows on `/status` with a countdown.
-- **Elites** — From floor 3, some monsters spawn with an affix (Rutting, Slick, Towering, Insatiable, Alluring) that buffs them. Beating one pays ×2 LP; satisfying one pays +10 LP.
-- **Marks** — Permanent tattoos and piercings from Syn's bench at **Syn & Berry's** (`/parlour`). Each costs LP and gives a small perk; they survive defeat, restarts and cycles. Some designs need a content toggle or body part.
-- **Quests** — Berry, who runs the shop counter, posts a quest board of her own at `/quests` (and a button on `/shop` leads there). She offers 3 errands at a time; hold up to 3, progress counts from your lifetime stats the moment you accept, and claiming pays bonus LP (50–150). Quests are repeatable, survive defeat, and completing 10 earns the **Berry's Favourite** achievement (25 for the title). Hidden at Syn's bench in `/parlour` once you wear 5 of her marks is **Syn's Secret**: a one-time five-step plan to surprise Berry with a vow-renewal wedding, ending with the **Fairy Family** title, a sixth mark slot and the masterwork Wedding Mark.
-- **Hybrid forms** — 30 forms earned through events and submissions, plus **Chimera fusion** of any two (100 LP; secondary at half strength), **deepening** (3 stages with mutation choices) and **resonance** (kindred monsters are easier to satisfy and gentler). Eros greets hybrids and chimeras by name.
-- **Biomes** — Each 5-floor section rolls a weighted biome (12 kinds: Milking Barns, Mirror Gallery, Living Depths, Velvet Kennels, Bell Choir, Glass Menagerie, Drowned Chapel, Honeyed Hive, Clockwork Brothel, Ashen Court, Flooded Grotto, Masquerade Ball), strongly tipped toward the boss waiting at the section's end, tilting monster types and event themes for the whole stretch.
-- **Altars & Attention** — Altar rooms let you pray, tithe or offer yourself; devotion fills Eros's **Attention**, and at 100 she visits with a gift, her Favour, a free curse purge, or healing.
-- **Admirers** — Satisfy 3 monsters of one type and one becomes your admirer: weaker kin, LP gifts, and jealous sabotage.
-- **Cycle burdens** — At floor 1 of a cycle, take up to 3 burdens (LP gains +25% each, up to ×1.75) from `/status`; locked until you clear the tower.
-- **Monster types** — Beast, Demon, Slime, Undead, Plant, Mimic (each with roster, color, and assault/submit flavor).
-- **Curses** — Defeat always brands you with a curse from the foe's type pool, and the tower can also curse you when you orgasm in combat, satisfy a monster, or win a fight (bosses and elites brand you more often, and every extra cycle raises the odds). New curses are always ones you don't already bear. Effects include lust/damage multipliers, encounter weighting, no-flee/no-death, climax LP, defiance start penalties, and flat STR/AGI/RES. Curses feed Threat, so the more you carry, the stronger and hornier everything gets.
-- **Combat** — **Fight** chips monster **HP**. **Flee** (AGI-based). **Submit** / monster hits raise **lust** with assault scenes; climax at 100 costs 20 defiance and leaves you exhausted (STR/AGI -1 for 2 floors) until 10 climaxes in a run make you addicted, after which climaxes buff you instead. Victory grants LP (no automatic floor advance). Defeat applies a curse and resets floor, level, base stats, defiance, and lust. **Non-cursed gear is lost**; living (cursed) mimic gear persists.
-- **Bosses** — Every 5th floor, once per gate. Defeating *or satisfying* the boss clears it, grants LP and a trophy, and advances one floor. Bosses are half as easy to satisfy as normal monsters. Only one trophy can be worn at a time, and trophies are lost on defeat. The first time a boss drops below half HP it changes tactics: you pick between **resisting** (costs defiance, deals a heavy blow, but the boss hits harder) or **giving in** (lust, LP and a step of satisfaction, but the boss recovers a little).
-- **Stats** — STR: damage. AGI: flee, dodge monster attacks (not while submitting), avoid traps, and slip free of multi-turn events. RES: cuts every lust hit by `100 / (100 + RES × 5)`. Max defiance grows with level: `100 + 10·√(level − 1)`.
-- **Explore** — Weighted rooms: monster / trap / treasure / **stairs** (floor+) / empty, plus **random events** (glory hole choices, multi-turn violations, instant traps). Lust traps that hit 100+ also climax.
-- **NPC encounters** — Other delvers and characters appear while exploring. Story NPCs (Mira, Lillia, Sister Elara, Marcus, Thomas, Alex) return on deeper floors based on your earlier choices; the Milking Station and Trapped Delvers can repeat. Content toggles and body type shape what appears.
-- **Treasure** — Finding a chest gives a choice: **Open it** (LP, a Defiance Tonic, a useful consumable like a Cooling Elixir or Bottled Sanctuary, basic gear, rare gear from floor 8 — and once you own all the chest-only gear, unowned shop gear instead — or **living mimic equipment** that auto-binds and may violate you in combat) or **Leave it** for a small defiance boost (4% of max). Mimics are rolled when the chest appears, and high AGI makes it more likely you spot a tell. No duplicate items. Cursed gear is matched to your `/options` toggles — every piece is themed to a theme you have enabled (there are 24 pieces, from bondage corsets to tentacle vine belts, milking bras and tickle-feather gloves), and the Cursed Shop seals pieces whose theme you have since disabled. If no cursed piece matches your tastes at all, a mimic chest rears up as a **Chest Mimic** to fight instead.
-- **Equipment** — Shop / chests / boss trophies, one item per slot (weapon, head, chest, legs, feet, groin, accessory, trophy). Besides STR/AGI/RES, gear can carry damage, lust per hit, lust taken, max defiance, defiance per round, flee, dodge, surprise-hit chance, lifesteal, satisfy chance, trap avoidance, monster-room rate, LP bonuses, and bonuses against specific monster types. The shop also sells Defiance Draughts and Cooling Elixirs. Normal gear is lost on defeat; cursed gear requires `e,remove` + LP to destroy.
+## Game mechanics (short)
+
+- **Threat** rises with LP and active curses. Higher Threat = tougher, lustier foes and more monster rooms.
+- **LP** — spend on levels, gear, curses, marks, hybrids. Also fuels Threat. Support **tag** adds +10% to gains.
+- **Defiance / Lust** — hits and submission raise lust; climax at 100 drains Defiance. 0 Defiance = defeat.
+- **Defeat** — curse, back to floor 1 / level 1; normal gear lost; living gear, LP, curses, marks, titles persist. Cycles reset to 1.
+- **Cycles** — clear floor 35 → harder climb, better payouts (~×1.3 per cycle), more curse pressure.
+- **Burdens** — up to 3 at floor 1 (+25% LP each). **Oaths** (up to 2, +10% LP) and **rerolls** work mid-climb; reroll price resets on floor 1.
+- **Bosses** — every 5 floors; trophy on clear (lost on defeat). Victory **Talk** with that lord.
+- **Curses** — from defeat and often from climax / satisfy / wins; manage via `/curses`.
+- **Marks, quests, hybrids, admirers, altars, biomes, weekly modifiers, elites** — see `/help` Tutorial for the player-facing tour.
+
+Design lore lives under [`docs/lore/`](docs/lore/README.md). Player-facing changes go in [`CHANGELOG.md`](CHANGELOG.md).
+
+---
 
 ## Project layout
 
 ```
-Gemfile
-Rakefile
-bot.rb                          # runtime only — does not register slash commands
-register_commands.rb            # one-shot slash registrar
-CHANGELOG.md                    # notable changes (keep updated)
-config/slash_commands.rb        # slash command definitions
-config/database.rb
-commands/…
-lib/…
-db/migrations/…
+bot.rb                 # runtime (does not register slash commands)
+register_commands.rb   # one-shot slash registrar
+CHANGELOG.md
+config/                # database, slash definitions
+commands/              # Discord command & button handlers
+lib/engine/            # game rules, events, conversations
+lib/models/            # Player and friends
+db/migrations/
+docs/lore/             # design bible
+webapp/                # standalone browser port (separate changelog)
 .env.example
-README.md
 ```
 
-Slash commands are registered with a single bulk overwrite via `bundle exec rake commands:register` (not on every `bot.rb` restart).
+Slash commands: `bundle exec rake commands:register` after changing names or
+descriptions. Global sync can take up to ~1 hour; set `DISCORD_GUILD_ID` for
+instant guild registration while testing.
 
-All Discord replies use **Components V2** (`has_components: true`) — containers + text displays instead of classic content/embeds.
+Errors: console + `logs/errors.log`, and optionally a Discord channel via
+`ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`.
 
-## Notes
+---
 
-- A real **DISCORD_TOKEN** is required to connect; without it the process exits on boot.
-- Run `bundle exec rake commands:register` after changing slash names/descriptions. Global sync can take up to ~1 hour; set `DISCORD_GUILD_ID` for instant guild-scoped registration while testing.
+## Age & content reminder
+
+**18+. NSFW. Explicit.**
+
+This project is adult erotic fiction in game form. By running, inviting, or
+playing with this bot you confirm you are an adult and accept graphic sexual
+content, including themes many people find extreme. If that is not for you —
+or if you are under 18 — **do not use this bot**.
