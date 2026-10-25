@@ -104,8 +104,10 @@ module Commands
         covar_bed_note(c, player, person)
 
         c.row do |row|
+          # Distinct from eros:talk:{person}:{uid} (Berry/Syn switcher) — Discord
+          # rejects duplicate custom_ids on one panel.
           row.button(label: '◀ Subjects', style: :secondary,
-                     custom_id: "eros:talk:#{person}:#{event.user.id}")
+                     custom_id: "eros:talk:subjects:#{person}:#{event.user.id}")
         end
         nav_row(c, event, player, person)
       end
@@ -205,6 +207,13 @@ module Commands
           row.button(label: '📖 Journal', style: :secondary, custom_id: "eros:codex:view:#{uid}")
         end
       end
+    end
+
+    button(custom_id: /^eros:talk:subjects:(#{PERSON_RE}):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      person = event.custom_id[/\Aeros:talk:subjects:(#{PERSON_RE}):\d+\z/, 1]
+      Commands::Conversations.show(event, person)
     end
 
     button(custom_id: /^eros:talk:(#{PERSON_RE}):\d+$/) do |event|

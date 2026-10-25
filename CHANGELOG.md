@@ -18,6 +18,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - **Postgres support:** `pg` gem + `tools/copy_sqlite_to_postgres.rb` for moving off SQLite. Set `DATABASE_URL=postgres://…` (Sequel already accepted it).
 
+### Fixed
+
+- **Talk subjects back button:** opening a category (e.g. General with Syn) no longer crashes Discord with a duplicate `custom_id` — ◀ Subjects no longer reused the Talk-to-Syn/Berry switcher id.
+
 ### Changed
 
 - **Restore the Dress — no relic stand-ins:** while Covar’s quest needs counsel from the **Succubus Queen** or **Lich Lord**, that lord’s floor cannot be replaced by a relic boss for that step (so you can always ask them about the dress).
