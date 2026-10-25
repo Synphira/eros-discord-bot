@@ -16,6 +16,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
+- **Clergy victory Talk** (synced from bot): domain-lord answers rewritten into character voice.
 - **Burdens mid-climb** (synced from bot): oaths and rerolls on any floor; reroll price resets on floor 1; rerolls skip oaths. Settings now exposes oath toggles and reroll buttons.
 - **Restart story-quest wipe** (synced from bot): Syn wedding, Vex/Covar/resident stories reset on Restart; Berry quests completed still carries over. Defeat still leaves those stories intact.
 - **Shop / parlour / quests intros** lightly aligned with lore voice (Berry’s *good girl* energy, Syn’s parlour).

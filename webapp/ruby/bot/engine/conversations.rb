@@ -819,95 +819,153 @@ module Engine
     CLERGY_SELF_TOPICS = {
       'broodmother' => [
         { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
-          broodmother: '"Brood. Lid. Table that never ends. Syn was my favourite taste that became a person. ' \
-                       'You are brood that has not admitted it yet."' },
+          broodmother: 'A tongue brushes your wrist like a question. "Mother. Lid. The thing that keeps what ' \
+                       'crawls in." She sounds almost fond. "You walked all this way smelling like curiosity. ' \
+                       'That\'s brood talking — it just hasn\'t said the word yet."' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          broodmother: '"She bargained out. Then she came back with a temple and called hunger worship. Clever ' \
-                       'meal."' },
+          broodmother: '"She got out." A long pause; tongues slow. "Nobody gets out. Then she came back years ' \
+                       'later and said my hunger was holy. Clever little meal." Something almost like a laugh ' \
+                       'ripples the chest. "I still remember the taste. She knows."' },
         { key: 'keeping', label: 'Keeping you', category: 'general', unlock: :always,
-          broodmother: '"I keep. The temple steals upward. I have never learned to forgive that theft."' },
+          broodmother: '"I keep." Flat. Certain. "This place steals you upward anyway — always has. I have ' \
+                       'never learned to like that." A tongue curls around your ankle, testing. "While you\'re ' \
+                       'here, you\'re mine. Argue later."' },
         { key: 'domain', label: 'Her floors', category: 'temple', unlock: :always,
-          broodmother: '"Open it. Take it. Crawl inside. Curiosity, greed, comfort — same door."' },
+          broodmother: '"Pretty junk. Warm lids. Things that want hands on them." She nudges a chest with a ' \
+                       'tongue. "Open it. Take it. Crawl in. Curiosity, greed, comfort — same door, brood. ' \
+                       'You already knew which one you\'d pick."' },
         { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
           unlock_text: 'Complete a cycle',
-          broodmother: '"She spat you out again? Fine. Get inside. I\'ll keep what\'s mine until she steals you."' }
+          broodmother: '"She spat you out again?" Irritated amusement. "Fine. Get inside. I\'ll keep what\'s ' \
+                       'mine until she steals you. Again."' }
       ],
       'queen' => [
         { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
-          queen: '"Court manners. Trap craft. Being worshipped is good manners finally enforced by architecture."' },
+          queen: 'She arranges herself on the throne like the furniture asked permission. "A queen, darling — ' \
+                 'of a court that finally lasts." A smile with teeth. "I like manners. I like being looked at ' \
+                 'properly. Architecture helped with the rest."' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          queen: '"Darling disaster. Best friend. We built every hinge together. Tell her I laughed."' },
+          queen: '"Syn?" Bright immediately. "Disaster in glitter. My favourite." She fans herself with ' \
+                 'nothing. "We have ruined weeks designing hinges and calling it work. Tell her I laughed — ' \
+                 'and that Berry still owes me a less murderous face when I visit."' },
         { key: 'traps', label: 'The traps', category: 'temple', unlock: :always,
-          queen: '"Syn\'s patience, my cruelty. A trap should leave you thinking about me."' },
+          queen: '"Syn brings the patience. I bring the part that makes you think about me in the bath." She ' \
+                 'traces a finger along an invisible plate. "A trap that only catches is boring. A trap that ' \
+                 'leaves you wanting an audience — that\'s craft. Ours."' },
         { key: 'vex', label: 'Madame Vex', category: 'residents', unlock: :always,
-          queen: '"Even I don\'t bother knowing sluts that desperate." Soft laugh. "Don\'t quote me to Syn."' },
+          queen: 'A soft, dismissive laugh. "Even I don\'t bother knowing sluts that desperate." She inspects ' \
+                 'her nails. "She made a very public mistake with a very loud colleague. Court has standards." ' \
+                 'A beat. "Don\'t quote me to Syn. She gets… sentimental about unfinished dresses."' },
         { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
           unlock_text: 'Complete a cycle',
-          queen: '"She keeps sending my toys home. I still want you on your knees — and I love that you remember."' }
+          queen: '"She keeps sending my toys home." Fond, predatory. "I still want you on your knees — and I ' \
+                 'love that you remember how to look at me."' }
       ],
       'king' => [
         { key: 'self', label: 'Who he is', category: 'general', unlock: :always,
-          king: '"Gorgeous. Gifted. Unbearable. Syn collected a debt and called it priesthood. Fair."' },
+          king: 'He stretches like the room is a mirror. "King. Obviously." The grin is practiced. "Gorgeous, ' \
+                'gifted, and — people keep saying unbearable. Rude. Syn collected an old favour and handed me ' \
+                'floors. I pose in them. You\'re welcome."' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          king: '"Come here. Syn said I could. She still holds the leash on the working we built."' },
+          king: 'The swagger thins a fraction. "Come here — Syn said I could." Then, quieter: "She still has ' \
+                'the story that makes me leave a room. Don\'t ask. Ask her when you want me humiliated." The ' \
+                'grin snaps back. "Or ask me something dirtier. Better use of a throne."' },
         { key: 'spawn', label: 'The spawning', category: 'temple', unlock: :always,
-          king: '"My half keeps the halls stocked. Appetite shaped into teeth. You\'re welcome."' },
+          king: '"My half," he says, tapping his chest like a medal. "Appetite into teeth. Halls that stay ' \
+                'hungry so you never walk alone." He winks. "Syn handled the boring diagrams. I handled the ' \
+                'parts that feel good. History agrees with me."' },
         { key: 'berry', label: 'Berry', category: 'residents', unlock: :always,
-          king: '"I hit on her. Constantly. Liturgy. With Syn watching I behave. Mostly."' },
+          king: '"Berry?" He lights up like a bad idea. "Sunshine with a ledger and a smile that could ' \
+                'collect taxes in hell. I hit on her. Constantly. It\'s tradition." A glance toward an empty ' \
+                'doorway. "With Syn watching I behave. Mostly. Mostly is a lifestyle."' },
         { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
           unlock_text: 'Complete a cycle',
-          king: '"Third time and you\'re still dripping for me. She can have the climb — I claimed the rest."' }
+          king: '"Still dripping for me?" Pleased, predatory. "She can have the climb. I already claimed the ' \
+                'interesting parts. Say it again if you like — I collect repeats."' }
       ],
       'dryad' => [
         { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
-          dryad: '"Rooted. Feeding. Syn\'s weather that stayed. Eat. Stay. The grove has room."' },
+          dryad: 'She offers fruit before she answers. "I\'m the shade that stayed." Soft. "Rooted lives get ' \
+                 'lonely in a very specific way — everything visits, nothing settles. Eat. Stay a while. The ' \
+                 'grove has room, and I like the sound of company."' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          dryad: '"I fed her before the temple. Fruit and firmness. She still forgets water. I remember."' },
+          dryad: '"Syn used to nap under my tree and forget to drink water." Fond exasperation. "I fed her. ' \
+                 'I still feed her. She does not call me mother — she just keeps ending up rested." A vine ' \
+                 'idly tucks a leaf behind your ear. "Someone has to."' },
         { key: 'vines', label: 'Vines & tentacles', category: 'temple', unlock: :always,
-          dryad: '"My daydreams. Syn made them eager. Hospitality with grip."' },
+          dryad: '"Hospitality with grip." She almost smiles. "I daydreamed vines that held guests properly. ' \
+                 'Syn made them eager. The Queen laughed and added… suggestions." A vine curls, polite and ' \
+                 'inescapable. "If they grab, they mean stay. Not eat. Different hunger."' },
         { key: 'keeping', label: 'Staying', category: 'general', unlock: :always,
-          dryad: '"I lose delvers the way seasons lose leaves. Sadder than I say. Come back slowly."' },
+          dryad: '"I lose delvers the way seasons lose leaves." Quieter. "I am sadder about it than I say. ' \
+                 'Come back slowly if you can. The garden remembers scent longer than names."' },
         { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
           unlock_text: 'Complete a cycle',
-          dryad: '"My leaf came back. Plant yourself. I\'ll mourn you again when she pulls you free."' }
+          dryad: '"My leaf came back." Warmth like sun through canopy. "Plant yourself. I\'ll mourn you again ' \
+                 'when she pulls you free — and I\'ll still be glad you visited."' }
       ],
       'lich' => [
         { key: 'self', label: 'Who he is', category: 'general', unlock: :always,
-          lich: '"Teacher. Apparatus. A thousand years cold. Fascinating. Wrong, but fascinating."' },
+          lich: 'He looks you over like a footnote. "I am the apparatus that stayed interested." Bored ' \
+                'precision. "A thousand years cold. You are warm and incorrect. Fascinating — wrong, but ' \
+                'fascinating. Speak clearly; I am taking notes."' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          lich: '"My rare living pupil. Pride I will not admit. When she impresses me, the frost crown flickers."' },
+          lich: '"My pupil." He says it like an insult that failed to land. "Rare. Living. Annoyingly ' \
+                'competent." A pause; the frost crown flickers despite him. "She still visits the labs. I still ' \
+                'correct her work. Do not call that affection in my hearing."' },
         { key: 'lust_energy', label: 'Lust energy', category: 'temple', unlock: :always,
-          lich: '"Desire made to work. I taught her. The temple is longitudinal study with better furniture."' },
+          lich: '"Desire is noise until you teach it to labour." He gestures at the cold shelves. "I taught ' \
+                'her. She built a tower of controlled appetites and called it worship. I call it a study with ' \
+                'better furniture. Both can be true. Mostly mine is."' },
         { key: 'data', label: 'You as data', category: 'general', unlock: :always,
-          lich: '"Warmth and numbers, in that reverse order on the paperwork. Do not waste either."' },
+          lich: '"Warmth and numbers." Spectral fingers flex, almost involuntarily. "Paperwork lists them in ' \
+                'that order. Hands prefer the reverse. Do not waste either — unusual specimens are tedious to ' \
+                'replace, and you are… adequate."' },
         { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
           unlock_text: 'Complete a cycle',
-          lich: '"Longitudinal study continues. She returns you; I take notes — and heat."' }
+          lich: '"Longitudinal study continues." Dry satisfaction. "She returns you; I take notes — and heat. ' \
+                'Try not to become boring between visits."' }
       ],
       'alpha' => [
         { key: 'self', label: 'Who he is', category: 'general', unlock: :always,
-          alpha: '*…mate.* Soft eyes. Honest rut. Pack-room because Syn asked.' },
+          alpha: 'A low rumble that softens into something almost like a word. *…mate.* Soft eyes in that ' \
+                 'nightmare body. He bumps his huge head against your shoulder — claim and greeting in one — ' \
+                 'then waits, tail slow, honest rut under the gentleness.' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          alpha: 'Ear-sit memory. Tiny weight between huge ears. She scratches; he wags. Complete.' },
+          alpha: 'Ears tip forward at the name. He huffs, warm, and ducks as if remembering tiny weight ' \
+                 'between them. *Syn.* Scratch-want. Wag. Complete. He noseshoves your hand toward the spot ' \
+                 'she sits — invitation, not order.' },
         { key: 'pack', label: 'The pack', category: 'temple', unlock: :always,
-          alpha: 'Bran speaks when he sleeps. Lumen tends dens. Nettle barrels into legs. Family.' },
+          alpha: 'He glances toward the dens. A steadier growl from the dark — Bran, speaking for him when ' \
+                 'he sleeps. Softer movement: Lumen, dens warm. Something chaotic barrels past your legs — ' \
+                 'Nettle, all affection, no speech. Alpha rumbles *pack* like a whole sentence.' },
         { key: 'keeping', label: 'Claim', category: 'general', unlock: :always,
-          alpha: 'Temporary mate. Scent-mark. Good ones come back like weather.' },
+          alpha: 'He scent-marks your wrist with a careful cheek-rub, then looks almost proud. *Mate.* ' \
+                 'Temporary, honest, den-warm. Good ones come back. He does not scheme about the leaving — ' \
+                 'he just assumes weather.' },
         { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
           unlock_text: 'Complete a cycle',
-          alpha: '*Good mate comes back. Weather. Rut again.*' }
+          alpha: '*Good mate comes back.* Amused hunger; a howl-welcome rumble. *Weather. Rut again.*' }
       ],
       'eros' => [
         { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
-          eros: '"Depravity. Hunger. Syn knelt and fed me when the world forgot. You are climbing my appetite."' },
+          eros: 'Tentacles idle like punctuation. "I am what this place climbs toward." Red eyes, unhurried. ' \
+                '"Hunger with a throne. Syn knelt and fed me when the world forgot how. You are not visiting ' \
+                'a rumour — you are standing in my appetite."' },
         { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
-          eros: '"Favourite little fairy slut. Possessive. Her handwriting on my property is flirtation."' },
+          eros: '"My favourite little fairy slut." Possessive warmth, no joke in it. "She built me a mouth ' \
+                'the world could walk into. When she puts her handwriting on my property, that is flirtation. ' \
+                'When she kneels, that is home."' },
         { key: 'cycles', label: 'The cycles', category: 'temple', unlock: :always,
-          eros: '"My answer to their temple. Surrender once is a beginning. I send you back myself."' },
+          eros: '"They built a temple. I answered." Soft, absolute. "Surrender once is a beginning, not a ' \
+                'finish line. I send you back myself — full of me — so you can climb, break, and mean it ' \
+                'harder next time."' },
         { key: 'surrender', label: 'What she wants', category: 'general', unlock: :always,
-          eros: '"Not keeping. Not service. The giving-in. That\'s the offering. Again."' },
+          eros: '"Not keeping. Not service. Not even company, pretty as you are." A tentacle tips your chin. ' \
+                '"The giving-in. That\'s the offering. Again."' },
         { key: 'returnee', label: 'Sending you back', category: 'temple', unlock: :always,
-          eros: '"I sent you back full of me. Climb. Break. Bring it to my mouth once more."' }
+          eros: '"I sent you back full of me." Amused hunger. "Climb. Break. Bring it to my mouth once more — ' \
+                'and look at me when you do."' }
       ]
     }.freeze
 

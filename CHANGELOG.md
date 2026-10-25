@@ -28,6 +28,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
+- **Clergy victory Talk:** domain-lord (and Eros) answers rewritten into character voice — less lore telegram, more how each of them actually talks.
 - **Restore the Dress — no relic stand-ins:** while Covar’s quest needs counsel from the **Succubus Queen** or **Lich Lord**, that lord’s floor cannot be replaced by a relic boss for that step (so you can always ask them about the dress).
 - **Burdens mid-climb:** **Oaths** can be sworn or released on any floor. **Rerolls** work on any floor; the escalating LP price **resets on floor 1** (same window as taking/shedding the three burdens). Rerolls never land on a torment you already carry as an **oath**.
 - **/restart story-quest wipe:** Syn’s second wedding, Madame Vex / Covar / resident stories (and their keepsakes / Wedding Mark) now reset when you restart a delver. They still persist through defeat. **Berry’s total quests completed** (and titles/achievements) still carry over.
