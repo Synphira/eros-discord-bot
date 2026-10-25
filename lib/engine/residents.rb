@@ -18,7 +18,7 @@ module Engine
       'pip' => {
         name: 'Pip', title: 'Self-Appointed Trapwright', tag: nil,
         blurb: 'Goblin delver who got caught too often and stayed to worship Syn and the Queen\'s hinge-work. ' \
-               'Self-appointed Trapwright. Berry keeps saying pants. The traps vote no.',
+               'Self-appointed Trapwright. Dresses for field testing. Origin questions redirect to traps.',
         intro: '_Goggles askew, tool-belt of scavenged springs, no pants in sight. Pip looks up from a sprung ' \
                'plate. "Mind the second tile. And the fourth. The third\'s just showing off." All teeth. ' \
                '"Pip. Trapwright. Ask me something with hinges."_'
@@ -34,10 +34,10 @@ module Engine
       'cartographer' => {
         name: 'The Pale Cartographer', title: 'Reader of the Dreaming Land', tag: nil,
         blurb: 'Fang does not map geography — the land re-dreams too fast. He reads the next three rooms and ' \
-               'sells the dream. Purely cartographic. (He redraws one counter more often than the maps require.)',
+               'sells the dream. (He redraws one counter more often than the maps require.)',
         intro: '_White ink on black paper; rooms that do not exist yet. The Pale Cartographer does not look ' \
                'up. "The room moved again. Hold this corner — or ask. You walk a place that dreams itself. ' \
-               'I take dictation. Purely cartographic."_'
+               'I take dictation."_'
       }
     }.freeze
 

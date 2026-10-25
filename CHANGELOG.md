@@ -23,6 +23,8 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 - **Talk subjects back button:** opening a category (e.g. General with Syn) no longer crashes Discord with a duplicate `custom_id` — ◀ Subjects no longer reused the Talk-to-Syn/Berry switcher id.
 - **Fang / Covar:** player-facing lines no longer say “crush” — Syn, Berry, and Fang’s resident blurb only hint (counter surveys, pink ears, “purely cartographic”).
 - **Talk voice pass:** Syn/Berry Ask-abouts rewritten off the lore checklist — less on-the-nose, Syn flirty/filthy with far less “darling”; Berry’s Vex line correctly has **Vex** exiled (not Covar).
+- **Fang:** “Purely cartographic” kept for the Covar-counter topic only — intros and other lines no longer repeat it.
+- **Pip Talk:** new **Where she came from** topic (canon trap redirect); **Pants** rewritten so it isn’t the Berry catchphrase on loop.
 
 ### Changed
 

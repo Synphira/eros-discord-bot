@@ -68,8 +68,8 @@ module Engine
         name: 'Pip',
         emoji: '🔧',
         heading: 'Talking with Pip',
-        intro: '_Pip looks up from a sprung plate, goggles askew, no pants in sight. "Berry keeps saying pants. ' \
-               'The traps vote no. Ask me something with hinges."_'
+        intro: '_Pip looks up from a sprung plate, goggles askew, bare legs swinging. "Mind the second tile. ' \
+               'Ask me something with hinges — I\'m in a documenting mood."_'
       },
       'nectar' => {
         name: 'Sister Nectar',
@@ -83,7 +83,7 @@ module Engine
         emoji: '🗺️',
         heading: 'Talking with the Cartographer',
         intro: '_Fang does not look up from the map that is also his room. "The room moved again. Hold this ' \
-               'corner — or ask. Purely cartographic."_'
+               'corner — or ask. I\'m mid-line."_'
       },
       'broodmother' => {
         name: 'Mimic Broodmother',
@@ -730,8 +730,8 @@ module Engine
         unlock_text: 'Buy 5 Cartographer sketches',
         berry: '"He\'s getting used to you." Approval. "Still — if Pip barrels through mid-ink, protect the ' \
                'page. And I am not discussing his favourite doorway."',
-        syn: '"He filed every scrap I teased him with." Amused. "Regular now. Still invents cartographic ' \
-             'reasons to blush. Adorable. Don\'t ruin it by naming anything."'
+        syn: '"He filed every scrap I teased him with." Amused. "Regular now. Still invents excuses to ' \
+             'blush. Adorable. Don\'t ruin it by naming anything."'
       }
     ].freeze
 
@@ -769,9 +769,15 @@ module Engine
           question: 'Why stay in the tower?',
           pip: '"Got caught too often. Eleventh time I started watching. Everyone worships goddesses or ' \
                'fairies. I worship workmanship. Syn thinks it\'s flattering. Syn is right."' },
+        { key: 'where_from', label: 'Where she came from', category: 'general', unlock: :always,
+          question: 'Where did you come from?',
+          pip: '"Oh where\'d I come from? I cum a lot to most of the traps so I\'m not sure what one you—" ' \
+               'She lights up. "OH SPEAKING OF TRAPS HAVE YOU BEEN INSIDE THE APHRODISIAC TRAP YET?!"' },
         { key: 'pants', label: 'Pants', category: 'general', unlock: :always,
           question: 'About the pants…',
-          pip: '"Berry keeps saying pants. The traps vote no. Have you been inside the aphrodisiac trap yet?!"' }
+          pip: '"Fabric gets in the way of field testing." Completely sincere. "You want clean data on a ' \
+               'dildo trap, you dress for the science. Berry can yell from the doorway — I\'m busy being ' \
+               'accurate."' }
       ],
       'nectar' => [
         { key: 'the_shrine', label: 'The shrine', category: 'temple', unlock: :always,
@@ -798,11 +804,11 @@ module Engine
                         'is what you meet — unless a floor lord overrides me. Honest of them."' },
         { key: 'syn_secrets', label: 'Syn\'s secrets', category: 'residents', unlock: :always,
           question: 'Does Syn help?',
-          cartographer: '"She teases floor secrets. I file both versions. Purely cartographic."' },
+          cartographer: '"She teases floor secrets. I mark both versions and pretend I understood the first."' },
         { key: 'covar_crush', label: 'The counter', category: 'residents', unlock: :always,
           question: 'Why mark Covar\'s shop so often?',
-          cartographer: '"Covar\'s counter is on this sheet. Purely cartographic." He does not look up. The ' \
-                        'ears are pink.' },
+          cartographer: '"Covar\'s counter is on this sheet." A beat. "Purely cartographic." He does not look ' \
+                        'up. The ears are pink.' },
         { key: 'pip_pants', label: 'Pip', category: 'residents', unlock: :always,
           question: 'Thoughts on Pip?',
           cartographer: '"I wish she would wear pants. The maps deserve dignity."' }
