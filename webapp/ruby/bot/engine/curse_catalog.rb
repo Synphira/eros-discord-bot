@@ -43,27 +43,27 @@ module Engine
       'mimic' => [
         {
         name: 'Mimic Tongue',
-        description: 'Your tongue becomes prehensile, allowing you to please monsters better (reduces their lust damage by 15%) but makes it harder to speak (10% less chance to flee)',
+        description: 'Your tongue becomes prehensile, letting you please mimics into a softer touch (mimics deal 15% less lust damage to you), but it tangles your words (10% lower chance to flee a mimic)',
         effects: { 'mimic_lust_mult' => 0.85, 'mimic_escape_penalty' => 0.9 }
         },
         {
         name: 'Object Desire',
-        description: 'You find yourself attracted to inanimate objects, gaining 5 LP when finding treasure but taking 20% more damage from mimics',
+        description: 'You find yourself attracted to inanimate objects, gaining 5 LP when finding treasure but taking 20% more lust damage from mimics',
         effects: { 'mimic_treasure_lp' => 5, 'mimic_damage_mult' => 1.2 }
         },
         {
           name: 'Mimic Flesh',
-          description: "Your skin takes on a partially wood-and-flesh texture, sometimes forming small openings or appendages without your control. This makes you slightly more durable (10% less damage from all monsters) but your body's unnatural transformation causes constant arousal (15% more lust damage).",
+          description: "Your skin takes on a partially wood-and-flesh texture, sometimes forming small openings or appendages without your control. Touches slide off the grain (10% less lust damage from all monsters), but a mimic's merging touch finds every opening (15% more lust damage from mimics).",
           effects: { 'damage_reduction' => 0.9, 'mimic_lust_mult' => 1.15 }
         },
         {
           name: 'Box Cravings',
-          description: 'You find yourself inexplicably drawn to boxes and containers, sometimes unable to resist opening them. This makes you more likely to discover hidden treasures (5 LP per container found) but also makes you vulnerable to mimic attacks (15% more damage from mimics).',
+          description: 'You find yourself inexplicably drawn to boxes and containers, sometimes unable to resist opening them. This makes you more likely to discover hidden treasures (5 LP per container found) but also makes you vulnerable to mimic attacks (15% more lust damage from mimics).',
           effects: { 'mimic_treasure_lp' => 5, 'mimic_damage_mult' => 1.15 }
         },
         {
           name: 'Phantom Latch',
-          description: 'A spectral connection sometimes forms between your body and nearby objects, causing them to temporarily merge with your flesh. This grants you limited object absorption abilities (10% chance to negate one attack per combat) but the merging sensation is intensely pleasurable (20% more lust damage).',
+          description: 'A spectral connection sometimes forms between your body and nearby objects, causing them to temporarily merge with your flesh. This grants you limited object absorption abilities (10% chance to absorb one lust attack, once per combat) but the merging sensation is intensely pleasurable (mimics deal 20% more lust damage to you).',
           effects: { 'negation_chance' => 0.1, 'mimic_lust_mult' => 1.2 }
         },
       ],
@@ -80,12 +80,12 @@ module Engine
         },
         {
           name: 'Hellfire Blood',
-          description: 'Your blood burns with demonic energy, dealing 2 damage to demons each time you hit them but taking 10% more lust damage',
+          description: "Your blood burns with demonic energy: each of your hits deals 2 more damage to a demon's HP, but demons deal 10% more lust damage to you",
           effects: { 'demon_thorns' => 2, 'demon_lust_mult' => 1.1 }
         },
         {
           name: 'Soulbound',
-          description: "Demons can't kill you, but you can't flee from them",
+          description: "Demons can't finish you — against them, your defiance never drops below 1 — but you can't flee from them",
           effects: { 'demon_no_flee' => true, 'demon_no_death' => true }
         },
         {
@@ -97,22 +97,22 @@ module Engine
       'slime' => [
         {
           name: 'Amorphous Body',
-          description: 'You take 20% less damage from slimes, but your agility decreases by 1',
+          description: 'You take 20% less lust damage from slimes, but your agility decreases by 1',
           effects: { 'slime_damage_mult' => 0.8, 'agility' => -1 }
         },
         {
           name: 'Absorbent',
-          description: 'You gain 5 LP each time a slime fills your lust meter, but you take 10% more lust damage',
+          description: 'You gain 5 LP each time a slime makes you orgasm, but you take 10% more lust damage from slimes',
           effects: { 'slime_climax_lp' => 5, 'slime_lust_mult' => 1.1 }
         },
         {
           name: 'Oozing Pores',
-          description: 'Your skin secretes slippery slime, making you 40% harder to grab but reducing your armor by 2',
+          description: 'Your skin secretes slippery slime, giving you a 40% better chance to flee slimes but reducing your resistance by 2',
           effects: { 'slime_escape_bonus' => 1.4, 'resistance' => -2 }
         },
         {
           name: 'Gelatinous Form',
-          description: 'Your body becomes partially amorphous, reducing all damage by 15% but making you 25% more vulnerable to lust',
+          description: 'Your body becomes partially amorphous: every touch slides off your yielding flesh (15% less lust damage from all monsters), but slimes find that flesh irresistible (25% more lust damage from slimes)',
           effects: { 'damage_reduction' => 0.85, 'slime_lust_mult' => 1.25 }
         },
         {
@@ -129,12 +129,12 @@ module Engine
         },
         {
           name: 'Spirit Ward',
-          description: 'You take 30% less damage from undead, but they track you more easily',
+          description: 'You take 30% less lust damage from undead, but they track you more easily (undead find you 30% more often)',
           effects: { 'undead_damage_mult' => 0.7, 'undead_tracking' => 1.3 }
         },
         {
           name: 'Deathly Resilience',
-          description: 'You gain 10 Defiance and 2 resistance, but healing effects are 30% less effective',
+          description: 'Your max Defiance rises by 10 and your resistance by 2, but healing effects are 30% less effective',
           effects: { 'max_hp_bonus' => 10, 'resistance' => 2, 'healing_mult' => 0.7 }
         },
         {
@@ -156,12 +156,12 @@ module Engine
         },
         {
           name: 'Thorned Skin',
-          description: 'You take 25% less damage from plants, but they bind you more easily',
+          description: 'You take 25% less lust damage from plants, but they bind you more easily',
           effects: { 'plant_damage_mult' => 0.75, 'plant_bind_bonus' => 1.5 }
         },
         {
           name: 'Blooming Scent',
-          description: 'Your scent atracts pollinators, reducing plant encounters by 30% but inscreasing all other encounter rates by 15%',
+          description: 'Your scent attracts pollinators, reducing plant encounters by 30% but increasing all other encounter rates by 15%',
           effects: { 'plant_encounter_rate' => 0.7, 'encounter_rate' => 1.15 }
         },
         {

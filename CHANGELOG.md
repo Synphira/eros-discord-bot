@@ -8,9 +8,22 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-24
 
+### Added
+
+- **Talk categories:** Talk now opens **General / Clergy / Residents / Temple**, then a topic dropdown per subject (Berry, Syn, Covar, residents).
+- **Victory Talk:** after defeating or satisfying a domain lord (or Eros), a **Talk** button lets you ask them a few questions on that screen only.
+- **More Ask-abouts:** resident topics (meet → short; story/milestones → deeper), Covar ask-abouts, and a **strange rooms** Temple topic once you’ve met those events.
+
+### Added
+
+- **Postgres support:** `pg` gem + `tools/copy_sqlite_to_postgres.rb` for moving off SQLite. Set `DATABASE_URL=postgres://…` (Sequel already accepted it).
+
 ### Changed
 
+- **Restore the Dress — no relic stand-ins:** while Covar’s quest needs counsel from the **Succubus Queen** or **Lich Lord**, that lord’s floor cannot be replaced by a relic boss for that step (so you can always ask them about the dress).
+- **Burdens mid-climb:** **Oaths** can be sworn or released on any floor. **Rerolls** work on any floor; the escalating LP price **resets on floor 1** (same window as taking/shedding the three burdens). Rerolls never land on a torment you already carry as an **oath**.
 - **/restart story-quest wipe:** Syn’s second wedding, Madame Vex / Covar / resident stories (and their keepsakes / Wedding Mark) now reset when you restart a delver. They still persist through defeat. **Berry’s total quests completed** (and titles/achievements) still carry over.
+- **Shop & venue voice:** Berry / Syn / Covar / residents intros (and Berry Regard lines) tuned to match the lore bible — including Covar wearing the Original when restored.
 
 ## 2026-10-23
 

@@ -7,7 +7,8 @@ ruby '>= 3.1.0'
 gem 'discordrb', '~> 3.5'
 
 gem 'sequel', '~> 5.0'
-gem 'sqlite3', '~> 1.7'
+gem 'sqlite3', '~> 1.7' # local / fallback
+gem 'pg', '~> 1.5'      # Postgres (set DATABASE_URL=postgres://...)
 
 gem 'dotenv', '~> 3.0'
 

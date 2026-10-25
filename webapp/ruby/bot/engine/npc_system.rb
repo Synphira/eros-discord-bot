@@ -226,7 +226,10 @@ module Engine
                 condition: { key: 'living_breastplate', name: 'Clinging Breastplate', floors: 3,
                              effects: { 'resistance' => 1, 'lust_mult' => 1.1 } },
                 scenes: ['The moment the LP changes hands, his breastplate peels away — and leaps straight onto *you*.',
-                         '"Oh no — it likes you now!" he gasps, as it clamps around your chest and starts kneading.'] },
+                         '"Oh no — it likes you now!" he gasps, as it clamps around your chest and moulds itself to you.'],
+                by_part: { 'breasts' => ['It cups your breasts and starts kneading them through the living metal, ' \
+                                         'squeezing in slow, possessive pulses.'] },
+                otherwise: ['It flattens over your chest, kneading the flesh there in slow, possessive pulses.'] },
               { key: 'fight', label: 'Fight him', text: 'Take his LP by force', lp: 25, lust: 18, set: 'robbed',
                 scenes: ['You land a single hit and every piece of his gear activates at once. "Can\'t... take it!" he wails ' \
                          'as it works him over relentlessly until he collapses, twitching.',
@@ -273,10 +276,88 @@ module Engine
                    'me? Just for a little while?"',
             choices: [
               { key: 'join', label: 'Join them', text: 'Step into the tentacles', lp: 60, lust: 40, set: 'joined',
-                scenes: ['You step in beside Alex and the tentacles wrap around you both, stroking, squeezing and filling, ' \
-                         'until the two of you are a tangle of moans and shaking limbs.'] },
+                scenes: ['You step in beside Alex and the tentacles wrap around you both, stroking and squeezing, ' \
+                         'until the two of you are a tangle of moans and shaking limbs.'],
+                by_part: {
+                  'vagina' => ['A thick tentacle slides into your pussy and pumps you in time with the ones working Alex.'],
+                  'penis' => ['A slick tentacle coils around your cock and strokes you in time with the ones working Alex.'],
+                  'anus' => ['A slim tentacle works its way into your ass and thrusts in time with the ones working Alex.']
+                },
+                otherwise: ['Tentacles stroke your thighs and hips until you are shaking beside them.'] },
               { key: 'leave', label: 'Leave them', text: 'Let them have their bliss', lust: 15, set: 'left',
                 scenes: ['"Thank you for showing me the way," Alex calls after you. You walk on, still flushed from the sight.'] }
+            ]
+          }
+        ]
+      },
+
+      'beekeeper' => {
+        name: 'Tobin', title: 'the Beekeeper',
+        stages: [
+          {
+            floors: (5..9),
+            intro: 'The corridor smells of warm honey and beeswax. A broad, calm man in a veil that he wears ' \
+                   'pushed up like a hat is tending a wall of hives the size of wardrobes, while Giant Bees the ' \
+                   'size of cats drift between them in slow, contented arcs. "Mind the girls," Tobin says, ' \
+                   'without looking up. "They are sweet as anything, and curious about strangers. Both things ' \
+                   'can be true at once."',
+            choices: [
+              { key: 'buy', label: 'Buy honey (15 LP)', text: 'A jar of the good stuff', cost: 15, heal: 15, set: 'bought',
+                scenes: ['He draws a jar off the comb like it was poured yesterday — dark, warm, luminous. ' \
+                         '"Heart-honey," Tobin says. "Steadies the will. The girls make it from whatever ' \
+                         'this place flowers with, and I do not ask what that is." The first spoonful ' \
+                         'spreads calm through you like sunrise.'] },
+              { key: 'help', label: 'Help tend the hives', text: 'Work a frame or two', lp: 20, lust: 10, set: 'helped',
+                scenes: ['You hold frames while Tobin works, and the girls inspect you — walking your arms ' \
+                         'in velvet feet, tasting your warmth with curious tongues, approving of you in a ' \
+                         'low, collective hum that goes through your ribs like a held note.',
+                         '"They like you," Tobin says, paying you without ceremony. "That is rarer than ' \
+                         'it sounds, and it counts for more."' ] },
+              { key: 'poke', label: 'Tease a forager', text: 'Careless, and you know it', lust: 18, set: 'stung',
+                condition: { key: 'bee_warmth', name: 'Bee-Warm', floors: 2,
+                             effects: { 'lust_mult' => 1.1 } },
+                scenes: ['You tease the wrong antenna. The kiss she gives you back is warm, immediate, ' \
+                         'and astonishingly thorough — a spreading golden heat that settles low in your ' \
+                         'belly and stays there, humming. "There it is," Tobin says mildly. "Curious, ' \
+                         'like I said."'] }
+            ]
+          },
+          {
+            floors: (12..17), after: %w[helped bought stung],
+            intro: 'One of Tobin\'s hives has gone quiet, and quiet, in a wall of humming, is the loudest thing ' \
+                   'there is. The girls circle it in worried, looping flights. "Queen\'s gone still," Tobin ' \
+                   'says. "Could be she\'s sleeping. Could be she\'s something else now. The hive needs an ' \
+                   'answer, and my hands have answered too many times — they need a stranger\'s."',
+            choices: [
+              { key: 'smoke', label: 'Smoke them calm', text: 'Slow, careful, beekeeper\'s work', lp: 30, lust: 15, set: 'smoked',
+                scenes: ['You work the smoker in slow drifts while the girls settle, heavy and drowsy, and ' \
+                         'Tobin lifts the still queen out with both hands like a sleeping child. "Resting," ' \
+                         'he decides, with enormous relief. "Just resting. You\'ve a beekeeper\'s patience, ' \
+                         'friend."' ] },
+              { key: 'reach', label: 'Reach in barehanded', text: 'Faster. Stickier. Worse idea', set: 'reached',
+                fight: { type: :beast, name: 'Giant Bee',
+                         text: 'Your bare hand goes into a queenless-tempered hive, and the hive gives its ' \
+                               'answer all at once — a Giant Bee, furious and gorgeous, comes out wearing ' \
+                               'your scent like an accusation.' } }
+            ]
+          },
+          {
+            floors: (20..26), after: %w[smoked reached],
+            intro: 'The hive you saved sings differently now — Tobin swears you can hear which one it is from ' \
+                   'three corridors away. He is holding a small pot of honey so dark it is nearly black. ' \
+                   '"Once a tower, a hive decides a person is *theirs*," he says. "Eat, and you\'ll always ' \
+                   'smell faintly of the apiary. Bees — and things that think like bees — will know you."',
+            choices: [
+              { key: 'accept', label: 'Eat the black honey', text: 'Become the hive\'s own', lp: 40, lust: 20, set: 'hive_friend',
+                condition: { key: 'hive_sweet', name: 'Hive-Sweet', floors: 4,
+                             effects: { 'beast_lust_mult' => 0.85, 'beast_submit_lp' => 2 } },
+                scenes: ['The black honey tastes of flowers that do not grow anywhere and of being, ' \
+                         'thoroughly and collectively, approved of. Somewhere in the wall a hundred wings ' \
+                         'change key. "There," Tobin says, like a man closing a good book. "You\'re one of ' \
+                         'ours now. Whatever that turns out to mean, it means it kindly."'] },
+              { key: 'refuse', label: 'Decline, kindly', text: 'Some families are enough', lust: 8, set: 'declined',
+                scenes: ['Tobin shrugs and seals the pot away without a flicker of offence. "Hive keeps, ' \
+                         'all the same. You know where the sweetness lives, if the tower ever changes your mind."'] }
             ]
           }
         ]
@@ -306,6 +387,7 @@ module Engine
                              effects: { 'lust_mult' => 1.15, 'satisfy_bonus' => 0.1 } },
                 scenes: ['The green milk tingles on your tongue and spreads under your skin. Even the air feels like a caress.'] },
               { key: 'become', label: 'Be milked', text: 'Take a free frame', lp: 20, lust: 25,
+                needs_any_part: %w[breasts penis],
                 trackers: %w[being_milked_events lactation_events],
                 condition: { key: 'milked_dry', name: 'Milked Dry', floors: 2,
                              effects: { 'submission' => 1, 'submit_lp_bonus' => 2 } },
@@ -318,8 +400,10 @@ module Engine
                               'squeezes in slow, tireless waves, milking you stroke after stroke until your hips are ' \
                               'bucking helplessly against the frame and you are drained to the last shudder.']
                 },
-                otherwise: ['She seals a warm pump over your sex and starts a slow, tireless rhythm — stroking, ' \
-                            'squeezing, coaxing — until you are trembling, flushed and milked dry.'] }
+                otherwise: ['She seals the warm pump over your cage instead. It pulses and tugs at the steel, ' \
+                            'milking nothing but whimpers out of you, until you are shaking and \'dry\' in every way ' \
+                            'that matters.'],
+                caged: true }
             ]
           }
         ]
@@ -338,7 +422,8 @@ module Engine
                 scenes: ['You unlock the stocks and she throws her arms around you. "Thank you! Let me reward you properly..."'],
                 by_part: { 'penis' => ['She sinks to her knees and takes your cock deep into her mouth, humming happily.'],
                            'vagina' => ['She sinks to her knees and buries her tongue between your thighs until your legs shake.'] },
-                otherwise: ['She sinks to her knees and worships you with her lips and tongue until your legs shake.'],
+                otherwise: ['She sinks to her knees and lavishes kisses over the cage sealing you, teasing the ' \
+                            'steel with her lips and tongue until your legs shake.'],
                 caged: true },
               { key: 'use', label: 'Use her', text: 'Take what she is offering', lp: 20, lust: 30, caged: true,
                 by_part: { 'penis' => ['You step behind her and thrust into her exposed pussy. "Yes... take me... fill me..." ' \
@@ -355,11 +440,13 @@ module Engine
               { key: 'help', label: 'Free them', text: 'Find the release lever', lp: 10, lust: 15, caged: true,
                 scenes: ['You find a lever and the wall swings open. A young man stumbles out, sticky and breathless. "Thank you..."'],
                 by_part: { 'penis' => ['He thanks you with a quick, eager blowjob before hurrying off.'],
-                           'vagina' => ['He thanks you with his tongue, quick and eager, before hurrying off.'] },
+                           'vagina' => ['He thanks you with his tongue between your thighs, lapping at your pussy ' \
+                                        'quick and eager, before hurrying off.'] },
                 otherwise: ['He thanks you with a deep, breathless kiss before hurrying off.'] },
               { key: 'use', label: 'Use the holes', text: 'Join the queue', lp: 20, lust: 35, caged: true,
-                by_part: { 'penis' => ['You pick a hole and push your cock through. Whoever is trapped there moans around ' \
-                                       'you, and you use them until you are shaking and breathless.'],
+                by_part: { 'penis' => ['You pick a hole and push your cock through into a warm, waiting mouth. Whoever ' \
+                                       'is trapped there moans around you, sucking you down, and you use them until you ' \
+                                       'are shaking and breathless.'],
                            'vagina' => ['You press your pussy to a hole and a hungry tongue answers at once, lapping at you ' \
                                         'until you are shaking and breathless.'] },
                 otherwise: ['You explore the offered body with your hands, teasing and stroking until the moans behind the ' \
@@ -376,10 +463,16 @@ module Engine
                          'blushes crimson. "Let me... repay you."'],
                 by_part: { 'penis' => ['She drops to her knees and takes your cock in her mouth, sucking with grateful enthusiasm.'],
                            'vagina' => ['She drops to her knees and laps at your pussy with grateful enthusiasm.'] },
-                otherwise: ['She drops to her knees and kisses her way up your thighs with grateful enthusiasm.'] },
+                otherwise: ['She drops to her knees and kisses her way up your thighs to the cage sealing you, ' \
+                            'and worships the steel there with grateful enthusiasm.'] },
               { key: 'join', label: 'Join her', text: 'Touch yourself beside her', lp: 15, lust: 40,
                 scenes: ['You sit beside her and start touching yourself. She notices and beckons. "Come... let\'s do it ' \
-                         'together..." You watch each other, hands moving faster and faster, until you are both panting.'] }
+                         'together..." You watch each other, hands moving faster and faster, until you are both panting.'],
+                by_part: {
+                  'vagina' => ['Your fingers rub your clit and slip into your pussy while she watches, matching your pace.'],
+                  'penis' => ['Your hand wraps around your cock and strokes while she watches, matching your pace.']
+                },
+                otherwise: ['Your hands stroke your thighs and hips while she watches, matching your pace.'] }
             ]
           },
           {
@@ -429,10 +522,25 @@ module Engine
       Hash(player.tracker_hash[FINISHED_KEY])
     end
 
+    # A finished story leaves something small behind for the shelf.
+    STORY_KEEPSAKES = {
+      'mira' => 'a stoppered vial of Mira\'s cream, labelled in her own hand',
+      'lillia' => 'a pink ribbon off Lillia\'s armour',
+      'elara' => 'a candle-end of Sister Elara\'s latex, still warm',
+      'marcus' => 'one of Marcus\'s spare charms (he has hundreds)',
+      'thomas' => 'a buckle off Thomas\'s breastplate, faintly bite-marked',
+      'alex' => 'a smooth, tentacle-polished ribbon from Alex\'s nest',
+      'beekeeper' => 'a thumb-sized pot of Tobin\'s black honey'
+    }.freeze
+
     def record_finished!(player, id, log)
       counts = finished_counts(player)
       player.set_tracker!(FINISHED_KEY, counts.merge(id => counts[id].to_i + 1))
       player.bump_tracker!('npc_stories_finished')
+      if (keepsake = STORY_KEEPSAKES[id.to_s])
+        player.add_keepsake!(keepsake)
+        log << "_Kept, for the shelf: #{keepsake}._"
+      end
       log << "_#{npc(id)[:name]}'s story is over for this run — you may cross paths again in a future run._"
     end
 
@@ -514,7 +622,11 @@ module Engine
     end
 
     def option_allowed?(player, opt)
-      return false if opt[:needs_part] && !player.body_parts_list.map(&:to_s).include?(opt[:needs_part])
+      parts = player.body_parts_list.map(&:to_s)
+      return false if opt[:needs_part] && !parts.include?(opt[:needs_part].to_s)
+      if opt[:needs_any_part]
+        return false if (Array(opt[:needs_any_part]).map(&:to_s) & parts).empty?
+      end
       return false if opt[:needs_form] && !Array(opt[:needs_form]).include?(player.active_transformation_key.to_s)
 
       true
@@ -569,6 +681,11 @@ module Engine
       end
 
       apply_rewards!(player, opt, log)
+      if id == 'milking_station' && opt[:key] == 'become' && player.tracker('nectar_met').positive?
+        player.bump_tracker!('nectar_milkings')
+        log << '_Sister Nectar works your frame herself today — she gets around; you have stopped asking ' \
+               'how. "There\'s my regular," she says, to the room at large._'
+      end
       player.bump_tracker!('npc_encounters') unless opt[:key] == 'leave'
       { ok: true }
     end

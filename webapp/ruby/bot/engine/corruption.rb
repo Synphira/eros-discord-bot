@@ -6,18 +6,19 @@ module Engine
     module_function
 
     KEY = 'corruption'
-    MAX = 20
+    SCALE_FLAG = 'corruption_v2'
+    MAX = 100
     STAGES = [
-      [5, 'Tainted',
+      [25, 'Tainted',
        'A slow heat settles under your skin and stays there. You catch yourself staring at the next monster\'s crotch ' \
        'before you remember you are supposed to fight it.'],
-      [10, 'Lewd',
+      [50, 'Lewd',
        'Your body has stopped pretending. You are wet or hard almost all the time now, and every touch from the ' \
        'tower\'s creatures makes you lean in instead of pulling away.'],
-      [15, 'Depraved',
+      [75, 'Depraved',
        'Filthy thoughts fill every quiet moment. You find your legs parting before a monster even reaches you, ' \
        'and you have to drag yourself back to your senses.'],
-      [20, 'Fully Corrupted',
+      [100, 'Fully Corrupted',
        'The tower owns you now. Resisting feels foreign and begging feels natural, and every creature on the floor ' \
        'can smell how badly you want it.']
     ].freeze
@@ -27,18 +28,44 @@ module Engine
     end
 
     def level(player)
+      rescale!(player)
       player.tracker(KEY)
+    end
+
+    # Saves from the 0-20 era: stretch old corruption x5 the first time it
+    # is read, so a delver keeps their stage (20/20 is still Fully Corrupted).
+    def rescale!(player)
+      return if player.tracker_hash[SCALE_FLAG]
+
+      old = player.tracker(KEY)
+      data = player.tracker_hash.merge(SCALE_FLAG => true)
+      data[KEY] = old * 5
+      player.update(trackers: data)
+      refresh!(player) if old.positive?
     end
 
     def stage(value)
       STAGES.reverse.find { |threshold, _, _| value >= threshold }
     end
 
+    # Corruption pays the willing and taxes the rest of you. The gifts all
+    # feed pleasuring and submitting to monsters (satisfy chance, submission,
+    # LP for submitting); the tolls scale just as hard the other way — lust
+    # lands heavier, resistance and max defiance erode in tiers, and healing
+    # works worse on a body the tower is rewriting.
     def effects(value)
-      tier = value / 5
-      fx = { 'submit_lp_bonus' => value / 2, 'lust_mult' => (1 + (value * 0.015)).round(2) }
-      fx['submission'] = tier if tier.positive?
-      fx['resistance'] = -tier if tier.positive?
+      tier = value / 20
+      fx = {
+        'submit_lp_bonus' => value / 4,
+        'satisfy_bonus' => (value * 0.002).round(3),
+        'lust_mult' => (1 + (value * 0.006)).round(2),
+        'healing_mult' => (1 - (value * 0.004)).round(2)
+      }
+      if tier.positive?
+        fx['submission'] = tier
+        fx['resistance'] = -tier
+        fx['max_hp_bonus'] = -(tier * 5)
+      end
       fx
     end
 
@@ -49,7 +76,7 @@ module Engine
       name = stage(value)&.at(1) || (value.zero? ? 'Untouched' : 'Touched')
       line = "**Corruption — #{name}** `#{value}/#{MAX}`"
       line += " _(#{FetishEvents.describe_effects(effects(value))})_" if value.positive?
-      line += "\n-# +1 each time you submit to a monster · resets on defeat"
+      line += "\n-# +5 each time you submit to a monster · resets on defeat"
       line
     end
 

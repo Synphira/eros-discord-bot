@@ -100,6 +100,8 @@ class Player < Sequel::Model(:players)
     false
   end
 
+  # Trackers kept across /restart, with once-per-delver story quests stripped.
+  # Pass a hash to sanitize a legacy blob (also covers older saves).
   def legacy_trackers(source = nil)
     data = (source || tracker_hash).reject { |k, _| RUN_TRACKERS.include?(k.to_s) || character_story_tracker_key?(k) }
     if data.key?('marks_owned')
@@ -269,13 +271,23 @@ class Player < Sequel::Model(:players)
       Array(tracker_hash['bosses_seen']).map { |n| Engine::BossFights.canonical_name(n) }.uniq.size
     when :royal_demons_cleared
       (Array(tracker_hash['bosses_seen']) & ['Succubus Queen', 'Incubus King']).size
+    when :unique_relic_bosses
+      Array(tracker_hash['relic_bosses_seen']).map(&:to_s).uniq.size
     when :mimics_removed_count then cursed_shop_unlocks.size
+    when :cursed_gear_collection_complete
+      names = Engine::Treasure.all_mimic_templates.map { |t| t[:name].to_s }
+      (names - cursed_shop_unlocks).empty? ? 1 : 0
+    when :covar_topics_heard then Array(tracker_hash['covar_topics_heard']).map(&:to_s).uniq.size
     when :current_floor then current_floor.to_i
     when :marks_owned then Engine::Marks.owned(self).size
     when :forms_unlocked then unlocked_transformations.size
     when :chimera_fused then Engine::TransformationSystem.chimera_combo(self) ? 1 : 0
-    when :admirer_kinds then Array(tracker_hash['admirer_types']).size
+    when :admirer_kinds
+      # Kinds ever won, not kinds currently following — admirers wander off
+      # (and cap at 3), so the current list can no longer reach 6.
+      Engine::Admirers.career_kinds(self)
     when :burdens_carried then Array(tracker_hash['cycle_burdens']).size
+    when :oaths_carried then Array(tracker_hash['oath_burdens']).size
     when :is_developer then Engine::Dev.owner?(discord_id) ? 1 : 0
     when :is_bug_tester then Engine::Dev.bug_tester?(discord_id) ? 1 : 0
     when :pure_title then earned_titles.include?('pure') ? 1 : 0
@@ -507,8 +519,9 @@ class Player < Sequel::Model(:players)
     Engine::Burdens.effects(self).each { |key, value| bags[key.to_s] << value }
     Engine::Weekly.effects.each { |key, value| bags[key.to_s] << value }
     Engine::Marks.effects(self).each { |key, value| bags[key.to_s] << value }
+    Engine::Wardrobe.effects(self).each { |key, value| bags[key.to_s] << value }
     equipped_items.each do |item|
-      item.stat_modifiers.each { |key, value| bags[key.to_s] << value if gear_bag_key?(key) }
+      gear_effects_for(item).each { |key, value| bags[key.to_s] << value if gear_bag_key?(key) }
     end
     bags
   end
@@ -624,6 +637,7 @@ class Player < Sequel::Model(:players)
 
   def trap_avoid_chance
     return 1.0 if Engine::Dev.debug?(self)
+    return 0.0 if curse_effect_flag?('no_trap_dodge')
 
     ((0.1 + (0.02 * effective_agility)).clamp(0.1, 0.6) + curse_effect_sum('trap_avoid_bonus')).clamp(0.1, 0.85)
   end
@@ -645,7 +659,13 @@ class Player < Sequel::Model(:players)
   end
 
   def max_defiance
-    bonus = curse_effect_sum('max_hp_bonus') + equipment_effect_sum('max_hp')
+    # A defiance cap (Glass Defiance) is exact: bonuses cannot raise max
+    # defiance past it, and reductions cannot push it below it either.
+    cap = curse_effect_sum('defiance_cap').round
+    return cap if cap.positive?
+
+    bonus = curse_effect_sum('max_hp_bonus') + equipment_effect_sum('max_hp') +
+            Engine::Wardrobe.effect_sum(self, 'max_hp')
     [self.class.calculate_max_hp(level) + bonus.round, 1].max
   end
 
@@ -804,6 +824,77 @@ class Player < Sequel::Model(:players)
     update(active_event: nil)
   end
 
+  # The keepsake shelf on /profile: small, display-only mementos from
+  # admirers, finished NPC stories, and first boss meetings.
+  def keepsakes
+    saved = tracker_hash['keepsakes']
+    saved.is_a?(Array) ? saved.map(&:to_s) : []
+  end
+
+  def add_keepsake!(text)
+    list = keepsakes
+    list << text.to_s
+    set_tracker!('keepsakes', list)
+    text.to_s
+  end
+
+  KEEPSAKE_PIN_LIMIT = 3
+
+  # The profile shelf shows icons, not sentences: one emoji per
+  # keepsake, matched by its most telling word (first match wins).
+  KEEPSAKE_EMOJI = [
+    ['second bouquet', '💐'], ['bouquet', '🌸'], ['black honey', '🍯'], ['honey', '🍯'],
+    ['cream', '🥛'], ['pink ribbon', '🎀'], ['court ribbon', '🎀'], ['cold to the touch', '❄️'],
+    ['ribbon', '🎀'], ['latex', '🕯️'], ['spare charms', '🧿'], ['buckle', '🔗'],
+    ['spare button', '🪡'],
+    ['thread', '🧵'], ['hymn sheet', '🎶'], ['polish cloth', '🧽'], ['signet', '💍'],
+    ['pressed leaf', '🍃'], ['library card', '📖'], ['shed fang', '🦷'], ['sucker-mark', '🐙'],
+    ['mirror', '🪞'], ['tassel', '🎐'], ['cork', '🍾'], ['warm grit', '🪨'],
+    ['grave-cold coin', '🌑'], ['coin', '🪙'], ['dark water', '💧'], ['tuft of fur', '🐾'],
+    ['black scale', '🐉'], ['shed scale', '🦎'], ['shell fragment', '🐚'], ['feather', '🪶'],
+    ['tail-hair', '🐴'], ['stone chip', '🪨'], ['bone bead', '🦴'], ['pearl', '🦪'],
+    ['never wilts', '🌹'], ['glowing jelly', '🧪'], ['black petal', '🥀'], ['brass key', '🗝️'],
+    ['river stone', '🌊']
+  ].freeze
+
+  def self.keepsake_emoji(text)
+    pair = KEEPSAKE_EMOJI.find { |needle, _| text.to_s.downcase.include?(needle) }
+    pair ? pair[1] : '✨'
+  end
+
+  # The three keepsakes pinned to the profile shelf (chosen on the
+  # Collections page). Pins for keepsakes no longer owned are ignored.
+  def keepsake_pins
+    saved = tracker_hash['keepsakes_pinned']
+    pins = saved.is_a?(Array) ? saved.map(&:to_s) : []
+    pins & keepsakes
+  end
+
+  def toggle_keepsake_pin!(text)
+    text = text.to_s
+    return { ok: false, message: 'That keepsake is not in your collection.' } unless keepsakes.include?(text)
+
+    pins = keepsake_pins
+    if pins.include?(text)
+      pins -= [text]
+      set_tracker!('keepsakes_pinned', pins)
+      { ok: true, pinned: false, message: "**#{text}** comes off the shelf." }
+    elsif pins.size >= KEEPSAKE_PIN_LIMIT
+      { ok: false, message: "Your shelf holds **#{KEEPSAKE_PIN_LIMIT}** — unpin one before pinning another." }
+    else
+      pins += [text]
+      set_tracker!('keepsakes_pinned', pins)
+      { ok: true, pinned: true, message: "**#{text}** goes on the shelf. (#{pins.size}/#{KEEPSAKE_PIN_LIMIT})" }
+    end
+  end
+
+  # What the profile actually shows: your pins, or — before you've
+  # chosen — the three most recent arrivals.
+  def displayed_keepsakes
+    pins = keepsake_pins
+    (pins.any? ? pins : keepsakes.last(KEEPSAKE_PIN_LIMIT)).first(KEEPSAKE_PIN_LIMIT)
+  end
+
   def reconcile_encounter!
     data = encounter_data
     if data
@@ -881,10 +972,102 @@ class Player < Sequel::Model(:players)
 
   def gain_lp!(amount)
     amount = amount.to_i
-    amount = (amount * Engine::Burdens.lp_multiplier(self)).round if amount.positive?
+    if amount.positive?
+      amount = (amount * Engine::Burdens.lp_multiplier(self)).round
+      # Being looked at pays: a provocative or depraved presentation
+      # earns a quiet cut of everything the tower hands out.
+      amount = (amount * Engine::ThreatCalculator.lp_multiplier(self)).round
+    end
     attrs = { lp: lp + amount }
     attrs[:trackers] = tracker_hash.merge('lp_earned' => tracker('lp_earned') + amount) if amount.positive?
     update(attrs)
+  end
+
+  # --- Saved outfits ---------------------------------------------------
+  # Up to three named-by-number sets of currently-worn gear, saved from
+  # the equipment menu and loaded back on the fly. The trophy never
+  # takes part: an outfit is what you wear, not what you display.
+
+  OUTFIT_SLOT_COUNT = 3
+
+  def outfit_slots
+    saved = tracker_hash['outfit_slots']
+    return {} unless saved.is_a?(Hash)
+
+    saved.transform_keys(&:to_s).transform_values { |ids| Array(ids).map(&:to_i) }
+  end
+
+  def saved_outfit(slot)
+    ids = outfit_slots[slot.to_s]
+    return nil if ids.nil? || ids.empty?
+
+    owned = equipment_dataset.all.to_h { |item| [item.id, item] }
+    ids.filter_map { |id| owned[id] }
+  end
+
+  def save_outfit!(slot)
+    worn = equipped_items.reject { |item| item.slot.to_s == TROPHY_SLOT }
+    return { ok: false, message: 'You are not wearing anything worth saving as an outfit.' } if worn.empty?
+
+    slots = outfit_slots.merge(slot.to_s => worn.map(&:id))
+    set_tracker!('outfit_slots', slots)
+    { ok: true, message: "Saved **Outfit #{slot}**: #{worn.map(&:name).join(', ')}." }
+  end
+
+  # Cursed pieces that loading this outfit would have to tear off: worn
+  # living gear whose slot the outfit covers with something else. Each
+  # costs its usual tear-free removal price, destroyed as usual.
+  def outfit_swap_conflicts(slot)
+    target = saved_outfit(slot)
+    return [] unless target
+
+    target_by_slot = target.to_h { |item| [item.slot.to_s, item] }
+    equipped_items.select do |item|
+      next false unless item.cursed
+
+      replacement = target_by_slot[item.slot.to_s]
+      replacement && replacement.id != item.id
+    end
+  end
+
+  def outfit_swap_cost(slot)
+    outfit_swap_conflicts(slot).sum { |item| cursed_removal_cost(item) }
+  end
+
+  def load_outfit!(slot)
+    target = saved_outfit(slot)
+    return { ok: false, message: "Outfit #{slot} is empty — save what you are wearing into it first." } if target.nil?
+
+    conflicts = outfit_swap_conflicts(slot)
+    cost = conflicts.sum { |item| cursed_removal_cost(item) }
+    if cost.positive? && lp < cost
+      names = conflicts.map { |item| "**#{item.name}** (#{cursed_removal_cost(item)} LP)" }.join(', ')
+      return { ok: false, error: :insufficient_lp, cost: cost,
+               message: "Loading Outfit #{slot} means tearing off #{names} — **#{cost} LP** in all, " \
+                        "and you have #{lp}." }
+    end
+
+    spent = 0
+    conflicts.each do |item|
+      result = remove_cursed_equipment!(item.id)
+      spent += cursed_removal_cost(item) if result[:ok]
+      refresh
+    end
+
+    worn_now = equipped_items.reject { |item| item.slot.to_s == TROPHY_SLOT }
+    target_ids = target.map(&:id)
+    worn_now.each do |item|
+      next if target_ids.include?(item.id)
+      next unless target.any? { |t| t.slot.to_s == item.slot.to_s }
+
+      unequip_item(item.id) unless item.cursed
+    end
+    target.each { |item| equip_item(item.id) }
+    refresh
+
+    note = spent.positive? ? " The living gear in the way was torn off and destroyed (**#{spent} LP**)." : ''
+    { ok: true, cost: spent,
+      message: "You change into **Outfit #{slot}**: #{target.map(&:name).join(', ')}.#{note}" }
   end
 
   def refund_lp!(amount)
@@ -1325,6 +1508,12 @@ class Player < Sequel::Model(:players)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
 
+    if item.stat_modifiers['dev_only'] && !Engine::Dev.owner?(discord_id)
+      return { ok: false, error: :dev_only,
+               message: "**#{item.name}** stirs, recognises that you are not its maker, and will not " \
+                        'be worn. Some things have exactly one owner.' }
+    end
+
     current = equipment_for_slot(item.slot)
     if current
       if current.cursed && current.id != item.id
@@ -1367,12 +1556,26 @@ class Player < Sequel::Model(:players)
     { ok: true, message: "Unequipped **#{item.name}**!" }
   end
 
+  # While Madame Vex is exiled from his back room (her story's
+  # mannequin ending, before the dress is restored), Covar's grief is
+  # priced in: tear-free removal costs double. The restoration of the
+  # dress lifts the grudge and prices return to normal.
+  def vex_exiled_for_pricing?
+    tracker_hash['vex_ending'].to_s == 'mannequin' && !tracker('vex_restoration_done').positive?
+  end
+
+  def cursed_removal_cost(item)
+    cost = item.removal_cost.to_i
+    vex_exiled_for_pricing? ? cost * 2 : cost
+  end
+
   def remove_cursed_equipment!(equipment_id)
     item = equipment_dataset.where(Sequel[:equipment][:id] => equipment_id).first
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
     return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `e,unequip`." } unless item.cursed
 
-    cost = item.removal_cost.to_i
+    surcharge = vex_exiled_for_pricing?
+    cost = cursed_removal_cost(item)
     unless spend_lp!(cost)
       return {
         ok: false,
@@ -1388,7 +1591,8 @@ class Player < Sequel::Model(:players)
     unlock = first_time ? "\n_**#{item.name}** is now available for free in the Cursed Shop (`/cursedshop`)._" : ''
     {
       ok: true,
-      message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free.#{unlock}"
+      message: "You spend **#{cost}** LP. **#{item.name}** turns to dust as it is torn free.#{unlock}" \
+               "#{surcharge ? "\n_That's Covar's grief pricing — double, while Vex sits exiled from his back room and her dress stands empty. Restore the dress and he'll forgive the arithmetic._" : ''}"
     }
   end
 
@@ -1441,8 +1645,20 @@ class Player < Sequel::Model(:players)
     equipment_dataset.where(Sequel[:player_equipment][:is_equipped] => true).all
   end
 
+  # A living piece Madame Vex has renegotiated carries this delver's own
+  # temperament, stored per-player — the shared template keeps its own.
+  def gear_effects_for(item)
+    base = item.stat_modifiers
+    return base unless item.cursed
+
+    overrides = tracker_hash['gear_refits']
+    return base unless overrides.is_a?(Hash) && overrides[item.name].is_a?(Hash)
+
+    overrides[item.name]
+  end
+
   def equipment_effect_values(key)
-    equipped_items.map { |item| item.stat_modifiers[key.to_s] }.compact
+    equipped_items.map { |item| gear_effects_for(item)[key.to_s] }.compact
   end
 
   def equipment_effect_sum(key)

@@ -638,6 +638,10 @@ module Engine
     def relic_assignment(player, floor)
       floor = floor.to_i
       return nil if floor >= Tower::FINAL_BOSS_FLOOR || player.current_cycle.to_i < 2
+      # Covar's dress quest needs the real Queen / Lich for counsel — while
+      # that step is active, their floor cannot be a relic stand-in (even if
+      # a relic was already rolled earlier this cycle).
+      return nil if dress_counsel_blocks_relic?(player, floor)
 
       saved = player.tracker_hash['relic_assignments']
       floors = if saved.is_a?(Hash) && saved['cycle'].to_i == player.current_cycle.to_i &&
@@ -659,6 +663,13 @@ module Engine
       player.set_tracker!('relic_assignments',
                           { 'cycle' => player.current_cycle.to_i, 'floors' => floors.merge(key => assigned) })
       assigned == 'none' ? nil : assigned
+    end
+
+    def dress_counsel_blocks_relic?(player, floor)
+      return false unless defined?(::Engine::Residents) &&
+                          Engine::Residents.respond_to?(:blocks_relic_for_dress_counsel?)
+
+      Engine::Residents.blocks_relic_for_dress_counsel?(player, floor)
     end
 
     # Relics gravitate to the domains they belong to: a relic whose

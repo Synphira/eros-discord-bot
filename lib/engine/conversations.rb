@@ -8,45 +8,147 @@ module Engine
   # dungeon before the reveal: after a delver's first return from floor 35,
   # Syn confirms it is a temple, and revealed variants replace the coy ones.
   module Conversations
+    # Shared Talk categories. Temple = systems/altars/cycles (not "talking to Eros").
+    CATEGORIES = [
+      { key: 'general', label: 'General' },
+      { key: 'clergy', label: 'Clergy' },
+      { key: 'residents', label: 'Residents' },
+      { key: 'temple', label: 'Temple' }
+    ].freeze
+
+    # Victory-screen Talk person keys ← canonical boss names.
+    BOSS_PERSON = {
+      'Mimic Broodmother' => 'broodmother',
+      'Succubus Queen' => 'queen',
+      'Incubus King' => 'king',
+      'Verdant Dryad' => 'dryad',
+      'Lich Lord' => 'lich',
+      'Alpha Beast' => 'alpha',
+      'Eros' => 'eros'
+    }.freeze
+
+    CLERGY_PEOPLE = %w[broodmother queen king dryad lich alpha eros].freeze
+    RESIDENT_PEOPLE = %w[vex pip nectar cartographer].freeze
+    FAIRY_PEOPLE = %w[berry syn].freeze
+
     PEOPLE = {
       'berry' => {
         name: 'Berry',
         emoji: '🍓',
         heading: 'Talking with Berry',
         intro: '_Berry flips her ledger shut and gives you her whole, sunny attention — the dangerous kind. ' \
-               '"Ask, sugar. If it\'s about the shop, the board, or my wife, I have opinions ready. If it\'s ' \
-               'about anyone else, I have even more."_'
+               '"Ask, sugar. Shop, board, wife, or the temple\'s gossip — I have opinions. Some of them are ' \
+               'even polite."_'
       },
       'syn' => {
         name: 'Syn',
         emoji: '🖤',
         heading: 'Talking with Syn',
-        intro: '_Syn sets her needle down, folds her inked arms, and looks at you properly for once — heavy-lidded, ' \
-               'violet-eyed, amused. "Questions, darling? I do love being studied. Try not to waste the rare ' \
-               'occasion when I\'m awake for it."_'
+        intro: '_Syn sets her needle down, folds her inked arms, and looks at you properly — heavy-lidded, ' \
+               'violet-eyed, amused. "Questions, darling? I do love being studied. Try not to waste me."_'
       },
       'covar' => {
         name: 'Covar Zephyren',
         emoji: '🔮',
         heading: 'Talking with Covar Zephyren',
-        intro: '_Behind the cursed counter stands **Covar Zephyren** — one of the first delvers ever to walk ' \
-               'these halls, and proof of what they do to a person. The tower remade him an incubus: curved ' \
-               'horns, a restless tail, a handsome face — and a pair of large, heavy breasts that strain the ' \
-               'open front of his shirt every time he leans on the counter, which he does often, and on ' \
-               'purpose. "Browse, ask, touch the merchandise," he says, grinning. "Some of it touches back."_'
+        intro: '_Covar leans on the cursed counter — horns, tail, D-cup chest on shameless display — and grins. ' \
+               '"Browse, ask, touch the merchandise. Some of it touches back. I\'m the matchmaker, not just ' \
+               'the shopkeep."_'
+      },
+      'vex' => {
+        name: 'Madame Vex',
+        emoji: '🪡',
+        heading: 'Talking with Madame Vex',
+        intro: '_Vex sits very still, Listener-calm, pins and tape within reach. "Easy. You don\'t have to ' \
+               'perform — just talk. I\'m listening."_'
+      },
+      'pip' => {
+        name: 'Pip',
+        emoji: '🔧',
+        heading: 'Talking with Pip',
+        intro: '_Pip looks up from a sprung plate, goggles askew, no pants in sight. "Berry keeps saying pants. ' \
+               'The traps vote no. Ask me something with hinges."_'
+      },
+      'nectar' => {
+        name: 'Sister Nectar',
+        emoji: '🥛',
+        heading: 'Talking with Sister Nectar',
+        intro: '_Nectar wipes her hands on her apron with shrine-professional warmth. "Milking is holy. Treat ' \
+               'it like holy. Then ask, darling."_'
+      },
+      'cartographer' => {
+        name: 'The Cartographer',
+        emoji: '🗺️',
+        heading: 'Talking with the Cartographer',
+        intro: '_Fang does not look up from the map that is also his room. "The room moved again. Hold this ' \
+               'corner — or ask. Purely cartographic."_'
+      },
+      'broodmother' => {
+        name: 'Mimic Broodmother',
+        emoji: '📦',
+        heading: 'Talking with the Broodmother',
+        intro: '_The lid stays open. Tongues idle. "Open it. Or crawl in. Same door. Ask while you\'re still ' \
+               'outside, brood."_',
+        victory_only: true
+      },
+      'queen' => {
+        name: 'Succubus Queen',
+        emoji: '👑',
+        heading: 'Talking with the Succubus Queen',
+        intro: '_She lounges like etiquette invented her. "Darling, architecture is just manners with teeth. ' \
+               'Ask carefully."_',
+        victory_only: true
+      },
+      'king' => {
+        name: 'Incubus King',
+        emoji: '🔥',
+        heading: 'Talking with the Incubus King',
+        intro: '_He grins like Syn already signed the permission slip. "Come here. Syn said I could. Or ask ' \
+               'first — cute."_',
+        victory_only: true
+      },
+      'dryad' => {
+        name: 'Verdant Dryad',
+        emoji: '🌿',
+        heading: 'Talking with the Verdant Dryad',
+        intro: '_Fruit scent and shade. "Eat. Stay. The grove has room — and answers, if you ask gently."_',
+        victory_only: true
+      },
+      'lich' => {
+        name: 'Lich Lord',
+        emoji: '❄️',
+        heading: 'Talking with the Lich Lord',
+        intro: '_Frost-crown flicker. Blue flame in empty sockets. "Fascinating. Wrong, but fascinating. ' \
+               'Speak. I am taking notes."_',
+        victory_only: true
+      },
+      'alpha' => {
+        name: 'Alpha Beast',
+        emoji: '🐺',
+        heading: 'Talking with the Alpha Beast',
+        intro: '_Soft eyes in a nightmare body. A low rumble that almost shapes a word. *…mate.* Ask; he ' \
+               'answers in growl and heat._',
+        victory_only: true
+      },
+      'eros' => {
+        name: 'Eros',
+        emoji: '❤️',
+        heading: 'Talking with Eros',
+        intro: '_Red eyes. Tentacle warmth. She already counted your kneels. "I read your skin. Ask — then ' \
+               'climb, break, and bring it to my mouth again."_',
+        victory_only: true
       }
     }.freeze
 
-    # Boss topics in floor order. `boss` is the canonical boss name recorded
-    # in the bosses_seen tracker when a boss fight is won or satisfied.
+    # Boss topics in floor order (fairy Ask-abouts). `boss` = bosses_seen name.
     BOSS_TOPICS = [
-      { key: 'broodmother', label: 'Mimic Broodmother', boss: 'Mimic Broodmother', floor: 5 },
-      { key: 'succubus_queen', label: 'Succubus Queen', boss: 'Succubus Queen', floor: 10 },
-      { key: 'incubus_king', label: 'Incubus King', boss: 'Incubus King', floor: 15 },
-      { key: 'verdant_dryad', label: 'Verdant Dryad', boss: 'Verdant Dryad', floor: 20 },
-      { key: 'lich_lord', label: 'Lich Lord', boss: 'Lich Lord', floor: 25 },
-      { key: 'alpha_beast', label: 'Alpha Beast', boss: 'Alpha Beast', floor: 30 },
-      { key: 'eros', label: 'Eros', boss: 'Eros', floor: 35 }
+      { key: 'broodmother', label: 'Mimic Broodmother', boss: 'Mimic Broodmother', floor: 5, category: 'clergy' },
+      { key: 'succubus_queen', label: 'Succubus Queen', boss: 'Succubus Queen', floor: 10, category: 'clergy' },
+      { key: 'incubus_king', label: 'Incubus King', boss: 'Incubus King', floor: 15, category: 'clergy' },
+      { key: 'verdant_dryad', label: 'Verdant Dryad', boss: 'Verdant Dryad', floor: 20, category: 'clergy' },
+      { key: 'lich_lord', label: 'Lich Lord', boss: 'Lich Lord', floor: 25, category: 'clergy' },
+      { key: 'alpha_beast', label: 'Alpha Beast', boss: 'Alpha Beast', floor: 30, category: 'clergy' },
+      { key: 'eros', label: 'Eros', boss: 'Eros', floor: 35, category: 'clergy' }
     ].freeze
 
     BOSS_ANSWERS = {
@@ -291,6 +393,7 @@ module Engine
     COVAR_TOPICS = [
       {
         key: 'his_arrival', label: 'How he got here', question: 'You were one of the first delvers?',
+        category: 'general',
         covar: '"First handful through the doors," Covar says, with real pride. "Came down here with a sword, ' \
                'a dour attitude, and a body I\'d never once questioned. The tower questioned it for me. Horns ' \
                'first, then the tail, then—" he gestures at his chest, which needs no gesturing at, "—the rest ' \
@@ -299,6 +402,7 @@ module Engine
       },
       {
         key: 'why_stay', label: 'Why he stays', question: 'Why stay and run this shop?',
+        category: 'general',
         covar: '"People assume I\'m trapped," Covar says, offended on the tower\'s behalf. "I\'m not trapped, ' \
                'I\'m *settled*. But the shop?" He sobers, which on him looks like weather changing. "You have ' \
                'to understand what I used to watch. Delvers, green as spring, wearing living pieces they ' \
@@ -315,6 +419,7 @@ module Engine
       },
       {
         key: 'cursed_gear', label: 'Cursed & living gear', question: 'Why cursed gear?',
+        category: 'temple',
         covar: 'His whole face lights up — the obsessive\'s glow. "Because living gear *remembers* you. Clean ' \
                'steel forgets. A cursed piece learns your heat, your habits, how you beg—" he catches himself, ' \
                'unrepentant, "—how you wear it. Syn made the first pieces, did you know that? I just… collect ' \
@@ -322,6 +427,7 @@ module Engine
       },
       {
         key: 'vex_dress', label: "Madame Vex's dress", question: "What about the dress Madame Vex wears?",
+        category: 'residents',
         covar: '"I would never dare remove the dress," Covar says, with the gravity of a man discussing ' \
                'scripture. "It\'s Syn\'s first ever work, and just look at it—" he does a special gay wave ' \
                'at the memory of it, wrist and all, "—it\'s *magnificent*. If I tried to part the two, the ' \
@@ -348,6 +454,7 @@ module Engine
       },
       {
         key: 'the_fairies', label: 'Syn & Berry', question: 'What about Syn and Berry?',
+        category: 'residents',
         covar: '"Family," Covar says simply. "Syn\'s my big sis — she made the first living gear and taught ' \
                'me everything: how it thinks, how to catalogue it, how to tell a shy piece from a hungry one. ' \
                'Berry\'s sweet as her name and treats me like a brother she has to feed. We don\'t see each ' \
@@ -356,6 +463,7 @@ module Engine
       },
       {
         key: 'his_body', label: 'His changed body', question: 'Do you like what you became?',
+        category: 'general',
         covar: '"Like?" He leans on the counter, and his chest does something deliberate. "Sweetheart, I ' \
                '*adore* what I became. The tower took a man who was afraid of his own appetites and gave him a ' \
                'body that has them on display. Breasts, cock, tail — a full menu, and every plate generous. ' \
@@ -363,6 +471,7 @@ module Engine
       },
       {
         key: 'customers', label: 'His customers', question: 'Who buys from you?',
+        category: 'general',
         covar: '"Everyone, eventually," Covar says. "They come in pretending disgust — \'oh no, cursed, how ' \
                'terrible\' — and they leave with something that has opinions about their skin. Then they come ' \
                'back. The gear chooses as much as the delver does, you know. I just introduce them and take ' \
@@ -370,6 +479,7 @@ module Engine
       },
       {
         key: 'delving_advice', label: 'Advice for delvers', question: 'Any advice for delving?',
+        category: 'temple',
         covar: '"Practical, then." He counts on long fingers. "One: living gear costs LP to tear free, so ' \
                'don\'t wear what you can\'t afford to remove. Two: every curse you carry makes the floors ' \
                'bolder — purge or suppress before a boss, not after. Three: if a chest smiles at you, it has ' \
@@ -378,6 +488,7 @@ module Engine
       },
       {
         key: 'the_goddess', label: 'Eros', question: 'What about the one at the top?',
+        category: 'clergy',
         covar: 'His voice drops, and for once there is no grin in it. "She remade me. Maybe not with her own ' \
                'hands — but this place is hers, and it decided I was worth improving. I\'ve never met her. I ' \
                'don\'t need to. Every morning I wake up in this body, in this shop, in these halls, and I say ' \
@@ -428,7 +539,7 @@ module Engine
     TOPICS = [
       {
         key: 'this_place', label: 'This place', question: 'What is this place, really?',
-        unlock: :always,
+        category: 'general', unlock: :always,
         berry: '"This place?" Berry gestures at the shelves, the curtain, the ceiling far above. "It\'s the ' \
                'tower, sugar. Floors going down, floors going up, and us in the middle keeping the lights on. ' \
                'Don\'t go looking for a fancier name. The tower doesn\'t need one, and neither do you."',
@@ -438,7 +549,7 @@ module Engine
       },
       {
         key: 'each_other', label: 'Your wife', question: 'Tell me about your wife.',
-        unlock: :always,
+        category: 'general', unlock: :always,
         berry: '"Syn?" Berry\'s whole face goes soft and exasperated at once. "Platinum trouble. Sleeps through ' \
                'stock day, flirts with the furniture, and puts marks on people that make my heart do stupid ' \
                'things. She\'s mine, she\'s brilliant, and if you repeat any of that I\'ll deny it while smiling."',
@@ -448,7 +559,7 @@ module Engine
       },
       {
         key: 'your_work', label: 'Your work here', question: 'What do you actually do here?',
-        unlock: :always,
+        category: 'general', unlock: :always,
         berry: '"I run the shop and the board," Berry says, tapping the ledger. "Gear out, Lust Points in, ' \
                'errands posted, delvers paid. Syn does the permanent art through the curtain. Between us we ' \
                'keep this place stocked, inked, and only mildly scandalous before breakfast."',
@@ -458,7 +569,7 @@ module Engine
       },
       {
         key: 'monsters', label: 'The monsters', question: 'Where do all the monsters come from?',
-        unlock: { requirement: { monsters_killed: 1 } },
+        category: 'temple', unlock: { requirement: { monsters_killed: 1 } },
         unlock_text: 'Defeat a monster',
         berry: '"They just keep coming, don\'t they?" Berry shrugs, unbothered. "Something up here likes the ' \
                'floors stocked. I bottle what you bring back and I don\'t ask the tower questions it hasn\'t ' \
@@ -469,7 +580,7 @@ module Engine
       },
       {
         key: 'traps', label: 'The traps', question: 'Who set all these traps?',
-        unlock: { any: { 'traps_triggered' => 1, 'traps_avoided' => 1 } },
+        category: 'temple', unlock: { any: { 'traps_triggered' => 1, 'traps_avoided' => 1 } },
         unlock_text: 'Trigger or dodge a trap',
         berry: 'Berry winces sympathetically. "Sprung one, did you? Half the clever cruelty in these halls has ' \
                'my wife\'s fingerprints on it. She calls it her early work. I call it why the shop has a first-aid ' \
@@ -480,7 +591,7 @@ module Engine
       },
       {
         key: 'curses', label: 'Curses', question: 'What can you tell me about curses?',
-        unlock: { requirement: { curses_gained: 1 } },
+        category: 'temple', unlock: { requirement: { curses_gained: 1 } },
         unlock_text: 'Be cursed once',
         berry: '"Curses stick because this place likes leaving handwriting on people," Berry says. "You can pay ' \
                'to purge one, silence one, or purge the whole pile at once if you\'re feeling flush. Syn will ' \
@@ -493,7 +604,7 @@ module Engine
       },
       {
         key: 'marks', label: 'Marks', question: 'What do marks mean to you?',
-        unlock: { requirement: { marks_owned: 1 } },
+        category: 'temple', unlock: { requirement: { marks_owned: 1 } },
         unlock_text: 'Wear one of Syn\'s marks',
         berry: '"That\'s my wife\'s handwriting on you," Berry says, with proprietary pride. "She doesn\'t ink ' \
                'just anyone, you know. Well. She inks anyone who pays. But she remembers the ones she likes, and ' \
@@ -503,7 +614,7 @@ module Engine
       },
       {
         key: 'transformations', label: 'Hybrid forms', question: 'What are these hybrid forms?',
-        unlock: { requirement: { forms_unlocked: 1 } },
+        category: 'temple', unlock: { requirement: { forms_unlocked: 1 } },
         unlock_text: 'Unlock a hybrid form',
         berry: '"The tower grows on people," Berry says cheerfully. "Ears, tails, wings — I\'ve seen delvers ' \
                'come back from the floors barely the shape they left in. Syn sketches every one. She has a whole ' \
@@ -514,7 +625,7 @@ module Engine
       },
       {
         key: 'altars', label: 'The altars', question: 'What are the altars about?',
-        unlock: { requirement: { eros_attention: 1 } },
+        category: 'temple', unlock: { requirement: { eros_attention: 1 } },
         unlock_text: 'Gain Eros\'s Attention at an altar',
         berry: 'Berry lowers her voice, just a little. "You\'ve knelt at one, then. Good. She notices devotion, ' \
                'sugar — every offering, every prayer. Keep showing up. Being noticed by her is... well. It\'s ' \
@@ -524,7 +635,7 @@ module Engine
       },
       {
         key: 'cycles', label: 'The cycles', question: 'What happens after the top?',
-        unlock: { requirement: { cycles_completed: 1 } },
+        category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
         unlock_text: 'Complete a cycle',
         berry: '"You went all the way up and came back for more," Berry says, delighted. "See, that\'s the ' \
                'thing about this place. It doesn\'t let favourites leave. The floors get bolder, the company ' \
@@ -535,7 +646,7 @@ module Engine
       },
       {
         key: 'covar', label: 'Covar Zephyren', question: 'What about Covar at the Cursed Shop?',
-        unlock: { requirement: { mimics_removed_count: 1 } },
+        category: 'residents', unlock: { requirement: { mimics_removed_count: 1 } },
         unlock_text: 'Tear free a piece of living gear',
         berry: '"Covar?" Berry\'s face goes soft at once. "Oh, he\'s sweet. Tower\'s own family, that one — ' \
                'we don\'t see him often, the Cursed Shop keeps him buried, but he\'s one of ours. If you go ' \
@@ -543,8 +654,258 @@ module Engine
         syn: '"My little brother," Syn says, with unguarded fondness. "Not by blood — by obsession. The boy ' \
              'lives for cursed and living gear, and I made the first of it, so who else was going to teach ' \
              'him? He catalogues my work like scripture, darling. It\'s the most flattering haunting I own."'
+      },
+      {
+        key: 'resident_vex', label: 'Madame Vex', question: 'What about Madame Vex?',
+        category: 'residents', unlock: { requirement: { resident_met_vex: 1 } },
+        unlock_text: 'Meet Madame Vex',
+        berry: '"Vex is a friend," Berry says. "Listener, seamstress, the one who hears living gear complain. ' \
+               'She loved Covar like a son — which is why his exile hurt. Be kind when you sit with her, sugar."',
+        syn: '"The Original was my first living dress," Syn says, quieter. "Vex wore it for decades. Pride and ' \
+             'guilt live in the same seam. She listens better than I deserve, darling."'
+      },
+      {
+        key: 'resident_pip', label: 'Pip', question: 'What about Pip the Trapwright?',
+        category: 'residents', unlock: { requirement: { resident_met_pip: 1 } },
+        unlock_text: 'Meet Pip',
+        berry: '"Put pants on," Berry says automatically. "Trapwright. Genius. No pants. Tell her I said so."',
+        syn: '"Trap fangirl," Syn purrs. "She loves my hinge-work more than I do. Origin sealed — ask about ' \
+             'traps instead. She\'ll redirect beautifully."'
+      },
+      {
+        key: 'resident_nectar', label: 'Sister Nectar', question: 'What about Sister Nectar?',
+        category: 'residents', unlock: { requirement: { resident_met_nectar: 1 } },
+        unlock_text: 'Meet Sister Nectar',
+        berry: '"Holy but weird," Berry says fondly. "Milking as worship. She means it. I nod politely and ' \
+               'send tense delvers her way."',
+        syn: '"Pope energy," Syn admits. "She looks at me like I ordained the dairy. Awkward. Sacred. Both."'
+      },
+      {
+        key: 'resident_fang', label: 'The Cartographer', question: 'What about the Cartographer?',
+        category: 'residents', unlock: { requirement: { resident_met_cartographer: 1 } },
+        unlock_text: 'Meet the Cartographer',
+        berry: '"Quiet map boy," Berry says. "Sweet. Lost. Don\'t let Pip distract him mid-sketch."',
+        syn: '"I tease him with floor secrets," Syn says. "He blushes and files them anyway. Cute. Covar ' \
+             'doesn\'t know the crush yet — don\'t spoil it."'
+      },
+      {
+        key: 'strange_rooms', label: 'Strange rooms', question: 'What about the odd rooms — Confessor, Tea, doors…?',
+        category: 'temple', unlock: { any: { 'tea_ceremonies' => 1, 'false_exits_opened' => 1, 'false_exits_knocked' => 1,
+                                            'confessor_fights' => 1, 'gorgon_bargains' => 1, 'gorgon_negotiations' => 1,
+                                            'spring_soaks' => 1 } },
+        unlock_text: 'Meet a strange-room event',
+        berry: '"Hazard report," Berry says. "Tea\'s polite — I buy the leaves. Confessor and false doors ' \
+               'waste your afternoon. Gorgon and Spring? Almost people. Be gentle."',
+        syn: '"Land improvisations," Syn says. "If the booth sounded like me, that was me saying hi. Queen\'s ' \
+             'hinges on the fake exit. Dryad hospitality went mobile. Negotiate with stone — don\'t be rude."'
+      },
+      {
+        key: 'resident_vex_deep', label: 'Madame Vex (her story)', question: 'After Vex\'s story…?',
+        category: 'residents', unlock: { requirement: { vex_story_done: 1 } },
+        unlock_text: 'Finish Madame Vex\'s story',
+        berry: '"She chose," Berry says, quieter. "Whatever ending you walked her into — she\'s still family. ' \
+               'Don\'t make me explain the kettle fees twice."',
+        syn: '"My handwriting on her skin and on that dress," Syn says. "You saw how the story ends. Pride ' \
+             'and guilt still share a seam. Treat her like a person, not a relic."'
+      },
+      {
+        key: 'resident_pip_deep', label: 'Pip (milestones)', question: 'After hearing Pip\'s milestones…?',
+        category: 'residents', unlock: { requirement: { pip_milestones_heard: 3 } },
+        unlock_text: 'Hear all of Pip\'s trap milestones',
+        berry: '"She still needs pants," Berry insists. "Also she delivered something brave. Don\'t tease the ' \
+               'note if you saw it — that\'s sacred fangirl nonsense."',
+        syn: '"She documented my work like scripture and then did something foolish for the Queen," Syn ' \
+             'murmurs. "I\'m flattered. I\'m also never telling you her origin. Ask about hinges."'
+      },
+      {
+        key: 'resident_nectar_deep', label: 'Sister Nectar (her story)', question: 'After Nectar\'s story…?',
+        category: 'residents', unlock: { requirement: { nectar_story_done: 1 } },
+        unlock_text: 'Finish Sister Nectar\'s story',
+        berry: '"She meant every holy word," Berry says. "Weird. Warm. Send the tense ones — she\'ll empty ' \
+               'them properly."',
+        syn: '"She still looks at me like I ordained the dairy," Syn admits. "After her story, that look got ' \
+             'worse. I nod. I do not correct her. Awkward is sacred too."'
+      },
+      {
+        key: 'resident_fang_deep', label: 'The Cartographer (regular)', question: 'After buying his sketches…?',
+        category: 'residents', unlock: { requirement: { sketches_bought: 5 } },
+        unlock_text: 'Buy 5 Cartographer sketches',
+        berry: '"Quiet map boy\'s getting used to you," Berry says. "Don\'t let Pip distract him mid-page. ' \
+               'And no, I will not gossip about the crush."',
+        syn: '"He filed every secret I teased him with," Syn says, amused. "Regular customer energy. Purely ' \
+             'cartographic, he insists. Ears still pink."'
       }
     ].freeze
+
+    # Resident self-talk (ported from Residents::TOPICS + lore crumbs).
+    RESIDENT_SELF_TOPICS = {
+      'vex' => [
+        { key: 'the_piece', label: 'Her piece', category: 'general', unlock: :always,
+          question: 'Tell me about the dress.',
+          vex: '"It chose me before Covar had a counter. Syn made it with her own hands — she still looks at ' \
+               'it like handwriting she forgot writing. It is old, proud, and terrified of being catalogued ' \
+               'into retirement. So am I, some mornings."' },
+        { key: 'the_language', label: 'Gear language', category: 'general', unlock: :always,
+          question: 'How do you hear living gear?',
+          vex: '"Creaks are complaints. Tugs are requests. Quiet is planning. Yours hum near what they want. ' \
+               'Most call that a curse. I call it a conversation they weren\'t invited to."' },
+        { key: 'about_covar', label: 'Covar', category: 'residents', unlock: :always,
+          question: 'What about Covar?',
+          vex: '"The boy collects strays and calls it a shop." Something almost fond. "Difficult pieces come ' \
+               'to my bench. I am the Cursed Shop\'s conscience. It pays terribly."' },
+        { key: 'listening', label: 'The Listener', category: 'general', unlock: :always,
+          question: 'Why do they call you Listener?',
+          vex: '"Because sitting still is a skill, and gear prefers an audience that doesn\'t flinch. Easy. ' \
+               'You don\'t have to perform — just talk."' }
+      ],
+      'pip' => [
+        { key: 'the_designers', label: 'The designers', category: 'clergy', unlock: :always,
+          question: 'Who designed the traps?',
+          pip: '"Syn and the Succubus Queen, every plate. Syn\'s patience, the Queen\'s hinge-work — Dryad ' \
+               'talked them into the vines. Nobody maintains them. The land re-dreams them. I take notes."' },
+        { key: 'her_notes', label: 'Her notes', category: 'general', unlock: :always,
+          question: 'What are the notes for?',
+          pip: '"Folded into sprung plates for the Queen." She produces eager handwriting. "A scholar ' \
+               'documents. Whether she\'s read one… a scholar doesn\'t ask."' },
+        { key: 'staying', label: 'Why she stays', category: 'general', unlock: :always,
+          question: 'Why stay in the tower?',
+          pip: '"Got caught too often. Eleventh time I started watching. Everyone worships goddesses or ' \
+               'fairies. I worship workmanship. Syn thinks it\'s flattering. Syn is right."' },
+        { key: 'pants', label: 'Pants', category: 'general', unlock: :always,
+          question: 'About the pants…',
+          pip: '"Berry keeps saying pants. The traps vote no. Have you been inside the aphrodisiac trap yet?!"' }
+      ],
+      'nectar' => [
+        { key: 'the_shrine', label: 'The shrine', category: 'temple', unlock: :always,
+          question: 'What is the shrine?',
+          nectar: '"Older than the machinery. The tower wanted a place where giving was the point, so it grew ' \
+                  'one — and me to keep it. Thin nectar means a tired tower. You can taste the mood."' },
+        { key: 'the_rooms', label: 'Every milking room', category: 'temple', unlock: :always,
+          question: 'How are you everywhere?',
+          nectar: '"Station, chamber, shrine — one room. The tower moves it. Don\'t ask how I get around. ' \
+                  'Also service ducts, but that ruins it."' },
+        { key: 'regulars', label: 'Her regulars', category: 'general', unlock: :always,
+          question: 'Who comes to you?',
+          nectar: '"The tower sends me the tense ones. I keep a list — names, preferences, how long they hold. ' \
+                  'Yours is a short entry, darling. There\'s room."' },
+        { key: 'holy', label: 'Holy, not kink', category: 'temple', unlock: :always,
+          question: 'Is it really worship?',
+          nectar: '"Milking is holy. Treat it like holy. Her Holiness Syn can put the joke away when she\'s ' \
+                  'in service."' }
+      ],
+      'cartographer' => [
+        { key: 'the_dreaming', label: 'Dreaming land', category: 'temple', unlock: :always,
+          question: 'How do the maps work?',
+          cartographer: '"Rooms roll out of the domain\'s sleep. Three ahead, the lean is legible. What I draw ' \
+                        'is what you meet — unless a floor lord overrides me. Honest of them."' },
+        { key: 'syn_secrets', label: 'Syn\'s secrets', category: 'residents', unlock: :always,
+          question: 'Does Syn help?',
+          cartographer: '"She teases floor secrets. I file both versions. Purely cartographic."' },
+        { key: 'covar_crush', label: 'The counter', category: 'residents', unlock: :always,
+          question: 'Why mark Covar\'s shop so often?',
+          cartographer: '"Covar\'s counter is on this sheet. Purely cartographic." He does not look up. The ' \
+                        'ears are pink.' },
+        { key: 'pip_pants', label: 'Pip', category: 'residents', unlock: :always,
+          question: 'Thoughts on Pip?',
+          cartographer: '"I wish she would wear pants. The maps deserve dignity."' }
+      ]
+    }.freeze
+
+    # Victory-only clergy self-talk (4–6 topics each).
+    CLERGY_SELF_TOPICS = {
+      'broodmother' => [
+        { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
+          broodmother: '"Brood. Lid. Table that never ends. Syn was my favourite taste that became a person. ' \
+                       'You are brood that has not admitted it yet."' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          broodmother: '"She bargained out. Then she came back with a temple and called hunger worship. Clever ' \
+                       'meal."' },
+        { key: 'keeping', label: 'Keeping you', category: 'general', unlock: :always,
+          broodmother: '"I keep. The temple steals upward. I have never learned to forgive that theft."' },
+        { key: 'domain', label: 'Her floors', category: 'temple', unlock: :always,
+          broodmother: '"Open it. Take it. Crawl inside. Curiosity, greed, comfort — same door."' },
+        { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
+          unlock_text: 'Complete a cycle',
+          broodmother: '"She spat you out again? Fine. Get inside. I\'ll keep what\'s mine until she steals you."' }
+      ],
+      'queen' => [
+        { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
+          queen: '"Court manners. Trap craft. Being worshipped is good manners finally enforced by architecture."' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          queen: '"Darling disaster. Best friend. We built every hinge together. Tell her I laughed."' },
+        { key: 'traps', label: 'The traps', category: 'temple', unlock: :always,
+          queen: '"Syn\'s patience, my cruelty. A trap should leave you thinking about me."' },
+        { key: 'vex', label: 'Madame Vex', category: 'residents', unlock: :always,
+          queen: '"Even I don\'t bother knowing sluts that desperate." Soft laugh. "Don\'t quote me to Syn."' },
+        { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
+          unlock_text: 'Complete a cycle',
+          queen: '"She keeps sending my toys home. I still want you on your knees — and I love that you remember."' }
+      ],
+      'king' => [
+        { key: 'self', label: 'Who he is', category: 'general', unlock: :always,
+          king: '"Gorgeous. Gifted. Unbearable. Syn collected a debt and called it priesthood. Fair."' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          king: '"Come here. Syn said I could. She still holds the leash on the working we built."' },
+        { key: 'spawn', label: 'The spawning', category: 'temple', unlock: :always,
+          king: '"My half keeps the halls stocked. Appetite shaped into teeth. You\'re welcome."' },
+        { key: 'berry', label: 'Berry', category: 'residents', unlock: :always,
+          king: '"I hit on her. Constantly. Liturgy. With Syn watching I behave. Mostly."' },
+        { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
+          unlock_text: 'Complete a cycle',
+          king: '"Third time and you\'re still dripping for me. She can have the climb — I claimed the rest."' }
+      ],
+      'dryad' => [
+        { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
+          dryad: '"Rooted. Feeding. Syn\'s weather that stayed. Eat. Stay. The grove has room."' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          dryad: '"I fed her before the temple. Fruit and firmness. She still forgets water. I remember."' },
+        { key: 'vines', label: 'Vines & tentacles', category: 'temple', unlock: :always,
+          dryad: '"My daydreams. Syn made them eager. Hospitality with grip."' },
+        { key: 'keeping', label: 'Staying', category: 'general', unlock: :always,
+          dryad: '"I lose delvers the way seasons lose leaves. Sadder than I say. Come back slowly."' },
+        { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
+          unlock_text: 'Complete a cycle',
+          dryad: '"My leaf came back. Plant yourself. I\'ll mourn you again when she pulls you free."' }
+      ],
+      'lich' => [
+        { key: 'self', label: 'Who he is', category: 'general', unlock: :always,
+          lich: '"Teacher. Apparatus. A thousand years cold. Fascinating. Wrong, but fascinating."' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          lich: '"My rare living pupil. Pride I will not admit. When she impresses me, the frost crown flickers."' },
+        { key: 'lust_energy', label: 'Lust energy', category: 'temple', unlock: :always,
+          lich: '"Desire made to work. I taught her. The temple is longitudinal study with better furniture."' },
+        { key: 'data', label: 'You as data', category: 'general', unlock: :always,
+          lich: '"Warmth and numbers, in that reverse order on the paperwork. Do not waste either."' },
+        { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
+          unlock_text: 'Complete a cycle',
+          lich: '"Longitudinal study continues. She returns you; I take notes — and heat."' }
+      ],
+      'alpha' => [
+        { key: 'self', label: 'Who he is', category: 'general', unlock: :always,
+          alpha: '*…mate.* Soft eyes. Honest rut. Pack-room because Syn asked.' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          alpha: 'Ear-sit memory. Tiny weight between huge ears. She scratches; he wags. Complete.' },
+        { key: 'pack', label: 'The pack', category: 'temple', unlock: :always,
+          alpha: 'Bran speaks when he sleeps. Lumen tends dens. Nettle barrels into legs. Family.' },
+        { key: 'keeping', label: 'Claim', category: 'general', unlock: :always,
+          alpha: 'Temporary mate. Scent-mark. Good ones come back like weather.' },
+        { key: 'returnee', label: 'Coming back', category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
+          unlock_text: 'Complete a cycle',
+          alpha: '*Good mate comes back. Weather. Rut again.*' }
+      ],
+      'eros' => [
+        { key: 'self', label: 'Who she is', category: 'general', unlock: :always,
+          eros: '"Depravity. Hunger. Syn knelt and fed me when the world forgot. You are climbing my appetite."' },
+        { key: 'syn', label: 'Syn', category: 'residents', unlock: :always,
+          eros: '"Favourite little fairy slut. Possessive. Her handwriting on my property is flirtation."' },
+        { key: 'cycles', label: 'The cycles', category: 'temple', unlock: :always,
+          eros: '"My answer to their temple. Surrender once is a beginning. I send you back myself."' },
+        { key: 'surrender', label: 'What she wants', category: 'general', unlock: :always,
+          eros: '"Not keeping. Not service. The giving-in. That\'s the offering. Again."' },
+        { key: 'returnee', label: 'Sending you back', category: 'temple', unlock: :always,
+          eros: '"I sent you back full of me. Climb. Break. Bring it to my mouth once more."' }
+      ]
+    }.freeze
 
     module_function
 
@@ -554,6 +915,34 @@ module Engine
 
     def person(person)
       PEOPLE[normalize_person(person)]
+    end
+
+    def fairy?(person)
+      FAIRY_PEOPLE.include?(normalize_person(person))
+    end
+
+    def covar?(person)
+      normalize_person(person) == 'covar'
+    end
+
+    def resident?(person)
+      RESIDENT_PEOPLE.include?(normalize_person(person))
+    end
+
+    def clergy?(person)
+      CLERGY_PEOPLE.include?(normalize_person(person))
+    end
+
+    def victory_only?(person)
+      !!person(person)[:victory_only]
+    end
+
+    def boss_person_for(boss_name)
+      BOSS_PERSON[Engine::BossFights.canonical_name(boss_name)]
+    end
+
+    def category_label(key)
+      CATEGORIES.find { |c| c[:key] == key.to_s }&.dig(:label) || key.to_s.capitalize
     end
 
     def boss_seen?(player, boss_name)
@@ -592,10 +981,8 @@ module Engine
       progress && !progress.empty? ? "#{base} — #{progress}" : base
     end
 
-    # All topics for the select menu: general topics first, then boss topics
-    # in floor order. Eighteen topics today — safely inside Discord's limit
-    # of 25 options per select menu, with room to grow.
-    def topics(player)
+    # Fairy Ask-abouts: general + residents + temple + clergy bosses.
+    def fairy_topics(player)
       general = TOPICS.map { |topic| present(player, topic) }
       bosses = BOSS_TOPICS.map do |spec|
         present(player, spec.merge(
@@ -624,9 +1011,28 @@ module Engine
     end
 
     def topics_for(player, person)
-      return COVAR_TOPICS.map { |topic| present(player, topic) } if normalize_person(person) == 'covar'
+      person = normalize_person(person)
+      list =
+        if person == 'covar'
+          COVAR_TOPICS
+        elsif RESIDENT_PEOPLE.include?(person)
+          RESIDENT_SELF_TOPICS.fetch(person, [])
+        elsif CLERGY_PEOPLE.include?(person)
+          CLERGY_SELF_TOPICS.fetch(person, [])
+        else
+          return fairy_topics(player)
+        end
+      list.map { |topic| present(player, topic) }
+    end
 
-      topics(player)
+    def topics_in_category(player, person, category)
+      topics_for(player, person).select { |t| (t[:category] || 'general').to_s == category.to_s }
+    end
+
+    def categories_for(player, person)
+      cats = topics_for(player, person).select { |t| t[:unlocked] }
+                                       .map { |t| (t[:category] || 'general').to_s }.uniq
+      CATEGORIES.select { |c| cats.include?(c[:key]) }
     end
 
     def covar_topics_heard(player)

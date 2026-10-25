@@ -32,7 +32,9 @@ module Eros
       @chimera_picks = {}
       @show_fusion = false
       @talk_person = 'berry'
+      @talk_category = nil
       @show_talk = false
+      @victory_talk_person = nil
       @log = []
       @confirm = nil
       @outcome = nil
@@ -132,14 +134,24 @@ module Eros
       when 'hybrid' then say(@player.select_transformation!(arg.to_s.empty? ? nil : arg.to_s)[:message])
       when 'talk_open'
         @talk_person = Engine::Conversations.normalize_person(arg)
+        @talk_category = nil
         @show_talk = true
-      when 'talk_person' then @talk_person = Engine::Conversations.normalize_person(arg)
-      when 'talk_close' then @show_talk = false
+        @victory_talk_person = nil if @talk_person == @victory_talk_person
+      when 'talk_person'
+        @talk_person = Engine::Conversations.normalize_person(arg)
+        @talk_category = nil
+      when 'talk_cat'
+        @talk_category = arg.to_s
+      when 'talk_cats' then @talk_category = nil
+      when 'talk_close'
+        @show_talk = false
+        @talk_category = nil
       when 'talk_topic'
         result = Engine::Conversations.answer(@player, @talk_person, arg.to_s)
         if result[:ok]
           Engine::Conversations.note_covar_topic!(@player, arg.to_s) if @talk_person == 'covar'
           spec = Engine::Conversations.person(@talk_person)
+          @talk_category = (result.dig(:topic, :category) || @talk_category || 'general').to_s
           say("**#{spec[:name]} on #{result[:topic][:label]}**", result[:text])
         else
           say(result[:message])
@@ -159,6 +171,8 @@ module Eros
         say("#{which.capitalize} form chosen: **#{Engine::TransformationSystem.get(key)&.dig(:name)}**. Pick the other half, then fuse.")
       when 'mutation' then say(Engine::TransformationSystem.choose_mutation!(@player, arg.to_s)[:message])
       when 'burden' then say(Engine::Burdens.toggle!(@player, arg.to_s)[:message])
+      when 'burden_oath' then say(Engine::Burdens.toggle_oath!(@player, arg.to_s)[:message])
+      when 'burden_reroll' then say(Engine::Burdens.reroll!(@player, arg.to_s)[:message])
       when 'chimera_fuse'
         say(Engine::TransformationSystem.fuse!(@player, @chimera_picks['primary'].to_s,
                                                @chimera_picks['secondary'].to_s)[:message])
@@ -197,6 +211,7 @@ module Eros
     def explore!
       return say('You are in combat. Fight, flee, or submit.') if Eros.encounter_for(@player)
 
+      @victory_talk_person = nil
       @screen = 'hub'
       result = Engine::Exploration.roll(@player)
       progress = @player.check_progress!
@@ -247,7 +262,11 @@ module Eros
       log = result[:log].concat(@player.check_progress!)
       say(Engine::ContentOptions.scrub!(@player, log))
 
-      if result[:tower_cleared] || result[:fled] || result[:satisfied] || result[:victory]
+      if result[:tower_cleared] || result[:victory]
+        person = Engine::Conversations.boss_person_for(enc[:name].to_s)
+        @victory_talk_person = person if person
+        Eros.clear_encounter!(@player)
+      elsif result[:fled] || result[:satisfied]
         Eros.clear_encounter!(@player)
       elsif result[:defeated] || result[:broken]
         Eros.clear_encounter!(@player)
@@ -470,12 +489,18 @@ module Eros
     def hub_view
       wait = rest_ready_at - Time.now.to_i
       rest_label = wait.positive? ? "Rest (#{(wait / 60.0).ceil}m)" : 'Rest'
-      { title: "Floor #{@player.current_floor}", actions: [
+      rows = [
         [btn('Explore', 'explore', style: 'primary'), btn(rest_label, 'rest', disabled: wait.positive?),
          btn('Level Up', 'nav', arg: 'levelup', style: 'success')],
         [btn('Gear', 'nav', arg: 'gear'), btn("Curses (#{@player.active_curse_count})", 'nav', arg: 'curses'),
          btn('Options', 'nav', arg: 'options'), btn('Settings', 'nav', arg: 'settings')]
-      ] }
+      ]
+      if @victory_talk_person
+        spec = Engine::Conversations.person(@victory_talk_person)
+        rows.unshift([btn("#{spec[:emoji]} Talk with #{spec[:name]}", 'talk_open',
+                          arg: @victory_talk_person, style: 'primary')])
+      end
+      { title: "Floor #{@player.current_floor}", actions: rows }
     end
 
     def combat_view(enc)
@@ -540,10 +565,9 @@ module Eros
           actions: [btn(owned ? 'Owned' : 'Buy', 'buy', arg: item.id, style: 'success',
                                                   disabled: owned || @player.lp < item.cost.to_i)] }
       end
-      intro = { text: "_**Berry** zips between the shelves on iridescent wings, seed-freckles on her cheeks and a " \
-                      "ledger under one arm. \"Welcome in, sugar! I run the shop, my wife Syn runs the parlour bench, " \
-                      "and everything here is clean steel and soft lies.\" Berry also posts quests — find her board " \
-                      "on the **Quests** tab._" }
+      intro = { text: "_**Berry** zips in — seed-freckles, sunny smile, ledger like a leash. \"Welcome in, sugar. " \
+                      "Clean steel and soft lies. Behave and I might call you a *good girl*.\" Quests live on the " \
+                      "**Quests** tab._" }
       { title: "Shop — #{@player.lp} LP", sections: [intro] + sections, actions: [tabs, back_row] }
     end
 
@@ -772,27 +796,42 @@ module Eros
 
     def talk_view
       spec = Engine::Conversations.person(@talk_person)
-      topics = Engine::Conversations.topics_for(@player, @talk_person)
+      categories = Engine::Conversations.categories_for(@player, @talk_person)
       switcher =
         if @talk_person == 'covar'
           [btn('🔮 Covar Zephyren', 'talk_person', arg: 'covar', style: 'primary', disabled: true),
            btn('🍓 Talk to Berry', 'talk_person', arg: 'berry', style: 'secondary'),
            btn('🖤 Talk to Syn', 'talk_person', arg: 'syn', style: 'secondary')]
-        else
+        elsif Engine::Conversations.fairy?(@talk_person)
           [btn('🍓 Talk to Berry', 'talk_person', arg: 'berry',
                 style: @talk_person == 'berry' ? 'primary' : 'secondary', disabled: @talk_person == 'berry'),
            btn('🖤 Talk to Syn', 'talk_person', arg: 'syn',
                 style: @talk_person == 'syn' ? 'primary' : 'secondary', disabled: @talk_person == 'syn')]
-        end
-      sections = [{ text: "## #{spec[:emoji]} #{spec[:heading]}\n#{spec[:intro]}", actions: switcher }]
-      topics.each do |topic|
-        if topic[:unlocked]
-          sections << { text: "**#{topic[:label]}** — #{topic[:question]}",
-                        actions: [btn("Ask #{spec[:name]}", 'talk_topic', arg: topic[:key], style: 'primary')] }
         else
-          sections << { text: "🔒 **#{topic[:label]}** — #{Engine::Conversations.unlock_hint(@player, topic)}" }
+          []
+        end
+      sections = [{ text: "## #{spec[:emoji]} #{spec[:heading]}\n#{spec[:intro]}",
+                    actions: switcher.empty? ? nil : switcher }.compact]
+
+      if @talk_category.nil? && categories.size > 1
+        sections << { text: '_Pick a subject. Then ask._',
+                      actions: categories.map { |c| btn(c[:label], 'talk_cat', arg: c[:key], style: 'primary') } }
+      else
+        category = @talk_category || categories.first&.dig(:key) || 'general'
+        topics = Engine::Conversations.topics_in_category(@player, @talk_person, category)
+        sections << { text: "### #{Engine::Conversations.category_label(category)}",
+                      actions: categories.size > 1 ? [btn('◀ Subjects', 'talk_cats', style: 'secondary')] : nil }.compact
+        topics.each do |topic|
+          if topic[:unlocked]
+            q = topic[:question] || topic[:label]
+            sections << { text: "**#{topic[:label]}** — #{q}",
+                          actions: [btn("Ask #{spec[:name]}", 'talk_topic', arg: topic[:key], style: 'primary')] }
+          else
+            sections << { text: "🔒 **#{topic[:label]}** — #{Engine::Conversations.unlock_hint(@player, topic)}" }
+          end
         end
       end
+
       if @talk_person == 'covar'
         if Engine::Conversations.covar_sex_unlocked?(@player)
           buttons = Engine::Conversations::COVAR_SEX.filter_map do |part, s|
@@ -814,6 +853,9 @@ module Eros
           { text: '_He charges in stories._',
             actions: [btn('◀ Cursed Shop', 'talk_close', style: 'secondary'),
                       btn('Shop', 'nav', arg: 'shop', style: 'secondary')] }
+        elsif Engine::Conversations.clergy?(@talk_person)
+          { text: '_Victory talk — they will not wait forever._',
+            actions: [btn('◀ Floor', 'talk_close', style: 'secondary')] }
         else
           { text: '_Their answers change with who you ask. Berry and Syn agree about very little._',
             actions: [btn('◀ Back', 'talk_close', style: 'secondary'),
@@ -828,13 +870,9 @@ module Eros
       return talk_view if @show_talk
 
       owned = Engine::Marks.owned(@player)
-      intro = { text: "_One half of Syn & Berry's glows with clean steel, where **Berry** — a strawberry-bright " \
-                      "fairy with a smile like sunrise and a grip like ownership — is already writing your name in " \
-                      "her ledger. The other half is velvet, ink and candle smoke, where her wife **Syn** lounges " \
-                      "over the parlour bench: a heavy-lidded fairy with waist-length platinum-blonde hair, " \
-                      "sleepless shadows under her eyes and next to nothing on but black lace scraps — her own " \
-                      "inked, pierced skin displays every mark she sells. Every mark Syn makes stays through " \
-                      "every run._\n" \
+      intro = { text: "_One half gleams — **Berry** writing your name like a claim. The other is velvet and ink: " \
+                      "**Syn** lounges at the bench, platinum hair, violet eyes, lace scraps over a catalogue of " \
+                      "her own skin. \"Something permanent, darling? My work never fades.\"_\n" \
                       "-# Marks worn #{owned.size}/#{Engine::Marks.max_marks(@player)}",
                 actions: [btn('🍓 Talk to Berry', 'talk_open', arg: 'berry', style: 'secondary'),
                           btn('🖤 Talk to Syn', 'talk_open', arg: 'syn', style: 'primary')] }
@@ -855,8 +893,8 @@ module Eros
       return talk_view if @show_talk
 
       sections = [{ text: "### 🍓 Berry's Quest Board\n" \
-                          "_\"Errands, sugar! I run the shop, Syn runs the bench, and you run your pretty legs off " \
-                          "for both of us.\"_\n#{Engine::Quests.board_lines(@player).join("\n")}\n" \
+                          "_\"Errands, sugar. Board pays. Finish one and I'll pay you in Lust Points — and maybe a " \
+                          "*good girl* if you earned it.\"_\n#{Engine::Quests.board_lines(@player).join("\n")}\n" \
                           "-# Quests completed for Berry: **#{Engine::Quests.completed(@player)}**",
                     actions: [btn('🍓 Talk to Berry', 'talk_open', arg: 'berry', style: 'primary'),
                               btn('🖤 Talk to Syn', 'talk_open', arg: 'syn', style: 'secondary')] }]
@@ -930,21 +968,53 @@ module Eros
                "LP earned **#{t['lp_earned']}**",
                "Chests opened **#{t['treasure_found']}** · left closed **#{t['chests_ignored']}**"]
       burdens = Engine::Burdens.active(@player)
-      burden_section = { text: "⛓️ **Cycle Burdens** — LP gains ×#{format('%.2f', Engine::Burdens.lp_multiplier(@player))}" \
-                               "#{burdens.any? ? " · carrying: #{burdens.map { |b| Engine::Burdens::BURDENS[b][:name] }.join(', ')}" : ''}\n" \
-                               "-# #{Engine::Burdens.changeable?(@player) ? 'You are at a cycle\'s start: take on or shed burdens (max 3, +25% LP each).' : 'Burdens are chosen at a cycle\'s start and set until you clear the tower.'}",
-                         actions: Engine::Burdens::BURDENS.map do |key, spec|
-                           on = burdens.include?(key)
-                           btn("#{on ? '✓ ' : ''}#{spec[:name]} — #{spec[:description]}", 'burden', arg: key,
-                               style: on ? 'danger' : 'secondary', disabled: !Engine::Burdens.changeable?(@player))
-                         end }
+      sworn = Engine::Burdens.oaths(@player)
+      changeable = Engine::Burdens.changeable?(@player)
+      oaths_ok = Engine::Burdens.oaths_changeable?(@player)
+      reroll_ok = Engine::Burdens.rerollable?(@player)
+      price = Engine::Burdens.reroll_price(@player)
+      burden_names = burdens.map { |b| Engine::Burdens::BURDENS[b][:name] }.join(', ')
+      oath_names = sworn.map { |b| Engine::Burdens::BURDENS[b][:name] }.join(', ')
+      burden_section = {
+        text: "⛓️ **Cycle Burdens** — LP gains ×#{format('%.2f', Engine::Burdens.lp_multiplier(@player))}" \
+              "#{burdens.any? ? " · carrying: #{burden_names}" : ''}" \
+              "#{sworn.any? ? " · oaths: #{oath_names}" : ''}\n" \
+              "-# Take/shed burdens on **floor 1** only. Oaths and paid rerolls work on any floor; " \
+              "reroll is **#{price} LP** (climbs mid-climb, resets on floor 1) and never rolls into an oath.",
+        actions: Engine::Burdens::BURDENS.map do |key, spec|
+          on = burdens.include?(key)
+          btn("#{on ? '✓ ' : ''}#{spec[:name]}", 'burden', arg: key,
+              style: on ? 'danger' : 'secondary', disabled: !changeable)
+        end
+      }
+      oath_section = {
+        text: '📜 **Oaths** — up to 2 extra torments (+10% LP each). Toggle anytime outside combat.',
+        actions: Engine::Burdens::BURDENS.map do |key, spec|
+          oath = sworn.include?(key)
+          btn("#{oath ? '✓ ' : ''}📜 #{spec[:name]}", 'burden_oath', arg: key,
+              style: oath ? 'danger' : 'secondary',
+              disabled: !oaths_ok || burdens.include?(key) ||
+                        (!oath && sworn.size >= Engine::Burdens::MAX_OATHS))
+        end
+      }
+      sections = [{ text: lines.join("\n") }, burden_section, oath_section]
+      if burdens.any?
+        sections << {
+          text: "🎲 **Reroll a burden** — **#{price} LP**; never into a carried burden or oath.",
+          actions: burdens.map do |key|
+            btn("Reroll #{Engine::Burdens::BURDENS[key][:name]}", 'burden_reroll', arg: key, style: 'secondary',
+                disabled: !reroll_ok || @player.lp < price || Engine::Burdens.reroll_pool(@player).empty?)
+          end
+        }
+      end
       restart = @confirm == :restart
       delete = @confirm == :delete_save
       notes = '-# **Restart** erases this delver but keeps titles, achievements, Berry quests completed, records and options. ' \
               'Story quests (Syn wedding, Vex/Covar/residents) reset for the new delver — not on defeat. ' \
               '**Delete save** erases everything. Your save lives in this browser only; use **Export save** to ' \
               'back it up or move it to another device.'
-      { title: 'Settings & stats', sections: [{ text: lines.join("\n") }, burden_section, { text: notes }],
+      sections << { text: notes }
+      { title: 'Settings & stats', sections: sections,
         actions: [[btn('Export save', 'export_save', style: 'primary'), btn('Import save', 'import_prompt')],
                   [btn(restart ? 'Restart (press again)' : 'Restart', 'restart', style: 'danger'),
                    btn(delete ? 'Delete save (press again)' : 'Delete save', 'delete_save', style: 'danger')],

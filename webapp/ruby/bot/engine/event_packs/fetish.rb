@@ -56,7 +56,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'One is plenty, thanks', lust: 4,
                    scene: 'You shake your head. She pouts, then blows you a kiss that tingles all the way down your spine.' },
-        fight: { label: 'Fight her', type: :demon, text: 'The succubus rises from the bed, eyes glowing. "Fine. We\'ll play rough."' }
+        fight: { name: 'Succubus', label: 'Fight her', type: :demon, text: 'The succubus rises from the bed, eyes glowing. "Fine. We\'ll play rough."' }
       },
       'feather_vines' => {
         name: 'Feather Vines', tag: 'tickling', tracker: 'tickling_events',
@@ -163,7 +163,7 @@ module Engine
         },
         decline: { label: 'Shut the doors', text: 'Keep your own clothes', lust: 2,
                    scene: 'You push the doors shut. Something inside sighs and rattles the hangers sulkily.' },
-        fight: { label: 'Kick it', type: :mimic, text: 'The wardrobe snaps its doors at you like jaws and lunges!' }
+        fight: { name: 'Wardrobe Mimic', label: 'Kick it', type: :mimic, text: 'The wardrobe snaps its doors at you like jaws and lunges!' }
       },
       'sin_altar' => {
         name: 'Altar of Sin', tag: 'corruption', tracker: 'corruption_events',
@@ -202,8 +202,8 @@ module Engine
                    'slide sideways into soft, sticky filth.',
                    'You find yourself stroking the velvet petals, then stroking yourself, giving in a little more with every breath.'],
           parts: {
-            'vagina' => 'Your pussy swells and drips, aching to be filled by anything at all.',
-            'penis' => 'Your cock goes achingly hard, leaking a steady string as the pollen works on you.'
+            'vagina' => 'Your pussy swells and drips as your fingers circle your clit, aching to be filled by anything at all.',
+            'penis' => 'Your cock goes achingly hard in your stroking hand, leaking a steady string as the pollen works on you.'
           },
           lp: 8, lust: 16, special: :corrupt,
           condition: { key: 'tainted_bloom', name: 'Tainted Bloom', floors: 3,
@@ -211,7 +211,7 @@ module Engine
         },
         decline: { label: 'Hold your breath', text: 'Hurry past', lust: 4,
                    scene: 'You hold your breath and hurry past. A few motes of pollen cling to your skin, tingling.' },
-        fight: { label: 'Uproot it', type: :plant, text: 'The orchid\'s roots tear free of the floor and lash at you!' }
+        fight: { name: 'Black Orchid', label: 'Uproot it', type: :plant, text: 'The orchid\'s roots tear free of the floor and lash at you!' }
       },
       'glowing_quill' => {
         name: 'Glowing Quill', tag: 'body_writing', tracker: 'body_writing_events',
@@ -271,10 +271,12 @@ module Engine
           scenes: ['He lets you press against his broad, sweat-slick chest and breathe him in, and the musk goes straight to ' \
                    'your head and between your legs at the same time. You rub your face against his fur shamelessly.',
                    'By the time he is done with you, you are soaked in his scent and humming with a deep, animal need.'],
-          parts: {
+          by_part: {
             'vagina' => 'He lifts you onto his thick cock and your pussy stretches around him while you breathe in his musk.',
-            'penis' => 'He grinds your cock against his sweaty abs until you spill across his fur.',
             'anus' => 'He bends you over the bench and fucks your ass slow and deep, his musk heavy all around you.'
+          },
+          parts: {
+            'penis' => 'Your cock bounces and leaks beneath you with every rut of his hips.'
           },
           lp: 7, lust: 14,
           condition: { key: 'bull_scented', name: 'Bull-Scented', floors: 3,
@@ -284,12 +286,16 @@ module Engine
           label: 'Steal the loincloth', text: 'Just bury your face in it',
           scenes: ['While he is in the steam you snatch his loincloth off the hook and bury your face in it, breathing deep ' \
                    'until your knees go weak and you are touching yourself right there by the lockers.'],
+          parts: {
+            'vagina' => 'Your fingers rub your clit in frantic circles, your pussy dripping as his scent fills your head.',
+            'penis' => 'You wrap your hand around your cock and stroke it frantically as his scent fills your head.'
+          },
           lp: 5, lust: 12,
           condition: { key: 'scent_hound', name: 'Scent Hound', floors: 3, effects: { 'explore_lp' => 1, 'lust_mult' => 1.1 } }
         },
         decline: { label: 'Leave', text: 'Get out before the smell gets you', lust: 4,
                    scene: 'You back out of the steam, but his scent clings to your clothes for a long while.' },
-        fight: { label: 'Challenge him', type: :beast, text: 'The minotaur snorts, lowers his horns, and charges!' }
+        fight: { name: 'Minotaur', label: 'Challenge him', type: :beast, text: 'The minotaur snorts, lowers his horns, and charges!' }
       },
       'orc_hot_spring' => {
         name: 'Orc Hot Spring', tag: 'musk', tracker: 'musk_events',
@@ -511,7 +517,7 @@ module Engine
         },
         decline: { label: 'Leave the mess', text: 'Not your kitchen', lust: 2,
                    scene: 'You leave the mess behind. The slime burbles sadly into the dishwater.' },
-        fight: { label: 'Mop it up', type: :slime, text: 'The slime surges out of the sink, wobbling indignantly!' }
+        fight: { name: 'Green Slime', label: 'Mop it up', type: :slime, text: 'The slime surges out of the sink, wobbling indignantly!' }
       },
       'chariot_race' => {
         name: 'Chariot Race', tag: 'pony_play', tracker: 'pony_events',
@@ -553,9 +559,11 @@ module Engine
           scenes: ['He brushes your hair into a glossy mane, laces you into hoof-boots and a snug harness, and walks you around ' \
                    'the paddock on a lead, praising your gait.',
                    'Then he mounts you in the soft grass, hands on your harness, and rides you like a prize.'],
-          parts: {
+          by_part: {
             'vagina' => 'His thick cock sinks into your pussy from behind, and you whinny and stamp your hoof-boots.',
-            'anus' => 'He takes your ass slow and steady, tugging your mane with each thrust.',
+            'anus' => 'He takes your ass slow and steady, tugging your mane with each thrust.'
+          },
+          parts: {
             'penis' => 'He reaches under you and strokes your cock like he is milking a prize stallion.'
           },
           lp: 7, lust: 12,
@@ -586,7 +594,7 @@ module Engine
         },
         decline: { label: 'Leave', text: 'Keep your voice', lust: 2,
                    scene: 'You shake your head and slip out. Not a single footstep echoes behind you.' },
-        fight: { label: 'Break the silence', type: :undead, text: 'You shout, and the wraith shrieks back, flying at you!' }
+        fight: { name: 'Wraith', label: 'Break the silence', type: :undead, text: 'You shout, and the wraith shrieks back, flying at you!' }
       },
       'muzzle_merchant' => {
         name: 'Muzzle Merchant', tag: 'gags_hoods', tracker: 'gag_events',
@@ -638,8 +646,8 @@ module Engine
         },
         alt: {
           label: 'Fingers only', text: 'Just her fingers, for now',
-          scenes: ['You offer yourself more modestly, and the marble fingers oblige, stroking you open with three slick ' \
-                   'digits until you are relaxed, flushed and gaping just a little.'],
+          scenes: ['You offer yourself more modestly, and the marble fingers oblige, stroking your ass open with ' \
+                   'three slick digits until you are relaxed, flushed and gaping just a little.'],
           lp: 5, lust: 10,
           condition: { key: 'nicely_loosened', name: 'Nicely Loosened', floors: 2,
                        effects: { 'satisfy_bonus' => 0.05, 'agility' => 1 } }
@@ -668,7 +676,7 @@ module Engine
         },
         decline: { label: 'Refuse the rules', text: 'Nobody fists you by decree', lust: 3,
                    scene: 'You refuse. He shrugs his mountain shoulders. "The tower always collects, little one."' },
-        fight: { label: 'Fight him', type: :beast, text: 'He cracks his knuckles and charges, Gauntlet first!' }
+        fight: { name: 'Arena Master', label: 'Fight him', type: :beast, text: 'He cracks his knuckles and charges, Gauntlet first!' }
       },
       'living_gauntlet' => {
         name: 'The Living Gauntlet', tag: 'gaping', tracker: 'gaping_events',
@@ -691,7 +699,7 @@ module Engine
         },
         decline: { label: 'Wave back', text: 'Leave it waving', lust: 2,
                    scene: 'You wave politely and walk on. The glove droops, then waves sadly at your back.' },
-        fight: { label: 'Stomp it', type: :mimic, text: 'The glove rears up, fingers spread like claws — it was a mimic all along!' }
+        fight: { name: 'Gauntlet Mimic', label: 'Stomp it', type: :mimic, text: 'The glove rears up, fingers spread like claws — it was a mimic all along!' }
       }
     }.freeze
   end

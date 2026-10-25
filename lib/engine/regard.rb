@@ -62,17 +62,16 @@ module Engine
 
     LINES = {
       shop: {
-        marked: '_Berry\'s wings slow mid-flutter. "Oh," she breathes, freckles standing out. "Oh, sugar. ' \
-                'She\'s been *watching* you, hasn\'t she. I can always tell. Sit — whatever you need, you ' \
-                'tell Berry first."_',
-        noticed: '_Berry beams over the ledger. "There\'s my noticed one! She\'s looked your way more ' \
-                 'than once, you know. I keep count. Well — Syn keeps count. I keep *feelings*."_',
-        changed: '_Berry circles you once, delighted, hands clasped. "Look at you! The tower\'s been ' \
-                 '*working* on you. Oh, don\'t be shy — half my regulars started out embarrassed too."_',
-        regular: '_Berry waves the ledger like a fan. "My regular! I was just telling Syn — well. Never ' \
-                 'you mind what I was telling Syn. The usual, sugar?"_',
-        surrendered: '_Berry\'s voice goes soft and proud. "You know what I told Syn? Losing is just the ' \
-                     'local way of praying, and you, sugar, are *devout*. Now. What can Berry do for you?"_'
+        marked: '_Berry\'s wings slow. "Oh," she breathes. "She\'s been *watching* you. I can always tell. ' \
+                'Sit — tell Berry first. Good girl. We\'ll sort the rest."_',
+        noticed: '_Berry beams over the ledger. "There\'s my noticed one. She\'s looked your way more than ' \
+                 'once. Syn keeps count. I keep *feelings*. Shop first — then gossip."_',
+        changed: '_Berry circles you once, delighted. "Look at you. The tower\'s been *working*. Don\'t be ' \
+                 'shy — half my regulars started embarrassed. You\'re already prettier for it."_',
+        regular: '_Berry waves the ledger like a fan. "My regular. I was just telling Syn — never you mind. ' \
+                 'The usual, sugar? Behave and I might praise you for it."_',
+        surrendered: '_Berry\'s voice goes soft and proud. "Losing is just praying with worse manners, and ' \
+                     'you, sugar, are *devout*. Good girl. Now — what does Berry do for you?"_'
       },
       parlour: {
         marked: '_Syn looks up from the needle and her smirk does something rare: it gentles. "Careful, ' \

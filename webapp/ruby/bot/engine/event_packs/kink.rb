@@ -52,7 +52,7 @@ module Engine
         },
         decline: { label: 'Step around', text: 'Avoid the vines (AGI)', lust: 3, escape: true,
                    scene: 'You duck the reaching vines and hurry past. The flower closes with a sulky rustle.' },
-        fight: { label: 'Uproot it', type: :plant, text: 'The flower rears up on a thick, writhing stalk!' }
+        fight: { name: 'Man-Eating Flower', label: 'Uproot it', type: :plant, text: 'The flower rears up on a thick, writhing stalk!' }
       },
       'keyholder_vault' => {
         name: 'Keyholder\'s Vault', tag: 'chastity', tracker: 'chastity_events',
@@ -87,7 +87,7 @@ module Engine
         },
         decline: { label: 'Step back', text: 'Stay out of its reach', lust: 2,
                    scene: 'You keep your distance. The slime hardens into a sulky lump on the floor.' },
-        fight: { label: 'Shatter it', type: :slime, text: 'The slime surges up, half liquid and half razor-bright crystal!' }
+        fight: { name: 'Crystal Slime', label: 'Shatter it', type: :slime, text: 'The slime surges up, half liquid and half razor-bright crystal!' }
       },
       'kennel_mistress' => {
         name: 'Kennel Mistress', tag: 'petplay', tracker: 'petplay_events',
@@ -100,17 +100,19 @@ module Engine
                    'until you are leaning into her hand. She brushes you, feeds you treats, and teaches you to sit, beg and roll over.',
                    'When you have earned it, she rewards her pup properly, mounting you right there on the cushions and growling ' \
                    'praise into your ear.'],
-          parts: { 'vagina' => 'Her thick cock spreads your pussy wide as she ruts into you from behind.',
-                   'anus' => 'She takes your ass slow and deep, one hand on your collar, calling you a good pup with every thrust.',
-                   'penis' => 'She reaches under you and strokes your cock in time with her thrusts until you whimper.' },
+          by_part: { 'vagina' => 'Her thick cock spreads your pussy wide as she ruts into you from behind.',
+                     'anus' => 'She takes your ass slow and deep, one hand on your collar, calling you a good pup with every thrust.' },
+          parts: { 'penis' => 'She reaches under you and strokes your cock in time with her thrusts until you whimper.' },
           lp: 6, lust: 12,
           condition: { key: 'kennel_trained', name: 'Kennel-Trained', floors: 3,
                        effects: { 'beast_submit_lp' => 3, 'agility' => 1, 'flee_bonus' => -0.05 } }
         },
         alt: {
           label: 'Take her knot', text: 'Let her tie you like a real pup', needs_tag: 'knotting',
-          scenes: ['She grins all teeth and mounts you hard, rutting until her knot swells and locks you together. You stay ' \
-                   'tied on the cushions for a long, blissful while, panting as she strokes your back.'],
+          scenes: ['She grins all teeth and mounts you hard from behind, rutting until her knot swells and locks you together. ' \
+                   'You stay tied on the cushions for a long, blissful while, panting as she strokes your back.'],
+          by_part: { 'vagina' => 'Her knot pops into your pussy and swells, locking her cock inside you.',
+                     'anus' => 'Her knot pops into your ass and swells, locking her cock inside you.' },
           lp: 8, lust: 15,
           condition: { key: 'knotted_pup', name: 'Knotted Pup', floors: 2,
                        effects: { 'beast_lust_mult' => 0.85, 'beast_submit_lp' => 4 } }
@@ -168,7 +170,7 @@ module Engine
         },
         decline: { label: 'Look away', text: 'Break eye contact', lust: 2,
                    scene: 'You wrench your gaze from the amulet. The lich sighs and lets it go still.' },
-        fight: { label: 'Snatch the amulet', type: :undead, text: 'The lich rises, eyes flaring, and reaches for you!' }
+        fight: { name: 'Lich', label: 'Snatch the amulet', type: :undead, text: 'The lich rises, eyes flaring, and reaches for you!' }
       },
       'trigger_word' => {
         name: 'Trigger Word', tag: 'mind_control', tracker: 'mind_control_events',
@@ -238,7 +240,7 @@ module Engine
         },
         decline: { label: 'Walk away', text: 'Keep your mind your own', lust: 3,
                    scene: 'You resist the hum and leave. Your head tingles pinkly for a few minutes afterwards.' },
-        fight: { label: 'Smash the halo', type: :mimic, text: 'The couch snaps upright on spindly legs — a mimic!' }
+        fight: { name: 'Couch Mimic', label: 'Smash the halo', type: :mimic, text: 'The couch snaps upright on spindly legs — a mimic!' }
       },
       'velvet_cocoon' => {
         name: 'Velvet Cocoon', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
@@ -260,7 +262,7 @@ module Engine
         },
         decline: { label: 'Back off', text: 'Keep your senses', lust: 1,
                    scene: 'You back away. The moth folds its wings and goes back to spinning.' },
-        fight: { label: 'Fight it', type: :beast, text: 'The moth dives, wings beating up a storm of glittering dust!' }
+        fight: { name: 'Velvet Moth', label: 'Fight it', type: :beast, text: 'The moth dives, wings beating up a storm of glittering dust!' }
       },
       'floating_tank' => {
         name: 'Floating Tank', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
@@ -309,7 +311,7 @@ module Engine
         },
         decline: { label: 'Keep moving', text: 'Stay warm and moving', lust: 1,
                    scene: 'You decline the plinth. The curator sighs and puts up a *Coming Soon* sign.' },
-        fight: { label: 'Fight it', type: :mimic, text: 'The empty plinth cracks open, revealing rows of teeth!' }
+        fight: { name: 'Plinth Mimic', label: 'Fight it', type: :mimic, text: 'The empty plinth cracks open, revealing rows of teeth!' }
       },
       'banquet_platter' => {
         name: 'Banquet Platter', tag: 'objectification', tracker: 'objectification_events',
@@ -381,7 +383,7 @@ module Engine
         },
         decline: { label: 'Grab your gear', text: 'Snatch it back fast (AGI)', lust: 2, escape: true,
                    scene: 'You grab your clothes back before they get far and stalk off. The imps boo.' },
-        fight: { label: 'Chase them down', type: :demon, text: 'The ringleader imp cackles and pounces!' }
+        fight: { name: 'Imp', label: 'Chase them down', type: :demon, text: 'The ringleader imp cackles and pounces!' }
       },
       'gilded_contract' => {
         name: 'Gilded Contract', tag: 'slavery', tracker: 'slavery_events',
@@ -403,7 +405,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Leave the pen untouched', lust: 2,
                    scene: 'You set the pen down. She rolls up the contract with an amused smile. *"Another time."*' },
-        fight: { label: 'Tear it up', type: :demon, text: 'You rip the contract — and her eyes flash with fury!' }
+        fight: { name: 'Demon Noblewoman', label: 'Tear it up', type: :demon, text: 'You rip the contract — and her eyes flash with fury!' }
       },
       'harem_quarters' => {
         name: 'Harem Quarters', tag: 'slavery', tracker: 'slavery_events',
@@ -501,7 +503,7 @@ module Engine
         },
         decline: { label: 'Decline the cup', text: 'Stay sober', lust: 4,
                    scene: 'You decline the cup and slip away. The music follows you, tempting, for a long time.' },
-        fight: { label: 'Break it up', type: :beast, text: 'A drunken satyr takes offence and lowers his horns!' }
+        fight: { name: 'Satyr', label: 'Break it up', type: :beast, text: 'A drunken satyr takes offence and lowers his horns!' }
       },
       'succubus_coven' => {
         name: 'Succubus Coven', tag: 'group_sex', tracker: 'group_sex_events',
@@ -552,7 +554,7 @@ module Engine
         },
         decline: { label: 'Back out', text: 'Leave the herd', lust: 3,
                    scene: 'You back out of the pit. The herd lows in disappointment.' },
-        fight: { label: 'Fight the bull', type: :beast, text: 'The lead bull lowers his horns and charges!' }
+        fight: { name: 'Minotaur', label: 'Fight the bull', type: :beast, text: 'The lead bull lowers his horns and charges!' }
       },
       'incubus_choir' => {
         name: 'Incubus Choir', tag: 'bukkake', tracker: 'bukkake_events',
@@ -652,7 +654,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Not today', lust: 2,
                    scene: 'You decline the duel. She shrugs and swings the harness over her shoulder. *"Coward. Cute coward."*' },
-        fight: { label: 'Duel her', type: :demon, text: 'She laughs, tosses the harness aside, and lunges — her demon eyes blazing!' }
+        fight: { name: 'Demon Amazon', label: 'Duel her', type: :demon, text: 'She laughs, tosses the harness aside, and lunges — her demon eyes blazing!' }
       },
       'jelly_harness' => {
         name: 'Jelly Harness', tag: 'pegging', tracker: 'strap_on_events',
@@ -730,7 +732,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Bow and leave', lust: 1,
                    scene: 'You bow respectfully and back away. The chieftain grunts and waves you off.' },
-        fight: { label: 'Challenge him', type: :beast, text: 'The chieftain roars and heaves himself off his throne!' }
+        fight: { name: 'Troll Chieftain', label: 'Challenge him', type: :beast, text: 'The chieftain roars and heaves himself off his throne!' }
       },
       'brat_tamer' => {
         name: 'Brat Tamer', tag: 'spanking', tracker: 'discipline_events',
@@ -760,7 +762,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Behave yourself', lust: 2,
                    scene: 'You decline politely. She laughs. *"Good behaviour? That\'s even cuter."*' },
-        fight: { label: 'Be a brat', type: :demon, text: 'You blow a raspberry. She grins and rolls up her sleeves.' }
+        fight: { name: 'Oni', label: 'Be a brat', type: :demon, text: 'You blow a raspberry. She grins and rolls up her sleeves.' }
       },
       'dryad_throne' => {
         name: 'Dryad Throne', tag: 'feet', tracker: 'foot_fetish_events',

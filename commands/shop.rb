@@ -52,9 +52,9 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: '## The Shops')
         c.text_display(
-          content: '_A strawberry-bright fairy zips overhead on iridescent wings, seed-freckles on her cheeks ' \
-                   'and a ledger under one arm. "Welcome in, sugar!" **Berry** chirps. "Pick a counter — ' \
-                   'mine are the tidy ones."_'
+          content: '_**Berry** zips in on iridescent wings — seed-freckles, sunny smile, ledger like a leash. ' \
+                   '"Welcome in, sugar. Pick a counter. Mine are the tidy ones. Behave, and I might even call ' \
+                   'you a *good girl*."_'
         )
         c.text_display(content: notice) if notice
         c.text_display(content: "Your Lust Points: **#{player.lp}**")
@@ -94,8 +94,9 @@ module Commands
                        'takeaway. The body tonics do one size at a time, and those Becoming draughts? Pick ' \
                        'the shape you want to keep, darling — those changes are for good."_'
                    else
-                     '_Berry pats the counter. "Clean steel and soft lies, sugar — no living gear at my ' \
-                       'counter. That wriggling nonsense is Covar\'s department, through the Shops menu."_'
+                     '_Berry pats the counter like she owns the room — because she does. "Clean steel and soft ' \
+                       'lies, sugar. No living gear at my counter. That wriggling nonsense is Covar\'s — ' \
+                       'Shops menu. Pay attention."_'
                    end
         )
         if (regard = Engine::Regard.line(player, :shop))

@@ -58,6 +58,7 @@ module Engine
         stat_modifiers: { 'resistance' => 2, 'submission' => 1 },
         violation_type: 'anal',
         requires: 'anal',
+        part: 'anus',
         removal_cost: 20,
         rarity: 4
       },
@@ -114,6 +115,7 @@ module Engine
         stat_modifiers: { 'submission' => 1, 'resistance' => 1 },
         violation_type: 'knot',
         requires: 'knotting',
+        part: 'anus',
         removal_cost: 20,
         rarity: 4
       },
@@ -218,12 +220,13 @@ module Engine
       },
       {
         name: 'Broodmother Plug',
-        description: 'A smooth plug that swells warm and heavy inside you, pulsing like something about to hatch.',
+        description: 'A smooth plug that swells warm and heavy inside your ass, pulsing like something about to hatch.',
         type: 'accessory',
         slot: 'accessory',
         stat_modifiers: { 'submission' => 1, 'lust_resist' => -1 },
         violation_type: 'egg',
         requires: 'oviposition',
+        part: 'anus',
         removal_cost: 20,
         rarity: 4
       }
@@ -324,6 +327,25 @@ module Engine
       templates.select { |t| template_allowed?(player, t) }
     end
 
+    # Why a template is sealed for this delver, in player-facing words, or
+    # nil when it can bind them. Content preferences are named before body
+    # requirements so the delver knows what could actually be changed.
+    def template_block_reason(player, tpl)
+      return 'That piece is not in the Cursed Shop.' unless tpl
+
+      req = tpl[:requires]
+      if req && !Engine::ContentOptions.enabled?(player, req)
+        return "re-enable **#{requires_label(tpl)}** in `/options` to call it back"
+      end
+
+      part = tpl[:part]
+      if part && !player.body_parts_list.map(&:to_s).include?(part.to_s)
+        return "it needs #{part.to_s.tr('_', ' ')} your body does not have"
+      end
+
+      nil
+    end
+
     def requires_label(tpl)
       req = tpl && tpl[:requires]
       req ? Engine::ContentOptions.preference(req)&.fetch(:label, req) : nil
@@ -381,7 +403,7 @@ module Engine
         type: 'armor',
         slot: 'chest',
         description: 'Light padding — better than nothing.',
-        stat_modifiers: { 'resistance' => 1 },
+        stat_modifiers: { 'resistance' => 1, 'appearance' => -1 },
         cost: 0,
         rarity: 1
       },
@@ -402,19 +424,20 @@ module Engine
     CHEST_FINDS = [
       { name: "Old Champion's Sword", type: 'weapon', slot: 'weapon', cost: 60, rarity: 3,
         description: 'A notched blade from a delver who made it further than most.',
-        stat_modifiers: { 'strength' => 4, 'damage' => 2, 'crit_chance' => 0.05 } },
+        stat_modifiers: { 'strength' => 4, 'damage' => 2, 'crit_chance' => 0.05, 'appearance' => 1 } },
       { name: 'Ghostsilk Gloves', type: 'accessory', slot: 'accessory', cost: 60, rarity: 3,
         description: 'Gloves so light they seem to move a moment before you do.',
-        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.06 } },
+        stat_modifiers: { 'agility' => 2, 'dodge_bonus' => 0.06, 'appearance' => 1 } },
       { name: "Sister's Veil", type: 'armor', slot: 'head', cost: 60, rarity: 3,
-        description: 'A blessed veil left behind by some devout delver. Touches feel distant through it.',
-        stat_modifiers: { 'resistance' => 2, 'lust_resist' => 2 } },
+        description: 'A blessed veil left behind by some devout delver. Touches feel distant through it. ' \
+                     'The tower, unfortunately, reads devotion as an invitation.',
+        stat_modifiers: { 'resistance' => 2, 'lust_resist' => 2, 'appearance' => 5 } },
       { name: "Delver's Lucky Boots", type: 'armor', slot: 'feet', cost: 60, rarity: 3,
         description: 'Scuffed boots with a knack for kicking open loose floorboards.',
         stat_modifiers: { 'agility' => 2, 'treasure_lp' => 3, 'explore_lp' => 1 } },
       { name: 'Moonlit Mail', type: 'armor', slot: 'chest', cost: 60, rarity: 3,
         description: 'Fine silvered mail that stays cool no matter how hot things get.',
-        stat_modifiers: { 'resistance' => 4, 'max_hp' => 10, 'lust_resist' => 1 } }
+        stat_modifiers: { 'resistance' => 4, 'max_hp' => 10, 'lust_resist' => 1, 'appearance' => 1 } }
     ].freeze
 
     def sync_to_db!
@@ -518,7 +541,9 @@ module Engine
       mimic = rand <= mimic_chance(level) if mimic.nil?
       if mimic && eligible_mimic_templates(player).empty?
         # No cursed gear matches this delver's tastes, so the chest itself
-        # rears up as a mimic to fight instead of binding them.
+        # rears up as a mimic to fight instead of binding them. The chest
+        # was still opened — it counts toward chest totals either way.
+        player.bump_tracker!('treasure_found')
         monster = Engine::MonsterTypes.generate_monster(level, player: player, type: :mimic)
         ambush = ['The lid snaps open on a mouth full of golden teeth — no gear in here matches your tastes, ' \
                   'so the chest itself lunges! **Chest Mimic!**']
@@ -711,7 +736,8 @@ module Engine
       'strength' => 'STR', 'agility' => 'AGI', 'resistance' => 'RES', 'submission' => 'Submission',
       'damage' => 'damage', 'max_hp' => 'max defiance', 'defiance_regen' => 'defiance per combat round',
       'victory_lp_bonus' => 'LP per victory', 'explore_lp' => 'LP per room explored', 'treasure_lp' => 'LP from chests',
-      'hit_lp' => 'LP when a monster gets its hands on you', 'submit_lp_bonus' => 'LP when you submit'
+      'hit_lp' => 'LP when a monster gets its hands on you', 'submit_lp_bonus' => 'LP when you submit',
+      'appearance' => 'Appearance'
     }.freeze
     PERCENT_LABELS = {
       'flee_bonus' => 'flee chance', 'crit_chance' => 'surprise-hit chance (double damage)',
@@ -765,6 +791,16 @@ module Engine
       type = violation_type.to_s
       tag = VIOLATION_TAGS[type]
       type = 'tease' if tag && !Engine::ContentOptions.enabled?(player, tag)
+      # The milking bra can only milk breasts the delver currently has; if a
+      # condition has since taken them, it settles for teasing instead.
+      if type == 'milk' && !player.body_parts_list.map(&:to_s).include?('breasts')
+        type = 'tease'
+      end
+      # Plugs live in the ass; if a delver somehow has none to plug, the
+      # gear settles for teasing instead.
+      if %w[anal knot egg].include?(type) && !Engine::ChastitySystem.scene_parts(player).include?('anus')
+        type = 'tease'
+      end
 
       scene =
         case type
@@ -833,11 +869,11 @@ module Engine
 
     def generate_positioning_scene(_player, item_name)
       [
-        "The #{item_name} coaxes your body into a lewd position, making you present yourself invitingly.",
-        "The #{item_name} shifts, moving your limbs until you're in a vulnerable pose.",
-        "The #{item_name} takes control of your body, positioning you for easy access.",
-        "The #{item_name} comes alive, tugging you into a deliciously shameless pose.",
-        "The #{item_name} manipulates your limbs, arranging you like a doll for someone's pleasure."
+        "The #{item_name} coaxes your body into a lewd position, arching your back and pushing your hips up invitingly.",
+        "The #{item_name} shifts, moving your limbs until you're kneeling with your knees spread and your chest down.",
+        "The #{item_name} takes control of your body, bending you over with your ass in the air for easy access.",
+        "The #{item_name} comes alive, tugging you into a deliciously shameless pose — on all fours, head low, hips high.",
+        "The #{item_name} manipulates your limbs, arranging you like a doll on your knees with your thighs parted for someone's pleasure."
       ].sample
     end
 
@@ -901,12 +937,15 @@ module Engine
       ].sample
     end
 
-    def generate_tentacle_scene(_player, item_name)
-      [
-        "The #{item_name} sprouts slick little vines that wander over your hips and tease between your thighs.",
+    def generate_tentacle_scene(player, item_name)
+      parts = Engine::ChastitySystem.scene_parts(player)
+      scenes = [
         "A tendril from the #{item_name} curls around your thigh and squeezes in a slow, deliberate rhythm.",
         "The #{item_name} comes alive, its vines coiling around your waist and tugging you into a helpless swaying."
-      ].sample
+      ] + Engine::ChastitySystem.lines_for(player, :tentacles, actor: item_name)
+      scenes << "The #{item_name} sprouts slick little vines that slip between your folds and rub your clit in slow circles." if parts.include?('vagina')
+      scenes << "The #{item_name} sprouts slick little vines that coil around your cock and stroke it in a slow, deliberate rhythm." if parts.include?('penis')
+      Engine::ContentOptions.pick(player, scenes)
     end
 
     def generate_milk_scene(_player, item_name)
@@ -919,9 +958,9 @@ module Engine
 
     def generate_knot_scene(_player, item_name)
       [
-        "The #{item_name} swells inside you, its knot lodging deep and refusing to slip free until it softens.",
-        "The #{item_name} pulses and thickens, stretching you around its bulge and holding you deliciously full.",
-        "Every step makes the #{item_name}'s knot nudge deeper, and your knees nearly give with each one."
+        "The #{item_name} swells inside your ass, its knot lodging deep and refusing to slip free until it softens.",
+        "The #{item_name} pulses and thickens in your ass, stretching you around its bulge and holding you deliciously full.",
+        "Every step makes the #{item_name}'s knot nudge deeper into your ass, and your knees nearly give with each one."
       ].sample
     end
 
@@ -951,9 +990,9 @@ module Engine
 
     def generate_egg_scene(_player, item_name)
       [
-        "The #{item_name} swells warm and heavy inside you, pulsing slow as something about to hatch.",
-        "Heat blooms around the #{item_name} as it thickens, keeping you full and achingly aware of it.",
-        "The #{item_name} throbs in a deep, patient rhythm, like a heartbeat that isn't yours."
+        "The #{item_name} swells warm and heavy inside your ass, pulsing slow as something about to hatch.",
+        "Heat blooms around the #{item_name} as it thickens in your ass, keeping you full and achingly aware of it.",
+        "The #{item_name} throbs in your ass in a deep, patient rhythm, like a heartbeat that isn't yours."
       ].sample
     end
   end

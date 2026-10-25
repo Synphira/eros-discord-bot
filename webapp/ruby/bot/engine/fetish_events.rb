@@ -37,7 +37,7 @@ module Engine
                'its slick hose twisting toward you with a life of its own, dripping warm, thick fluid...',
         accept: {
           label: 'Let it connect', text: 'Get pumped full',
-          scenes: ['The hose slides into you and begins to pump. You feel yourself expanding with every pulse, warm syrup filling you ' \
+          scenes: ['The hose slides into your ass and begins to pump. You feel yourself expanding with every pulse, warm syrup filling you ' \
                    'deeper and deeper. Your stomach distends dramatically, the skin stretched tight as the liquid floods your insides.',
                    'Your skin stretches tight as you grow rounder and fuller, the pressure inside making it hard to breathe. Every ' \
                    'movement makes you slosh and blush as your swollen belly gurgles audibly, the fullness pressing on your bladder ' \
@@ -48,7 +48,7 @@ module Engine
         },
         decline: { label: 'Dodge', text: 'Try to dodge the nozzles (AGI)', lust: 2, escape: true,
                    scene: 'You twist away from the hose and slip out of the room before it can latch on.' },
-        fight: { label: 'Burst it', type: :slime, text: 'The nozzles belong to a bloated slime — and it wants you!' }
+        fight: { name: 'Bloated Slime', label: 'Burst it', type: :slime, text: 'The nozzles belong to a bloated slime — and it wants you!' }
       },
       'living_clothing' => {
         name: 'Living Clothing', tag: 'living_clothing', tracker: nil,
@@ -67,7 +67,55 @@ module Engine
         },
         decline: { label: 'Leave it', text: 'Leave it hanging', lust: 2,
                    scene: 'You carefully weave around the drifting clothes. They droop sadly back onto their hangers as you leave.' },
-        fight: { label: 'Rip it apart', type: :mimic, text: 'The outfit lunges — it was a mimic all along!' }
+        fight: { name: 'Clothing Mimic', label: 'Rip it apart', type: :mimic, text: 'The outfit lunges — it was a mimic all along!' }
+      },
+      'dressing_room' => {
+        name: 'The Dressing Room', tag: 'living_clothing', tracker: 'living_clothing_events',
+        blurb: 'a rack of gowns is already holding one up to you.',
+        intro: 'A fitting room with no door and excellent lighting. The rack along the wall is not waiting ' \
+               'to be browsed — it is browsing *you*, gowns and suits sliding along the rail to get a better ' \
+               'look, hems lifting in appraisal. The outfits choose here. You are simply the occasion.',
+        accept: {
+          label: 'Let them choose', text: 'Stand still and be dressed',
+          scenes: ['The montage is not dignified and does not ask to be. A gown pours itself over your head ' \
+                   'while a suit argues with it in rustling silk, both of them on you at once, layers ' \
+                   'negotiating your waist, your chest, the exact betraying line of you. A corset wins. ' \
+                   'It usually does.',
+                   'Gloves smooth you down like you are being prepared for presentation, because you are. ' \
+                   'Every piece that settles decides something small about how you will move, and begs to ' \
+                   'be moved in — a shorter stride, a sway, a hand that keeps finding reasons to touch what ' \
+                   'it is wearing. Nothing stays on you. That is not the arrangement. You leave *worn*.'],
+          parts: {
+            'penis' => 'Something silky keeps measuring you through every fitting, patient as a tailor, and never once writes the number down.',
+            'vagina' => 'Every hem in the room agrees about you at a length just past decent, and the agreement is unanimous and final.',
+            'breasts' => 'Three necklines audition against your chest in quick succession. The lowest one gets the part.'
+          },
+          lp: 5, lust: 12,
+          condition: { key: 'worn_by_the_room', name: 'Worn by the Room', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.1, 'submit_lp_bonus' => 2, 'agility' => -1 } }
+        },
+        alt: {
+          label: 'Ask for the frills', text: 'The full pretty fitting (Sissification)', needs_tag: 'sissification',
+          scenes: ['The rack rustles with professional delight. What comes off the rail is lace, ribbon, and ' \
+                   'intent: stockings rolled up your legs by hands that are mostly sleeve, a skirt that ' \
+                   'twirls itself once to check the swish, bows pinned by drifting gloves.',
+                   'A floating mirror gives the lessons while the clothes hold you in position — curtsy, ' \
+                   'lashes, the kneel, the thank-you — and dresses you again between each one so the lesson ' \
+                   'settles. By the end the room applauds in soft fabric, and you are curtsying to an empty ' \
+                   'doorway before you catch yourself.'],
+          parts: {
+            'penis' => 'Silky panties are eased up and settled with a pat, the lace a constant, encouraging friction every time the skirt swishes.',
+            'vagina' => 'The lace panties cling, already damp, and the whole rack sighs at how well the fitting is going.',
+            'breasts' => 'A padded lace bra lifts and frames you to the mirror\'s exacting, delighted standard.'
+          },
+          lp: 6, lust: 12,
+          condition: { key: 'sissified', name: 'Sissified', floors: 3,
+                       effects: { 'submission' => 1, 'agility' => 1, 'strength' => -1 } }
+        },
+        decline: { label: 'Back out', text: 'Keep your own clothes on', lust: 3,
+                   scene: 'You back out under a rain of disappointed rustling. Something small and silky ' \
+                           'follows you to the threshold and has to be gently discouraged.' },
+        fight: { name: 'Wardrobe Mimic', label: 'Tear the rack down', type: :mimic, text: 'The whole rack lunges — of course it does. It was furniture, and hungry.' }
       },
       'beast_taming' => {
         name: 'Beast Taming', tag: 'petplay', tracker: 'petplay_events',
@@ -81,14 +129,17 @@ module Engine
                    'It begins to train you — teaching you to present yourself on all fours, to take its knot when it mounts you, to ' \
                    'swallow its seed when offered. Every act of obedience sends a thrill through you as the pack takes turns using ' \
                    'your mouth and ass. *Good pet.*'],
-          parts: { 'vagina' => 'The alpha claims your cunt for itself, mounting you again and again until you are dripping with its seed.' },
+          by_part: {
+            'vagina' => 'The alpha claims your cunt for itself, mounting you again and again, its knot swelling inside your pussy until you are dripping with its seed.',
+            'anus' => 'The alpha claims your ass for itself, mounting you again and again, its knot swelling inside you until you are dripping with its seed.'
+          },
           lp: 5, lust: 12,
           condition: { key: 'good_pet', name: 'Good Pet', floors: 3,
                        effects: { 'beast_lust_mult' => 0.8, 'beast_submit_lp' => 3, 'flee_bonus' => -0.1 } }
         },
         decline: { label: 'Refuse the collar', text: 'Leave the pack be', lust: 2,
                    scene: 'You step away from the alpha. It drops the collar with a disappointed huff and lets you go.' },
-        fight: { label: 'Challenge the alpha', type: :beast, text: 'The alpha bares its teeth and charges!' }
+        fight: { name: 'Alpha Wolf', label: 'Challenge the alpha', type: :beast, text: 'The alpha bares its teeth and charges!' }
       },
       'rubber_chamber' => {
         name: 'Rubber Chamber', tag: 'latex', tracker: 'latex_events',
@@ -98,7 +149,7 @@ module Engine
           label: 'Be encased', text: 'Let the latex coat you',
           scenes: ['The latex flows up your body and tightens into a flawless, squeaking second skin. It seals over you completely, ' \
                    'covering your eyes and leaving only your mouth and holes exposed.',
-                   'Every touch through the rubber feels muffled yet electric. The latex pulses around your nipples, milking them ' \
+                   'Every touch through the rubber feels muffled yet electric. The latex pulses around your nipples, tugging them ' \
                    'relentlessly as it squeezes your body in a constant, gleaming embrace.'],
           parts: { 'vagina' => 'A slick nub of rubber presses against your clit and throbs in time with the rest of the suit.',
                    'penis' => 'The latex hugs your cock in a tight, glossy sheath that squeezes with every heartbeat.' },
@@ -108,7 +159,7 @@ module Engine
         },
         decline: { label: 'Step around', text: 'Avoid the puddle', lust: 1,
                    scene: 'You edge around the gleaming pool.' },
-        fight: { label: 'Fight it', type: :slime, text: 'The latex surges up into a hungry rubber slime!' }
+        fight: { name: 'Rubber Slime', label: 'Fight it', type: :slime, text: 'The latex surges up into a hungry rubber slime!' }
       },
       'oviposition_chamber' => {
         name: 'Oviposition Chamber', tag: 'oviposition', tracker: 'oviposition_events',
@@ -127,7 +178,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Politely decline', lust: 2,
                    scene: 'The broodmother clicks, disappointed, and returns to her nest.' },
-        fight: { label: 'Fight', type: :beast, text: 'The broodmother rears up, defending her nest!' }
+        fight: { name: 'Broodmother', label: 'Fight', type: :beast, text: 'The broodmother rears up, defending her nest!' }
       },
       'chastity_trap' => {
         name: 'Chastity Trap', tag: 'chastity', tracker: 'chastity_events',
@@ -198,6 +249,11 @@ module Engine
                    'Being seen so completely by so many awakens something in you — the exposure becomes its own kind of intimacy. You ' \
                    'spread your legs wide and touch yourself for their viewing pleasure, and coins of lust-light rain onto the stage ' \
                    'when you finish.'],
+          parts: {
+            'vagina' => 'You rub your clit in slow circles and slip two fingers into your pussy for the hidden crowd.',
+            'penis' => 'You stroke your cock in slow, showing strokes, rolling your balls for the hidden crowd.',
+            'breasts' => 'You roll your nipples between your fingers and arch your chest toward the lights.'
+          },
           lp: 7, lust: 10,
           condition: { key: 'on_display', name: 'On Display', floors: 3,
                        effects: { 'victory_lp_bonus' => 3, 'encounter_rate' => 1.2 } }
@@ -276,7 +332,7 @@ module Engine
         },
         decline: { label: 'Walk through', text: 'Ignore the pedestal', lust: 1,
                    scene: 'You reject the pedestal\'s call and pick your way carefully through the room. The furniture watches you leave.' },
-        fight: { label: 'Smash it', type: :mimic, text: 'A chair lurches up on too many legs!' }
+        fight: { name: 'Chair Mimic', label: 'Smash it', type: :mimic, text: 'A chair lurches up on too many legs!' }
       },
       'mirror_of_change' => {
         name: 'Mirror of Change', tag: 'gender_bending', tracker: 'gender_bending_events',
@@ -297,11 +353,12 @@ module Engine
       },
       'milking_chamber' => {
         name: 'Milking Chamber', tag: 'lactation', tracker: 'being_milked_events',
+        requires_any: %w[breasts penis],
         blurb: 'brass pumps hiss rhythmically.',
         intro: 'A padded stall full of contraptions built to draw fluids from living bodies. A machine of brass pumps and suction cups ' \
                'hisses awake as you approach, its attachments extending toward you. A little plaque promises generous payment.',
         accept: {
-          label: 'Get milked', text: 'Strap in and be milked',
+          label: 'Get milked', text: 'Strap in and be milked', needs_any_part: %w[breasts penis],
           scenes: ['The pumps latch on and pull in a slow, relentless rhythm, the ache blurring into overwhelming pleasure.',
                    'Your body answers by giving more than you thought possible. The machine purrs, pleased with your output.'],
           parts: { 'breasts' => 'Your breasts swell and ache as the cups tug, milk spraying in thick white jets from your dark, swollen nipples.',
@@ -322,11 +379,16 @@ module Engine
                'of immense size and virility, snorting eagerly as its intent becomes very clear...',
         accept: {
           label: 'Lie on the altar', text: 'Let the beast breed you',
-          scenes: ['You present yourself on the altar. The beast mounts you, its massive cock stretching you as it sinks deep. Its knot ' \
-                   'swells inside you, locking you together as it begins to breed you properly.',
+          scenes: ['You present yourself on the altar and the beast mounts you from behind, working its massive cock in deep. Its knot ' \
+                   'swells and locks you together as it begins to breed you properly.',
                    'It pumps you full of thick, hot seed until you can feel it sloshing inside you. Your belly glows faintly afterward — ' \
                    'warm, full, and blissfully bred.'],
-          parts: { 'vagina' => 'You can feel its seed take root in your womb, your body already eager to carry its offspring.' },
+          by_part: {
+            'vagina' => 'Its cock sinks into your pussy, stretching you wide, and you can feel its seed take root in your womb, ' \
+                        'your body already eager to carry its offspring.',
+            'anus' => 'Its cock sinks into your ass, stretching you wide, and its seed floods your belly through sheer magic, ' \
+                      'the fertility runes glowing as it takes root all the same.'
+          },
           lp: 7, lust: 14,
           condition: { key: 'bred', name: 'Bred', floors: 3,
                        effects: { 'healing_mult' => 1.25, 'agility' => -1, 'beast_submit_lp' => 2 } }
@@ -408,7 +470,7 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Refuse her', lust: 2,
                    scene: 'You respectfully decline. She tuts and lets you go — *this* time.' },
-        fight: { label: 'Defy her', type: :demon, text: 'Her eyes flash. *"Oh, a brat. Wonderful."*' }
+        fight: { name: 'Demon Mistress', label: 'Defy her', type: :demon, text: 'Her eyes flash. *"Oh, a brat. Wonderful."*' }
       },
       'public_shame' => {
         name: 'Public Shame', tag: 'humiliation', tracker: 'humiliation_events',
@@ -448,7 +510,7 @@ module Engine
         },
         decline: { label: 'Cover your ears', text: 'Run through (AGI)', lust: 2, escape: true,
                    scene: 'You clamp your hands over your ears and sprint through, leaving the whispers behind.' },
-        fight: { label: 'Silence them', type: :undead, text: 'The whispers coalesce into a lustful wraith!' }
+        fight: { name: 'Wraith', label: 'Silence them', type: :undead, text: 'The whispers coalesce into a lustful wraith!' }
       },
       'sensory_void' => {
         name: 'Sensory Void', tag: 'sensory_deprivation', tracker: 'sensory_deprivation_events',
@@ -486,7 +548,8 @@ module Engine
         },
         decline: { label: 'Refuse', text: 'Walk off the stage', lust: 2,
                    scene: 'You slip away before anyone can place a bid. The crowd groans.' },
-        fight: { label: 'Fight the auctioneer', type: :demon, text: 'The auctioneer snarls and lunges!' }
+        outbid: { label: 'Outbid the room', text: 'Buy your own evening back and walk free (costs LP, deeper = pricier)' },
+        fight: { name: 'Demon Auctioneer', label: 'Fight the auctioneer', type: :demon, text: 'The auctioneer snarls and lunges!' }
       },
       'strap_on_chamber' => {
         name: 'Strap-On Chamber', tag: 'pegging', tracker: 'strap_on_events',
@@ -497,16 +560,16 @@ module Engine
           label: 'Wear one', text: 'Strap on and take charge',
           scenes: ['A harness wraps itself around your waist and settles into place as if it were made for you. The toy warms and ' \
                    '*feels*, its veins pulsing as it becomes part of you.',
-                   'A strange sense of power fills you with your new length. The succubus moans as you take her hard, stretching her ' \
-                   'as you pound into her until the toy floods her with its enchanted seed.'],
+                   'A strange sense of power fills you with your new length. The succubus moans as you slide the toy into her ' \
+                   'dripping pussy and take her hard, pounding into her until the toy floods her with its enchanted seed.'],
           lp: 6, lust: 10,
           condition: { key: 'strapped', name: 'Strapped', floors: 3,
                        effects: { 'strength' => 2, 'victory_lp_bonus' => 2 } }
         },
         alt: {
           label: 'Receive', text: 'Let her peg you', needs_tag: 'anal',
-          scenes: ['She buckles on a thick toy and bends you over, taking you slow and deep until you are babbling, its ribs rubbing ' \
-                   'every sensitive spot inside you.',
+          scenes: ['She buckles on a thick toy and bends you over, sliding it into your ass slow and deep until you are babbling, ' \
+                   'its ribs rubbing every sensitive spot inside you.',
                    'Your body betrays you as you beg for more — harder, deeper. She laughs, flips you over, and pounds your ass into ' \
                    'blissful submission.'],
           parts: { 'penis' => 'Every thrust grinds the toy against your prostate, your cock bouncing and leaking untouched.' },
@@ -564,6 +627,12 @@ module Engine
                    'partner to partner, mouths on your chest, cocks filling your holes.',
                    'The overwhelming attention drives you from peak to peak, lost in the pleasure of serving so many. You stumble out ' \
                    'hours later sticky, sore, and glowing.'],
+          parts: {
+            'vagina' => 'One cock sinks into your pussy and pumps you while hands hold your thighs wide.',
+            'anus' => 'Another cock works into your ass from behind, filling you from the other side.',
+            'penis' => 'A hot mouth swallows your cock and sucks you while the rest of the pile has its way.',
+            'breasts' => 'Mouths latch onto your nipples and suckle you through every thrust.'
+          },
           lp: 8, lust: 16,
           condition: { key: 'afterglow', name: 'Afterglow', floors: 2,
                        effects: { 'healing_mult' => 1.2, 'lust_mult' => 1.1, 'hit_lp' => 1 } }
@@ -583,6 +652,11 @@ module Engine
                    'with crude comments.',
                    'The thrill of being watched by so many, without knowing who, is as nerve-racking as it is intoxicating as you ' \
                    'spread yourself wide and let them see everything.'],
+          parts: {
+            'vagina' => 'You slide two fingers into your pussy and rub your clit in slow circles for the glass.',
+            'penis' => 'You wrap your hand around your cock and stroke it in slow, showing strokes for the glass.',
+            'breasts' => 'You cup your breasts and roll your nipples between your fingers, arching for the watchers.'
+          },
           lp: 6, lust: 12,
           condition: { key: 'emboldened', name: 'Emboldened', floors: 3,
                        effects: { 'strength' => 1, 'victory_lp_bonus' => 2, 'encounter_rate' => 1.15 } }
@@ -601,6 +675,10 @@ module Engine
                    'writhing together in a frenzy of lust.',
                    'The thrill of seeing what you\'re not meant to see is intoxicating. You can\'t look away — or keep your hands from ' \
                    'straying as you touch yourself in rhythm with their coupling.'],
+          parts: {
+            'vagina' => 'Your fingers circle your clit, then slip into your pussy in time with their thrusts.',
+            'penis' => 'Your hand wraps your cock and strokes in time with their thrusts.'
+          },
           lp: 5, lust: 12,
           condition: { key: 'voyeurs_thrill', name: 'Voyeur\'s Thrill', floors: 2,
                        effects: { 'treasure_lp' => 3, 'explore_lp' => 1 } }
@@ -643,7 +721,7 @@ module Engine
         },
         decline: { label: 'Stay dry', text: 'Walk around the pool', lust: 1,
                    scene: 'You decide against changing and walk around the pool. The spirits splash after you.' },
-        fight: { label: 'Fight the guardian', type: :beast, text: 'A great wolf-spirit rises from the water!' }
+        fight: { name: 'Wolf Spirit', label: 'Fight the guardian', type: :beast, text: 'A great wolf-spirit rises from the water!' }
       },
       'overstimulation_engine' => {
         name: 'Overstimulation Engine', tag: 'overstimulation', tracker: 'overstim_events',
@@ -658,7 +736,7 @@ module Engine
                    'starts building the next, ignoring how you twitch and beg.'],
           parts: {
             'vagina' => 'A humming wand presses flat against your clit and never lets up, not even while you squirm and squirt ' \
-                        'around the slick shaft pumping in and out of you.',
+                        'around the slick shaft pumping in and out of your pussy.',
             'penis' => 'A tight, slick sleeve works your cock from root to tip, faster and faster, wringing you through one orgasm ' \
                        'and straight into the next while your oversensitive shaft throbs.',
             'breasts' => 'Little suction cups latch onto your nipples and pulse, tugging them stiff and swollen.'
@@ -669,7 +747,7 @@ module Engine
         },
         decline: { label: 'Back away', text: 'Leave the chair alone', lust: 4,
                    scene: 'You back out of the room. Behind you the machine keeps humming, patient.' },
-        fight: { label: 'Smash it', type: :mimic, text: 'The chair lurches toward you on stubby legs. It was a mimic all along!' }
+        fight: { name: 'Chair Mimic', label: 'Smash it', type: :mimic, text: 'The chair lurches toward you on stubby legs. It was a mimic all along!' }
       },
       'tickle_trap' => {
         name: 'Tickle Trap', tag: 'tickling', tracker: 'tickling_events',
@@ -820,9 +898,11 @@ module Engine
                    'way*, you think, and then it starts to push.',
                    'Inch by inch it stretches you wider than you thought possible, until you are stuffed so full you can feel ' \
                    'your own heartbeat around it.'],
-          parts: {
+          by_part: {
             'vagina' => 'Your pussy stretches obscenely around its girth, and every slow thrust drags a helpless cry out of you.',
-            'anus' => 'It works its way into your ass inch by inch until you are gaping around it, trembling and full.',
+            'anus' => 'It works its way into your ass inch by inch until you are gaping around it, trembling and full.'
+          },
+          parts: {
             'penis' => 'It wraps one huge hand around your cock, and the whole thing disappears inside its fist.'
           },
           lp: 8, lust: 16,
@@ -830,7 +910,7 @@ module Engine
         },
         decline: { label: 'Back away', text: 'You very much cannot take it', lust: 3,
                    scene: 'You decide you very much cannot take it and back out. The ogre\'s laughter shakes the walls.' },
-        fight: { label: 'Fight it', type: :beast, text: 'The ogre roars and charges!' }
+        fight: { name: 'Ogre', label: 'Fight it', type: :beast, text: 'The ogre roars and charges!' }
       },
       'cum_fountain' => {
         name: 'Cum Fountain', tag: 'cum_play', tracker: 'cum_play_events',
@@ -913,10 +993,13 @@ module Engine
                    'under your skirt.',
                    'By the end of the evening the master of the house has bent you over the dining table and thanked you very ' \
                    'warmly for your service.'],
-          parts: {
-            'vagina' => 'He takes you right there on the tablecloth, your pussy clenching around his cock while the candles flicker.',
+          by_part: {
+            'vagina' => 'He takes you right there on the tablecloth, his cock sinking into your pussy until it clenches around ' \
+                        'him while the candles flicker.',
             'anus' => 'He spreads you over the table and fucks your ass in front of the empty chairs, your little skirt flipped ' \
-                      'up over your back.',
+                      'up over your back.'
+          },
+          parts: {
             'penis' => 'He strokes your cock under your apron until you are leaking all over the clean linen.'
           },
           lp: 8, lust: 12,
@@ -935,9 +1018,12 @@ module Engine
           scenes: ['He buckles you into a leather harness, slips a soft bit between your teeth and fits you with a long, swishing ' \
                    'tail. Then he takes the reins and trots you around the ring until you are flushed and panting.',
                    'When you have done well enough, he rewards you the way stallions do, mounting you in the clean straw.'],
-          parts: {
-            'anus' => 'The tail is attached to a thick plug that sits snug in your ass and shifts with every high step.',
+          by_part: {
             'vagina' => 'His huge cock spreads your pussy wide as he mounts you, and you whinny around the bit.',
+            'anus' => 'His huge cock slides into your ass as he mounts you, and you whinny around the bit.'
+          },
+          parts: {
+            'anus' => 'The tail he fitted you with swishes behind you and shifts with every high step.',
             'penis' => 'He reaches beneath you and strokes your cock with a gloved hand as you trot.'
           },
           lp: 7, lust: 12,
@@ -1007,7 +1093,7 @@ module Engine
 
     EFFECT_LABELS = {
       'strength' => 'STR', 'agility' => 'AGI', 'resistance' => 'RES', 'submission' => 'Submission',
-      'max_hp_bonus' => 'max defiance'
+      'max_hp_bonus' => 'max defiance', 'appearance' => 'Appearance'
     }.freeze
 
     module_function
@@ -1022,19 +1108,27 @@ module Engine
 
     def available?(player, key)
       spec = event(key) or return false
+      parts = player.body_parts_list.map(&:to_s)
+      if spec[:requires_any]
+        return false if (Array(spec[:requires_any]).map(&:to_s) & parts).empty?
+      end
+
       case spec[:requires]
       when nil then true
       when :swappable then SWAPS.key?(player.gender.to_s)
-      else player.body_parts_list.map(&:to_s).include?(spec[:requires].to_s)
+      else parts.include?(spec[:requires].to_s)
       end
     end
 
     def choices(player, key)
       spec = event(key) or return []
       list = []
-      list << choice_button('accept', spec[:accept], :primary)
-      list << choice_button('alt', spec[:alt], :primary) if spec[:alt] && option_allowed?(player, spec[:alt])
-      list << choice_button('fight', spec[:fight], :danger) if spec[:fight]
+      if available?(player, key)
+        list << choice_button('accept', spec[:accept], :primary) if option_allowed?(player, spec[:accept])
+        list << choice_button('alt', spec[:alt], :primary) if spec[:alt] && option_allowed?(player, spec[:alt])
+        list << choice_button('fight', spec[:fight], :danger) if spec[:fight]
+        list << choice_button('outbid', spec[:outbid], :success) if spec[:outbid]
+      end
       list << choice_button('decline', spec[:decline], :secondary)
       list
     end
@@ -1044,8 +1138,13 @@ module Engine
     end
 
     def option_allowed?(player, opt)
+      return false if opt.nil?
       return false if opt[:needs_tag] && !Engine::ContentOptions.enabled?(player, opt[:needs_tag])
-      return false if opt[:needs_part] && !player.body_parts_list.map(&:to_s).include?(opt[:needs_part])
+      parts = player.body_parts_list.map(&:to_s)
+      return false if opt[:needs_part] && !parts.include?(opt[:needs_part].to_s)
+      if opt[:needs_any_part]
+        return false if (Array(opt[:needs_any_part]).map(&:to_s) & parts).empty?
+      end
 
       true
     end
@@ -1071,12 +1170,28 @@ module Engine
         return { ok: false, retry: true } unless spec[:fight]
 
         log << { scene: spec[:fight][:text] }
-        { ok: true, fight: spec[:fight][:type] }
+        { ok: true, fight: spec[:fight][:type], monster_name: spec[:fight][:name] }
       when 'decline'
         decline!(player, key, spec, level, log)
+      when 'outbid'
+        return { ok: false, retry: true } unless spec[:outbid]
+
+        cost = 30 + (level.to_i * 2)
+        unless player.spend_lp!(cost)
+          return { ok: false, retry: true,
+                   message: "The auctioneer spreads his hands. \"The room's bid stands at **#{cost} LP**, " \
+                            'specimen. Come back richer — or step up."' }
+        end
+
+        log << { scene: 'You raise your own hand, and the room goes deliciously quiet. The auctioneer ' \
+                        'stares, then laughs like a struck bell. "Sold!" he cries, to the only bidder who ' \
+                        'was ever going to win. "To the specimen, for one evening, unshared!" The crowd ' \
+                        'applauds your audacity all the way to the door.' }
+        log << "You buy your own evening back for **#{cost} LP** and walk free on your own chain."
+        { ok: true }
       when 'accept', 'alt'
         opt = spec[choice.to_sym]
-        return { ok: false, retry: true } unless opt && (choice == 'accept' || option_allowed?(player, opt))
+        return { ok: false, retry: true } unless available?(player, key) && option_allowed?(player, opt)
 
         accept!(player, key, spec, opt, level, log)
         { ok: true }
@@ -1089,12 +1204,13 @@ module Engine
       opt = spec[:decline]
       if opt[:escape]
         chance = player.trap_avoid_chance
-        if rand >= chance
+        roll = rand
+        if roll >= chance && available?(player, key) && option_allowed?(player, spec[:accept])
           log << "You're not quick enough! _(AGI #{player.effective_agility} · #{(chance * 100).round}% to escape)_"
           accept!(player, key, spec, spec[:accept], level, log)
           return { ok: true }
         end
-        player.bump_tracker!('traps_avoided')
+        player.bump_tracker!('traps_avoided') if roll < chance
       end
       log << { scene: opt[:scene] } if opt[:scene]
       lust = opt[:lust].to_i
@@ -1108,6 +1224,14 @@ module Engine
     def accept!(player, _key, spec, opt, level, log)
       parts = spec[:tag] == 'chastity' ? player.body_parts_list.map(&:to_s) : Engine::ChastitySystem.scene_parts(player)
       Array(opt[:scenes]).each { |s| log << { scene: s } }
+      # by_part is for acts where exactly one body part is used (a single
+      # penetrator choosing a hole): the first matching part wins, unlike
+      # parts below, which all stack for simultaneous attention.
+      if opt[:by_part] || opt[:otherwise]
+        part = Hash(opt[:by_part]).keys.find { |p| parts.include?(p.to_s) }
+        pool = part ? opt[:by_part][part] : opt[:otherwise]
+        log << { scene: Array(pool).sample } if Array(pool).any?
+      end
       Hash(opt[:parts]).each { |part, s| log << { scene: s } if parts.include?(part) }
       log.concat(Engine::ChastitySystem.scenes(player, opt[:caged])) if opt[:caged]
 
@@ -1130,6 +1254,12 @@ module Engine
       apply_condition!(player, opt[:condition], log) if opt[:condition]
       Array(spec[:tracker]).each { |t| player.bump_tracker!(t) }
       player.bump_tracker!('fetish_events_accepted')
+      if _key.to_s == 'milking_chamber' && player.tracker('nectar_met').positive?
+        player.bump_tracker!('nectar_milkings')
+        log << { scene: 'Sister Nectar is somehow already in the stall, sleeves rolled, checking the ' \
+                        'cups like a priestess inspecting a font. "My stall, my keeping," she says, and ' \
+                        'works the pumps herself. "Arrive tense, darling."' }
+      end
     end
 
     def apply_condition!(player, cond, log, parts: [], remove_parts: [])
@@ -1150,8 +1280,8 @@ module Engine
       when :gender_swap then gender_swap!(player, log)
       when :beastkin then log << "_Your body takes on the traits of a **#{BEASTKIN_ANIMALS.sample}**._"
       when :overstimulate then overstimulate!(player, log)
-      when :corrupt then Engine::Corruption.add!(player, 3, log)
-      when :purify then Engine::Corruption.add!(player, -3, log)
+      when :corrupt then Engine::Corruption.add!(player, 15, log)
+      when :purify then Engine::Corruption.add!(player, -15, log)
       when :body_writing then body_writing!(player, log)
       when :monster_form then monster_form!(player, log)
       end
@@ -1186,7 +1316,8 @@ module Engine
       sizes = player.body_sizes.is_a?(Hash) ? player.body_sizes.dup : {}
       player.update(body_sizes: sizes.merge(part => new))
       label = Engine::ContentOptions::BODY_SIZES[part][:label].downcase
-      log << "_Your #{label} grew: **#{old} → #{new}** (change it any time in `/options`)._"
+      log << "_Your #{label} grew: **#{old} → #{new}** (tonics in the shop's Potions aisle can change it further)._"
+
     end
 
     def grant_living_clothing!(player, log)
@@ -1255,18 +1386,30 @@ module Engine
       when 'satisfy_bonus' then "satisfy #{pct.(value)}"
       when 'submit_lp_bonus' then "+#{value} LP on submit"
       when /_submit_lp\z/ then "+#{value} LP submitting #{label}"
+      when 'submit_lp_mult' then "submit LP ×#{value}"
       when 'no_flee' then "can't flee"
+      when 'no_trap_dodge' then 'traps always catch you'
+      when 'defiance_cap' then "max Defiance capped at #{value}"
       when 'flee_bonus' then "flee #{pct.(value)}"
       when 'dodge_bonus' then "dodge #{pct.(value)}"
       when /_dodge_bonus\z/ then "dodge #{label} #{pct.(value)}"
+      when 'trap_avoid_bonus' then "trap avoidance #{pct.(value)}"
+      when 'damage_reduction' then "lust damage taken ×#{value}"
+      when /_damage_mult\z/ then "lust taken #{label} ×#{value}"
+      when 'intimidate_chance' then "intimidate #{pct.(value)}"
+      when 'crit_chance' then "crit chance #{pct.(value)}"
       when 'victory_lp_bonus' then "+#{value} LP per fight ended"
       when 'hit_lp' then "+#{value} LP per hit taken"
       when 'explore_lp' then "+#{value} LP per floor"
       when 'treasure_lp' then "+#{value} LP from treasure"
       when 'healing_mult' then "healing ×#{value}"
       when 'encounter_rate' then "monster rooms ×#{value}"
+      when /_encounter_rate\z/ then "#{label.sub('vs ', '')} encounters ×#{value}"
       when 'deny_climax' then 'orgasms denied'
-      else "#{key} #{value}"
+      else
+        # Never leak a raw snake_case key into player-facing text.
+        human = key.tr('_', ' ')
+        value == true ? human : "#{human} #{value}"
       end
     end
   end

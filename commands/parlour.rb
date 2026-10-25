@@ -8,16 +8,13 @@ module Commands
     COLOUR = 0x9b2d6f
 
     INTRO = "## Syn & Berry's\n" \
-            "_One half of the shop glows with clean steel and bottled light, where **Berry** — a strawberry-bright " \
-            "fairy with a smile like sunrise and a grip like ownership — is already writing your name in her ledger. " \
-            "The other half is velvet, ink and candle smoke, where her wife **Syn** lounges over the parlour bench: " \
-            "a heavy-lidded fairy with a waist-length cascade of platinum-blonde hair and sleepless shadows " \
-            "under her eyes, wearing next to nothing but a few scraps of black lace — because her own skin is " \
-            "the catalogue. Every tattoo and piercing she sells is displayed on her own inked, pierced body, " \
-            "from the sigil low on her belly to the gold rings through her nipples. \"Something permanent, " \
-            "darling?\" Syn purrs, not looking up. \"My work never fades. Not " \
-            "after defeat, not after a new cycle, not ever.\" Berry's wings flick. \"And if you're here for " \
-            "errands, pet, my quest board is its own page now — `/quests`. She's mine — the marks are yours.\"_"
+            "_One half gleams — clean steel, bottled light, **Berry** already writing your name like a claim. " \
+            "The other half is velvet, ink, and candle smoke: **Syn** lounges over the parlour bench, " \
+            "heavy-lidded, platinum hair down her back, sleepless shadows under violet eyes, wearing almost " \
+            "nothing but black lace scraps because her own inked, pierced skin *is* the catalogue — belly " \
+            "sigil, nipple rings, the works. \"Something permanent, darling?\" she purrs, not looking up. " \
+            "\"My work never fades. Not after defeat. Not after a cycle. Not ever.\" Berry's wings flick. " \
+            "\"Quests are `/quests`, sugar. She's mine — the marks are yours.\"_"
 
     module_function
 

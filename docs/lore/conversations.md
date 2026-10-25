@@ -30,9 +30,17 @@ The reveal happens **after the first return**. A delver who reaches floor 35 is 
 
 **Syn delivers it**, confirming what the delver has already half-guessed — she is proud of the work, and tired of euphemisms with someone who has seen the throne. The reveal is therefore personal rather than proclaimed: one delver at a time, at the moment they have earned the truth by surviving it. Before that moment, the language rule above holds absolutely. After it, Syn and Berry may call the place the temple to that delver.
 
+## Talk UI (shipped)
+
+**Talk** opens a **category chooser** (General / Clergy / Residents / Temple), then a **topic dropdown** for that subject. Temple = altars, cycles, marks, systems — not “talking to Eros.” Per-person menus only show categories that have at least one topic for that speaker.
+
+**Entry points:** quest board, parlour, cursed shop (Covar), residents visit, codex/curses where wired. **Clergy Talk is victory-screen only** (defeat *or* satisfy a domain lord / Eros) — no persistent clergy hub after you leave that screen.
+
+**Residents** use the same Talk shell (topics live in Conversations; service/story buttons stay on the visit panel).
+
 ## Ask About the Bosses
 
-**Talk to Berry** and **Talk to Syn** buttons on the quest board and at the parlour open a conversation screen for each fairy. Defeating or satisfying a boss unlocks that boss as a topic with both of them. The conversation menu currently holds 17 topics (10 general, 7 bosses); Discord select menus allow 25 options, so there is room to grow.
+**Talk to Berry** and **Talk to Syn** open the category Talk shell for each fairy. Defeating or satisfying a boss unlocks that boss under **Clergy** with both of them. Topics also unlock from experience (monsters, traps, curses, marks, forms, altars, cycles) and from meeting residents / finishing their beats.
 
 The same boss should produce different conversations depending on who is asked:
 
@@ -89,13 +97,13 @@ Once a delver has met Eros (and Syn has confirmed the temple), conversations gro
 2. **Residents** as Ask-about topics — **implementation priority #1** when expanding the menu (checklist below).
 3. Boss talk gains **“she sent you back”** colour: fairy addenda *and* victory-screen nods from lords — see **Victory / satisfy voice bible** in `clergy.md` (satisfy + returnee; returnee = met Eros **or** 3rd+ visit to that lord).
 
-Menu organisation aims at **categories** (General / Clergy / Residents / Eros) rather than one flat list of 25.
+Menu organisation is **categories** (General / Clergy / Residents / Temple).
 
-### Residents Ask-abouts — implementation checklist
+### Residents Ask-abouts — checklist
 
-- **Rollout:** omnibus **“the Residents”** topic first; individual topics later (Vex, Pip, Nectar, Fang, Covar, then Lacta).
-- **Unlock:** meet → short answer; finish their story / key beat → deep answer.
-- **Reveal variants:** yes — post-temple-reveal diction (`temple`, clergy context) on these topics too.
+- **Shipped:** individual short topics for Vex, Pip, Nectar, Fang, Covar (meet / tear-free unlocks) + deeper follow-ups after story / milestones / sketch regulars; **strange rooms** omnibus under Temple.
+- **Still later:** Lacta; full deep-script for every rumour line.
+- **Reveal variants:** yes — post-temple-reveal diction on fairy topics.
 - **Extras:** story-path hooks (restored Vex, Queen’s note for Pip, etc.), not boss-satisfy logic.
 
 **Syn’s angles:** Vex = Original pride/guilt · Pip = trap-fangirl cute · Nectar = pope-energy awkward · Fang = tease floor secrets · Covar = little brother · Lacta = Nectar’s spare.

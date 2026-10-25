@@ -63,7 +63,7 @@ module Engine
         },
         decline: { label: 'Hug the far wall', text: 'Edge past (AGI)', lust: 2, escape: true,
                    scene: 'You flatten against the opposite wall and sidle past while the lips pout and blow you kisses.' },
-        fight: { label: 'Fight the wall', type: :mimic, text: 'The wall heaves — the whole corridor is one enormous mimic!' }
+        fight: { name: 'Corridor Mimic', label: 'Fight the wall', type: :mimic, text: 'The wall heaves — the whole corridor is one enormous mimic!' }
       },
       'rivals_bargain' => {
         name: 'Rival\'s Bargain', tag: 'oral', tracker: 'oral_events',
@@ -126,7 +126,7 @@ module Engine
         },
         decline: { label: 'Leave', text: 'Walk away from the bed', lust: 4,
                    scene: 'You force yourself out of the room. His soft laughter follows you, promising next time.' },
-        fight: { label: 'Banish him', type: :demon, text: 'The incubus rises with a sigh and comes to change your mind.' }
+        fight: { name: 'Incubus', label: 'Banish him', type: :demon, text: 'The incubus rises with a sigh and comes to change your mind.' }
       },
       'moonstone_lover' => {
         name: 'Moonstone Lover', tag: 'vaginal', tracker: 'vaginal_events', requires: 'vagina',
@@ -164,7 +164,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Wave him off', lust: 3,
                    scene: 'He tosses his mane in disappointment and gallops off into the trees.' },
-        fight: { label: 'Wrestle him', type: :beast, text: 'The stallion tosses his head and charges!' }
+        fight: { name: 'Centaur', label: 'Wrestle him', type: :beast, text: 'The stallion tosses his head and charges!' }
       },
       'satyr_bathhouse' => {
         name: 'Satyr Bathhouse', tag: 'anal', tracker: 'anal_events',
@@ -216,7 +216,7 @@ module Engine
         },
         decline: { label: 'Shoo it', text: 'Step around (AGI)', lust: 2, escape: true,
                    scene: 'You dodge around the eager slime and dart through the far door.' },
-        fight: { label: 'Pop it', type: :slime, text: 'The slime stops being polite and lunges for you!' }
+        fight: { name: 'Amber Slime', label: 'Pop it', type: :slime, text: 'The slime stops being polite and lunges for you!' }
       },
       'gargoyle_ledge' => {
         name: 'Gargoyle Ledge', tag: 'anal', tracker: 'anal_events',
@@ -239,7 +239,7 @@ module Engine
         },
         decline: { label: 'Keep walking', text: 'Don\'t look down', lust: 2,
                    scene: 'You keep well away from the edge. The gargoyle closes its eyes, unbothered.' },
-        fight: { label: 'Topple it', type: :demon, text: 'The gargoyle spreads its wings and swoops at you!' }
+        fight: { name: 'Gargoyle', label: 'Topple it', type: :beast, text: 'The gargoyle spreads its wings and swoops at you!' }
       },
       'wisp_hollow' => {
         name: 'Wisp Hollow', tag: 'breast_play', tracker: 'breast_play_events',
@@ -288,6 +288,10 @@ module Engine
           label: 'Full treatment', text: 'Ask her to finish you',
           scenes: ['She grins and keeps one hand on your nipples while the other slides lower, working you with oily strokes ' \
                    'until you cum arching under her touch.'],
+          parts: {
+            'vagina' => 'Her slick fingers rub your clit and slip into your pussy, pumping you while she pinches above.',
+            'penis' => 'Her slick hand wraps your cock and strokes it, rolling your balls while she pinches above.'
+          },
           lp: 7, lust: 10,
           condition: { key: 'thoroughly_oiled', name: 'Thoroughly Oiled', floors: 2,
                        effects: { 'flee_bonus' => 0.15, 'satisfy_bonus' => 0.05 } }
@@ -316,7 +320,7 @@ module Engine
         },
         decline: { label: 'Squeeze past', text: 'Try to slip by (AGI)', lust: 3, escape: true,
                    scene: 'You duck under his arm and slip past while he is still staring.' },
-        fight: { label: 'Fight him', type: :beast, text: 'The minotaur snorts and lowers his horns.' }
+        fight: { name: 'Minotaur', label: 'Fight him', type: :beast, text: 'The minotaur snorts and lowers his horns.' }
       },
       'hellhound_kennel' => {
         name: 'Hellhound Kennel', tag: 'knotting', tracker: 'knotting_events',
@@ -329,9 +333,11 @@ module Engine
                    'spears into you.',
                    'With one last shove his knot pops inside, swelling until you are locked together, and you cum around it as ' \
                    'he pulses into you for what feels like forever.'],
-          parts: {
+          by_part: {
             'vagina' => 'He knots your pussy, the swollen bulb grinding against every sensitive spot inside you.',
-            'anus' => 'He knots your ass, stretching it wide around the swollen bulb until you can only pant and push back.',
+            'anus' => 'He knots your ass, stretching it wide around the swollen bulb until you can only pant and push back.'
+          },
+          parts: {
             'penis' => 'Your cock swings beneath you, spurting onto the kennel floor with every throb of his knot.'
           },
           lp: 8, lust: 16,
@@ -340,7 +346,7 @@ module Engine
         },
         decline: { label: 'Back out slowly', text: 'Leave the kennel (AGI)', lust: 3, escape: true,
                    scene: 'You back out with your eyes down, and the pack lets you go with a disappointed huff.' },
-        fight: { label: 'Fight the pack leader', type: :beast, text: 'The hellhound bares glowing fangs and leaps!' }
+        fight: { name: 'Hellhound', label: 'Fight the pack leader', type: :demon, text: 'The hellhound bares glowing fangs and leaps!' }
       },
       'wolfkin_den' => {
         name: 'Wolfkin Den', tag: 'knotting', tracker: 'knotting_events',
@@ -353,7 +359,7 @@ module Engine
                    'slides deep.',
                    'Her knot swells as she grinds in, stretching you until it locks with a slick pop, and she holds you close ' \
                    'through every throbbing pulse, nuzzling you while you cum around her.'],
-          parts: {
+          by_part: {
             'vagina' => 'Her knot locks inside your pussy, swollen and snug against your clit.',
             'anus' => 'Her knot locks inside your ass, a hot, stretching fullness you feel all the way to your toes.'
           },
@@ -383,9 +389,11 @@ module Engine
                    'insistently at your entrance.',
                    'He rocks you down until the knot slips in and swells, locking you together, and the circle flares with ' \
                    'light as you cum with him buried to the hilt.'],
-          parts: {
+          by_part: {
             'vagina' => 'His knot swells in your pussy until you feel stretched around every inch of him.',
-            'anus' => 'His knot swells in your ass, locking you on his lap while you writhe.',
+            'anus' => 'His knot swells in your ass, locking you on his lap while you writhe.'
+          },
+          parts: {
             'breasts' => 'He kneads your breasts while you wait for the knot to soften.'
           },
           lp: 9, lust: 16,
@@ -408,7 +416,7 @@ module Engine
                    'Lightheaded and floating, you touch yourself through the haze, and the moment you cum the collar loosens and ' \
                    'lets you gulp down air, giddy and glowing.'],
           parts: {
-            'vagina' => 'Your pussy clenches harder with every shallow, fluttering breath.',
+            'vagina' => 'Your fingers circle your clit faster with every shallow, fluttering breath, your pussy clenching harder all the while.',
             'penis' => 'Your cock throbs in your hand, harder with every snug hug of the collar.'
           },
           lp: 6, lust: 12,
@@ -440,7 +448,12 @@ module Engine
         alt: {
           label: 'Hold her', text: 'You take the throne',
           scenes: ['You sit on the throne and she settles in your lap, guiding your hand to her neck with a delighted shiver, ' \
-                   'and you hold her lightly while she rides you to a gasping, shuddering finish.'],
+                   'and you hold her lightly while she takes you to a gasping, shuddering finish.'],
+          by_part: {
+            'penis' => 'She sinks down onto your cock and rides it slow, her pussy clenching around you with every roll of her hips.',
+            'vagina' => 'She grinds her pussy against yours, clit to clit, rocking in your lap until you are both shaking.'
+          },
+          otherwise: 'She grinds herself against your thigh in your lap, riding the pressure until she shudders apart.',
           lp: 6, lust: 12,
           condition: { key: 'gentle_grip', name: 'Gentle Grip', floors: 2,
                        effects: { 'strength' => 1, 'victory_lp_bonus' => 2 } }
@@ -469,7 +482,7 @@ module Engine
         },
         decline: { label: 'Pass', text: 'Thank her and move on', lust: 2,
                    scene: 'She sighs and settles back into the sun.' },
-        fight: { label: 'Fight her', type: :beast, text: 'The lamia rears up, hissing, offended by the refusal!' }
+        fight: { name: 'Lamia', label: 'Fight her', type: :beast, text: 'The lamia rears up, hissing, offended by the refusal!' }
       },
       'tentacle_bath' => {
         name: 'Tentacle Bath', tag: 'tentacles', tracker: 'tentacle_events',
@@ -524,7 +537,7 @@ module Engine
         },
         decline: { label: 'Duck under', text: 'Dash through (AGI)', lust: 3, escape: true,
                    scene: 'You duck low and sprint beneath the swaying tentacles.' },
-        fight: { label: 'Hack at them', type: :plant, text: 'The tentacles thrash and lash toward you!' }
+        fight: { name: 'Tentacle Vine', label: 'Hack at them', type: :plant, text: 'The tentacles thrash and lash toward you!' }
       },
       'honeyed_orchard' => {
         name: 'Honeyed Orchard', tag: 'aphrodisiacs', tracker: 'aphrodisiac_events',
@@ -538,8 +551,8 @@ module Engine
                    'You end up sprawled under the trees, rubbing yourself frantically through orgasm after orgasm, juice ' \
                    'smeared all over your chin.'],
           parts: {
-            'vagina' => 'Your pussy swells and drips, your clit so sensitive that the lightest touch makes you cum.',
-            'penis' => 'Your cock stays rock hard and leaks constantly, twitching at the faintest breeze.'
+            'vagina' => 'Your fingers fly over your swollen clit, your pussy dripping, so sensitive that the lightest touch makes you cum.',
+            'penis' => 'Your hand pumps your rock-hard cock as it leaks constantly, twitching at the faintest breeze.'
           },
           lp: 6, lust: 16,
           condition: { key: 'fruit_flushed', name: 'Fruit-Flushed', floors: 2,
@@ -577,7 +590,7 @@ module Engine
         },
         decline: { label: 'Hold your breath', text: 'Hurry through (AGI)', lust: 3, escape: true,
                    scene: 'You hold your breath and hurry through before the smoke can take hold.' },
-        fight: { label: 'Douse the censers', type: :demon, text: 'The succubus rises from her divan, thoroughly annoyed.' }
+        fight: { name: 'Succubus', label: 'Douse the censers', type: :demon, text: 'The succubus rises from her divan, thoroughly annoyed.' }
       },
       'phantom_waltz' => {
         name: 'Phantom Waltz', tag: 'possession', tracker: 'possession_events',
@@ -601,7 +614,7 @@ module Engine
         },
         decline: { label: 'Decline', text: 'Keep your body to yourself', lust: 2,
                    scene: 'You shake your head. She fades with a wistful sigh.' },
-        fight: { label: 'Exorcise her', type: :undead, text: 'The ghost shrieks and swoops at you!' }
+        fight: { name: 'Ghost', label: 'Exorcise her', type: :undead, text: 'The ghost shrieks and swoops at you!' }
       },
       'ring_of_the_rider' => {
         name: 'Ring of the Rider', tag: 'possession', tracker: 'possession_events',
@@ -664,7 +677,7 @@ module Engine
         },
         decline: { label: 'Close the lid', text: 'Leave the toys', lust: 2,
                    scene: 'You close the lid. The buzzing goes muffled and sad.' },
-        fight: { label: 'Kick the chest', type: :mimic, text: 'The chest yawns wide, toys and all — it was a mimic!' }
+        fight: { name: 'Chest Mimic', label: 'Kick the chest', type: :mimic, text: 'The chest yawns wide, toys and all — it was a mimic!' }
       },
       'goblin_workshop' => {
         name: 'Goblin Workshop', tag: 'toys', tracker: 'toy_events',
@@ -679,7 +692,7 @@ module Engine
                    'hard enough to rattle the bench.'],
           parts: {
             'vagina' => 'The dildo pistons into your pussy while a vibrating nub hums against your clit.',
-            'anus' => 'She swaps in a tapered attachment and lets it fuck your ass on its slowest, deepest setting.',
+            'anus' => 'Then she swaps in a tapered attachment and lets it fuck your ass on its slowest, deepest setting.',
             'penis' => 'A vibrating sleeve closes over your cock and milks you in time with the strokes.'
           },
           lp: 7, lust: 14,
@@ -700,9 +713,9 @@ module Engine
                    'spurt across your skin until you are plastered in cum, hot and dripping from your chin.',
                    'They cheer as you rub it in, and the chieftain fills you with seed last of all, leaving it leaking down ' \
                    'your thighs while his warriors roar.'],
-          parts: {
-            'vagina' => 'The chieftain empties himself in your pussy, and cum oozes out of you when you stand.',
-            'anus' => 'Another orc takes your ass and leaves you dripping with seed.'
+          by_part: {
+            'vagina' => 'The chieftain mounts you last of all and empties himself in your pussy, and cum oozes out of you when you stand.',
+            'anus' => 'The chieftain takes your ass last of all and empties himself there, leaving you dripping with seed.'
           },
           lp: 8, lust: 14,
           condition: { key: 'orc_marked', name: 'Orc-Marked', floors: 2,
@@ -740,7 +753,7 @@ module Engine
         },
         decline: { label: 'Step back', text: 'Avoid the basin', lust: 2,
                    scene: 'You keep your distance. The slime burbles sadly and settles.' },
-        fight: { label: 'Fight it', type: :slime, text: 'The slime surges out of its basin toward you!' }
+        fight: { name: 'Cream Slime', label: 'Fight it', type: :slime, text: 'The slime surges out of its basin toward you!' }
       },
       'silkweavers_web' => {
         name: 'Silkweaver\'s Web', tag: 'bondage', tracker: 'bondage_events',
@@ -773,7 +786,7 @@ module Engine
         },
         decline: { label: 'Back out', text: 'Slip out (AGI)', lust: 3, escape: true,
                    scene: 'You slip between the strands and out of the chamber before she can drop.' },
-        fight: { label: 'Fight her', type: :beast, text: 'The silkweaver drops toward you, legs spread wide!' }
+        fight: { name: 'Silkweaver', label: 'Fight her', type: :beast, text: 'The silkweaver drops toward you, legs spread wide!' }
       }
     }.freeze
   end

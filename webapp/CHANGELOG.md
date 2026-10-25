@@ -9,9 +9,16 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-24
 
+### Added
+
+- **Talk categories** (synced from bot): Talk opens General / Clergy / Residents / Temple, then topics — same shell as Discord.
+- **Victory Talk:** after a boss clear (defeat or satisfy), the floor hub offers **Talk** with that lord (or Eros) before you explore again.
+
 ### Changed
 
+- **Burdens mid-climb** (synced from bot): oaths and rerolls on any floor; reroll price resets on floor 1; rerolls skip oaths. Settings now exposes oath toggles and reroll buttons.
 - **Restart story-quest wipe** (synced from bot): Syn wedding, Vex/Covar/resident stories reset on Restart; Berry quests completed still carries over. Defeat still leaves those stories intact.
+- **Shop / parlour / quests intros** lightly aligned with lore voice (Berry’s *good girl* energy, Syn’s parlour).
 
 ## 2026-10-21
 

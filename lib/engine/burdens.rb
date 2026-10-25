@@ -2,9 +2,9 @@
 
 module Engine
   # Cycle burdens. At the start of a cycle (floor 1), a delver may take on
-  # up to three torments for the whole cycle. Each one multiplies every LP
-  # gain by +25%. They can only be chosen or shed at a cycle's start —
-  # Eros does not let her pets renegotiate mid-climb.
+  # or shed up to three torments for the whole cycle. Each one multiplies
+  # every LP gain by +25%. Oaths and paid rerolls may be adjusted mid-climb;
+  # the three carried burdens themselves stay locked once you leave floor 1.
   module Burdens
     TRACKER = 'cycle_burdens'
     OATH_TRACKER = 'oath_burdens'
@@ -76,8 +76,27 @@ module Engine
       "_#{spec[:ritual]}_"
     end
 
+    def at_threshold?(player)
+      player.current_floor.to_i <= 1
+    end
+
+    def free?(player)
+      !player.in_combat && !player.active_event?
+    end
+
+    # Manual take/shed of the three cycle burdens — floor 1 only.
     def changeable?(player)
-      player.current_floor.to_i <= 1 && !player.in_combat && !player.active_event?
+      at_threshold?(player) && free?(player)
+    end
+
+    # Oaths may be sworn or released on any floor (outside combat/events).
+    def oaths_changeable?(player)
+      free?(player)
+    end
+
+    # Paid shuffle of a carried burden — any floor (outside combat/events).
+    def rerollable?(player)
+      free?(player)
     end
 
     def toggle!(player, key)
@@ -104,16 +123,16 @@ module Engine
 
     def toggle_oath!(player, key)
       return { ok: false, message: 'Unknown burden.' } unless BURDENS.key?(key.to_s)
-      unless changeable?(player)
-        return { ok: false, message: 'Oaths are sworn at the start of a cycle, like burdens.' }
+      unless oaths_changeable?(player)
+        return { ok: false, message: 'Oaths cannot be changed mid-fight or mid-event. Finish that first.' }
       end
 
       list = oaths(player)
       if list.include?(key.to_s)
         player.update(trackers: player.tracker_hash.merge(OATH_TRACKER => list - [key.to_s]))
         player.clamp_defiance!
-        { ok: true, message: "Oath released: **#{BURDENS[key.to_s][:name]}**. Eros allows it — at the " \
-                              'threshold, and only just.' }
+        { ok: true, message: "Oath released: **#{BURDENS[key.to_s][:name]}**. Devotion can be renegotiated — " \
+                              'this once, she allows it.' }
       elsif active(player).include?(key.to_s)
         { ok: false, message: "**#{BURDENS[key.to_s][:name]}** is already a carried burden — an oath must be a new torment." }
       elsif list.size >= MAX_OATHS
@@ -130,23 +149,30 @@ module Engine
     REROLL_BASE = 150
     REROLL_STEP = 50
 
-    def rerolls_this_cycle(player)
+    # Escalates mid-climb; resets to 0 on floor 1 (same window as manual burden select).
+    def rerolls_this_climb(player)
+      return 0 if at_threshold?(player)
+
       saved = player.tracker_hash['burden_rerolls']
       saved.is_a?(Hash) && saved['cycle'].to_i == player.current_cycle.to_i ? saved['count'].to_i : 0
     end
 
     def reroll_price(player)
-      REROLL_BASE + (REROLL_STEP * rerolls_this_cycle(player))
+      REROLL_BASE + (REROLL_STEP * rerolls_this_climb(player))
     end
 
-    # At a cycle's start, Eros will shuffle one carried burden into a
-    # different one — for a price that climbs with each shuffle. The
-    # replacement is never a burden already carried, and never the one
-    # just lifted. Even the torments you roll into are non-negotiable.
+    # Pool for a shuffle: never a burden already carried, never an oath,
+    # never the one being lifted (still in `list` until replaced).
+    def reroll_pool(player, list = active(player))
+      BURDENS.keys - list - oaths(player)
+    end
+
+    # Shuffle one carried burden into a different one — any floor, for a
+    # price that climbs with each mid-climb shuffle and resets on floor 1.
     def reroll!(player, key)
       return { ok: false, message: 'Unknown burden.' } unless BURDENS.key?(key.to_s)
-      unless changeable?(player)
-        return { ok: false, message: 'Burdens are chosen at the start of a cycle. Yours are set until you clear the tower.' }
+      unless rerollable?(player)
+        return { ok: false, message: 'Burdens cannot be shuffled mid-fight or mid-event. Finish that first.' }
       end
 
       list = active(player)
@@ -154,24 +180,32 @@ module Engine
         return { ok: false, message: "You are not carrying **#{BURDENS[key.to_s][:name]}**." }
       end
 
+      pool = reroll_pool(player, list)
+      if pool.empty?
+        return { ok: false, message: 'Nothing left to shuffle into — every other torment is already a ' \
+                                     'burden or an oath.' }
+      end
+
       price = reroll_price(player)
       if player.lp < price
         return { ok: false, message: "Shuffling **#{BURDENS[key.to_s][:name]}** costs **#{price} LP** — you have #{player.lp}." }
       end
 
-      new_key = (BURDENS.keys - list).sample
+      new_key = pool.sample
       player.spend_lp!(price)
       player.bump_tracker!('burden_rerolls_total')
+      # Floor 1 keeps the escalator at 0; mid-climb increments.
+      next_count = at_threshold?(player) ? 0 : rerolls_this_climb(player) + 1
       player.update(trackers: player.tracker_hash.merge(
                       TRACKER => (list - [key.to_s]) + [new_key],
-                      'burden_rerolls' => { 'cycle' => player.current_cycle.to_i,
-                                            'count' => rerolls_this_cycle(player) + 1 }
+                      'burden_rerolls' => { 'cycle' => player.current_cycle.to_i, 'count' => next_count }
                     ))
       player.clamp_defiance!
       { ok: true,
         message: "Eros shuffles your torment: **#{BURDENS[key.to_s][:name]}** is lifted, and " \
                  "**#{BURDENS[new_key][:name]}** settles in its place — #{BURDENS[new_key][:description]}. " \
-                 "_(#{price} LP; the next shuffle costs #{reroll_price(player)} LP.)_" }
+                 "_(#{price} LP; the next shuffle costs #{reroll_price(player)} LP" \
+                 "#{at_threshold?(player) ? ' — price resets while you are on floor 1' : ''}.)_" }
     end
 
     def apply_branded_start!(player)

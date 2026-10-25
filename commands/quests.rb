@@ -8,12 +8,12 @@ module Commands
     COLOUR = 0xe14b7a
 
     INTRO = "## 🍓 Berry's Quest Board\n" \
-            "_Pinned up beside the shop counter, in Berry's round, cheerful handwriting, with little hearts " \
-            "dotting every i. Berry herself hovers over it — a strawberry-bright fairy with a smile like " \
-            "sunrise and a grip like ownership — quill already poised over your name._\n" \
-            "_\"Errands, sugar! I run the shop, my wife Syn runs the parlour bench, and you run your pretty " \
-            "legs off for both of us. Finish one, come back, and I'll pay you in Lust Points and praise. " \
-            "Eyes on the board while my wife works, though. She's mine — the quests are yours.\"_"
+            "_Pinned beside the counter in Berry's round, cheerful hand — hearts on every i, and her quill " \
+            "already hovering over your name. Strawberry-bright wings, seed-freckles, smile like sunrise " \
+            "with a grip like ownership._\n" \
+            "_\"Errands, sugar. Board pays. I keep the books; Syn keeps the ink; you keep moving. Finish one " \
+            "and I'll pay you in Lust Points — and maybe a *good girl* if you earned it. She's mine. The " \
+            "quests are yours. Eyes on the board.\"_"
 
     module_function
 

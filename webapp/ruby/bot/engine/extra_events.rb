@@ -29,7 +29,7 @@ module Engine
       'bloating_slime' => {
         name: 'Bloating Slime',
         blurb: 'the floor softens and pulses beneath you.',
-        description: "A gelatinous slime that forces its way into your body, expanding until you're painfully stuffed."
+        description: 'A gelatinous slime that forces its way into every entrance it can find and swells inside you, stretching you fuller and fuller.'
       },
       'egg_chamber' => {
         name: 'Egg Chamber',
@@ -39,7 +39,7 @@ module Engine
       'paddle_golem' => {
         name: 'Paddle Golem',
         blurb: 'a wooden golem holds a paddle.',
-        description: "A rough-hewn golem that wants to spank your ass until it's red and raw."
+        description: 'A rough-hewn golem that wants to bend you over its knee and spank you until you are squirming, soaked, and begging it to keep count.'
       },
       'edging_altar' => {
         name: 'Edging Altar',
@@ -82,9 +82,25 @@ module Engine
       log << bits.join(' · ')
     end
 
+    def milkable?(player)
+      parts = player.body_parts_list.map(&:to_s)
+      (parts & %w[breasts penis]).any?
+    end
+
     def apply!(player, type, level, log)
       parts = Engine::ChastitySystem.scene_parts(player)
+      if type.to_s == 'milking_shrine' && !milkable?(player)
+        log << { scene: 'The cups drift over you, searching for breasts or a cock to latch onto, then retreat with a disappointed hiss. ' \
+                        'The shrine powers down, leaving you untouched.' }
+        return
+      end
+
       bump_trackers!(player, type)
+      if type.to_s == 'milking_shrine' && player.tracker('nectar_met').positive?
+        player.bump_tracker!('nectar_milkings')
+        log << { scene: 'Sister Nectar herself adjusts the cups before they seal — the keeper of this ' \
+                        'shrine, somehow already here. "Arrive tense," she murmurs, "leave drained."' }
+      end
       case type
       when 'milking_shrine' then milking!(player, parts, level, log)
       when 'swelling_fountain' then swelling!(player, level, log)
@@ -100,24 +116,35 @@ module Engine
     end
 
     def milking!(player, parts, level, log)
-      size = Engine::ContentOptions.size_of(player, 'breasts')
-      log << { scene: "The brass cups immediately clamp onto your #{size_word(player, 'breasts')} breasts, creating an airtight seal. " \
-                      'The machine starts with intense suction that pulls at your nipples, making them elongate and turn dark purple as ' \
-                      'blood rushes to them. Milk begins spraying from your tits in thick, steady streams, filling the collection tubes ' \
-                      'with creamy white fluid.' }
-      bonus = { 'flat' => 0, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5 }.fetch(size, 0)
+      breasts = parts.include?('breasts')
+      bonus = 0
+      if breasts
+        size = Engine::ContentOptions.size_of(player, 'breasts')
+        log << { scene: "The brass cups settle over your #{size_word(player, 'breasts')} breasts and seal snugly. A slow, rhythmic " \
+                        'suction coaxes milk from your nipples in thick, steady streams, filling the collection tubes with creamy white fluid.' }
+        bonus += { 'flat' => 0, 'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5 }.fetch(size, 0)
+      end
       if parts.include?('penis')
-        log << { scene: 'A third, smaller cup descends and attaches to your cock, its suction immediately making your shaft swell as the ' \
-                        'machine begins milking your prostate from inside. You can feel your balls constricting as thick ropes of semen ' \
-                        'spurt from your tip, collected by the hungry machine.' }
+        log << { scene: 'A soft sleeve descends and seals around your cock, pulsing in time with the pumps. It milks you with shameless ' \
+                        'patience, drawing thick ropes from your tip again and again into the waiting tubes.' }
         bonus += 2
       elsif (caged = Engine::ChastitySystem.line(player, :milking))
         log << { scene: caged }
         bonus += 2
       end
-      log << { scene: "The machine's rhythm increases, the suction becoming painful as it tries to extract every last drop. Your breasts " \
-                      'are now raw and dripping, your nipples swollen to twice their size. When the cups finally release with a loud pop, ' \
-                      'your breasts sag, covered in your own milk, nipples glistening and sore.' }
+      if breasts && parts.include?('penis')
+        log << { scene: 'At last the rhythm eases. The cups pop free of your breasts and the sleeve slides off your cock ' \
+                        'together, leaving both heavy, flushed and thoroughly drained as the shrine hums its approval.' }
+      elsif breasts
+        log << { scene: 'At last the rhythm eases. The cups release with a soft pop, leaving your breasts heavy, flushed and slick ' \
+                        'with milk as the shrine hums its approval.' }
+      elsif parts.include?('penis')
+        log << { scene: 'At last the rhythm eases. The sleeve loosens and withdraws, leaving your cock twitching and thoroughly ' \
+                        'drained as the shrine hums its approval.' }
+      else
+        log << { scene: 'At last the rhythm eases and the pumps fall silent, leaving your cock throbbing, untouched, behind ' \
+                        'its cage — milked dry without ever being freed, as the shrine hums its approval.' }
+      end
       reward!(player, 3 + (level / 3) + (bonus / 2), 10 + (level / 2) + bonus, log)
     end
 
@@ -152,18 +179,20 @@ module Engine
             'is overwhelming as the growth continues.'
         end
       log << { scene: scene }
-      log << "_Your #{label} grew: **#{old} → #{new}** (change it any time in `/options`)._"
+      log << "_Your #{label} grew: **#{old} → #{new}** (tonics in the shop's Potions aisle can change it further)._"
+
       reward!(player, 3, 8 + (level / 2), log)
     end
 
     def bloating!(player, level, log)
-      log << { scene: 'The slime suddenly surges into your mouth, forcing its way down your throat. You can feel it expanding inside your ' \
-                      'stomach, filling you completely. Your belly begins to swell outward, stretching painfully as the creature pumps ' \
-                      'more of itself into you.' }
-      log << { scene: 'Another tendril of slime forces its way into your ass, the cold gelatinous mass filling you completely. You feel so ' \
-                      'full you might burst, the pressure making you gasp as your stomach distends into a round, pregnant shape.' }
+      log << { scene: 'The slime suddenly surges into your mouth, forcing its way down your throat in thick, pulsing gulps. You can feel ' \
+                      'it expanding inside your stomach, filling you completely. Your belly begins to swell outward, stretching ' \
+                      'obscenely taut as the creature pumps more and more of itself into you.' }
+      log << { scene: 'Another tendril of slime forces its way between your cheeks and deep into your ass, the cool gelatinous mass ' \
+                      'filling you from the other side. Stuffed from both ends, you can barely breathe, your distended belly round ' \
+                      'and heavy as it rocks you with every obscene slosh inside you.' }
       log << { scene: 'Content at last, the slime begins to slowly withdraw, the sensation of its departure as intense as its entry. As it ' \
-                      'leaves your ass with a wet sucking sound, your body collapses inward, leaving you trembling and empty.' }
+                      'leaves your ass with a wet sucking sound, your body collapses inward, leaving you trembling, dripping and empty.' }
       reward!(player, 4 + (level / 3), 12 + (level / 2), log)
     end
 
@@ -183,14 +212,15 @@ module Engine
 
     def paddle!(player, level, log)
       size = Engine::ContentOptions.size_of(player, 'butt')
-      log << { scene: "The golem forces you over its knee, exposing your #{size_word(player, 'butt')} rear. The wooden paddle crashes " \
-                      'down, leaving an immediate red mark that quickly darkens to purple. Each impact comes harder than the last, the ' \
-                      'sound echoing through the chamber as you struggle and scream.' }
+      log << { scene: "The golem bends you over its knee and bares your #{size_word(player, 'butt')} ass to the room. The wooden paddle " \
+                      'lands with a crack that echoes off the stone, and your hips buck at every swat, heat blooming hotter across ' \
+                      'your cheeks. By the tenth you are grinding against its hard wooden thigh, gasping and shamelessly wet.' }
       extra = { 'small' => 0, 'medium' => 1, 'large' => 2, 'huge' => 3 }.fetch(size, 0)
-      log << { scene: 'After twenty brutal swats, your ass is a mass of welts and bruises. The golem runs its rough wooden fingers over ' \
-                      'the damage, pressing into the deepest welts and making you cry out.' }
+      log << { scene: 'After twenty counted swats the golem sets the paddle aside and rubs slow, heavy circles over your heated, ' \
+                      'tingling cheeks, its rough wooden fingers dipping teasingly between them to find how soaked the spanking ' \
+                      'left you. It nods, satisfied, and lets you up on trembling legs.' }
       player.adjust_defiance!(-3)
-      log << "The brutal spanking costs you **3** defiance. (now #{player.defiance}/#{player.max_defiance})"
+      log << "The relentless spanking costs you **3** defiance. (now #{player.defiance}/#{player.max_defiance})"
       reward!(player, 3 + (level / 3) + extra, 8 + (level / 2) + (extra * 2), log)
     end
 

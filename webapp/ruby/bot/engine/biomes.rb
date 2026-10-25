@@ -144,6 +144,48 @@ module Engine
       current(player)[:tags].fetch(tag.to_s, 1.0)
     end
 
+    # Each five-floor section belongs to the lord waiting at its end; the
+    # land was shaped around them and reshapes itself in their idiom.
+    DOMAIN_INTROS = {
+      5 => ['the Mimic Broodmother', 'The furniture is already watching you, and the walls keep ' \
+            'rearranging themselves into warmer, hungrier rooms. Everything here wants to keep you inside it.'],
+      10 => ['the Succubus Queen', 'Court etiquette hangs in the air like perfume, and the corridors keep ' \
+             're-polishing themselves for an audience. Everything here wants to be chosen by her — and to choose you.'],
+      15 => ['the Incubus King', 'The halls carry a swagger; doors open like challenges and the very ' \
+             'furniture seems claimed. Everything here is already his — the land is merely deciding how you will be, too.'],
+      20 => ['the Verdant Dryad', 'Green things push through every seam, and the paths regrow behind you ' \
+             'softer than they were. Everything here wants company, planted close and kept.'],
+      25 => ['the Lich Lord', 'Cold order settles over the stone; shelves, labels and specimens multiply ' \
+             'in the dark. Everything here wants you catalogued, studied — and kept warm in the archive.'],
+      30 => ['the Alpha Beast', 'The corridors widen into runs and dens, scratched, scent-marked, lived-in. ' \
+             'Everything here smells of pack. Everything here is deciding whether you run with it.'],
+      35 => ['Eros', 'The dreaming court. Silk and candlelight breathe in and out of existence, altars ' \
+             'surface like stones in a tide, and the land reshapes itself almost as fast as you look at ' \
+             'it. She is close. The danger here is not the monsters — it is being noticed.']
+    }.freeze
+
+    def wrapped_floor(floor)
+      ((floor.to_i - 1) % 35) + 1
+    end
+
+    # One-time line for the first room a delver sees in a new section
+    # (per cycle). Returns nil once shown, or outside a section start.
+    def domain_intro(player)
+      return nil unless player
+
+      wrapped = wrapped_floor(player.current_floor)
+      return nil unless (wrapped % BLOCK_SIZE) == 1
+
+      lord, text = DOMAIN_INTROS[wrapped + BLOCK_SIZE - 1]
+      return nil unless lord
+
+      stamp = "#{player.current_cycle.to_i}:#{section_for(player.current_floor)}"
+      return nil if player.tracker_hash['domain_intro_stamp'].to_s == stamp
+
+      player.set_tracker!('domain_intro_stamp', stamp)
+      "👑 **Domain of #{lord} — floors #{wrapped}–#{wrapped + BLOCK_SIZE - 1}.** #{text}"
+    end
+
     def line(player)
       biome = current(player)
       boss_type = player && boss_type_for_section(section_for(player.current_floor))

@@ -16,9 +16,9 @@ module Commands
         c.text_display(content: '## The Residents')
         c.text_display(content: notice) if notice
         c.text_display(
-          content: '_Not every soul in the tower is hunting you. Some of them settled, took up a trade, ' \
-                   'and now keep hours. Berry points them out the way she points out her own counters: ' \
-                   'proudly, and with opinions._'
+          content: '_Not every soul is hunting you. Some settled, took a trade, and keep hours — Vex, Pip, ' \
+                   'Nectar, Fang. Berry points them out the way she points out her counters: proudly, with ' \
+                   'opinions, and a *good girl* if you treat them right._'
         )
         Engine::Residents::RESIDENTS.each do |id, spec|
           exiled = id.to_s == 'vex' && Engine::Residents.vex_exiled?(player)
@@ -99,14 +99,8 @@ module Commands
           )
         end
 
-        topics = Engine::Residents.topics(id)
-        if topics.any?
-          c.row do |row|
-            topics.each do |topic|
-              row.button(label: topic[:label], style: :secondary,
-                         custom_id: "eros:resident:topic:#{id}:#{topic[:key]}:#{owner}")
-            end
-          end
+        c.row do |row|
+          row.button(label: '💬 Talk', style: :primary, custom_id: "eros:talk:#{id}:#{owner}")
         end
 
         case id.to_s
@@ -310,14 +304,6 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Residents.show(event, event.custom_id[/\Aeros:resident:show:([a-z_]+):\d+\z/, 1])
-    end
-
-    button(custom_id: /^eros:resident:topic:[a-z_]+:[a-z_]+:\d+$/) do |event|
-      next unless ErosHelpers.assert_button_owner!(event)
-
-      id, key = event.custom_id.match(/\Aeros:resident:topic:([a-z_]+):([a-z_]+):\d+\z/).captures
-      topic = Engine::Residents.topics(id).find { |t| t[:key] == key }
-      Commands::Residents.show(event, id, notice: topic ? "_#{topic[:text]}_" : nil)
     end
 
     button(custom_id: /^eros:resident:pipbeat:\d+:\d+$/) do |event|

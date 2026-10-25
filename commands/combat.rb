@@ -44,6 +44,8 @@ module Commands
         ErosUI.reply_v2(event, colour: 0xd4af37, with_actions: :explore) do |c|
           c.text_display(content: '## The Tower Is Conquered')
           ErosUI.append_action_log(c, result[:log])
+          dress_ask_button(c, player, result[:encounter], event.user.id)
+          victory_talk_button(c, result[:encounter], event.user.id)
         end
         return
       end
@@ -53,6 +55,7 @@ module Commands
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
           ErosUI.append_action_log(c, result[:log])
           dress_ask_button(c, player, result[:encounter], event.user.id)
+          # Boss satisfy finishes as :victory; this :satisfied path is non-boss. No clergy Talk.
         end
         return
       end
@@ -62,6 +65,7 @@ module Commands
         ErosUI.reply_v2(event, colour: 0x4a7c59, with_actions: :explore) do |c|
           ErosUI.append_action_log(c, result[:log])
           dress_ask_button(c, player, result[:encounter], event.user.id)
+          victory_talk_button(c, result[:encounter], event.user.id)
         end
         return
       end
@@ -99,6 +103,20 @@ module Commands
       container.row do |row|
         row.button(label: "🪡 Ask the #{enc[:name]} about the dress", style: :danger,
                    custom_id: "eros:dress:ask:#{who}:#{owner_id}")
+      end
+    end
+
+    # Victory / satisfy Talk with domain lords + Eros (no mid-combat hub).
+    def victory_talk_button(container, enc, owner_id)
+      return unless enc
+
+      person = Engine::Conversations.boss_person_for(enc[:name].to_s)
+      return unless person
+
+      spec = Engine::Conversations.person(person)
+      container.row do |row|
+        row.button(label: "#{spec[:emoji]} Talk", style: :secondary,
+                   custom_id: "eros:talk:#{person}:#{owner_id}")
       end
     end
 

@@ -237,6 +237,21 @@ module Engine
               'kiss my wife and ask her to marry me all over again." Satisfy 1 boss.' }
     ].freeze
 
+    # The second wedding happens once per delver (resets on /restart, not defeat). It leaves a keepsake.
+    WEDDING_KEEPSAKE = 'a pressed petal from Berry\'s second bouquet'
+
+    def grant_wedding_keepsake!(player)
+      return nil if player.keepsakes.include?(WEDDING_KEEPSAKE)
+
+      player.add_keepsake!(WEDDING_KEEPSAKE)
+      WEDDING_KEEPSAKE
+    end
+
+    # For delvers who stood at the wedding before the shelf existed.
+    def backfill_wedding_keepsake!(player)
+      grant_wedding_keepsake!(player) if story_done?(player)
+    end
+
     def story_step(player)
       player.tracker(STORY_TRACKER)
     end
@@ -308,6 +323,7 @@ module Engine
       player.set_tracker!(STORY_START_TRACKER, player.progress_value(STORY[step + 1][:tracker].to_sym)) if STORY[step + 1]
       player.gain_lp!(spec[:reward])
       news = player.check_progress!
+      grant_wedding_keepsake!(player) if story_done?(player)
       message =
         if story_done?(player)
           "💍 **The Second Wedding.** Berry walks in on lanterns, cake, and her exhausted wife on one knee — " \
@@ -316,7 +332,8 @@ module Engine
           "which it is. Afterwards both fairies corner you. \"Family gets the matching ink,\" Syn says, and " \
           "designs you something no one else will ever wear — **the Wedding Mark** — making room for a " \
           "**sixth mark** on your skin. Berry is already planning your chair at every anniversary. " \
-          "**+#{spec[:reward]} LP**."
+          "**+#{spec[:reward]} LP**." \
+          "\n_Kept, for the shelf: #{WEDDING_KEEPSAKE}._"
         else
           "🖤 **Secret kept: #{spec[:name]}** — **+#{spec[:reward]} LP**. \"Mmm. Efficient *and* pretty,\" " \
           "Syn purrs, looking you over like a sketch she intends to finish later. \"Next: **#{STORY[step + 1][:name]}**. " \

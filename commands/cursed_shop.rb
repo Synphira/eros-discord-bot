@@ -36,11 +36,11 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: '## Cursed Shop — Covar Zephyren')
         c.text_display(
-          content: '_**Covar Zephyren** minds the living gear: curved horns, a lashing tail, and a pair of ' \
-                   'large breasts making a warm spectacle of his open shirt. He was one of the first delvers ' \
-                   'here; the tower remade him, and he stayed — happily. "Living gear you have worn and torn ' \
-                   'free remembers you," he says. "Call it back for free. Removing it again costs its usual ' \
-                   'LP. Conversation\'s free too — I charge in stories."_'
+          content: '_**Covar Zephyren** minds the living gear — horns, lashing tail, D-cup chest on shameless ' \
+                   'display in an open shirt. First delvers\' success story: the tower remade him, and he ' \
+                   'stayed, grinning. "Torn free and worn, it remembers you," he says. "Call it back free. ' \
+                   'Peel it off again and you pay LP. Conversation\'s free. I charge in stories. I\'m the ' \
+                   'matchmaker, not just the shopkeep."_'
         )
         if (regard = Engine::Regard.line(player, :cursed))
           c.text_display(content: regard)

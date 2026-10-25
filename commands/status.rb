@@ -26,19 +26,21 @@ module Commands
       player = ErosHelpers.require_player(event) or return
       active = Engine::Burdens.active(player)
       changeable = Engine::Burdens.changeable?(player)
+      oaths_ok = Engine::Burdens.oaths_changeable?(player)
+      reroll_ok = Engine::Burdens.rerollable?(player)
+      price = Engine::Burdens.reroll_price(player)
 
       ErosUI.reply_v2(event, colour: 0x6b5b95) do |c|
         c.text_display(content: "## ⛓️ Cycle Burdens — #{player.display_name}")
         c.text_display(
           content: 'Take on up to **3 torments** for the whole cycle. Every burden makes **every LP gain +25%** ' \
-                   "(you are at **×#{format('%.2f', Engine::Burdens.lp_multiplier(player))}**). Burdens can only " \
-                   'be taken or shed at a cycle\'s start — floor 1, before you delve; once you climb, they are ' \
-                   'locked in until you clear the tower.'
+                   "(you are at **×#{format('%.2f', Engine::Burdens.lp_multiplier(player))}**). Taking or shedding " \
+                   'burdens is only allowed at a cycle\'s start — **floor 1**. Rerolls and oaths work on any floor.'
         )
         c.text_display(
           content: '_The truly devoted may also swear up to **2 Oaths** — extra torments beyond the three, ' \
                    'worth **+10% LP each**. Oaths torment exactly like burdens, but devotion is its own ' \
-                   'category: they never count toward Burdens Carried honours._'
+                   'category: they never count toward Burdens Carried honours. Toggle them anytime (outside combat)._'
         )
         c.text_display(content: notice) if notice
         sworn = Engine::Burdens.oaths(player)
@@ -49,8 +51,8 @@ module Commands
         end
         c.text_display(content: lines.join("\n"))
         c.text_display(
-          content: changeable ? '-# You are at a cycle\'s start: the buttons below work.' \
-                              : '-# Locked in — burdens can only change at a cycle\'s start (floor 1).'
+          content: changeable ? '-# Floor 1: take or shed burdens freely.' \
+                              : '-# Burdens locked — take/shed only on floor 1. Oaths and rerolls still work.'
         )
         c.row do |row|
           Engine::Burdens::BURDENS.each do |key, spec|
@@ -64,14 +66,16 @@ module Commands
           c.separator(divider: true, spacing: :small)
           c.text_display(
             content: '_Or let Eros shuffle a carried burden into a different one — never one you already ' \
-                     "carry. Shuffling costs **#{Engine::Burdens.reroll_price(player)} LP** and climbs " \
-                     "#{Engine::Burdens::REROLL_STEP} LP with every shuffle this cycle._"
+                     "carry, and never one sworn as an oath. Shuffling costs **#{price} LP** and climbs " \
+                     "#{Engine::Burdens::REROLL_STEP} LP with every mid-climb shuffle; the price resets on " \
+                     '**floor 1**._'
           )
           c.row do |row|
             active.each do |key|
               row.button(label: "🎲 Reroll: #{Engine::Burdens::BURDENS[key][:name]}", style: :secondary,
                          custom_id: "eros:burden:reroll:#{key}:#{event.user.id}",
-                         disabled: !changeable || player.lp < Engine::Burdens.reroll_price(player))
+                         disabled: !reroll_ok || player.lp < price ||
+                                   Engine::Burdens.reroll_pool(player).empty?)
             end
           end
         end
@@ -80,7 +84,7 @@ module Commands
             oath = sworn.include?(key)
             row.button(label: "#{oath ? '✓ ' : ''}📜 #{spec[:name]}", style: oath ? :danger : :secondary,
                        custom_id: "eros:burden:oath:#{key}:#{event.user.id}",
-                       disabled: !changeable || active.include?(key) ||
+                       disabled: !oaths_ok || active.include?(key) ||
                                  (!oath && sworn.size >= Engine::Burdens::MAX_OATHS))
           end
         end

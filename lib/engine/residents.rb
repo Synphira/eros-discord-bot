@@ -9,37 +9,35 @@ module Engine
     RESIDENTS = {
       'vex' => {
         name: 'Madame Vex', title: 'the Listener', tag: 'living_clothing',
-        blurb: 'Decades ago one of Syn\'s original handmade pieces chose her, and it has never let go. ' \
-               'She learned the language of living gear in self-defence. Covar sends her the difficult cases.',
-        intro: '_The back room of the Cursed Shop smells of cedar and warm leather. A woman sits very ' \
-               'still in a high-backed chair, gloved hands folded, while the living gown she wears breathes ' \
-               'slowly against her ribs — older than the temple, patient as debt. "Sit," Madame Vex says. ' \
-               '"Your gear has been talking about you. I only translate."_'
+        blurb: 'Syn\'s first living dress — the Original — chose her decades ago. She learned gear-language ' \
+               'in self-defence. Covar sends her the difficult cases. Easy. She\'s listening.',
+        intro: '_Cedar, warm leather, pins within reach. Madame Vex sits Listener-still while the living ' \
+               'gown breathes against her ribs — older than polite history, patient as debt. "Sit," she ' \
+               'says. "You don\'t have to perform. Your gear has been talking. I only translate."_'
       },
       'pip' => {
         name: 'Pip', title: 'Self-Appointed Trapwright', tag: nil,
-        blurb: 'A goblin delver who got caught once too often and stayed to study the Queen\'s mechanisms ' \
-               'the way monks study scripture. Nobody else uses her title. She has never once minded.',
-        intro: '_A goblin in a tool-belt of scavenged springs looks up from a sprung pressure plate she is ' \
-               'reverse-engineering with religious care. "Mind the second tile. And the fourth. The third ' \
-               'one\'s just showing off." Pip grins with all her teeth. "Pip. Trapwright. The Queen\'s own ' \
-               'scholar — self-appointed, but then, so is genius."_'
+        blurb: 'Goblin delver who got caught too often and stayed to worship Syn and the Queen\'s hinge-work. ' \
+               'Self-appointed Trapwright. Berry keeps saying pants. The traps vote no.',
+        intro: '_Goggles askew, tool-belt of scavenged springs, no pants in sight. Pip looks up from a sprung ' \
+               'plate. "Mind the second tile. And the fourth. The third\'s just showing off." All teeth. ' \
+               '"Pip. Trapwright. Ask me something with hinges."_'
       },
       'nectar' => {
         name: 'Sister Nectar', title: 'Keeper of the Milking Shrine', tag: 'lactation',
-        blurb: 'Keeper of the tower\'s milking shrine, though she somehow staffs every milking room you ' \
-               'find. She gets around. Don\'t ask how.',
-        intro: '_Brass cups gleam on their hooks and the pumps breathe like something sleeping. Sister ' \
-               'Nectar wipes her hands on her apron and looks you over with a professional\'s warmth. ' \
-               '"The shrine provides, darling. Arrive tense, leave drained — that\'s the whole liturgy."_'
+        blurb: 'Keeper of the milking shrine — and somehow every milking room you find. Thin nectar means a ' \
+               'tired tower. Milking is holy. Treat it like holy.',
+        intro: '_Brass cups on hooks; pumps breathing like something asleep. Sister Nectar wipes her hands ' \
+               'on her apron with shrine-professional warmth. "Arrive tense, leave drained — that\'s the ' \
+               'liturgy. Milking is holy. Then ask, darling."_'
       },
       'cartographer' => {
         name: 'The Pale Cartographer', title: 'Reader of the Dreaming Land', tag: nil,
-        blurb: 'He does not map geography — the land re-dreams itself too fast for that. He reads what the ' \
-               'domain is dreaming next, and sells the dream, three rooms at a time.',
-        intro: '_His table is covered in maps of rooms that do not exist yet, drawn in white ink on black ' \
-               'paper. The Pale Cartographer does not look up from his pen. "You walk a place that dreams ' \
-               'itself," he says. "I merely take dictation."_'
+        blurb: 'Fang does not map geography — the land re-dreams too fast. He reads the next three rooms and ' \
+               'sells the dream. Purely cartographic. (The crush on Covar is also purely cartographic.)',
+        intro: '_White ink on black paper; rooms that do not exist yet. The Pale Cartographer does not look ' \
+               'up. "The room moved again. Hold this corner — or ask. You walk a place that dreams itself. ' \
+               'I take dictation. Purely cartographic."_'
       }
     }.freeze
 
@@ -343,6 +341,21 @@ module Engine
 
       spec = DRESS_COUNSEL.values.find { |s| s[:boss] == encounter_name.to_s } or return false
       !player.tracker(spec[:flag]).positive?
+    end
+
+    # Floor whose domain lord must appear in person for the current
+    # Restore-the-Dress counsel step (Succubus Queen = 10, Lich Lord = 25).
+    # While that step is active, relics may not hold that throne.
+    DRESS_COUNSEL_FLOORS = {
+      'queen_dress_counsel' => 10,
+      'lich_dress_counsel' => 25
+    }.freeze
+
+    def blocks_relic_for_dress_counsel?(player, floor)
+      spec = restoration_current(player)
+      return false unless spec && spec[:flag]
+
+      DRESS_COUNSEL_FLOORS[spec[:flag]].to_i == floor.to_i
     end
 
     def dress_counsel!(player, who)
