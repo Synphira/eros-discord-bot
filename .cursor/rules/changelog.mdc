@@ -10,14 +10,23 @@ Whenever you **add**, **change**, or **fix** behavior in this repo, update the m
 - **Discord bot** (everything outside `webapp/`): [`CHANGELOG.md`](CHANGELOG.md).
 - **Web version** (anything under `webapp/`): [`webapp/CHANGELOG.md`](webapp/CHANGELOG.md) only — never the bot changelog.
 - A bot change that also reaches the web version through `webapp/tools/sync_from_bot.rb` goes in the bot changelog; add a web entry too only if web players notice something web-specific.
+- **Player-facing Discord announce copy:** also append to [`DISCORD_CHANGELOG.md`](DISCORD_CHANGELOG.md) (gitignored — local paste fodder only). See below.
 
-## How to update
+## How to update (`CHANGELOG.md` / web)
 
 1. Put entries under today’s date (`## YYYY-MM-DD`). Create that heading if missing (newest dates first).
 2. Use sections as needed: `### Added`, `### Changed`, `### Fixed`, `### Removed`.
 3. Write short, user-facing bullets (what a player or operator notices), not file dumps.
 4. Mention migrations, new commands, or breaking behavior when relevant.
 5. Do **not** log pure refactors, formatting-only edits, or dependency bumps unless they affect players/ops.
+
+## `DISCORD_CHANGELOG.md` (Syn’s announce voice)
+
+Update this when the change is something a **delver would notice in Discord**. Copy-paste ready blocks, newest first, written **as Syn** (flirty, filthy-fond, proud; rare “darling”; tower/ruins — not dungeon).
+
+**Skip entirely:** lore/art/NovelAI briefs, migrations, Postgres/CI/gitignore/ops, refactors, env vars, and anything players wouldn’t see or understand.
+
+If the only changelog hit is engineering/ops, leave `DISCORD_CHANGELOG.md` alone.
 
 ## Do not skip
 
