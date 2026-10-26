@@ -27,12 +27,16 @@ module Commands
     def bonuses(event)
       player = ErosHelpers.require_player(event) or return
       bot = event.respond_to?(:bot) ? event.bot : nil
-      Engine::SupportBonuses.observe!(event.user, bot: bot, force: true)
+      title_lines = Engine::SupportBonuses.observe!(event.user, bot: bot, force: true, player: player)
       player.refresh if player.respond_to?(:refresh)
 
       ErosUI.reply_v2(event, colour: 0xf0c27f) do |c|
         c.text_display(content: "## Bonuses — #{player.display_name}")
         c.text_display(content: Engine::SupportBonuses.bonus_lines(player).join("\n"))
+        if title_lines&.any?
+          c.separator(divider: true, spacing: :small)
+          c.text_display(content: title_lines.join("\n"))
+        end
         c.separator(divider: true, spacing: :small)
         c.text_display(content: Engine::SupportBonuses.promo_text)
         c.row do |row|

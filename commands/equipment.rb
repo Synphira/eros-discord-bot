@@ -89,7 +89,17 @@ module Commands
       spare_note = spare.empty? ? '' : " _(#{spare.size} more in your pack — `/equip` to swap)_"
       lines << "**Trophy:** #{trophy ? trophy.name : 'None'}#{spare_note}"
       if trophy&.stat_modifiers&.dig('cheat_death')
-        lines << "_Lich's Phylactery: **#{player.phylactery_used ? 'spent this run' : 'ready'}**_"
+        left = player.phylactery_charges_left
+        max = player.phylactery_max_uses
+        status =
+          if left <= 0
+            "spent this run (#{max}/#{max})"
+          elsif left == max
+            "ready (#{left}/#{max})"
+          else
+            "#{left}/#{max} left"
+          end
+        lines << "_Lich's Phylactery: **#{status}**_"
       end
       container.text_display(content: lines.join("\n"))
 

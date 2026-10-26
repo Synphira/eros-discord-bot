@@ -263,7 +263,8 @@ module Engine
     # What this delver actually pays: Berry quietly rewards a delver
     # who arrives looking like an invitation.
     def price_for(player, item)
-      [(item.cost.to_i * Engine::ThreatCalculator.price_multiplier(player)).round, 1].max
+      raw = [(item.cost.to_i * Engine::ThreatCalculator.price_multiplier(player)).round, 1].max
+      player.lp_price(raw)
     end
 
     def buy_item(player, item_id)
@@ -280,6 +281,7 @@ module Engine
           message: "You don't have enough Lust Points! You need **#{cost}** LP (you have `#{player.lp}`)."
         }
       end
+      # cost is already lp_price'd — spenders below use already_priced: true
 
       if player.owns_equipment?(item.id) && item.type != 'special'
         return { ok: false, error: :already_owned, message: "You already own **#{item.name}**." }
@@ -304,7 +306,7 @@ module Engine
             return { ok: false, error: :already_active, message: 'Your sanctuary is already active — explore first.' }
           end
 
-          player.spend_lp!(cost)
+          player.spend_lp!(cost, already_priced: true)
           player.update(sanctuary: true)
           return { ok: true, message: 'You drink from the bottled sanctuary. Your next exploration will be safe!' }
         when 'Bottled Ceremony'
@@ -314,7 +316,7 @@ module Engine
                                                       'Berry refuses to let you slosh.' }
           end
 
-          player.spend_lp!(cost)
+          player.spend_lp!(cost, already_priced: true)
           player.bump_tracker!('bottled_ceremony')
           return { ok: true, message: "Berry stoppers the little vial with ceremony. **Bottled Ceremony " \
                                       "carried (#{held + 1}/3)** — your next monster starts charmed by " \
@@ -324,14 +326,14 @@ module Engine
             return { ok: false, error: :full, message: 'Your defiance is already full.' }
           end
 
-          player.spend_lp!(cost)
+          player.spend_lp!(cost, already_priced: true)
           gained = player.heal_defiance!((player.max_defiance * DRAUGHT_PCT).round)
           return { ok: true, message: "You down the draught. **+#{gained} Defiance** " \
                                       "(now `#{player.defiance}/#{player.max_defiance}`)." }
         when 'Cooling Elixir'
           return { ok: false, error: :calm, message: "You're not aroused enough to need it." } if player.lust <= 0
 
-          player.spend_lp!(cost)
+          player.spend_lp!(cost, already_priced: true)
           before = player.lust
           player.update(lust: [player.lust - ELIXIR_LUST, 0].max)
           return { ok: true, message: "The elixir spreads through you like cool water. **−#{before - player.lust} Lust** " \
@@ -339,7 +341,7 @@ module Engine
         end
       end
 
-      player.spend_lp!(cost)
+      player.spend_lp!(cost, already_priced: true)
       grant = player.grant_equipment!(item, auto_equip: false)
       unless grant[:ok]
         player.refund_lp!(cost)
@@ -358,7 +360,7 @@ module Engine
                  message: "There's no corruption on you to wash away — Berry keeps your LP." }
       end
 
-      player.spend_lp!(cost)
+      player.spend_lp!(cost, already_priced: true)
       player.set_tracker!(Engine::Corruption::KEY, 0)
       Engine::Corruption.refresh!(player)
       { ok: true,
@@ -378,7 +380,7 @@ module Engine
                  message: 'You are already **Fully Corrupted**. The potion could not make you worse if it tried.' }
       end
 
-      player.spend_lp!(cost)
+      player.spend_lp!(cost, already_priced: true)
       new_level = [old + 25, Engine::Corruption::MAX].min
       player.set_tracker!(Engine::Corruption::KEY, new_level)
       Engine::Corruption.refresh!(player)
@@ -403,7 +405,7 @@ module Engine
         return { ok: false, error: :at_limit, message: "Your #{label} is already #{edge}." }
       end
 
-      player.spend_lp!(cost)
+      player.spend_lp!(cost, already_priced: true)
       sizes = player.body_sizes.is_a?(Hash) ? player.body_sizes.dup : {}
       player.update(body_sizes: sizes.merge(part => new_size))
       { ok: true,
@@ -424,7 +426,7 @@ module Engine
       end
 
       target = CharacterArchetypes::ALL.values.find { |a| a[:gender] == target_gender }
-      player.spend_lp!(cost)
+      player.spend_lp!(cost, already_priced: true)
       cleared = clear_gender_conditions!(player)
       player.update(gender: target[:gender], body_parts: target[:body_parts])
       player.bump_tracker!('gender_bending_events')

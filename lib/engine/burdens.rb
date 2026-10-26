@@ -158,7 +158,7 @@ module Engine
     end
 
     def reroll_price(player)
-      REROLL_BASE + (REROLL_STEP * rerolls_this_climb(player))
+      player.lp_price(REROLL_BASE + (REROLL_STEP * rerolls_this_climb(player)))
     end
 
     # Pool for a shuffle: never a burden already carried, never an oath,
@@ -192,7 +192,7 @@ module Engine
       end
 
       new_key = pool.sample
-      player.spend_lp!(price)
+      player.spend_lp!(price, already_priced: true)
       player.bump_tracker!('burden_rerolls_total')
       # Floor 1 keeps the escalator at 0; mid-climb increments.
       next_count = at_threshold?(player) ? 0 : rerolls_this_climb(player) + 1

@@ -744,7 +744,7 @@ module Engine
       'satisfy_bonus' => 'satisfy chance', 'trap_avoid_bonus' => 'trap avoidance',
       'intimidate_chance' => 'chance a monster backs off without touching you'
     }.freeze
-    FLAG_LABELS = { 'deny_climax' => 'orgasms denied', 'cheat_death' => 'survive one defeat per run' }.freeze
+    FLAG_LABELS = { 'deny_climax' => 'orgasms denied', 'cheat_death' => 'survive defeat (charges per run)' }.freeze
     TYPE_NAMES = { 'beast' => 'beasts', 'demon' => 'demons', 'slime' => 'slimes', 'undead' => 'undead',
                    'plant' => 'plants', 'mimic' => 'mimics' }.freeze
 

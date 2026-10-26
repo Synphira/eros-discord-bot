@@ -558,7 +558,7 @@ module Engine
         stat_modifiers: { 'max_hp' => 10, 'resistance' => 2, 'appearance' => 1 }
       },
       "Lich's Phylactery" => {
-        description: 'Once per run, survive a finishing blow with half your Defiance restored.',
+        description: 'Survive a finishing blow with half your Defiance restored (1 use per run; boosters get 2).',
         stat_modifiers: { 'cheat_death' => true, 'appearance' => 1 }
       },
       'Alpha Beast Trophy' => {

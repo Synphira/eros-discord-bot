@@ -575,8 +575,9 @@ module Engine
       unless owned.include?(primary_key.to_s) && owned.include?(secondary_key.to_s)
         return { ok: false, message: 'You can only fuse forms you have unlocked.' }
       end
-      unless player.spend_lp!(FUSION_COST)
-        return { ok: false, message: "Fusing two forms costs **#{FUSION_COST} LP** — you have #{player.lp}." }
+      fusion_price = player.lp_price(FUSION_COST)
+      unless player.spend_lp!(fusion_price, already_priced: true)
+        return { ok: false, message: "Fusing two forms costs **#{fusion_price} LP** — you have #{player.lp}." }
       end
 
       player.set_tracker!(CHIMERA_PRIMARY_TRACKER, primary_key.to_s)
@@ -585,7 +586,7 @@ module Engine
       form = chimera_form(player)
       { ok: true, form: form,
         message: "Your two shapes weave together — you are now a **#{form[:name]}**! " \
-                 "#{primary[:name]} leads at full strength; #{secondary[:name]} echoes at half. (−#{FUSION_COST} LP)" }
+                 "#{primary[:name]} leads at full strength; #{secondary[:name]} echoes at half. (−#{fusion_price} LP)" }
     end
 
     def eligible?(player, key)

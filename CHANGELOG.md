@@ -6,6 +6,22 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-26
+
+### Changed
+
+- **Support-server perks:** tag is **+5% LP** (was +10%). **Boosters** get **+5% LP**, **10% off all LP prices**, and **+1 Lich's Phylactery use** per run. Revocable titles: **Tagged Devotee** / **Tower Patron** / **Beloved of the Tower**.
+
+### Added
+
+- Migration `018_phylactery_uses` (integer charges per run; boosters may spend two).
+
+## 2026-10-25
+
+### Changed
+
+- **Covar art brief / NovelAI prompt:** lean-muscular male incubus (short messy pale hair, harder masculine face, C-cup + cock), dark cropped halter + buckled loincloth, lean-over-counter rear three-quarter pose.
+
 ## 2026-10-24
 
 ### Added

@@ -201,15 +201,16 @@ module Engine
       if owned(player).size >= max_marks(player)
         return { ok: false, message: "You have no room left for more marks (#{max_marks(player)} max). Remove one first." }
       end
-      unless player.spend_lp!(mark[:cost])
-        return { ok: false, message: "The **#{mark[:name]}** costs **#{mark[:cost]} LP** — you have #{player.lp}." }
+      price = player.lp_price(mark[:cost])
+      unless player.spend_lp!(price, already_priced: true)
+        return { ok: false, message: "The **#{mark[:name]}** costs **#{price} LP** — you have #{player.lp}." }
       end
 
       player.update(trackers: player.tracker_hash.merge(TRACKER => owned(player) + [key.to_s]))
       visit_lines = []
       Engine::Altars.gain_attention!(player, 4, visit_lines)
       { ok: true, mark: mark,
-        message: "_#{mark[:scene]}_\n**#{mark[:name]}** added (−#{mark[:cost]} LP). #{mark[:perk].sub(/\A[a-z]/, &:upcase)}.\n" \
+        message: "_#{mark[:scene]}_\n**#{mark[:name]}** added (−#{price} LP). #{mark[:perk].sub(/\A[a-z]/, &:upcase)}.\n" \
                  "_Syn taps the matching **#{mark[:name]}** displayed on her own inked, pierced skin and winks. \"Twins now, darling.\"" \
                  "#{visit_lines.empty? ? '' : "\n#{visit_lines.join("\n")}"}" }
     end

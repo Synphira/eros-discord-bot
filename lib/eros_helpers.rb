@@ -107,12 +107,17 @@ module ErosHelpers
   def require_player(event)
     return nil if guard_channel!(event)
 
+    player = find_player(event.user.id)
+
     if defined?(Engine::SupportBonuses)
       bot = event.respond_to?(:bot) ? event.bot : nil
-      Engine::SupportBonuses.observe!(event.user, bot: bot)
+      title_lines = Engine::SupportBonuses.observe!(event.user, bot: bot, player: player)
+      if player && title_lines&.any?
+        player.refresh if player.respond_to?(:refresh)
+        # Quiet grant/revoke — Bonuses panel is the loud place; status sheet stays clean.
+      end
     end
 
-    player = find_player(event.user.id)
     return player if player
 
     ErosUI.reply_v2(event, ephemeral: true) do |c|

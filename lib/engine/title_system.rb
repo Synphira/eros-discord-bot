@@ -54,6 +54,29 @@ module Engine
         description: "You've amassed great wealth in your adventures"
       },
 
+      # Discord support-server perks — granted/revoked by SupportBonuses.sync_titles!
+      'support_tag' => {
+        name: 'Tagged Devotee',
+        support: true,
+        hidden: true,
+        requirement: {},
+        description: 'You wear the support server tag for the tower'
+      },
+      'support_boost' => {
+        name: 'Tower Patron',
+        support: true,
+        hidden: true,
+        requirement: {},
+        description: 'You boost the support server that shelters the tower'
+      },
+      'support_beloved' => {
+        name: 'Beloved of the Tower',
+        support: true,
+        hidden: true,
+        requirement: {},
+        description: 'You wear the tag and boost — the tower keeps your name warm'
+      },
+
       'beast_breeder' => {
         name: 'Beast Breeder',
         requirement: { beast_submissions: 15 },
@@ -388,7 +411,9 @@ module Engine
     ).freeze
 
     TITLE_PRIORITY = %w[
-      original_syn sin_sculptor climax_checker depraved_one silver_delver endless_legend cycle_sovereign tenfold eternal mythic legendary master royal_consort covars_favourite_customer mimic_seedbed survivor experienced novice cursed lustful submissive rich
+      original_syn sin_sculptor climax_checker depraved_one silver_delver endless_legend cycle_sovereign tenfold eternal mythic legendary master royal_consort covars_favourite_customer mimic_seedbed
+      support_beloved support_boost support_tag
+      survivor experienced novice cursed lustful submissive rich
       broken addicted pure succubus_bane incubus_bane succubus_pet incubus_toy beast_breeder demon_consort
       slime_vessel undead_paramour plant_pollinated pit_survivor glory_hole_veteran trap_springer
     ].freeze

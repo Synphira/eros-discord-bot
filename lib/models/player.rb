@@ -349,7 +349,7 @@ class Player < Sequel::Model(:players)
     note_highest_level!
     lines = []
     3.times do
-      new_titles = Engine::TitleSystem::TITLES.reject { |k, _| earned_titles.include?(k) }
+      new_titles = Engine::TitleSystem::TITLES.reject { |k, t| earned_titles.include?(k) || t[:support] }
                                               .select { |_, t| Engine::TitleSystem.met?(self, t[:requirement]) }
       new_achievements = Engine::TitleSystem::ACHIEVEMENTS.reject { |a| earned_achievements.include?(a[:id]) }
                                                           .select { |a| Engine::TitleSystem.met?(self, a[:requirement]) }
@@ -689,14 +689,40 @@ class Player < Sequel::Model(:players)
     update(defiance: max_defiance) if defiance > max_defiance
   end
 
+  def phylactery_max_uses
+    Engine::SupportBonuses.phylactery_max_uses(self)
+  end
+
+  def phylactery_uses_count
+    if self.class.columns.include?(:phylactery_uses)
+      phylactery_uses.to_i
+    else
+      phylactery_used ? 1 : 0
+    end
+  end
+
+  def phylactery_charges_left
+    [phylactery_max_uses - phylactery_uses_count, 0].max
+  end
+
   def try_cheat_death!(lines)
-    return false if phylactery_used
     return false unless equipment_effect_flag?('cheat_death')
+    return false if phylactery_charges_left <= 0
 
     restored = [(max_defiance / 2.0).round, 1].max
-    update(defiance: restored, lust: base_lust, phylactery_used: true)
+    used = phylactery_uses_count + 1
+    attrs = { defiance: restored, lust: base_lust, phylactery_used: true }
+    attrs[:phylactery_uses] = used if self.class.columns.include?(:phylactery_uses)
+    update(attrs)
+    left = phylactery_max_uses - used
+    charge_note =
+      if left.positive?
+        "_(#{left} charge#{left == 1 ? '' : 's'} left this run)_"
+      else
+        '_(last charge this run)_'
+      end
     lines << "**Lich's Phylactery** cracks and pulls your soul back! Defiance restored to **#{restored}** " \
-             '_(once per run)_.'
+             "#{charge_note}."
     true
   end
 
@@ -710,7 +736,7 @@ class Player < Sequel::Model(:players)
     stripped = strip_non_cursed_equipment!
     reactivated = reactivate_suppressed_curses!
 
-    update(
+    run_reset = {
       level: 1,
       strength: 5,
       agility: 5,
@@ -729,7 +755,9 @@ class Player < Sequel::Model(:players)
       conditions: [],
       trackers: tracker_hash.merge(RUN_TRACKERS.to_h { |k| [k, 0] })
                             .merge('rooms_floor_stamp' => '1:1', 'rooms_on_floor' => 0)
-    )
+    }
+    run_reset[:phylactery_uses] = 0 if self.class.columns.include?(:phylactery_uses)
+    update(run_reset)
     update(defiance: starting_defiance)
     Engine::NPCSystem.reset_finished!(self)
 
@@ -962,10 +990,17 @@ class Player < Sequel::Model(:players)
       { curse: nil, entry: nil, newly_afflicted: false }
   end
 
-  def spend_lp!(cost)
-    return false if lp < cost
+  # Booster 10% off — use for UI quotes. spend_lp! applies the same by default.
+  def lp_price(base)
+    Engine::SupportBonuses.lp_price(self, base)
+  end
 
-    update(lp: lp - cost)
+  # Pass already_priced: true when `cost` came from lp_price / Shop.price_for.
+  def spend_lp!(cost, already_priced: false)
+    amount = already_priced ? cost.to_i : lp_price(cost)
+    return false if amount.positive? && lp < amount
+
+    update(lp: lp - amount) if amount.positive?
     true
   end
 
@@ -1092,8 +1127,8 @@ class Player < Sequel::Model(:players)
       return { ok: false, error: :unknown_stat, message: 'Unknown stat.' }
     end
 
-    cost = stat_upgrade_cost(stat)
-    unless spend_lp!(cost)
+    cost = lp_price(stat_upgrade_cost(stat))
+    unless spend_lp!(cost, already_priced: true)
       return { ok: false, error: :insufficient_lp, message: "You need **#{cost}** LP to raise #{stat} (you have `#{lp}`)." }
     end
 
@@ -1108,8 +1143,8 @@ class Player < Sequel::Model(:players)
   end
 
   def upgrade_level!
-    cost = level_upgrade_cost
-    unless spend_lp!(cost)
+    cost = lp_price(level_upgrade_cost)
+    unless spend_lp!(cost, already_priced: true)
       return { ok: false, error: :insufficient_lp, message: "You need **#{cost}** LP to level up (you have `#{lp}`)." }
     end
 
@@ -1299,17 +1334,18 @@ class Player < Sequel::Model(:players)
     curse = list[index]
     return { ok: false, error: :invalid_index, message: 'That curse number is invalid.' } unless curse
 
-    unless spend_lp!(CURSE_REMOVE_COST)
+    cost = lp_price(CURSE_REMOVE_COST)
+    unless spend_lp!(cost, already_priced: true)
       return {
         ok: false,
         error: :insufficient_lp,
-        message: "You don't have enough Lust Points! You need #{CURSE_REMOVE_COST} LP."
+        message: "You don't have enough Lust Points! You need #{cost} LP."
       }
     end
 
     deleted = DB[:player_curses].where(player_id: discord_id, curse_id: curse.id).delete
     if deleted.zero?
-      refund_lp!(CURSE_REMOVE_COST)
+      refund_lp!(cost)
       return { ok: false, error: :curse_not_found, message: 'Curse not found.' }
     end
 
@@ -1329,8 +1365,8 @@ class Player < Sequel::Model(:players)
     list = active_curses_ordered
     return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" } if list.empty?
 
-    cost = list.size * CURSE_REMOVE_COST
-    unless spend_lp!(cost)
+    cost = lp_price(list.size * CURSE_REMOVE_COST)
+    unless spend_lp!(cost, already_priced: true)
       return {
         ok: false,
         error: :insufficient_lp,
@@ -1348,15 +1384,18 @@ class Player < Sequel::Model(:players)
       refund_lp!(cost)
       return { ok: false, error: :curse_not_found, message: 'Curse not found.' }
     end
-    refund_lp!((list.size - deleted) * CURSE_REMOVE_COST) if deleted < list.size
+    if deleted < list.size
+      refund_lp!(lp_price((list.size - deleted) * CURSE_REMOVE_COST))
+    end
+    paid = lp_price(deleted * CURSE_REMOVE_COST)
 
     {
       ok: true,
       count: deleted,
-      cost: deleted * CURSE_REMOVE_COST,
+      cost: paid,
       curses: list,
       message: "You've purged **all #{deleted} curses** in one rite — " \
-               "#{deleted * CURSE_REMOVE_COST} LP spent. (LP left: #{lp})"
+               "#{paid} LP spent. (LP left: #{lp})"
     }
   end
 
@@ -1369,7 +1408,7 @@ class Player < Sequel::Model(:players)
 
     message =
       if result[:error] == :insufficient_lp
-        "You don't have enough Lust Points! You need #{CURSE_SUPPRESS_COST} LP."
+        "You don't have enough Lust Points! You need #{lp_price(CURSE_SUPPRESS_COST)} LP."
       else
         'That curse is already suppressed.'
       end
@@ -1383,19 +1422,21 @@ class Player < Sequel::Model(:players)
   end
 
   def purge_curse!(curse_id, cost: CURSE_REMOVE_COST)
-    return { ok: false, error: :insufficient_lp } unless spend_lp!(cost)
+    priced = lp_price(cost)
+    return { ok: false, error: :insufficient_lp } unless spend_lp!(priced, already_priced: true)
 
     deleted = DB[:player_curses].where(player_id: discord_id, curse_id: curse_id).delete
     if deleted.zero?
-      refund_lp!(cost)
+      refund_lp!(priced)
       return { ok: false, error: :curse_not_found }
     end
 
-    { ok: true, action: :purged, curse_id: curse_id, lp_spent: cost }
+    { ok: true, action: :purged, curse_id: curse_id, lp_spent: priced }
   end
 
   def suppress_curse!(curse_id, cost:)
-    return { ok: false, error: :insufficient_lp } unless spend_lp!(cost)
+    priced = lp_price(cost)
+    return { ok: false, error: :insufficient_lp } unless spend_lp!(priced, already_priced: true)
 
     updated = DB[:player_curses]
               .where(player_id: discord_id, curse_id: curse_id, is_suppressed: false)
@@ -1576,8 +1617,8 @@ class Player < Sequel::Model(:players)
     return { ok: false, error: :not_cursed, message: "**#{item.name}** isn't cursed — use `e,unequip`." } unless item.cursed
 
     surcharge = vex_exiled_for_pricing?
-    cost = cursed_removal_cost(item)
-    unless spend_lp!(cost)
+    cost = lp_price(cursed_removal_cost(item))
+    unless spend_lp!(cost, already_priced: true)
       return {
         ok: false,
         error: :insufficient_lp,

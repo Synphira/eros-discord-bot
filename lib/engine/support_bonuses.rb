@@ -11,10 +11,12 @@ module Engine
     DEFAULT_GUILD_ID = 1_552_733_580_067_872_798
     DEFAULT_BOOSTER_ROLE_ID = 1_562_618_450_730_553_354
     INVITE_URL = 'https://discord.gg/fXWCsyCUyU'
-    DEFAULT_TAG_MULT = 1.10
-    # Mechanical booster reward still TBD — detection and UI ship first.
-    DEFAULT_BOOSTER_MULT = 1.0
+    DEFAULT_TAG_MULT = 1.05
+    DEFAULT_BOOSTER_MULT = 1.05
+    DEFAULT_PRICE_MULT = 0.9
     CACHE_TTL = 300
+
+    SUPPORT_TITLE_KEYS = %w[support_tag support_boost support_beloved].freeze
 
     @bot = nil
     @lock = Mutex.new
@@ -47,6 +49,10 @@ module Engine
       mult_from_env('SUPPORT_BOOSTER_LP_MULT', DEFAULT_BOOSTER_MULT)
     end
 
+    def purchase_multiplier_value
+      mult_from_env('SUPPORT_BOOSTER_PRICE_MULT', DEFAULT_PRICE_MULT)
+    end
+
     def tag_bonus_percent
       ((tag_multiplier_value - 1.0) * 100).round
     end
@@ -55,13 +61,31 @@ module Engine
       ((booster_multiplier_value - 1.0) * 100).round
     end
 
+    def price_discount_percent
+      ((1.0 - purchase_multiplier_value) * 100).round
+    end
+
+    # Final LP cost after the booster purchase discount (floored at 1 when base > 0).
+    def lp_price(player, base)
+      raw = base.to_i
+      return raw if raw <= 0
+
+      mult = boosting?(discord_id_of(player)) ? purchase_multiplier_value : 1.0
+      [(raw * mult).round, 1].max
+    end
+
+    def phylactery_max_uses(player)
+      1 + (boosting?(discord_id_of(player)) ? 1 : 0)
+    end
+
     # Refresh tag from the interaction user; refresh booster (and optionally
     # tag via User.resolve) from the support guild when stale or forced.
-    def observe!(user, bot: nil, force: false)
-      return unless user
+    # Returns optional title sync lines when a player row is provided.
+    def observe!(user, bot: nil, force: false, player: nil)
+      return [] unless user
 
       id = user.respond_to?(:id) ? user.id.to_i : nil
-      return unless id&.positive?
+      return [] unless id&.positive?
 
       bot ||= @bot
       now = Time.now
@@ -90,6 +114,9 @@ module Engine
       end
 
       write_state!(id, tag: tag, booster: booster, at: fetched_at || now)
+
+      player ||= Player[id] if defined?(Player)
+      player ? sync_titles!(player) : []
     end
 
     def tagged?(discord_id)
@@ -116,6 +143,59 @@ module Engine
       mult
     end
 
+    def desired_support_title(discord_id)
+      id = discord_id.to_i
+      tag = tagged?(id)
+      boost = boosting?(id)
+      return 'support_beloved' if tag && boost
+      return 'support_tag' if tag
+      return 'support_boost' if boost
+
+      nil
+    end
+
+    # Grant/revoke the three support titles to match current tag/boost state.
+    def sync_titles!(player)
+      return [] unless player
+
+      id = discord_id_of(player)
+      desired = desired_support_title(id)
+      have = player.earned_titles & SUPPORT_TITLE_KEYS
+      want = desired ? [desired] : []
+
+      to_add = want - have
+      to_drop = have - want
+      return [] if to_add.empty? && to_drop.empty?
+
+      lines = []
+      titles = player.earned_titles.dup
+      to_drop.each do |key|
+        titles.delete(key)
+        entry = Engine::TitleSystem.title(key)
+        next unless entry
+
+        reason =
+          case key
+          when 'support_beloved' then 'tag or boost lapsed'
+          when 'support_boost' then 'no longer boosting'
+          else 'no longer wearing the support tag'
+          end
+        lines << "**Title removed:** #{entry[:name]} — _#{reason}._"
+      end
+      to_add.each do |key|
+        titles << key unless titles.include?(key)
+        entry = Engine::TitleSystem.title(key)
+        lines << "**New title unlocked:** #{entry[:name]} — _#{entry[:description]}_ (equip with `/titles`)" if entry
+      end
+
+      attrs = { titles: titles }
+      if player.selected_title && to_drop.include?(player.selected_title.to_s)
+        attrs[:selected_title] = nil
+      end
+      player.update(attrs)
+      lines
+    end
+
     def bonus_lines(player)
       id = discord_id_of(player)
       lines = []
@@ -127,11 +207,9 @@ module Engine
       end
 
       if boosting?(id)
-        lines << if booster_multiplier_value > 1.0
-                   "✅ **Server booster** — **+#{booster_bonus_percent}% LP** from all sources."
-                 else
-                   '✅ **Server booster** — active _(reward coming soon — thank you for boosting)._'
-                 end
+        lines << "✅ **Server booster** — **+#{booster_bonus_percent}% LP** from all sources; " \
+                 "**#{price_discount_percent}% off** all LP prices; " \
+                 "**+1 Lich's Phylactery** use per run."
       else
         lines << '▫️ **Server booster** — not boosting the support server.'
       end
@@ -140,8 +218,10 @@ module Engine
     end
 
     def promo_text
-      'You can **boost the support server** or **wear the support server tag** to gain bonuses. ' \
-        'These apply even in DMs or other servers, as long as you\'re in the support server with the tag and/or boost.'
+      "You can **wear the support server tag** (+#{tag_bonus_percent}% LP) and/or **boost the support server** " \
+        "(+#{booster_bonus_percent}% LP, #{price_discount_percent}% off LP prices, extra Phylactery charge). " \
+        'Both apply even in DMs or other servers while you\'re in the support server. ' \
+        'Stack them for **Beloved of the Tower**.'
     end
 
     def tagged_from_user?(user)

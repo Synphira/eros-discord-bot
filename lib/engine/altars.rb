@@ -133,12 +133,13 @@ module Engine
         log << "Warm approval brushes your skin like a suckered fingertip. **+#{gained} Defiance** · " \
                "Attention **#{attention(player)}/#{MAX_ATTENTION}**."
       when 'tithe'
-        unless player.spend_lp!(TITHE_COST)
-          log << "Your pockets are too empty for a tithe (#{TITHE_COST} LP). The stone goddess's smile turns pitying."
+        tithe = player.lp_price(TITHE_COST)
+        unless player.spend_lp!(tithe, already_priced: true)
+          log << "Your pockets are too empty for a tithe (#{tithe} LP). The stone goddess's smile turns pitying."
           return
         end
 
-        log << "You pour #{TITHE_COST} LP of lust-light into the offering bowl. It burns rose-red and rises like incense."
+        log << "You pour #{tithe} LP of lust-light into the offering bowl. It burns rose-red and rises like incense."
         Engine::FetishEvents.apply_condition!(player, BLESSING, log)
         gain_attention!(player, 15, log)
         log << "**Eros's Favour** settles on you · Attention **#{attention(player)}/#{MAX_ATTENTION}**."

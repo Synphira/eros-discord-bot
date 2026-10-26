@@ -1,0 +1,27 @@
+name: Webapp smoke
+
+on:
+  push:
+    paths:
+      - 'webapp/**'
+      - 'lib/**'
+      - '.github/workflows/webapp-smoke.yml'
+  pull_request:
+    paths:
+      - 'webapp/**'
+      - 'lib/**'
+      - '.github/workflows/webapp-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: false
+      - name: Sync bot engines into webapp
+        run: ruby webapp/tools/sync_from_bot.rb
+      - name: Smoke test (800 steps)
+        run: ruby webapp/test/smoke.rb 800 11

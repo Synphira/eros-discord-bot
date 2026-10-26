@@ -38,7 +38,7 @@ Support server: [discord.gg/fXWCsyCUyU](https://discord.gg/fXWCsyCUyU)
 - **Shops & residents:** Berry’s counter and quests, Syn’s parlour (marks), Covar’s Cursed Shop (living gear), plus residents like Madame Vex, Pip, Sister Nectar, and the Cartographer.
 - **Talk** with Syn, Berry, Covar, and residents (categories: General / Clergy / Residents / Temple). Clergy Talk is victory-only.
 - **Content options** (`/options`) — Core themes on by default; Bodies, Kinks, and Fetishes are opt-in. You choose intensity; you do **not** make the bot SFW.
-- **Support bonuses** (`/status` → Bonuses): wear this support server’s Discord **tag** for **+10% LP** from all sources; **server boosters** are detected (booster reward TBD). Works in DMs and other servers.
+- **Support bonuses** (`/status` → Bonuses): wear this support server’s Discord **tag** for **+5% LP**; **boost** for another **+5% LP**, **10% off all LP prices**, and an **extra Lich's Phylactery** charge per run. Titles: Tagged Devotee / Tower Patron / Beloved of the Tower (revoked if you drop tag or boost). Works in DMs and other servers.
 
 ---
 
@@ -138,7 +138,7 @@ panel; slash/prefix commands send a **new** message. Replies use Discord
 ## Game mechanics (short)
 
 - **Threat** rises with LP and active curses. Higher Threat = tougher, lustier foes and more monster rooms.
-- **LP** — spend on levels, gear, curses, marks, hybrids. Also fuels Threat. Support **tag** adds +10% to gains.
+- **LP** — spend on levels, gear, curses, marks, hybrids. Also fuels Threat. Support **tag** / **boost** add +5% each to gains (boost also discounts LP prices).
 - **Defiance / Lust** — hits and submission raise lust; climax at 100 drains Defiance. 0 Defiance = defeat.
 - **Defeat** — curse, back to floor 1 / level 1; normal gear lost; living gear, LP, curses, marks, titles persist. Cycles reset to 1.
 - **Cycles** — clear floor 35 → harder climb, better payouts (~×1.3 per cycle), more curse pressure.

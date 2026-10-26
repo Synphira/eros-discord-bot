@@ -647,7 +647,8 @@ module Engine
     end
 
     def vex_outfit_price(player, spec)
-      [(spec[:cost] * Engine::ThreatCalculator.price_multiplier(player)).round, 1].max
+      raw = [(spec[:cost] * Engine::ThreatCalculator.price_multiplier(player)).round, 1].max
+      player.lp_price(raw)
     end
 
     def buy_vex_outfit!(player, equipment_id)
@@ -668,7 +669,7 @@ module Engine
       return { ok: false, message: "You already own **#{item.name}**." } if player.owns_equipment?(item.id)
 
       price = vex_outfit_price(player, spec)
-      unless player.spend_lp!(price)
+      unless player.spend_lp!(price, already_priced: true)
         return { ok: false, message: "\"Cash first, poetry later. **#{price} LP**, delver — you have " \
                                      "#{player.lp}.\"" }
       end
@@ -702,8 +703,8 @@ module Engine
       item = player.equipped_mimics.find { |i| i.id == equipment_id.to_i }
       return { ok: false, message: 'That piece is not being worn.' } unless item
 
-      cost = negotiate_cost(player, item)
-      unless player.spend_lp!(cost)
+      cost = player.lp_price(negotiate_cost(player, item))
+      unless player.spend_lp!(cost, already_priced: true)
         return { ok: false, message: "Negotiation costs **#{cost} LP** — you have #{player.lp}." }
       end
 
@@ -733,8 +734,9 @@ module Engine
       if refitted_names(player).include?(item.name)
         return { ok: false, message: "The **#{item.name}** has already renegotiated once. Pride, again." }
       end
-      unless player.spend_lp!(REFIT_COST)
-        return { ok: false, message: "A refit costs **#{REFIT_COST} LP** — you have #{player.lp}." }
+      refit_price = player.lp_price(REFIT_COST)
+      unless player.spend_lp!(refit_price, already_priced: true)
+        return { ok: false, message: "A refit costs **#{refit_price} LP** — you have #{player.lp}." }
       end
 
       mods = player.gear_effects_for(item).transform_keys(&:to_s).dup
@@ -773,8 +775,10 @@ module Engine
     def buy_spotting!(player)
       return { ok: false, message: 'Pip is already Queen-watching for you — the next trap will be spotted.' } if player.tracker('pip_spotting').positive?
 
-      price = spotting_price(player)
-      return { ok: false, message: "Queen-watching costs **#{price} LP** — you have #{player.lp}." } unless player.spend_lp!(price)
+      price = player.lp_price(spotting_price(player))
+      unless player.spend_lp!(price, already_priced: true)
+        return { ok: false, message: "Queen-watching costs **#{price} LP** — you have #{player.lp}." }
+      end
 
       player.set_tracker!('pip_spotting', 1)
       { ok: true,
@@ -789,7 +793,8 @@ module Engine
       if player.tracker('pip_wedges') >= MAX_WEDGES
         return { ok: false, message: "You already carry **#{MAX_WEDGES}** of Pip's wedges. Jam something first." }
       end
-      return { ok: false, message: "A wedge costs **#{WEDGE_COST} LP** — you have #{player.lp}." } unless player.spend_lp!(WEDGE_COST)
+      wedge_price = player.lp_price(WEDGE_COST)
+      return { ok: false, message: "A wedge costs **#{wedge_price} LP** — you have #{player.lp}." } unless player.spend_lp!(wedge_price, already_priced: true)
 
       player.bump_tracker!('pip_wedges')
       { ok: true,
@@ -920,8 +925,10 @@ module Engine
     end
 
     def buy_sketch!(player)
-      price = sketch_price(player)
-      return { ok: false, message: "A sketch costs **#{price} LP** — you have #{player.lp}." } unless player.spend_lp!(price)
+      price = player.lp_price(sketch_price(player))
+      unless player.spend_lp!(price, already_priced: true)
+        return { ok: false, message: "A sketch costs **#{price} LP** — you have #{player.lp}." }
+      end
 
       queue = Engine::Exploration.new(player).projected_pool_kinds(3)
       player.set_tracker!('cartographer_sketch', { 'stamp' => shrine_stamp(player), 'queue' => queue })
