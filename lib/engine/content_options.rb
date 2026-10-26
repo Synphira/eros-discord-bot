@@ -63,7 +63,9 @@ module Engine
       'pony_play' => { label: 'Pony Play', group: :fetish, default: false, description: 'Harnesses, bits, tails, and trotting.' },
       'gags_hoods' => { label: 'Gags & Hoods', group: :fetish, default: false, description: 'Ball gags, ring gags, and leather hoods.' },
       'gaping' => { label: 'Gaping & Fisting', group: :fetish, default: false, description: 'Fisting and being left stretched wide open.' },
-      'clowns' => { label: 'Clowns', group: :fetish, default: false, description: 'Painted faces, balloons, pies, and carnival filth (opt-in).' }
+      'clowns' => { label: 'Clowns', group: :fetish, default: false, description: 'Painted faces, balloons, pies, and carnival filth (opt-in).' },
+      'halloween_scares' => { label: 'Halloween Scares', group: :fetish, default: false,
+                              description: 'Jump-scare All Hallows rooms (opt-in; seasonal — only rolls Oct 30–Nov 5).' }
     }.freeze
 
     CORE_KEYS = PREFERENCES.select { |_, v| v[:group] == :core }.keys.freeze

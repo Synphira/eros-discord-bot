@@ -55,6 +55,13 @@ module Engine
         effects: { 'satisfy_bonus' => 0.08, 'victory_lp_bonus' => 3, 'submit_lp_bonus' => 3 },
         blurb: 'Tiara, lace, garter, and wings, worn as their maker wears them: the tower ' \
                'recognises its first seamstress, and everything in it behaves accordingly.'
+      },
+      'all_hallows_masque' => {
+        name: "All Hallows' Masque", bonus_name: 'Night of Masks',
+        pieces: ['Masquerade Domino', 'Pumpkin-Cut Bodice', 'Cobweb Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04 },
+        blurb: 'Mask, bodice, and webs worn together: the temple reads you as dressed for All Hallows — ' \
+               'and keeps paying that compliment long after the candles go out.'
       }
     }.freeze
 

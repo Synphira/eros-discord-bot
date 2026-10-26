@@ -23,7 +23,11 @@ module Presence
   end
 
   def text_for(users, towers)
-    "with #{users} #{users == 1 ? 'user' : 'users'} in #{towers} #{towers == 1 ? 'tower' : 'towers'}."
+    if defined?(Engine::Halloween) && Engine::Halloween.respond_to?(:presence_text)
+      Engine::Halloween.presence_text(users, towers)
+    else
+      "with #{users} #{users == 1 ? 'user' : 'users'} in #{towers} #{towers == 1 ? 'tower' : 'towers'}."
+    end
   end
 
   def fetch_counts!(bot)

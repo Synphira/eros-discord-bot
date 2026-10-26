@@ -16,10 +16,44 @@ module Commands
         count = player.condition_list.size
         burden_count = Engine::Burdens.active(player).size
         bonus_count = Engine::SupportBonuses.active_count(player)
+        candy = Engine::Halloween.candy_count(player)
         c.row do |row|
           row.button(label: "⛓️ Burdens (#{burden_count})", style: :primary, custom_id: "eros:status:burdens:#{event.user.id}")
           row.button(label: "Bonuses (#{bonus_count})", style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
           row.button(label: "Conditions (#{count})", style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
+        end
+        if candy.positive?
+          c.row do |row|
+            row.button(label: "🍬 Eat Candy (#{candy})", style: :success,
+                       custom_id: "eros:status:candy:#{event.user.id}")
+          end
+        end
+      end
+    end
+
+    def eat_candy(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Halloween.eat_candy!(player)
+      player.refresh if player.respond_to?(:refresh)
+      notice = result[:ok] ? "✅ #{result[:message]}" : "❌ #{result[:message]}"
+      threat = Engine::ThreatCalculator.calculate(player)
+      ErosUI.reply_v2(event, colour: ErosUI.threat_color(threat.category)) do |c|
+        ErosUI.build_status_container(c, player)
+        c.text_display(content: notice)
+        count = player.condition_list.size
+        burden_count = Engine::Burdens.active(player).size
+        bonus_count = Engine::SupportBonuses.active_count(player)
+        candy = Engine::Halloween.candy_count(player)
+        c.row do |row|
+          row.button(label: "⛓️ Burdens (#{burden_count})", style: :primary, custom_id: "eros:status:burdens:#{event.user.id}")
+          row.button(label: "Bonuses (#{bonus_count})", style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
+          row.button(label: "Conditions (#{count})", style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
+        end
+        if candy.positive?
+          c.row do |row|
+            row.button(label: "🍬 Eat Candy (#{candy})", style: :success,
+                       custom_id: "eros:status:candy:#{event.user.id}")
+          end
         end
       end
     end
@@ -183,6 +217,12 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Status.bonuses(event)
+    end
+
+    button(custom_id: /^eros:status:candy:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Status.eat_candy(event)
     end
 
     button(custom_id: /^eros:status:conditions:\d+$/) do |event|

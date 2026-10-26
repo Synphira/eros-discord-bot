@@ -99,11 +99,21 @@ module Engine
 
     def present!(player)
       level = [player.current_floor, 1].max
-      player.store_event!(type: 'altar', level: level, mode: 'choice', name: 'Altar of Eros')
-      log = ["**Floor #{level}** — candlelight in the dark.",
-             { scene: 'An altar of white stone and dark red silk, carved with a towering, horned goddess whose ' \
-                      'stone tentacles curl around the offering bowl. The candles light themselves as you ' \
-                      "approach. Her Attention rests on you at **#{attention(player)}/#{MAX_ATTENTION}**." }]
+      pumpkin = Engine::Halloween.pumpkin_altar?
+      name = pumpkin ? 'Pumpkin Altar of Eros' : 'Altar of Eros'
+      player.store_event!(type: 'altar', level: level, mode: 'choice', name: name)
+      scene =
+        if pumpkin
+          'An altar of white stone dressed for All Hallows — orange silk, a hollowed pumpkin for an offering ' \
+          'bowl, candlelight grinning through carved teeth. Stone tentacles curl around the rind like they ' \
+          "have always belonged there. Her Attention rests on you at **#{attention(player)}/#{MAX_ATTENTION}**."
+        else
+          'An altar of white stone and dark red silk, carved with a towering, horned goddess whose ' \
+          'stone tentacles curl around the offering bowl. The candles light themselves as you ' \
+          "approach. Her Attention rests on you at **#{attention(player)}/#{MAX_ATTENTION}**."
+        end
+      log = ["**Floor #{level}** — #{pumpkin ? 'pumpkin candlelight in the dark' : 'candlelight in the dark'}.",
+             { scene: scene }]
       if attention(player) >= 60
         log << '_The candles were already lit — all of them, flames leaning toward you like faces. ' \
                'She was watching this altar before you found it. She was watching **you**._'
@@ -111,7 +121,8 @@ module Engine
         log << '_One candle lights a breath before the others. Noticed, then. Not yet known._'
       end
       log << 'What do you offer your goddess?'
-      { ok: true, mode: :choice, name: 'Altar of Eros', colour: 0x5c0a2e, log: log, choices: choices(player) }
+      { ok: true, mode: :choice, name: name, colour: pumpkin ? 0xb85c1a : 0x5c0a2e, log: log,
+        choices: choices(player) }
     end
 
     def choices(_player)
@@ -124,14 +135,21 @@ module Engine
     end
 
     def resolve!(player, choice, log)
+      pumpkin = Engine::Halloween.pumpkin_altar?
       case choice.to_s
       when 'pray'
-        log << 'You kneel before the altar and pray — honestly, filthily, telling your goddess exactly what ' \
-               'the tower has done to you and what you want it to do next.'
+        log << if pumpkin
+                 'You kneel before the pumpkin altar and pray — honestly, filthily — while the carved grin ' \
+                 'flickers in time with your pulse.'
+               else
+                 'You kneel before the altar and pray — honestly, filthily, telling your goddess exactly what ' \
+                 'the tower has done to you and what you want it to do next.'
+               end
         gain_attention!(player, 10, log)
         gained = player.heal_defiance!(10)
         log << "Warm approval brushes your skin like a suckered fingertip. **+#{gained} Defiance** · " \
                "Attention **#{attention(player)}/#{MAX_ATTENTION}**."
+        grant_pumpkin_candy!(player, log) if pumpkin
       when 'tithe'
         tithe = player.lp_price(TITHE_COST)
         unless player.spend_lp!(tithe, already_priced: true)
@@ -139,14 +157,27 @@ module Engine
           return
         end
 
-        log << "You pour #{tithe} LP of lust-light into the offering bowl. It burns rose-red and rises like incense."
-        Engine::FetishEvents.apply_condition!(player, BLESSING, log)
+        log << if pumpkin
+                 "You pour #{tithe} LP of lust-light into the pumpkin's mouth. It burns rose-orange and smells of caramel."
+               else
+                 "You pour #{tithe} LP of lust-light into the offering bowl. It burns rose-red and rises like incense."
+               end
+        blessing = pumpkin ? Engine::Halloween::PUMPKIN_BLESSING : BLESSING
+        Engine::FetishEvents.apply_condition!(player, blessing, log)
         gain_attention!(player, 15, log)
-        log << "**Eros's Favour** settles on you · Attention **#{attention(player)}/#{MAX_ATTENTION}**."
+        label = pumpkin ? 'Pumpkin Glow' : "Eros's Favour"
+        log << "**#{label}** settles on you · Attention **#{attention(player)}/#{MAX_ATTENTION}**."
+        grant_pumpkin_candy!(player, log) if pumpkin
       when 'kneel'
-        log << 'You kneel and offer yourself on the altar steps. Stone tentacles warm and soften beneath you, ' \
-               'suckers kissing along your thighs while candlelight crawls over your skin — she takes her time ' \
-               'looking, and the looking alone leaves you trembling and soaked.'
+        log << if pumpkin
+                 'You kneel and offer yourself on pumpkin-silk steps. Stone tentacles warm and soften, smelling ' \
+                 'faintly of spice, suckers kissing along your thighs while the jack-o\'-lantern watches — she ' \
+                 'takes her time looking, and the looking alone leaves you trembling and soaked.'
+               else
+                 'You kneel and offer yourself on the altar steps. Stone tentacles warm and soften beneath you, ' \
+                 'suckers kissing along your thighs while candlelight crawls over your skin — she takes her time ' \
+                 'looking, and the looking alone leaves you trembling and soaked.'
+               end
         parts = Engine::ChastitySystem.scene_parts(player)
         touches = []
         touches << 'One warm sucker seals over your clit and pulses there, patient as prayer.' if parts.include?('vagina')
@@ -160,9 +191,19 @@ module Engine
         player.gain_lust!(25)
         gain_attention!(player, 25, log)
         log << "**+25 Lust** · Attention **#{attention(player)}/#{MAX_ATTENTION}**."
+        grant_pumpkin_candy!(player, log, amount: 2) if pumpkin
       else
         log << 'You back away from the altar. Behind you, one candle stays lit a moment longer than the rest.'
       end
     end
+
+    def grant_pumpkin_candy!(player, log, amount: 1)
+      added = Engine::Halloween.grant_candy!(player, amount)
+      return unless added.positive?
+
+      log << "Foil sweets tumble from the offering bowl — **+#{added} Halloween Candy** " \
+             "(**#{Engine::Halloween.candy_count(player)}/#{Engine::Halloween::CANDY_MAX}** stashed; keeps after All Hallows)."
+    end
+    module_function :grant_pumpkin_candy!
   end
 end

@@ -406,7 +406,16 @@ module Engine
         'silenced' => ['Silenced', :gag_events, 3, 'Gagged and hooded, and better for it'],
         'wide_open' => ['Wide Open', :gaping_events, 3, "You've been fisted and left gaping, and loved every inch of it"],
         'carnival_slut' => ['Carnival Slut', :clown_events, 3, 'Pies, balloons, and painted smiles — you kept coming back'],
-        'clown_consort' => ['Clown Consort', :clown_submissions, 15, "You've offered yourself to the tower's carnival pests"]
+        'clown_consort' => ['Clown Consort', :clown_submissions, 15, "You've offered yourself to the tower's carnival pests"],
+        # All Hallows' souvenirs — earned only in-season (trackers only bump then), kept forever.
+        'masquerade_meat' => ['Masquerade Meat', :halloween_submits, 10,
+                              'Ten submissions during All Hallows — the mask never really came off'],
+        'sweet_tooth' => ['Sweet Tooth', :halloween_candy_eaten, 8,
+                          'You saved the candy and ate it when you wanted — season or not'],
+        'door_to_door' => ['Door-to-Door', :trick_or_treat_events, 3,
+                           'You knocked. Treats, tricks, and sticky fingers followed'],
+        'easily_spooked' => ['Easily Spooked', :halloween_scare_events, 3,
+                             'You opted into the fright — and came back for more']
       }.transform_values do |name, tracker, count, desc|
         { name: name, requirement: { tracker => count }, description: desc }
       end
@@ -418,6 +427,7 @@ module Engine
       survivor experienced novice cursed lustful submissive rich
       broken addicted pure succubus_bane incubus_bane succubus_pet incubus_toy beast_breeder demon_consort
       slime_vessel undead_paramour plant_pollinated pit_survivor glory_hole_veteran trap_springer
+      masquerade_meat sweet_tooth door_to_door easily_spooked carnival_slut clown_consort
     ].freeze
 
     ACHIEVEMENT_CATEGORIES = {
@@ -486,6 +496,10 @@ module Engine
       ['pony_veteran', 'Well Trained', 'Get harnessed in the stables 3 times', :pony_events, 3, 25],
       ['clown_veteran', 'In the Act', 'Survive carnival clownery 3 times', :clown_events, 3, 25],
       ['clown_submit_veteran', 'Honked Into Submission', 'Submit to clowns 10 times', :clown_submissions, 10, 35],
+      ['halloween_submit_veteran', 'Masquerade Meat', 'Submit 10 times during All Hallows\' Heat', :halloween_submits, 10, 40],
+      ['halloween_candy_veteran', 'Sweet Tooth', 'Eat 8 pieces of Halloween candy', :halloween_candy_eaten, 8, 25],
+      ['trick_or_treat_veteran', 'Door-to-Door', 'Finish 3 trick-or-treat All Hallows events', :trick_or_treat_events, 3, 30],
+      ['halloween_scare_veteran', 'Easily Spooked', 'Survive 3 Halloween scare rooms', :halloween_scare_events, 3, 30],
       ['gag_veteran', 'Mmmph', 'Wear a gag or hood 3 times', :gag_events, 3, 25],
       ['gaping_veteran', 'Wide Open', 'Experience fisting 3 times', :gaping_events, 3, 30],
       ['denied_frustrated', 'Frustrated', 'Have an orgasm denied by chastity 5 times', :denied_climaxes, 5, 20],
@@ -902,6 +916,10 @@ module Engine
       mimic_submissions: 'mimic submissions',
       clown_submissions: 'clown submissions',
       clown_events: 'carnival clown events',
+      halloween_submits: 'All Hallows submissions',
+      halloween_candy_eaten: 'Halloween candy eaten',
+      trick_or_treat_events: 'trick-or-treat events',
+      halloween_scare_events: 'Halloween scare events',
       succubus_defeats: 'succubi defeated',
       incubus_defeats: 'incubi defeated',
       succubus_submissions: 'succubus submissions',
@@ -979,7 +997,8 @@ module Engine
       temperature_events: 'temperature', size_events: 'size_difference', cum_play_events: 'cum_play',
       degradation_events: 'degradation', monster_form_events: 'monster_transformation', maid_events: 'maid_service',
       pony_events: 'pony_play', gag_events: 'gags_hoods', gaping_events: 'gaping',
-      clown_events: 'clowns', clown_submissions: 'clowns'
+      clown_events: 'clowns', clown_submissions: 'clowns',
+      halloween_scare_events: 'halloween_scares'
     }.freeze
 
     module_function

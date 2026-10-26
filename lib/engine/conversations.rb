@@ -626,6 +626,18 @@ module Engine
              'Offer. Get noticed. Regulars get remembered — and she remembers skin the way I remember ink."'
       },
       {
+        key: 'all_hallows', label: 'All Hallows', question: 'Why does the temple love this night?',
+        category: 'temple', unlock: :halloween,
+        unlock_text: 'Ask during All Hallows\' Heat (Oct 30–Nov 5), or after hearing it once',
+        berry: '"Masks, candy, clergy in costume — don\'t look at me, I didn\'t invent it." Berry sighs fondly. ' \
+               '"Syn gets weird about this week. Soft-weird. Eat the sweets, wear the lace, and don\'t ask her ' \
+               'about endings unless you want a needle pointed at your throat."',
+        syn: 'Syn goes still in a way she almost never does. "Because endings are sexy when they\'re temporary." ' \
+             'A smile that does not quite reach. "The temple likes a night where everyone pretends the dark is ' \
+             'a costume. I refuse to explain further — ask Eros if you want theology. Ask me again after the ' \
+             'candles go out and I\'ll pretend I never said that."'
+      },
+      {
         key: 'cycles', label: 'The cycles', question: 'What happens after the top?',
         category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
         unlock_text: 'Complete a cycle',
@@ -1018,6 +1030,7 @@ module Engine
 
       unlock = topic[:unlock]
       return true if unlock.nil? || unlock == :always
+      return Engine::Halloween.syn_halloween_unlocked?(player) if unlock == :halloween
       return Engine::TitleSystem.met?(player, unlock[:requirement]) if unlock[:requirement]
       if unlock[:any]
         return unlock[:any].any? { |key, need| player.tracker(key) >= need.to_i }
@@ -1030,7 +1043,7 @@ module Engine
       return "Defeat or satisfy #{topic[:boss]} (floor #{topic[:floor]}) once" if topic[:boss]
 
       unlock = topic[:unlock]
-      return topic[:unlock_text].to_s if unlock == :always || unlock.nil?
+      return topic[:unlock_text].to_s if unlock == :always || unlock.nil? || unlock == :halloween
 
       base = topic[:unlock_text].to_s
       progress =
@@ -1250,6 +1263,7 @@ module Engine
       end
 
       player.remember!('talk_heard', token) unless person == 'covar'
+      Engine::Halloween.mark_syn_crumb!(player) if topic[:key] == 'all_hallows'
       { ok: true, person: person, topic: topic, text: text, heard_before: heard,
         satisfied_extra: !satisfied_extra.nil? }
     end

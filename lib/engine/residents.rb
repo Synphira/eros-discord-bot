@@ -614,12 +614,28 @@ module Engine
         stat_modifiers: { 'appearance' => 12, 'satisfy_bonus' => 0.04, 'victory_lp_bonus' => 1 } },
       { name: 'Fishnet Tights', slot: 'legs', type: 'armor', cost: 60, tier: :restored,
         description: 'Fishnets worn over bare skin and under no illusions.',
-        stat_modifiers: { 'appearance' => 9, 'submit_lp_bonus' => 1 } }
+        stat_modifiers: { 'appearance' => 9, 'submit_lp_bonus' => 1 } },
+      # Seasonal All Hallows' rack — only stocked Oct 30–Nov 5; owned pieces keep forever.
+      { name: 'Masquerade Domino', slot: 'head', type: 'armor', cost: 55, tier: :halloween,
+        description: 'A black lace half-mask. The temple loves a face that admits it came to play.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Pumpkin-Cut Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :halloween,
+        description: 'Orange silk laced obscenely tight, carved like a jack-o\'-lantern\'s grin across the bust.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Cobweb Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :halloween,
+        description: 'Sheer black webs for thighs. Something always seems to catch in them.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } }
     ].freeze
 
     def vex_outfit_stock(player)
       restored = vex_restored?(player)
-      VEX_OUTFITS.select { |spec| spec[:tier] == :basic || restored }
+      VEX_OUTFITS.select do |spec|
+        case spec[:tier]
+        when :halloween then Engine::Halloween.costume_stock?
+        when :basic then true
+        else restored
+        end
+      end
     end
 
     def sync_vex_outfits!

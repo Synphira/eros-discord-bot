@@ -583,6 +583,13 @@ module ErosUI
     end
     container.text_display(content: admirer_line)
     container.text_display(content: Engine::Weekly.status_line)
+    candy = Engine::Halloween.candy_count(player)
+    if candy.positive?
+      container.text_display(
+        content: "🍬 **Halloween Candy** `#{candy}/#{Engine::Halloween::CANDY_MAX}` — " \
+                 'earned in-season, kept forever. Eat from Status anytime.'
+      )
+    end
     player.reconcile_encounter!
     container.separator(divider: false, spacing: :small)
     container.text_display(

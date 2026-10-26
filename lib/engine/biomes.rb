@@ -107,6 +107,7 @@ module Engine
       weighted = BIOMES.map do |biome|
         weight = biome[:weight].to_f
         weight *= BOSS_AFFINITY if boss_type && biome[:monsters].key?(boss_type)
+        weight *= Engine::Halloween.biome_weight_mult(biome[:key])
         [biome, [weight, 0.01].max]
       end
       roll = rand * weighted.sum { |(_, w)| w }

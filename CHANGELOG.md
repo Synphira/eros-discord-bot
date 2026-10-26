@@ -11,12 +11,23 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 ### Changed
 
 - **Support-server perks:** tag is **+5% LP** (was +10%). **Boosters** get **+5% LP**, **10% off all LP prices**, and **+1 Lich's Phylactery use** per run. Revocable titles: **Tagged Devotee** / **Tower Patron** / **Beloved of the Tower**.
+- **Halloween weekly:** from **Oct 30 through Nov 5** the rotating weekly is replaced by **All Hallows' Heat** (undead/demon throngs, hotter lust, elite & event bumps, restless mimics). Dev can still `e,dev week halloween`.
 
 ### Added
 
 - Migration `018_phylactery_uses` (integer charges per run; boosters may spend two).
 - **Guild join/leave log:** when Eros joins or leaves a Discord server, a notice posts to the support guild-log channel (name, member count, owner, icon). Override with `GUILD_LOG_CHANNEL_ID`.
 - **Clowns (opt-in fetish):** Content Options → Fetishes → **Clowns**. Enables a **Clown** monster kind (Carnival Clown, Balloon Mistress, Pie Clown, Honker, Ringmaster, Jester, etc.), fight/submit scenes, and events **The Pie Booth** / **Balloon Animal Lesson**. Desire Magnet can favour clowns while the option is on.
+- **All Hallows' season package** (Oct 30–Nov 5; rewards keep forever):
+  - **Trick-or-Treat** / **Jack-o'-Lantern Shrine** rooms; opt-in **Halloween Scares** (`/options`) for jump-scare alcoves & blinking mirrors.
+  - **Halloween Candy** from events, pumpkin altars, and chests — stash up to 12, eat anytime from `/status` (Defiance / LP / Lust).
+  - **Costume rack** at Madame Vex (mask, pumpkin bodice, cobweb stockings) + hidden set **All Hallows' Masque**; chest drops too. Stock is seasonal; owned gear stays.
+  - Haunted **biome tilt**, **Pumpkin Altar** variant, clergy costume lines, presence “masked delvers…”, Syn Talk crumb **All Hallows**.
+  - Souvenir titles/achievements: **Masquerade Meat**, **Sweet Tooth**, **Door-to-Door**, **Easily Spooked**.
+
+### Fixed
+
+- **All Hallows Alpha Beast line:** calls him Syn's pupper only (not the delver's).
 
 ## 2026-10-25
 

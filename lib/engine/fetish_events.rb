@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-%w[core body kink fetish].each { |pack| require_relative "event_packs/#{pack}" }
+%w[core body kink fetish halloween].each { |pack| require_relative "event_packs/#{pack}" }
 
 module Engine
   module FetishEvents
@@ -1057,7 +1057,7 @@ module Engine
         decline: { label: 'Leave', text: 'Keep your voice', lust: 2,
                    scene: 'You thank him politely and leave with your voice intact.' }
       }
-    }.merge(EventPacks::CORE, EventPacks::BODY, EventPacks::KINK, EventPacks::FETISH).freeze
+    }.merge(EventPacks::CORE, EventPacks::BODY, EventPacks::KINK, EventPacks::FETISH, EventPacks::HALLOWEEN).freeze
 
     KEYS = EVENTS.keys.freeze
     TAGS = EVENTS.transform_values { |e| e[:tag] }.freeze
@@ -1108,6 +1108,8 @@ module Engine
 
     def available?(player, key)
       spec = event(key) or return false
+      return false if spec[:season] == :halloween && !Engine::Halloween.active?
+
       parts = player.body_parts_list.map(&:to_s)
       if spec[:requires_any]
         return false if (Array(spec[:requires_any]).map(&:to_s) & parts).empty?
@@ -1252,6 +1254,13 @@ module Engine
       log << bits.join(' · ')
 
       apply_condition!(player, opt[:condition], log) if opt[:condition]
+      if opt[:candy].to_i.positive?
+        added = Engine::Halloween.grant_candy!(player, opt[:candy].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Halloween Candy** " \
+                 "(**#{Engine::Halloween.candy_count(player)}/#{Engine::Halloween::CANDY_MAX}** in your pouch — keeps after the season)."
+        end
+      end
       Array(spec[:tracker]).each { |t| player.bump_tracker!(t) }
       player.bump_tracker!('fetish_events_accepted')
       if _key.to_s == 'milking_chamber' && player.tracker('nectar_met').positive?
