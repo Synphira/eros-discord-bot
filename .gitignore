@@ -12,6 +12,6 @@ vendor/bundle/
 .vscode/
 logs/
 
-# Web build outputs (re-created by webapp/tools/vendor_ruby.rb and build_itch.rb)
-webapp/vendor/
-webapp/dist/
+# Local-only: design docs + browser build (kept on disk, not published)
+docs/
+webapp/
