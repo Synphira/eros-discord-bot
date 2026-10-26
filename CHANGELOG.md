@@ -16,6 +16,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - Migration `018_phylactery_uses` (integer charges per run; boosters may spend two).
 - **Guild join/leave log:** when Eros joins or leaves a Discord server, a notice posts to the support guild-log channel (name, member count, owner, icon). Override with `GUILD_LOG_CHANNEL_ID`.
+- **Clowns (opt-in fetish):** Content Options → Fetishes → **Clowns**. Enables a **Clown** monster kind (Carnival Clown, Balloon Mistress, Pie Clown, Honker, Ringmaster, Jester, etc.), fight/submit scenes, and events **The Pie Booth** / **Balloon Animal Lesson**. Desire Magnet can favour clowns while the option is on.
 
 ## 2026-10-25
 

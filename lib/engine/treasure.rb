@@ -746,7 +746,7 @@ module Engine
     }.freeze
     FLAG_LABELS = { 'deny_climax' => 'orgasms denied', 'cheat_death' => 'survive defeat (charges per run)' }.freeze
     TYPE_NAMES = { 'beast' => 'beasts', 'demon' => 'demons', 'slime' => 'slimes', 'undead' => 'undead',
-                   'plant' => 'plants', 'mimic' => 'mimics' }.freeze
+                   'plant' => 'plants', 'mimic' => 'mimics', 'clown' => 'clowns' }.freeze
 
     def format_stat_changes(stats)
       return '_none_' if stats.nil? || stats.empty?

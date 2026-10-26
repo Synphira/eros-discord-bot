@@ -699,6 +699,60 @@ module Engine
         decline: { label: 'Wave back', text: 'Leave it waving', lust: 2,
                    scene: 'You wave politely and walk on. The glove droops, then waves sadly at your back.' },
         fight: { name: 'Gauntlet Mimic', label: 'Stomp it', type: :mimic, text: 'The glove rears up, fingers spread like claws — it was a mimic all along!' }
+      },
+      'pie_booth' => {
+        name: 'The Pie Booth', tag: 'clowns', tracker: 'clown_events',
+        blurb: 'a striped booth smells like sugar and bad decisions.',
+        intro: 'A carnival booth waits in an otherwise empty hall, striped canvas flapping with no breeze. A painted face ' \
+               'leans over the counter, rubber nose gleaming. "Free sample," it singsongs, holding up a cream pie that ' \
+               'wobbles like it has opinions. "Face, chest, or… lower. Your call, sugar."',
+        accept: {
+          label: 'Take the sample', text: 'Get pied — and then some',
+          scenes: ['The pie hits with a wet *splat* — cream everywhere, in your hair, down your front, dripping between ' \
+                   'your thighs. The clown laughs so hard its wig tips, then steps around the booth to "help clean you up."',
+                   'Help means tongue, gloves, and more cream. It smears, licks, and fucks the mess into you until you are ' \
+                   'sticky, laughing, and a little ruined for polite company.'],
+          parts: {
+            'vagina' => 'Cream-slick fingers — then cock — work into your pussy while the clown hums a circus tune.',
+            'penis' => 'It pies your cock on purpose and strokes you through the mess until you spill into white foam.',
+            'anus' => 'A cream-lubed finger finds your ass; the clown winks and adds another for the encore.',
+            'breasts' => 'It motorboats the cream into your tits and sucks your nipples clean with theatrical moans.'
+          },
+          lp: 6, lust: 14,
+          condition: { key: 'pied_and_proud', name: 'Pied & Proud', floors: 2,
+                       effects: { 'submission' => 1, 'submit_lp_bonus' => 2 } }
+        },
+        decline: { label: 'Walk past', text: 'Keep your face uncreamed', lust: 3,
+                   scene: 'You decline. The clown pouts so hard the paint cracks. "Party pooper," it stage-whispers.' },
+        fight: { name: 'Pie Clown', label: 'Smash the booth', type: :clown,
+                 text: 'The booth collapses — and the Pie Clown comes out swinging cream-first!' }
+      },
+      'balloon_animal_lesson' => {
+        name: 'Balloon Animal Lesson', tag: 'clowns', tracker: 'clown_events',
+        blurb: 'squeaking balloons twist themselves into suggestive shapes.',
+        intro: 'A Balloon Mistress sits on a stool amid a cloud of half-finished animals — dogs, swords, and several ' \
+               'shapes that are *not* for children. She twists a long pink balloon, glances at your hips, and smiles ' \
+               'with painted lips. "Hold still. I need a model."',
+        accept: {
+          label: 'Be the model', text: 'Get wrapped, squeaked, and used',
+          scenes: ['Balloons coil around your wrists and thighs with soft squeaks, lifting and spreading you while she ' \
+                   'works. Every knot presses somewhere sensitive; every stretch makes you gasp.',
+                   'The "lesson" ends with her riding the joke home — balloon-slick friction, honks of approval, and you ' \
+                   'left marked with powder and red lipstick kisses.'],
+          parts: {
+            'vagina' => 'A knotted balloon rubs your clit while she fucks you, squeaking in time with your moans.',
+            'penis' => 'She twists a tight sheath around your cock and strokes until the balloon threatens to pop.',
+            'anus' => 'A slender balloon snake works into your ass, then she replaces it with herself, laughing.',
+            'breasts' => 'Balloon loops cinch under your tits, pushing them up for her mouth and painted fingers.'
+          },
+          lp: 7, lust: 13,
+          condition: { key: 'squeaky_sore', name: 'Squeaky & Sore', floors: 2,
+                       effects: { 'agility' => -1, 'satisfy_bonus' => 0.05, 'clown_submit_lp' => 3 } }
+        },
+        decline: { label: 'Not today', text: 'Leave the balloons untwisted', lust: 2,
+                   scene: 'You back away. A balloon dog deflates with a sad little wheeze.' },
+        fight: { name: 'Balloon Mistress', label: 'Pop everything', type: :clown,
+                 text: 'She stands, balloons bristling like a colourful arsenal. "Rude."' }
       }
     }.freeze
   end

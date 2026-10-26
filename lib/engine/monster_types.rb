@@ -52,14 +52,24 @@ module Engine
         color: 0x228b22
       },
       mimic: {
-    name: 'Mimic',
-    description: 'Shape-shifting creatures that disguise themselves as objects',
-    common_monsters: ['Chest Mimic', 'Door Mimic', 'Statue Mimic', 'Item Pile Mimic', 'Chair Mimic',
-                      'Wardrobe Mimic', 'Couch Mimic', 'Clothing Mimic', 'Stone Golem', 'Bed Mimic',
-                      'Book Mimic', 'Mirror Mimic', 'Bath Mimic', 'Throne Mimic', 'Curtain Mimic',
-                      'Rug Mimic', 'Chandelier Mimic', 'Clock Mimic', 'Piano Mimic', 'Loom Mimic'],
-    color: 0x696969
-  },
+        name: 'Mimic',
+        description: 'Shape-shifting creatures that disguise themselves as objects',
+        common_monsters: ['Chest Mimic', 'Door Mimic', 'Statue Mimic', 'Item Pile Mimic', 'Chair Mimic',
+                          'Wardrobe Mimic', 'Couch Mimic', 'Clothing Mimic', 'Stone Golem', 'Bed Mimic',
+                          'Book Mimic', 'Mirror Mimic', 'Bath Mimic', 'Throne Mimic', 'Curtain Mimic',
+                          'Rug Mimic', 'Chandelier Mimic', 'Clock Mimic', 'Piano Mimic', 'Loom Mimic'],
+        color: 0x696969
+      },
+      # Only rolled when ContentOptions "clowns" is on — carnival filth for
+      # the opt-in crowd (and one very spoiled Alpha Beast).
+      clown: {
+        name: 'Clown',
+        description: 'Painted carnival pests — balloons, pies, honks, and sticky applause',
+        common_monsters: ['Carnival Clown', 'Balloon Mistress', 'Pie Clown', 'Honker',
+                          'Ringmaster', 'Jester', 'Cotton-Candy Imp', 'Big-Shoe Brute'],
+        color: 0xff69b4,
+        requires_option: 'clowns'
+      },
       # Eldritch is deliberately pool-empty: only two eldritch things
       # exist in the tower — Eros herself, and the Drowned Saint she
       # keeps. Nothing eldritch is ever rolled as a random encounter.
@@ -69,7 +79,7 @@ module Engine
         common_monsters: [],
         color: 0x5c0a2e
       }
-}.freeze
+    }.freeze
 
     ENCOUNTER_KEYS = {
       beast: %w[beast_encounter_rate],
@@ -127,13 +137,17 @@ module Engine
       'Bed Mimic' => :object, 'Book Mimic' => :object, 'Mirror Mimic' => :object,
       'Bath Mimic' => :object, 'Throne Mimic' => :object, 'Curtain Mimic' => :object,
       'Rug Mimic' => :object, 'Chandelier Mimic' => :object, 'Clock Mimic' => :object,
-      'Piano Mimic' => :object, 'Loom Mimic' => :object
+      'Piano Mimic' => :object, 'Loom Mimic' => :object,
+      # Clown
+      'Carnival Clown' => :painted, 'Balloon Mistress' => :painted, 'Pie Clown' => :painted,
+      'Honker' => :painted, 'Ringmaster' => :painted, 'Jester' => :painted,
+      'Cotton-Candy Imp' => :painted, 'Big-Shoe Brute' => :painted
     }.freeze
 
     DEFAULT_FAMILIES = {
       'beast' => :furred, 'demon' => :hellish, 'slime' => :gelatinous,
       'undead' => :corporeal, 'plant' => :floral, 'mimic' => :object,
-      'eldritch' => :smooth
+      'clown' => :painted, 'eldritch' => :smooth
     }.freeze
 
     module_function
@@ -156,7 +170,15 @@ module Engine
 
     def generate_monster(floor, player: nil, type: nil, elite: true)
       f = [floor.to_i, 1].max
-      type = type && TYPES.key?(type.to_sym) ? type.to_sym : weighted_type(player)
+      requested = type && TYPES.key?(type.to_sym) ? type.to_sym : nil
+      # Option-gated kinds (clowns) never spawn unless the delver opted in —
+      # even if a caller hard-codes the type.
+      type =
+        if requested && option_allows?(player, requested)
+          requested
+        else
+          weighted_type(player)
+        end
       info = TYPES.fetch(type)
 
       strength = 2 + (f / 2)
@@ -190,9 +212,23 @@ module Engine
       player && elite ? Engine::Elites.roll!(monster, f) : monster
     end
 
+    def option_allows?(player, type)
+      req = TYPES.dig(type.to_sym, :requires_option)
+      return true if req.nil?
+      return false unless player
+
+      Engine::ContentOptions.enabled?(player, req)
+    end
+
+    def encounterable_types(player)
+      keys.reject { |t| TYPES[t][:common_monsters].empty? || !option_allows?(player, t) }
+    end
+
     def weighted_type(player)
       # Pool-empty types (eldritch) are never rolled as encounters.
-      weights = keys.reject { |t| TYPES[t][:common_monsters].empty? }.map do |type|
+      # Option-gated types (clown) stay out unless the delver opted in.
+      pool = encounterable_types(player)
+      weights = pool.map do |type|
         weight = 1.0
         if player
           Array(ENCOUNTER_KEYS[type]).each do |key|
@@ -216,7 +252,7 @@ module Engine
         roll -= weight
         return type if roll <= 0
       end
-      keys.sample
+      pool.sample || :beast
     end
   end
 end

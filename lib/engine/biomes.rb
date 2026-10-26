@@ -61,7 +61,7 @@ module Engine
       {
         key: 'clockwork_brothel', name: 'The Clockwork Brothel', weight: 0.8,
         flavour: 'gears sigh behind velvet walls and the furniture has been wound up and left eager',
-        monsters: { 'mimic' => 1.4 }, tags: { 'toys' => 1.7, 'objectification' => 1.5, 'latex' => 1.5 }
+        monsters: { 'mimic' => 1.4, 'clown' => 1.3 }, tags: { 'toys' => 1.7, 'objectification' => 1.5, 'latex' => 1.5, 'clowns' => 1.4 }
       },
       {
         key: 'ashen_court', name: 'The Ashen Court', weight: 0.7,
@@ -76,7 +76,8 @@ module Engine
       {
         key: 'masquerade_ball', name: 'The Masquerade Ball', weight: 0.7,
         flavour: 'an endless masked ball where every dancer already knows your name and your tastes',
-        monsters: { 'demon' => 1.3, 'undead' => 1.3 }, tags: { 'exhibitionism' => 1.5, 'group_sex' => 1.5, 'voyeurism' => 1.4 }
+        monsters: { 'demon' => 1.3, 'undead' => 1.3, 'clown' => 1.2 },
+        tags: { 'exhibitionism' => 1.5, 'group_sex' => 1.5, 'voyeurism' => 1.4, 'clowns' => 1.5 }
       }
     ].freeze
 

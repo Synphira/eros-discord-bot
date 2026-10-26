@@ -62,7 +62,8 @@ module Engine
       'maid_service' => { label: 'Maid Service', group: :fetish, default: false, description: 'Uniforms and serving the house.' },
       'pony_play' => { label: 'Pony Play', group: :fetish, default: false, description: 'Harnesses, bits, tails, and trotting.' },
       'gags_hoods' => { label: 'Gags & Hoods', group: :fetish, default: false, description: 'Ball gags, ring gags, and leather hoods.' },
-      'gaping' => { label: 'Gaping & Fisting', group: :fetish, default: false, description: 'Fisting and being left stretched wide open.' }
+      'gaping' => { label: 'Gaping & Fisting', group: :fetish, default: false, description: 'Fisting and being left stretched wide open.' },
+      'clowns' => { label: 'Clowns', group: :fetish, default: false, description: 'Painted faces, balloons, pies, and carnival filth (opt-in).' }
     }.freeze
 
     CORE_KEYS = PREFERENCES.select { |_, v| v[:group] == :core }.keys.freeze

@@ -375,7 +375,7 @@ module Engine
     }.freeze
 
     MONSTER_LABELS = {
-      beast: 'Beast', demon: 'Demon', slime: 'Slime', undead: 'Undead', plant: 'Plant', mimic: 'Mimic',
+      beast: 'Beast', demon: 'Demon', slime: 'Slime', undead: 'Undead', plant: 'Plant', mimic: 'Mimic', clown: 'Clown',
       eldritch: 'Eldritch'
     }.freeze
 

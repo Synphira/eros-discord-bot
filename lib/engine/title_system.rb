@@ -404,7 +404,9 @@ module Engine
         'head_maid' => ['Head Maid', :maid_events, 3, 'The house has never been served so thoroughly'],
         'show_pony' => ['Show Pony', :pony_events, 3, 'Harnessed, bridled, and ridden'],
         'silenced' => ['Silenced', :gag_events, 3, 'Gagged and hooded, and better for it'],
-        'wide_open' => ['Wide Open', :gaping_events, 3, "You've been fisted and left gaping, and loved every inch of it"]
+        'wide_open' => ['Wide Open', :gaping_events, 3, "You've been fisted and left gaping, and loved every inch of it"],
+        'carnival_slut' => ['Carnival Slut', :clown_events, 3, 'Pies, balloons, and painted smiles — you kept coming back'],
+        'clown_consort' => ['Clown Consort', :clown_submissions, 15, "You've offered yourself to the tower's carnival pests"]
       }.transform_values do |name, tracker, count, desc|
         { name: name, requirement: { tracker => count }, description: desc }
       end
@@ -482,6 +484,8 @@ module Engine
       ['monster_form_veteran', 'Becoming', 'Wade into the pool of becoming 3 times', :monster_form_events, 3, 30],
       ['maid_veteran', 'At Your Service', 'Serve the monster manor 3 times', :maid_events, 3, 25],
       ['pony_veteran', 'Well Trained', 'Get harnessed in the stables 3 times', :pony_events, 3, 25],
+      ['clown_veteran', 'In the Act', 'Survive carnival clownery 3 times', :clown_events, 3, 25],
+      ['clown_submit_veteran', 'Honked Into Submission', 'Submit to clowns 10 times', :clown_submissions, 10, 35],
       ['gag_veteran', 'Mmmph', 'Wear a gag or hood 3 times', :gag_events, 3, 25],
       ['gaping_veteran', 'Wide Open', 'Experience fisting 3 times', :gaping_events, 3, 30],
       ['denied_frustrated', 'Frustrated', 'Have an orgasm denied by chastity 5 times', :denied_climaxes, 5, 20],
@@ -896,6 +900,8 @@ module Engine
       undead_submissions: 'undead submissions',
       plant_submissions: 'plant submissions',
       mimic_submissions: 'mimic submissions',
+      clown_submissions: 'clown submissions',
+      clown_events: 'carnival clown events',
       succubus_defeats: 'succubi defeated',
       incubus_defeats: 'incubi defeated',
       succubus_submissions: 'succubus submissions',
@@ -972,7 +978,8 @@ module Engine
       corruption_events: 'corruption', body_writing_events: 'body_writing', musk_events: 'musk',
       temperature_events: 'temperature', size_events: 'size_difference', cum_play_events: 'cum_play',
       degradation_events: 'degradation', monster_form_events: 'monster_transformation', maid_events: 'maid_service',
-      pony_events: 'pony_play', gag_events: 'gags_hoods', gaping_events: 'gaping'
+      pony_events: 'pony_play', gag_events: 'gags_hoods', gaping_events: 'gaping',
+      clown_events: 'clowns', clown_submissions: 'clowns'
     }.freeze
 
     module_function

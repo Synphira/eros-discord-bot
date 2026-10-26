@@ -67,6 +67,7 @@ module Engine
         when 'undead' then generate_undead_scene(parts, monster_name)
         when 'plant' then generate_plant_scene(parts, monster_name)
         when 'mimic' then generate_mimic_scene(parts, monster_name)
+        when 'clown' then generate_clown_scene(parts, monster_name)
         else []
         end
       scenes += Engine::ChastitySystem.lines_for(player, :monster, actor: monster_name)
@@ -84,6 +85,7 @@ module Engine
         when 'undead' then generate_undead_assault(parts, monster_name)
         when 'plant' then generate_plant_assault(parts, monster_name)
         when 'mimic' then generate_mimic_assault(parts, monster_name)
+        when 'clown' then generate_clown_assault(parts, monster_name)
         else []
         end
       scenes += Engine::ChastitySystem.lines_for(player, :monster, actor: monster_name)
@@ -293,6 +295,36 @@ module Engine
       scenes
     end
 
+    def generate_clown_assault(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "The #{monster_name} honks once, flips you onto a painted crate, and drives into your cunt with slapstick rhythm — every thrust ending in a wet, ridiculous smack."
+        scenes << "Greasepaint-smeared hands spread your thighs as the #{monster_name} fucks you hard, laughing through a painted smile while cream from its pie-slick cock coats your folds."
+        scenes << "A squeaky balloon knot presses against your clit while the #{monster_name} hilts itself in your pussy, pumping until you're dripping carnival mess."
+      end
+
+      if parts.include?('penis')
+        scenes << "The #{monster_name} drops to its knees in oversized shoes and swallows your cock with a theatrical moan, throat working like a joke that went too far."
+        scenes << "Painted gloves stroke you fast while the #{monster_name} smears whipped cream down your shaft and licks it off between filthy giggles."
+        scenes << "The #{monster_name} straddles you and rides, big shoes planted either side of your hips, squeezing your cock until you spill with a honk of triumph."
+      end
+
+      if parts.include?('anus')
+        scenes << "The #{monster_name} bends you over, honks against your cheek, and pushes a cream-slick cock into your ass with gleeful, relentless thrusts."
+        scenes << "A rubber nose digs into your back as the #{monster_name} fucks your hole, painted hands leaving sticky prints on your hips."
+        scenes << "The #{monster_name} works a balloon-lubed toy into your ass first — then replaces it with itself, stretching you open for the punchline."
+      end
+
+      if parts.include?('breasts')
+        scenes << "The #{monster_name} motorboats your tits with a loud, wet honk, then pinches your nipples between cream-sticky fingers."
+        scenes << "Painted lips latch onto a nipple while the #{monster_name} squeezes your breasts together and laughs into your cleavage."
+        scenes << "The #{monster_name} pies your chest and smears the cream in slow circles over your nipples until they're glazed and aching."
+      end
+
+      scenes
+    end
+
     def generic_assault(monster_name)
       [
         "The #{monster_name} presses you against the wall and grinds its body against yours, its hands everywhere at once.",
@@ -463,6 +495,36 @@ module Engine
       scenes
     end
 
+    def generate_clown_scene(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "The #{monster_name} traces a cream-heart over your mound before easing into your cunt, painted smile never slipping as it fucks you in teasing little thrusts."
+        scenes << "Balloon-slick fingers spread you open; the #{monster_name} fills your pussy while a squeaker clicks every time you clench."
+        scenes << "The #{monster_name} rolls you through carnival confetti and takes you slow, greasepaint kissing your thighs with every grind."
+      end
+
+      if parts.include?('penis')
+        scenes << "The #{monster_name} juggles a look of innocence, then wraps painted lips around your cock and sucks like the encore depends on it."
+        scenes << "Cream-sticky gloves pump your shaft while the #{monster_name} hums a circus tune against the head."
+        scenes << "The #{monster_name} sits in your lap and rides, oversized shoes bouncing, squeezing every drop out of you with a wink."
+      end
+
+      if parts.include?('anus')
+        scenes << "The #{monster_name} pats your ass like a drum, then slides cream-slick fingers — and then cock — into your hole with theatrical care."
+        scenes << "A rubber nose bumps your back as the #{monster_name} fucks your ass in jaunty rhythm, laugh lines cracking the paint."
+        scenes << "The #{monster_name} lubes you with pie filling first, then fills you proper, leaving you sticky and open."
+      end
+
+      if parts.include?('breasts')
+        scenes << "The #{monster_name} paints little stars around your nipples, then sucks them clean with warm, messy devotion."
+        scenes << "Painted hands cup your tits and squeeze until cream squirts between its fingers — half joke, half worship."
+        scenes << "The #{monster_name} rests its rubber nose between your breasts and motorboats until you're laughing and wet."
+      end
+
+      scenes
+    end
+
     def generate_plant_scene(parts, monster_name)
       scenes = []
 
@@ -577,6 +639,7 @@ module Engine
         when 'undead' then generate_undead_willing(parts, monster_name)
         when 'plant' then generate_plant_willing(parts, monster_name)
         when 'mimic' then generate_mimic_willing(parts, monster_name)
+        when 'clown' then generate_clown_willing(parts, monster_name)
         else []
         end
       scenes += Engine::ChastitySystem.lines_for(player, :willing, actor: monster_name)
@@ -614,6 +677,11 @@ module Engine
         'The %<name>s clacks its lid in delighted applause, a long tongue licking you clean. You are clearly its favourite treasure.',
         'The %<name>s shivers with pleasure, its insides still wet and warm from you.',
         'The %<name>s wraps a slick tongue around your thigh like a proud little ribbon.'
+      ],
+      'clown' => [
+        'The %<name>s honks twice in triumph and smears a little more greasepaint across your cheek. Curtain call.',
+        '"What a show!" the %<name>s crows, wiping cream off your thighs with a flourish. "Encore later, sugar."',
+        'The %<name>s bows so low its wig tips, then pats your ass like a closing drumroll.'
       ]
     }.freeze
 
@@ -872,6 +940,36 @@ module Engine
         scenes << "You lean into the #{monster_name}'s open lid and moan as soft, wet mouths inside latch onto your nipples."
         scenes << "You let the mimic's tongues wrap your breasts and squeeze while their tips flick your nipples."
         scenes << "You press your tits into the #{monster_name}'s warm, slick interior and rub them against its walls."
+      end
+
+      scenes
+    end
+
+    def generate_clown_willing(parts, monster_name)
+      scenes = []
+
+      if parts.include?('vagina')
+        scenes << "You hitch your skirts for the #{monster_name} and pull it into your cunt, moaning when the cream-slick thrusts make a filthy slap with every bounce."
+        scenes << "You sit on the #{monster_name}'s lap, guide it inside, and grind until its painted smile smears against your neck."
+        scenes << "You hold a balloon knot to your clit while the #{monster_name} fucks you, laughing into its shoulder when you clench."
+      end
+
+      if parts.include?('penis')
+        scenes << "You feed your cock between the #{monster_name}'s painted lips and fuck its throat while it honks encouragement."
+        scenes << "You let the #{monster_name} pie your shaft and lick you clean, hips jerking into cream-sticky gloves."
+        scenes << "You pull the #{monster_name} down to ride you, hands on those ridiculous hips, spilling when it squeezes and winks."
+      end
+
+      if parts.include?('anus')
+        scenes << "You bend over a painted crate and beg the #{monster_name} for it — it obliges, cream-slick and relentless in your ass."
+        scenes << "You back onto the #{monster_name}'s cock yourself, gasping as oversized hands steady your hips for the punchline."
+        scenes << "You offer your hole with a mock curtsy; the #{monster_name} bows back and fucks you open for the crowd that isn't there."
+      end
+
+      if parts.include?('breasts')
+        scenes << "You shove your tits into the #{monster_name}'s painted face and moan when it motorboats and sucks by turns."
+        scenes << "You smear pie cream on your nipples and feed them to the #{monster_name}, shivering at every sticky lick."
+        scenes << "You hold your breasts together for the #{monster_name}'s cock to thrust between, laughing when it honks mid-stroke."
       end
 
       scenes

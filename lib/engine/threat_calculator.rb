@@ -99,7 +99,7 @@ module Engine
     # How much likelier the lustier kinds are to find a delver who
     # looks like an invitation.
     def self.encounter_weight(player, type)
-      lusty = %w[demon slime beast].include?(type.to_s)
+      lusty = %w[demon slime beast clown].include?(type.to_s)
       return 1.0 unless lusty
 
       case calculate(player).category

@@ -21,13 +21,20 @@ module Commands
 
     # The Desire Magnet's kinds: every pool type (eldritch is not a
     # kind that wanders, and the tower will not be magnetised to it).
-    MAGNET_KINDS = %w[beast demon slime undead plant mimic].freeze
+    MAGNET_KINDS = %w[beast demon slime undead plant mimic clown].freeze
 
     module_function
 
     def magnet_kind(player)
       kind = player.tracker_hash['desire_magnet'].to_s
-      MAGNET_KINDS.include?(kind) ? kind : nil
+      return nil unless MAGNET_KINDS.include?(kind)
+      return nil unless Engine::MonsterTypes.option_allows?(player, kind)
+
+      kind
+    end
+
+    def magnet_kinds_for(player)
+      MAGNET_KINDS.select { |kind| Engine::MonsterTypes.option_allows?(player, kind) }
     end
 
     # The options home: one button per family of toggles, with its tally.
@@ -63,7 +70,7 @@ module Commands
           row.string_select(custom_id: "eros:opts:magnet:#{event.user.id}", placeholder: 'Choose a favourite monster kind…',
                             min_values: 1, max_values: 1) do |menu|
             menu.option(label: 'No favourite — let the tower guess', value: 'none', default: magnet.nil?)
-            MAGNET_KINDS.each do |kind|
+            magnet_kinds_for(player).each do |kind|
               menu.option(label: Engine::MonsterTypes.fetch(kind)[:name], value: kind,
                           description: Engine::MonsterTypes.fetch(kind)[:description][0, 100],
                           default: magnet == kind)
