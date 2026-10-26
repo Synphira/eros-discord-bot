@@ -7,6 +7,7 @@ require 'fileutils'
 
 require_relative 'lib/error_reporter'
 require_relative 'lib/presence'
+require_relative 'lib/guild_watch'
 require_relative 'config/database'
 require_relative 'lib/engine/tower'
 require_relative 'lib/engine/weekly'
@@ -136,6 +137,7 @@ bot.ready do |_event|
 end
 
 Presence.install!(bot)
+GuildWatch.install!(bot)
 Engine::SupportBonuses.install!(bot)
 
 puts 'Starting Endless Ruins of Sin Discord bot...'

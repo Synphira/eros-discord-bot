@@ -79,7 +79,7 @@ server and/or NSFW channels). Prefix commands are ignored outside NSFW channels
 in a guild; DMs are always allowed.
 
 Useful `.env` knobs (see `.env.example`): `BOT_PREFIX`, `DEVELOPER_ID`,
-`BUG_TESTER_IDS`, `ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`, support-server bonus
+`BUG_TESTER_IDS`, `ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`, `GUILD_LOG_CHANNEL_ID`, support-server bonus
 ids, `DATABASE_URL` for Postgres.
 
 ---
@@ -172,7 +172,7 @@ descriptions. Global sync can take up to ~1 hour; set `DISCORD_GUILD_ID` for
 instant guild registration while testing.
 
 Errors: console + `logs/errors.log`, and optionally a Discord channel via
-`ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`.
+`ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`. Join/leave notices go to `GUILD_LOG_CHANNEL_ID` (defaults to the support guild-log channel).
 
 ---
 
