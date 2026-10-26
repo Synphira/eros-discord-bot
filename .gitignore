@@ -12,6 +12,11 @@ vendor/bundle/
 .vscode/
 logs/
 
+# Pterodactyl / Calagopus panel trash. If untracked, the Ruby egg's
+# `git clean -fd` after auto-update tries to delete it, hits
+# "Device or resource busy", and exits 1 before the bot ever starts.
+.trash/
+
 # Local-only: design docs + browser build (kept on disk, not published)
 docs/
 webapp/
