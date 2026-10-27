@@ -855,14 +855,29 @@ class Player < Sequel::Model(:players)
   # admirers, finished NPC stories, and first boss meetings.
   def keepsakes
     saved = tracker_hash['keepsakes']
-    saved.is_a?(Array) ? saved.map(&:to_s) : []
+    list = saved.is_a?(Array) ? saved.map(&:to_s) : []
+    uniq = list.uniq
+    # Self-heal duplicate shelves from older add_keepsake! paths.
+    if uniq.size != list.size
+      data = tracker_hash.merge('keepsakes' => uniq)
+      if data.key?('keepsakes_pinned')
+        data = data.merge('keepsakes_pinned' => Array(data['keepsakes_pinned']).map(&:to_s) & uniq)
+      end
+      update(trackers: data)
+    end
+    uniq
   end
 
   def add_keepsake!(text)
+    text = text.to_s
+    return text if text.empty?
+
     list = keepsakes
-    list << text.to_s
+    return text if list.include?(text)
+
+    list << text
     set_tracker!('keepsakes', list)
-    text.to_s
+    text
   end
 
   KEEPSAKE_PIN_LIMIT = 3

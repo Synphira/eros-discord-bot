@@ -318,7 +318,7 @@ module Commands
 
     def set_week(event, key)
       if key.empty?
-        list = Engine::Weekly::MODIFIERS.map { |m| "`#{m[:key]}`" }.join(', ')
+        list = Engine::Weekly.override_keys.map { |k| "`#{k}`" }.join(', ')
         return reply(event, "#{Engine::Weekly.status_line}\n\nOverride with `e,dev week <key>` (or `e,dev week auto`): #{list}")
       end
 

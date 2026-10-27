@@ -140,6 +140,9 @@ module Commands
 
     def header(c, player, person, spec, notice)
       c.text_display(content: "## #{spec[:emoji]} #{spec[:heading]} — #{player.display_name}\n#{spec[:intro]}")
+      if (dress = Engine::Conversations.dress_note(person))
+        c.text_display(content: "_#{dress}_")
+      end
       c.text_display(content: notice) if notice
       regard_ctx =
         if person == 'syn' then :parlour

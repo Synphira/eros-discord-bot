@@ -10,8 +10,11 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
+- **`/status` layout:** sheet is split into **Climb / Body / Vitals / Threat / Company** sections with dividers; Burdens, Bonuses, Conditions (and Eat Candy when relevant) live in one **select menu** instead of a button row.
+- **Error channel posts:** Discord error reports are compact embeds (class, message, trigger, where, API details, hint, short stack) instead of full code-fence dumps. Full traces still go to `logs/errors.log`.
 - **Support-server perks:** tag is **+5% LP** (was +10%). **Boosters** get **+5% LP**, **10% off all LP prices**, and **+1 Lich's Phylactery use** per run. Revocable titles: **Tagged Devotee** / **Tower Patron** / **Beloved of the Tower**.
 - **Halloween weekly:** from **Oct 30 through Nov 5** the rotating weekly is replaced by **All Hallows' Heat** (undead/demon throngs, hotter lust, elite & event bumps, restless mimics). Dev can still `e,dev week halloween`.
+- **Seasons framework:** holiday calendars now run through `Engine::Seasons` (Halloween migrated onto it). Dev: `e,dev week halloween` / future season keys / `friday_13`. Named folk (clergy, Syn, Berry, Covar, Vex, Pip) **dress for the holiday**; Syn dresses **Alpha** herself. Random encounter monsters stay undecorated.
 
 ### Added
 
@@ -28,6 +31,8 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 ### Fixed
 
 - **All Hallows Alpha Beast line:** calls him Syn's pupper only (not the delver's).
+- **Cursed Shop page overflow:** Discord’s 40-component cap no longer blows up on later aisles — 3 pieces per page, and Covar’s long flavour stays on page 1 only.
+- **Keepsake duplicates:** the shelf can no longer hold the same memento twice; existing duplicate lists self-heal when next read.
 
 ## 2026-10-25
 

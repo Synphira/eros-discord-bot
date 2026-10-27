@@ -526,75 +526,97 @@ module ErosUI
 
   def build_status_container(container, player)
     threat = Engine::ThreatCalculator.calculate(player)
-
-    container.text_display(content: '## Endless Ruins of Sin — Delver Status')
-    container.text_display(content: '_Descend. Endure. Desire._')
-    container.separator(divider: true, spacing: :small)
+    stairs = Engine::Exploration.stairs_status(player)
     title = player.active_title_name
+    hybrid = player.active_transformation_name
+
+    # Header + identity
     name_line = "### #{player.display_name}"
     name_line += " — _#{title}_" if title
-    container.text_display(content: name_line)
+    identity = [
+      '## Delver Status',
+      '_Descend. Endure. Desire._',
+      '',
+      name_line,
+      "**#{player.gender}**#{hybrid ? " · Hybrid: **#{hybrid}**" : ''}",
+      "Lv **#{player.level}** · Cycle **#{player.current_cycle}** · " \
+      "Floor **#{player.current_floor}**/#{Engine::Tower::FINAL_BOSS_FLOOR}"
+    ]
     if player.character_name.to_s.empty?
-      container.text_display(content: '-# No character name yet — use `/profile` → **Rename**, or `e,name Your Name`.')
+      identity << '-# No character name yet — `/profile` → **Rename**, or `e,name Your Name`.'
     end
-    hybrid = player.active_transformation_name
+    container.text_display(content: identity.join("\n"))
+
+    # Climb
+    container.separator(divider: true, spacing: :small)
     container.text_display(
-      content: "**#{player.gender}**#{hybrid ? " · **Hybrid:** #{hybrid}" : ''}\n" \
-               "Lv **#{player.level}** · **Cycle #{player.current_cycle}** · " \
-               "Floor **#{player.current_floor}**/#{Engine::Tower::FINAL_BOSS_FLOOR}\n" \
-               "**Floor progress** Rooms searched **#{Engine::Exploration.stairs_status(player)[:searched]}** · " \
-               "stairs from room **#{Engine::Exploration.stairs_status(player)[:minimum]}** · " \
-               "guaranteed by room **#{Engine::Exploration.stairs_status(player)[:limit]}**\n" \
-               "#{body_sizes_line(player)}" \
-               "**Submission** `#{player.effective_submission}` _(#{player.submission_display}, " \
-               "base #{player.submission})_"
+      content: "### Climb\n" \
+               "Rooms searched **#{stairs[:searched]}** · stairs from **#{stairs[:minimum]}** · " \
+               "guaranteed by **#{stairs[:limit]}**"
     )
+
+    # Body
+    body = body_sizes_line(player).to_s.strip.sub(/\A\*\*Body\*\*\s*/, '')
+    body_bits = []
+    body_bits << body unless body.empty?
+    body_bits << "**Submission** `#{player.effective_submission}` " \
+                 "_(#{player.submission_display}, base #{player.submission})_"
+    container.text_display(content: "### Body\n#{body_bits.join("\n")}")
+
+    # Vitals
+    container.separator(divider: true, spacing: :small)
     container.text_display(
-      content: "**Defiance** `#{player.defiance}/#{player.max_defiance}`  ·  " \
-               "**Lust** `#{player.lust}`  ·  " \
-               "**LP** `#{player.lp}`"
+      content: "### Vitals\n" \
+               "**Defiance** `#{player.defiance}/#{player.max_defiance}` · " \
+               "**Lust** `#{player.lust}` · **LP** `#{player.lp}`\n" \
+               "**STR** #{player.effective_strength} _(#{player.strength})_ · " \
+               "**AGI** #{player.effective_agility} _(#{player.agility})_ · " \
+               "**RES** #{player.effective_resistance} _(#{player.resistance})_"
     )
-    container.text_display(
-      content: "**STR** #{player.effective_strength} _(base #{player.strength})_  ·  " \
-               "**AGI** #{player.effective_agility} _(base #{player.agility})_  ·  " \
-               "**RES** #{player.effective_resistance} _(base #{player.resistance})_"
-    )
-    container.text_display(
-      content: "**Threat Level — #{threat_label(threat.category)}** #{threat_bar(threat.percent)}\n" \
-               "_LP contrib #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
-               "Appearance +#{threat.appearance_component}_"
-    )
+
+    # Threat & lasting marks
+    container.separator(divider: true, spacing: :small)
+    threat_block = [
+      '### Threat',
+      "**#{threat_label(threat.category)}** #{threat_bar(threat.percent)}",
+      "-# LP #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
+      "Appearance +#{threat.appearance_component}"
+    ]
     if (chastity = Engine::ChastitySystem.description(player))
-      container.text_display(content: "🔒 #{chastity}")
+      threat_block << "🔒 #{chastity}"
     end
     if (corruption = Engine::Corruption.status_line(player))
-      container.text_display(content: corruption)
+      threat_block << corruption
     end
+    container.text_display(content: threat_block.join("\n"))
+
+    # Company / season
+    container.separator(divider: true, spacing: :small)
     admirer_types = Engine::Admirers.types(player)
-    admirer_line = "**Admirers** — **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
+    company = [
+      '### Company',
+      "**Admirers** **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
+    ]
     if admirer_types.any?
       soonest = admirer_types.sort_by { |type| Engine::Admirers.rooms_left(player, type) }.first(3)
       following = soonest.map do |type|
         name = Engine::Admirers.name_for(player, type) || type
-        "#{name} _(#{Engine::Admirers.rooms_left(player, type)} rooms left)_"
+        "#{name} _(#{Engine::Admirers.rooms_left(player, type)} left)_"
       end
       following << "+#{admirer_types.size - 3} more" if admirer_types.size > 3
-      admirer_line += "\n-# Leaving you soonest: #{following.join(' · ')}"
+      company << "-# Soonest: #{following.join(' · ')}"
     end
-    container.text_display(content: admirer_line)
-    container.text_display(content: Engine::Weekly.status_line)
-    candy = Engine::Halloween.candy_count(player)
-    if candy.positive?
-      container.text_display(
-        content: "🍬 **Halloween Candy** `#{candy}/#{Engine::Halloween::CANDY_MAX}` — " \
-                 'earned in-season, kept forever. Eat from Status anytime.'
-      )
+    company << Engine::Weekly.status_line
+    Engine::Seasons.status_consumables(player).each do |item|
+      max = item[:max] ? "/#{item[:max]}" : ''
+      company << "🍬 **#{item[:label]}** `#{item[:count]}#{max}` — eat anytime from the menu below."
     end
+    container.text_display(content: company.join("\n"))
+
     player.reconcile_encounter!
-    container.separator(divider: false, spacing: :small)
     container.text_display(
-      content: '-# Defeat resets the run and returns you to Cycle 1 — LP, curses, living gear, titles, ' \
-               'and deepest floor persist; trophies and conditions are lost. Use `/curses` for brands, `/profile` for titles & achievements.'
+      content: '-# Defeat resets the run to Cycle 1 — LP, curses, living gear, titles, and deepest floor keep. ' \
+               '`/curses` · `/profile`'
     )
   end
 

@@ -1108,7 +1108,9 @@ module Engine
 
     def available?(player, key)
       spec = event(key) or return false
-      return false if spec[:season] == :halloween && !Engine::Halloween.active?
+      if spec[:season]
+        return false unless Engine::Seasons.active?(spec[:season])
+      end
 
       parts = player.body_parts_list.map(&:to_s)
       if spec[:requires_any]

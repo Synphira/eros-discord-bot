@@ -31,6 +31,15 @@ module Engine
     RESIDENT_PEOPLE = %w[vex pip nectar cartographer].freeze
     FAIRY_PEOPLE = %w[berry syn].freeze
 
+    # Talk person key → Seasons dress table key (named folk only).
+    DRESS_WHO = {
+      'berry' => 'Berry', 'syn' => 'Syn', 'covar' => 'Covar',
+      'vex' => 'Madame Vex', 'pip' => 'Pip',
+      'broodmother' => 'Mimic Broodmother', 'queen' => 'Succubus Queen',
+      'king' => 'Incubus King', 'dryad' => 'Verdant Dryad', 'lich' => 'Lich Lord',
+      'alpha' => 'Alpha Beast', 'eros' => 'Eros'
+    }.freeze
+
     PEOPLE = {
       'berry' => {
         name: 'Berry',
@@ -1264,12 +1273,19 @@ module Engine
 
       player.remember!('talk_heard', token) unless person == 'covar'
       Engine::Halloween.mark_syn_crumb!(player) if topic[:key] == 'all_hallows'
+      if (dress = Engine::Seasons.dress_line(DRESS_WHO[person]))
+        text = "_#{dress}_\n\n#{text}"
+      end
       { ok: true, person: person, topic: topic, text: text, heard_before: heard,
         satisfied_extra: !satisfied_extra.nil? }
     end
 
     def present(player, topic)
       topic.merge(unlocked: unlocked?(player, topic))
+    end
+
+    def dress_note(person)
+      Engine::Seasons.dress_line(DRESS_WHO[normalize_person(person)])
     end
   end
 end

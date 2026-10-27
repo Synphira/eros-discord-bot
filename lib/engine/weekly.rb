@@ -1,29 +1,13 @@
 # frozen_string_literal: true
 
+require_relative 'seasons'
+
 module Engine
   module Weekly
     module_function
 
     WEEK = 7 * 24 * 3600
     MONDAY_OFFSET = 4 * 24 * 3600
-
-    # Day before Halloween (Oct 30) through Nov 5 inclusive — seven nights.
-    HALLOWEEN = {
-      key: 'halloween',
-      name: "All Hallows' Heat",
-      description: 'The temple puts on a mask: undead and demons throng the halls, lust runs hotter (×1.1), ' \
-                   'undead lust ×1.2, +3 LP submitting to undead / +2 to demons, elites ×1.5, and events 25% more often. ' \
-                   'Mimics stir, biomes lean haunted, pumpkin altars and trick-or-treat rooms appear, Vex stocks costumes, ' \
-                   'and candy/titles/gear you earn stay after the season.',
-      effects: {
-        'lust_mult' => 1.1,
-        'undead_lust_mult' => 1.2,
-        'undead_submit_lp' => 3,
-        'demon_submit_lp' => 2
-      },
-      monsters: { undead: 2.0, demon: 1.5, mimic: 1.35 },
-      special: { 'elite_chance' => 1.5, 'event_rate' => 1.25, 'mimic_chance' => 1.25 }
-    }.freeze
 
     MODIFIERS = [
       { key: 'heat_week', name: 'Heat Week',
@@ -49,40 +33,59 @@ module Engine
         effects: { 'slime_lust_mult' => 0.85, 'slime_submit_lp' => 3 }, monsters: { slime: 2.5 } },
       { key: 'spring_bloom', name: 'Spring Bloom',
         description: 'The tower blossoms: plants appear far more often, and +3 LP submitting to them.',
-        effects: { 'plant_submit_lp' => 3 }, monsters: { plant: 2.5 } },
-      HALLOWEEN
+        effects: { 'plant_submit_lp' => 3 }, monsters: { plant: 2.5 } }
     ].freeze
 
     @override = nil
 
     def override!(key)
-      @override = key && MODIFIERS.find { |m| m[:key] == key.to_s } ? key.to_s : nil
+      key = key&.to_s
+      if key.nil? || key.empty? || key == 'auto'
+        @override = nil
+        Engine::Seasons.force!(nil)
+        return nil
+      end
+
+      if key == 'friday_13' || Engine::Seasons.pack(key)
+        @override = nil
+        Engine::Seasons.force!(key)
+        return key
+      end
+
+      Engine::Seasons.force!(nil)
+      @override = MODIFIERS.find { |m| m[:key] == key } ? key : nil
     end
 
     def week_index(now = Time.now)
       (now.to_i - MONDAY_OFFSET) / WEEK
     end
 
-    # Oct 30 00:00 … Nov 6 00:00 (local server time) — day-before Halloween + one week.
+    # Back-compat for anything still asking the old Halloween helper.
     def halloween_window?(now = Time.now)
-      start = Time.new(now.year, 10, 30)
-      finish = Time.new(now.year, 11, 6)
-      now >= start && now < finish
+      Engine::Seasons.active?(:halloween, now)
     end
 
     def halloween_ends_at(now = Time.now)
-      Time.new(now.year, 11, 6).to_i
+      pack = Engine::Seasons.pack('halloween')
+      pack ? pack.ends_at(now) : Time.new(now.year, 11, 6).to_i
     end
 
     def current(now = Time.now)
-      return MODIFIERS.find { |m| m[:key] == @override } if @override
-      return HALLOWEEN if halloween_window?(now)
+      if @override
+        return MODIFIERS.find { |m| m[:key] == @override }
+      end
 
-      MODIFIERS.reject { |m| m[:key] == 'halloween' }[week_index(now) % (MODIFIERS.size - 1)]
+      seasonal = Engine::Seasons.weekly_for(now)
+      return seasonal if seasonal
+
+      MODIFIERS[week_index(now) % MODIFIERS.size]
     end
 
     def ends_at(now = Time.now)
-      return halloween_ends_at(now) if !@override && halloween_window?(now)
+      return ((week_index(now) + 1) * WEEK) + MONDAY_OFFSET if @override
+
+      seasonal_end = Engine::Seasons.ends_at(now)
+      return seasonal_end if seasonal_end
 
       ((week_index(now) + 1) * WEEK) + MONDAY_OFFSET
     end
@@ -92,7 +95,14 @@ module Engine
     end
 
     def special(key, default = 1.0)
-      current.dig(:special, key.to_s) || default
+      base = current.dig(:special, key.to_s) || default
+      return base unless Engine::Seasons.friday_13?
+
+      # Unlucky Friday: lean into elites and events a little harder.
+      case key.to_s
+      when 'elite_chance', 'event_rate', 'mimic_chance' then base.to_f * 1.25
+      else base
+      end
     end
 
     def monster_weight(type)
@@ -101,8 +111,17 @@ module Engine
 
     def status_line
       mod = current
-      label = mod[:key] == 'halloween' ? 'This season' : 'This week'
-      "**#{label} — #{mod[:name]}:** #{mod[:description]}\n-# Changes <t:#{ends_at}:R>."
+      seasonal = Engine::Seasons.active
+      label = seasonal && mod[:key] == seasonal.key.to_s ? 'This season' : 'This week'
+      line = "**#{label} — #{mod[:name]}:** #{mod[:description]}\n-# Changes <t:#{ends_at}:R>."
+      if Engine::Seasons.friday_13?
+        line += "\n**Also — Friday the 13th:** the temple is feeling unlucky (elites, events, and mimics lean harder today)."
+      end
+      line
+    end
+
+    def override_keys
+      MODIFIERS.map { |m| m[:key] } + Engine::Seasons.season_keys + %w[friday_13]
     end
   end
 end

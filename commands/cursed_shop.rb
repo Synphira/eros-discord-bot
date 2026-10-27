@@ -15,7 +15,10 @@ module Commands
       'armor' => 'Armor',
       'accessory' => 'Accessories'
     }.freeze
-    PAGE_SIZE = 5
+    # Discord Components V2 caps a message at 40 components. Each living
+    # piece is a section (section + text + button ≈ 3). Keep the page small
+    # and put long Covar flavour on page 0 only so later pages stay under budget.
+    PAGE_SIZE = 3
 
     module_function
 
@@ -32,44 +35,46 @@ module Commands
       page_items = items.slice(page * PAGE_SIZE, PAGE_SIZE) || []
       label = CATEGORY_LABELS[category]
       unlocked_total = (player.cursed_shop_unlocks & stock_names).size
+      front = page.zero?
 
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: '## Cursed Shop — Covar Zephyren')
-        c.text_display(
-          content: '_**Covar Zephyren** minds the living gear — horns, lashing tail, D-cup chest on shameless ' \
-                   'display in an open shirt. First delvers\' success story: the tower remade him, and he ' \
-                   'stayed, grinning. "Torn free and worn, it remembers you," he says. "Call it back free. ' \
-                   'Peel it off again and you pay LP. Conversation\'s free. I charge in stories. I\'m the ' \
-                   'matchmaker, not just the shopkeep."_'
-        )
-        if (regard = Engine::Regard.line(player, :cursed))
-          c.text_display(content: regard)
-        end
-        if Engine::Residents.vex_restored?(player)
+        if front
           c.text_display(
-            content: '_Covar is wearing the Original today — Syn\'s first work, restored, seams singing in ' \
-                     'a new key around horns and tail and that impossible chest, and he turns once for you ' \
-                     'without being asked. "It needed a body that would show it off," he says. "It had one ' \
-                     'for decades. Now it has a louder one." Prices, you note, are his own kind ones again._'
+            content: '_**Covar Zephyren** minds the living gear — horns, lashing tail, D-cup chest on shameless ' \
+                     'display in an open shirt. First delvers\' success story: the tower remade him, and he ' \
+                     'stayed, grinning. "Torn free and worn, it remembers you," he says. "Call it back free. ' \
+                     'Peel it off again and you pay LP. Conversation\'s free. I charge in stories. I\'m the ' \
+                     'matchmaker, not just the shopkeep."_'
           )
-        elsif Engine::Residents.vex_exiled?(player)
-          c.text_display(
-            content: '_Covar\'s smile does not reach his eyes. He threw Vex out of the back room the day ' \
-                     'her dress went onto the mannequin, and the dress now stands salvaged under every ' \
-                     'light he owns. "Tearing free costs **double** now," he says. "Call it grief. Help ' \
-                     'me make the dress whole again and I\'ll forgive the arithmetic."_'
-          )
-          c.row do |row|
-            row.button(label: '🪡 Restore the Dress', style: :danger,
-                       custom_id: "eros:cshop:dress:#{event.user.id}")
+          if (regard = Engine::Regard.line(player, :cursed))
+            c.text_display(content: regard)
           end
+          if Engine::Residents.vex_restored?(player)
+            c.text_display(
+              content: '_Covar is wearing the Original today — Syn\'s first work, restored, seams singing in ' \
+                       'a new key around horns and tail and that impossible chest, and he turns once for you ' \
+                       'without being asked. "It needed a body that would show it off," he says. "It had one ' \
+                       'for decades. Now it has a louder one." Prices, you note, are his own kind ones again._'
+            )
+          elsif Engine::Residents.vex_exiled?(player)
+            c.text_display(
+              content: '_Covar\'s smile does not reach his eyes. He threw Vex out of the back room the day ' \
+                       'her dress went onto the mannequin, and the dress now stands salvaged under every ' \
+                       'light he owns. "Tearing free costs **double** now," he says. "Call it grief. Help ' \
+                       'me make the dress whole again and I\'ll forgive the arithmetic."_'
+            )
+            c.row do |row|
+              row.button(label: '🪡 Restore the Dress', style: :danger,
+                         custom_id: "eros:cshop:dress:#{event.user.id}")
+            end
+          end
+          c.separator(divider: true, spacing: :small)
         end
-        c.separator(divider: true, spacing: :small)
         c.text_display(
-          content: "Your Lust Points: **#{player.lp}** · Unlocked **#{unlocked_total}/#{stock_names.size}** pieces"
+          content: "Your Lust Points: **#{player.lp}** · Unlocked **#{unlocked_total}/#{stock_names.size}** · " \
+                   "**#{label}** page **#{page + 1}/#{pages}**"
         )
-        c.separator(divider: true, spacing: :small)
-        c.text_display(content: "**#{label}** — page **#{page + 1}/#{pages}**")
 
         if page_items.empty?
           c.text_display(content: '_Nothing stirs in this aisle._')
@@ -119,8 +124,7 @@ module Commands
           row.button(label: 'Equipment', style: :secondary, custom_id: "eros:cshop:equipment:#{event.user.id}")
         end
 
-        c.separator(divider: false, spacing: :small)
-        c.text_display(content: '-# Category tabs · each piece has its own Take button · Prev/Next')
+        c.text_display(content: '-# Category tabs · Take per piece · Prev/Next')
       end
     end
 

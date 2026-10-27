@@ -775,6 +775,9 @@ module Engine
 
         #{combat_banner}
       MSG
+      if (dress = Engine::Seasons.dress_line(boss[:name]))
+        message += "\n\n_#{dress}_"
+      end
       if (appraisal = ThreatCalculator.boss_appraisal(player))
         message += "\n\n#{appraisal}"
       end
@@ -797,6 +800,9 @@ module Engine
         "You stand before **#{boss[:title] || boss[:name]}**!",
         "_#{boss[:description]}_"
       ]
+      if (dress = Engine::Seasons.dress_line(boss[:name]))
+        parts << "_#{dress}_"
+      end
       gossip = gossip_line(player, boss[:name])
       parts << gossip if gossip
       if (appraisal = ThreatCalculator.boss_appraisal(player))

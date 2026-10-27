@@ -7,22 +7,25 @@ module ErrorReporter
   LOG_FILE = File.join(ROOT, 'logs', 'errors.log')
   RULE = '=' * 70
   REPOST_WINDOW = 60
-  DISCORD_LIMIT = 2000
+  EMBED_COLOUR = 0xED4245 # Discord red
+  FIELD_LIMIT = 1024
+  TITLE_LIMIT = 256
+  DESC_LIMIT = 400
 
   @bot = nil
   @recent = {}
   @lock = Mutex.new
 
   HINTS = [
-    [/cannot exceed 40/i, 'A panel has more than 40 components (text blocks, dividers, buttons, rows). Trim what that screen renders.'],
-    [/4000|content.*length|must be 4000/i, 'A message has more than 4000 characters of text. Shorten or split the content.'],
-    [/Unknown interaction|10062/i, 'Discord expired the interaction: the bot took longer than 3 seconds to respond, or responded twice.'],
-    [/already been acknowledged|40060/i, 'The interaction was answered twice (e.g. respond after update).'],
-    [/Missing Access|Missing Permissions|50001|50013/i, 'The bot lacks permission in that channel or server.'],
-    [/custom_id.*(duplicate|unique)|must be unique/i, 'Two components on one panel share the same custom_id.'],
+    [/cannot exceed 40/i, 'A panel has more than 40 components. Trim what that screen renders.'],
+    [/4000|content.*length|must be 4000/i, 'A message has more than 4000 characters. Shorten or split.'],
+    [/Unknown interaction|10062/i, 'Interaction expired (>3s) or was answered twice.'],
+    [/already been acknowledged|40060/i, 'Interaction answered twice (e.g. respond after update).'],
+    [/Missing Access|Missing Permissions|50001|50013/i, 'Bot lacks permission in that channel or server.'],
+    [/custom_id.*(duplicate|unique)|must be unique/i, 'Two components share the same custom_id.'],
     [/options.*25|must be less than or equal to 25/i, 'A select menu has more than 25 options.'],
-    [/SQLite3|Sequel::/, 'Database error. Check that migrations are applied (`bundle exec rake db:migrate`).'],
-    [/NoMethodError|NameError/, 'Code bug: something was called on the wrong kind of object (often nil).']
+    [/SQLite3|Sequel::/, 'Database error — check migrations (`bundle exec rake db:migrate`).'],
+    [/NoMethodError|NameError/, 'Called something on the wrong object (often nil).']
   ].freeze
 
   module_function
@@ -67,15 +70,28 @@ module ErrorReporter
     frames = project_frames(error.backtrace)
     hidden = Array(error.backtrace).size - frames.size
     hint = HINTS.find { |pattern, _| pattern.match?("#{error.class} #{message} #{details.join(' ')}") }&.last
+    trigger = Thread.current[:eros_context] || 'background / not tied to a command'
+    where = frames.first || '(inside a gem — see logs/errors.log)'
 
+    summary = {
+      klass: error.class.name.to_s,
+      message: message,
+      trigger: trigger,
+      where: where,
+      details: details.first(5),
+      hint: hint,
+      frames: frames.first(4)
+    }
+
+    # Full dump stays on disk / stderr; Discord only gets the compact embed.
     lines = [
       RULE,
       "ERROR  #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}",
-      "What:     #{error.class}: #{message}",
-      "Trigger:  #{Thread.current[:eros_context] || 'background / not tied to a command'}",
-      "Where:    #{frames.first || '(inside a gem — see trace)'}"
+      "What:     #{summary[:klass]}: #{message}",
+      "Trigger:  #{trigger}",
+      "Where:    #{where}"
     ]
-    lines << "Details:  #{details.first(5).join(' | ')}" if details.any?
+    lines << "Details:  #{summary[:details].join(' | ')}" if summary[:details].any?
     lines << "Hint:     #{hint}" if hint
     if frames.size > 1
       lines << 'Our code (most recent first):'
@@ -87,7 +103,8 @@ module ErrorReporter
 
     $stderr.puts("\n#{text}\n")
     write_file(text, error)
-    post_to_discord(text, "#{error.class}|#{frames.first}|#{message[0, 120]}|#{details.first.to_s[0, 120]}")
+    signature = "#{summary[:klass]}|#{where}|#{message[0, 120]}|#{summary[:details].first.to_s[0, 120]}"
+    post_to_discord(summary, signature)
   rescue StandardError => e
     warn "ErrorReporter failed (#{e.class}: #{e.message}); original: #{error.class}: #{error.message}"
   end
@@ -128,7 +145,14 @@ module ErrorReporter
     end
   end
 
-  def post_to_discord(text, signature)
+  def clip(text, limit)
+    text = text.to_s
+    return text if text.size <= limit
+
+    "#{text[0, limit - 1]}…"
+  end
+
+  def post_to_discord(summary, signature)
     return unless @bot && env_id('ERROR_CHANNEL_ID')
 
     repeats = throttle(signature)
@@ -136,14 +160,36 @@ module ErrorReporter
 
     Thread.new do
       channel = error_channel
-      if channel
-        body = text.gsub('```', "'''")
-        note = repeats.positive? ? "\n-# Also happened #{repeats} more time(s) since the last post." : ''
-        room = DISCORD_LIMIT - note.size - 12
-        body = "#{body[0, room - 20]}\n… (truncated)" if body.size > room
-        channel.send_message("```\n#{body}\n```#{note}", false, nil, nil, { parse: [] })
-      else
+      unless channel
         warn '[error channel] ERROR_CHANNEL_ID not reachable (wrong ID, wrong server, or bot lacks access).'
+        next
+      end
+
+      title = clip(summary[:klass], TITLE_LIMIT)
+      desc = clip(summary[:message], DESC_LIMIT)
+
+      # send_embed(message, embed, attachments, tts, allowed_mentions, ...)
+      channel.send_embed('', nil, nil, false, { parse: [] }) do |embed, _view|
+        embed.title = title
+        embed.description = desc unless desc.empty?
+        embed.colour = EMBED_COLOUR
+        embed.timestamp = Time.now
+        embed.add_field(name: 'Trigger', value: clip(summary[:trigger], FIELD_LIMIT), inline: false)
+        embed.add_field(name: 'Where', value: "```#{clip(summary[:where], FIELD_LIMIT - 6)}```", inline: false)
+        if summary[:details]&.any?
+          embed.add_field(name: 'Details', value: clip(summary[:details].join("\n"), FIELD_LIMIT), inline: false)
+        end
+        if summary[:hint]
+          embed.add_field(name: 'Hint', value: clip(summary[:hint], FIELD_LIMIT), inline: false)
+        end
+        extra = Array(summary[:frames])
+        if extra.size > 1
+          stack = extra.map { |f| "• #{f}" }.join("\n")
+          embed.add_field(name: 'Stack', value: clip(stack, FIELD_LIMIT), inline: false)
+        end
+        footer = 'Full trace → logs/errors.log'
+        footer = "×#{repeats + 1} in last minute · #{footer}" if repeats.positive?
+        embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: footer)
       end
     rescue StandardError => e
       warn "[error channel] Posting failed: #{e.class}: #{e.message.to_s.lines.first&.strip}"

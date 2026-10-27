@@ -13,19 +13,37 @@ module Commands
 
       ErosUI.reply_v2(event, colour: ErosUI.threat_color(threat.category)) do |c|
         ErosUI.build_status_container(c, player)
-        count = player.condition_list.size
-        burden_count = Engine::Burdens.active(player).size
-        bonus_count = Engine::SupportBonuses.active_count(player)
-        candy = Engine::Halloween.candy_count(player)
-        c.row do |row|
-          row.button(label: "⛓️ Burdens (#{burden_count})", style: :primary, custom_id: "eros:status:burdens:#{event.user.id}")
-          row.button(label: "Bonuses (#{bonus_count})", style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
-          row.button(label: "Conditions (#{count})", style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
-        end
-        if candy.positive?
-          c.row do |row|
-            row.button(label: "🍬 Eat Candy (#{candy})", style: :success,
-                       custom_id: "eros:status:candy:#{event.user.id}")
+        status_nav(c, player, event, current: :status)
+      end
+    end
+
+    # One select instead of a button row — keeps the sheet short on mobile.
+    def status_nav(container, player, event, current:)
+      uid = event.user.id
+      burdens = Engine::Burdens.active(player).size
+      bonuses = Engine::SupportBonuses.active_count(player)
+      conditions = player.condition_list.size
+      candy = Engine::Halloween.candy_count(player)
+
+      container.row do |row|
+        row.string_select(custom_id: "eros:status:goto:#{uid}", placeholder: 'Open a panel…',
+                          min_values: 1, max_values: 1) do |menu|
+          menu.option(label: 'Status', value: 'status',
+                      description: 'Your delver sheet',
+                      emoji: { name: '📜' }, default: current == :status)
+          menu.option(label: "Burdens (#{burdens})", value: 'burdens',
+                      description: 'Cycle torments & oaths',
+                      emoji: { name: '⛓️' }, default: current == :burdens)
+          menu.option(label: "Bonuses (#{bonuses})", value: 'bonuses',
+                      description: 'Support-server perks',
+                      emoji: { name: '✨' }, default: current == :bonuses)
+          menu.option(label: "Conditions (#{conditions})", value: 'conditions',
+                      description: 'Active floor effects',
+                      emoji: { name: '🩸' }, default: current == :conditions)
+          if candy.positive?
+            menu.option(label: "Eat Candy (#{candy})", value: 'candy',
+                        description: 'Spend a Halloween sweet',
+                        emoji: { name: '🍬' })
           end
         end
       end
@@ -40,21 +58,7 @@ module Commands
       ErosUI.reply_v2(event, colour: ErosUI.threat_color(threat.category)) do |c|
         ErosUI.build_status_container(c, player)
         c.text_display(content: notice)
-        count = player.condition_list.size
-        burden_count = Engine::Burdens.active(player).size
-        bonus_count = Engine::SupportBonuses.active_count(player)
-        candy = Engine::Halloween.candy_count(player)
-        c.row do |row|
-          row.button(label: "⛓️ Burdens (#{burden_count})", style: :primary, custom_id: "eros:status:burdens:#{event.user.id}")
-          row.button(label: "Bonuses (#{bonus_count})", style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
-          row.button(label: "Conditions (#{count})", style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
-        end
-        if candy.positive?
-          c.row do |row|
-            row.button(label: "🍬 Eat Candy (#{candy})", style: :success,
-                       custom_id: "eros:status:candy:#{event.user.id}")
-          end
-        end
+        status_nav(c, player, event, current: :status)
       end
     end
 
@@ -77,11 +81,7 @@ module Commands
           row.button(label: 'Join Support Server', style: :link,
                      url: Engine::SupportBonuses::INVITE_URL)
         end
-        c.row do |row|
-          row.button(label: 'Back to Status', style: :primary, custom_id: "eros:status:view:#{event.user.id}")
-          row.button(label: '⛓️ Burdens', style: :secondary, custom_id: "eros:status:burdens:#{event.user.id}")
-          row.button(label: 'Conditions', style: :secondary, custom_id: "eros:status:conditions:#{event.user.id}")
-        end
+        status_nav(c, player, event, current: :bonuses)
       end
     end
 
@@ -151,10 +151,7 @@ module Commands
                                  (!oath && sworn.size >= Engine::Burdens::MAX_OATHS))
           end
         end
-        c.row do |row|
-          row.button(label: 'Back to Status', style: :primary, custom_id: "eros:status:view:#{event.user.id}")
-          row.button(label: 'Bonuses', style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
-        end
+        status_nav(c, player, event, current: :burdens)
       end
     end
 
@@ -164,10 +161,7 @@ module Commands
 
       ErosUI.reply_v2(event, colour: ErosUI.threat_color(threat.category)) do |c|
         ErosUI.build_conditions_container(c, player)
-        c.row do |row|
-          row.button(label: 'Back to Status', style: :primary, custom_id: "eros:status:view:#{event.user.id}")
-          row.button(label: 'Bonuses', style: :secondary, custom_id: "eros:status:bonuses:#{event.user.id}")
-        end
+        status_nav(c, player, event, current: :conditions)
       end
     end
 
@@ -207,6 +201,19 @@ module Commands
       Commands::Status.burdens(event, notice: result[:ok] ? "🎲 #{result[:message]}" : "❌ #{result[:message]}")
     end
 
+    string_select(custom_id: /^eros:status:goto:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      case Array(event.values).first.to_s
+      when 'burdens' then Commands::Status.burdens(event)
+      when 'bonuses' then Commands::Status.bonuses(event)
+      when 'conditions' then Commands::Status.conditions(event)
+      when 'candy' then Commands::Status.eat_candy(event)
+      else Commands::Status.run(event)
+      end
+    end
+
+    # Legacy button ids — old panels in chat still work until they refresh.
     button(custom_id: /^eros:status:burdens:\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 

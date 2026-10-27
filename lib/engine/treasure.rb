@@ -565,7 +565,7 @@ module Engine
         lines << "Your craving for containers pays off — **+#{bonus_lp} LP** (now `#{player.lp}`)."
       end
 
-      lines.concat(Engine::Halloween.chest_bonus!(player))
+      lines.concat(Engine::Seasons.chest_bonus!(player))
 
       {
         lines: lines,

@@ -631,7 +631,7 @@ module Engine
       restored = vex_restored?(player)
       VEX_OUTFITS.select do |spec|
         case spec[:tier]
-        when :halloween then Engine::Halloween.costume_stock?
+        when :halloween then Engine::Seasons.active?(:halloween)
         when :basic then true
         else restored
         end

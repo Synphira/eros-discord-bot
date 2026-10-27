@@ -1,15 +1,34 @@
 # frozen_string_literal: true
 
+require_relative 'seasons'
+
 module Engine
-  # Seasonal All Hallows' content. The calendar window lives on Weekly;
-  # rewards earned here (titles, costumes, candy stockpiles, heard crumbs)
-  # are permanent — the season only gates *earning* and *encounter rate*.
+  # All Hallows' Heat pack. Rewards earned here persist; the calendar only
+  # gates earning and encounter rate.
   module Halloween
+    KEY = 'halloween'
     CANDY_TRACKER = 'halloween_candy'
     CANDY_EATEN = 'halloween_candy_eaten'
     CANDY_MAX = 12
     SUBMIT_TRACKER = 'halloween_submits'
     SCARES_OPTION = 'halloween_scares'
+
+    WEEKLY = {
+      key: KEY,
+      name: "All Hallows' Heat",
+      description: 'The temple puts on a mask: undead and demons throng the halls, lust runs hotter (×1.1), ' \
+                   'undead lust ×1.2, +3 LP submitting to undead / +2 to demons, elites ×1.5, and events 25% more often. ' \
+                   'Mimics stir, biomes lean haunted, pumpkin altars and trick-or-treat rooms appear, Vex stocks costumes, ' \
+                   'named folk dress for the night, and candy/titles/gear you earn stay after the season.',
+      effects: {
+        'lust_mult' => 1.1,
+        'undead_lust_mult' => 1.2,
+        'undead_submit_lp' => 3,
+        'demon_submit_lp' => 2
+      },
+      monsters: { undead: 2.0, demon: 1.5, mimic: 1.35 },
+      special: { 'elite_chance' => 1.5, 'event_rate' => 1.25, 'mimic_chance' => 1.25 }
+    }.freeze
 
     COSTUME_NAMES = [
       'Masquerade Domino',
@@ -35,29 +54,55 @@ module Engine
       summary: 'Candle-warm and faintly orange — the temple likes your costume'
     }.freeze
 
+    # Named characters only — not random encounter monsters. Alpha is always
+    # Syn's handiwork.
+    DRESS = {
+      'Mimic Broodmother' => 'The Broodmother\'s lid is draped in tattered lace and paper bats her brood has glued on crooked. ' \
+                            'She looks absurd. She looks delighted.',
+      'Succubus Queen' => 'The Queen wears a jewelled half-mask and a gown cut for All Hallows — every inch of her ' \
+                         'announces that costume is just another kind of throne.',
+      'Incubus King' => 'The King has painted his horns gold and hung a cape that does nothing for his dignity. He ' \
+                       'strikes a pose anyway.',
+      'Verdant Dryad' => 'Autumn leaves crown the Dryad instead of summer flowers — a harvest halo, soft and inevitable.',
+      'Lich Lord' => 'A paper crown sits atop blue fire. The Lich did not ask for it. Someone (Syn) insisted. He is ' \
+                    'enduring the curriculum.',
+      'Alpha Beast' => 'Syn has buckled a ridiculous bat-wing collar onto her pupper for All Hallows. He is delighted. ' \
+                      'You are compromised.',
+      'Eros' => 'Even the goddess has indulged the night — a ribbon of black lace somewhere a goddess should not need ' \
+               'lace, and a smile that says the temple is allowed to play dress-up.',
+      'Syn' => 'Syn has ink-smudged bat wings painted at the corners of her eyes and a needle tucked behind one ear ' \
+              'like a festive pin. She looks like she invented the holiday to have an excuse.',
+      'Berry' => 'Berry wears a tiny witch\'s hat at a practical angle and pretends it is for the customers. It is ' \
+                'absolutely for Syn.',
+      'Covar' => 'Covar has a mask. He claims it is for anonymity. It is velvet and fits him far too well.',
+      'Madame Vex' => 'Vex\'s living cloth has agreed — for once — to look like cobweb silk. She looks like a ghost who ' \
+                     'charges for fittings.',
+      'Pip' => 'Pip is in a bedsheet ghost costume with eyeholes cut by someone who hates symmetry. She is very proud.'
+    }.freeze
+
     CLERGY_LINES = {
       'Mimic Broodmother' => {
         victory: 'The Broodmother\'s lid clacks like a laugh. "Dress-up night," she croons. "My brood loves costumes. Especially the ones that scream."',
         praise: 'Little mimics bounce in paper masks. One of them is wearing your discarded dignity.'
       },
       'Succubus Queen' => {
-        victory: 'The Queen adjusts a jewelled half-mask she was not wearing a moment ago. "Samhain etiquette," she purrs. "Kneel prettier."',
+        victory: 'The Queen adjusts her jewelled half-mask. "Samhain etiquette," she purrs. "Kneel prettier."',
         praise: '"Masks make everyone honest," she says, and kisses the spot yours would cover.'
       },
       'Incubus King' => {
-        victory: 'The King has horns painted gold for the night and zero shame. "Trick or treat," he says, already deciding you are both.',
+        victory: 'Gold-painted horns catch the light. "Trick or treat," the King says, already deciding you are both.',
         praise: 'He tugs a candy ribbon from nowhere and ties it around your wrist like a claim.'
       },
       'Verdant Dryad' => {
-        victory: 'Autumn leaves crown her instead of flowers. "The garden dies beautifully this week," she murmurs. "So can you."',
+        victory: 'Autumn leaves crown her. "The garden dies beautifully this week," she murmurs. "So can you."',
         praise: 'She tucks a dried leaf behind your ear. It smells like smoke and sap.'
       },
       'Lich Lord' => {
-        victory: 'Blue fire wears a paper crown. "All Hallows is when the living remember they are temporary," the Lich notes. "Useful curriculum."',
+        victory: 'The paper crown tips. "All Hallows is when the living remember they are temporary," the Lich notes. "Useful curriculum."',
         praise: 'He stamps your skin with a cold sigil that looks, briefly, like a candy skull.'
       },
       'Alpha Beast' => {
-        victory: 'Syn\'s pupper has a ridiculous bat-wing collar someone buckled on him. He is delighted. You are compromised.',
+        victory: 'Syn\'s pupper shakes his bat-wing collar proudly. He is delighted. You are compromised.',
         praise: 'He drops a mouthful of foil-wrapped candy on your chest and looks enormously proud.'
       },
       'Eros' => {
@@ -68,12 +113,41 @@ module Engine
 
     module_function
 
+    def key
+      KEY
+    end
+
+    def name
+      WEEKLY[:name]
+    end
+
+    def weekly
+      WEEKLY
+    end
+
+    def window?(now = Time.now)
+      start = Time.new(now.year, 10, 30)
+      finish = Time.new(now.year, 11, 6)
+      now >= start && now < finish
+    end
+
+    def ends_at(now = Time.now)
+      Time.new(now.year, 11, 6).to_i
+    end
+
     def active?(now = Time.now)
-      Engine::Weekly.halloween_window?(now)
+      Engine::Seasons.active?(:halloween, now) ||
+        (Engine::Seasons.forced_key == KEY)
+    end
+
+    # Called only while this pack is the active season (or forced) — do not
+    # re-gate on Time.now here (Seasons may be probing a simulated date).
+    def dress_line(who)
+      DRESS[who.to_s]
     end
 
     def note_submit!(player)
-      return unless active? && player
+      return unless player && (active? || Engine::Seasons.forced_key == KEY)
 
       player.bump_tracker!(SUBMIT_TRACKER)
     end
@@ -114,9 +188,14 @@ module Engine
       end
     end
 
-    def biome_weight_mult(biome_key)
-      return 1.0 unless active?
+    def status_consumables(player)
+      count = candy_count(player)
+      return [] unless count.positive?
 
+      [{ id: 'halloween_candy', label: 'Halloween Candy', count: count, max: CANDY_MAX }]
+    end
+
+    def biome_weight_mult(biome_key)
       case biome_key.to_s
       when 'ashen_court', 'masquerade_ball', 'clockwork_brothel', 'bell_choir' then 1.75
       when 'flooded_grotto', 'honeyed_hive', 'milking_barns' then 0.85
@@ -124,16 +203,15 @@ module Engine
       end
     end
 
-    def presence_text(users, towers)
-      base = "with #{users} #{users == 1 ? 'user' : 'users'} in #{towers} #{towers == 1 ? 'tower' : 'towers'}"
-      return "#{base}." unless active?
+    def presence_suffix
+      ' — masked delvers in the temple for All Hallows.'
+    end
 
-      "#{base} — masked delvers in the temple for All Hallows."
+    def presence_text(users, towers)
+      Engine::Seasons.presence_text(users, towers)
     end
 
     def clergy_line(boss_name, kind = :victory)
-      return nil unless active?
-
       key = kind.to_sym == :praise ? :praise : :victory
       CLERGY_LINES.dig(boss_name.to_s, key)
     end
@@ -154,7 +232,6 @@ module Engine
       active?
     end
 
-    # Seasonal chest extras: candy always tries; unowned costume pieces sometimes.
     def chest_bonus!(player)
       return [] unless active?
 
@@ -177,5 +254,7 @@ module Engine
       end
       lines
     end
+
+    Engine::Seasons.register!(KEY, self)
   end
 end

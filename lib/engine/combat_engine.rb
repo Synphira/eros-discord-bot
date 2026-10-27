@@ -387,7 +387,7 @@ module Engine
       @player.bump_tracker!('submissions')
       @player.bump_tracker!('run_submissions')
       @player.bump_tracker!("#{enc[:type]}_submissions")
-      Engine::Halloween.note_submit!(@player)
+      Engine::Seasons.note_submit!(@player)
       demon_kind = demon_kind(enc)
       @player.bump_tracker!("#{demon_kind}_submissions") if demon_kind
       log << "You submit to the #{enc[:name]}, gaining **#{lp_reward}** Lust Points for your willingness."
@@ -521,7 +521,7 @@ module Engine
       text = Engine::BossFights.line(@player, enc[:name], key)
       log << { scene: text } if text
       season_kind = %i[sated wanting].include?(key.to_sym) ? :praise : :victory
-      if (season = Engine::Halloween.clergy_line(enc[:name], season_kind))
+      if (season = Engine::Seasons.clergy_line(enc[:name], season_kind))
         log << { scene: season }
       end
     end

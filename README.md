@@ -171,8 +171,9 @@ Slash commands: `bundle exec rake commands:register` after changing names or
 descriptions. Global sync can take up to ~1 hour; set `DISCORD_GUILD_ID` for
 instant guild registration while testing.
 
-Errors: console + `logs/errors.log`, and optionally a Discord channel via
-`ERROR_GUILD_ID` / `ERROR_CHANNEL_ID`. Join/leave notices go to `GUILD_LOG_CHANNEL_ID` (defaults to the support guild-log channel).
+Errors: console + `logs/errors.log`, and optionally a compact Discord embed via
+`ERROR_GUILD_ID` / `ERROR_CHANNEL_ID` (class, message, trigger, where, details, hint).
+Join/leave notices go to `GUILD_LOG_CHANNEL_ID` (defaults to the support guild-log channel).
 
 ---
 
