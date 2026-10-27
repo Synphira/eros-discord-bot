@@ -11,6 +11,8 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 ### Changed
 
 - **`/status` layout:** sheet is split into **Climb / Body / Vitals / Threat / Company** sections with dividers; Burdens, Bonuses, Conditions (and Eat Candy when relevant) live in one **select menu** instead of a button row.
+- **`/status` Events panel:** weekly/season modifier, Friday the 13th, and seasonal stash (candy) moved off the main sheet onto a dedicated **Events** menu entry. Threat keeps short chastity/corruption flags; full effect text stays under **Conditions**.
+- **`/status` Conditions paging:** lists **6** conditions per page with prev/next. **Chastity** and **body-change** conditions (plus the live chastity description) always land on page 1.
 - **Error channel posts:** Discord error reports are compact embeds (class, message, trigger, where, API details, hint, short stack) instead of full code-fence dumps. Full traces still go to `logs/errors.log`.
 - **Support-server perks:** tag is **+5% LP** (was +10%). **Boosters** get **+5% LP**, **10% off all LP prices**, and **+1 Lich's Phylactery use** per run. Revocable titles: **Tagged Devotee** / **Tower Patron** / **Beloved of the Tower**.
 - **Halloween weekly:** from **Oct 30 through Nov 5** the rotating weekly is replaced by **All Hallows' Heat** (undead/demon throngs, hotter lust, elite & event bumps, restless mimics). Dev can still `e,dev week halloween`.

@@ -574,73 +574,163 @@ module ErosUI
                "**RES** #{player.effective_resistance} _(#{player.resistance})_"
     )
 
-    # Threat & lasting marks
+    # Threat — short; chastity / corruption detail live under Conditions & Events.
     container.separator(divider: true, spacing: :small)
-    threat_block = [
+    threat_bits = [
       '### Threat',
       "**#{threat_label(threat.category)}** #{threat_bar(threat.percent)}",
       "-# LP #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
       "Appearance +#{threat.appearance_component}"
     ]
-    if (chastity = Engine::ChastitySystem.description(player))
-      threat_block << "🔒 #{chastity}"
+    if Engine::ChastitySystem.description(player)
+      threat_bits << '🔒 Chastity locked — details under **Conditions**.'
     end
-    if (corruption = Engine::Corruption.status_line(player))
-      threat_block << corruption
+    if Engine::Corruption.enabled?(player) && Engine::Corruption.level(player).positive?
+      value = Engine::Corruption.level(player)
+      name = Engine::Corruption.stage(value)&.at(1) || 'Touched'
+      threat_bits << "**Corruption** #{name} `#{value}/#{Engine::Corruption::MAX}` — effects under **Conditions**."
     end
-    container.text_display(content: threat_block.join("\n"))
+    container.text_display(content: threat_bits.join("\n"))
 
-    # Company / season
-    container.separator(divider: true, spacing: :small)
+    # Company — admirers only; weekly / season / candy → Events panel.
     admirer_types = Engine::Admirers.types(player)
-    company = [
-      '### Company',
-      "**Admirers** **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
-    ]
-    if admirer_types.any?
-      soonest = admirer_types.sort_by { |type| Engine::Admirers.rooms_left(player, type) }.first(3)
-      following = soonest.map do |type|
-        name = Engine::Admirers.name_for(player, type) || type
-        "#{name} _(#{Engine::Admirers.rooms_left(player, type)} left)_"
+    if admirer_types.any? || Engine::Admirers.total(player).positive?
+      container.separator(divider: true, spacing: :small)
+      company = [
+        '### Company',
+        "**Admirers** **#{admirer_types.size}** current · **#{Engine::Admirers.total(player)}** all time"
+      ]
+      if admirer_types.any?
+        soonest = admirer_types.sort_by { |type| Engine::Admirers.rooms_left(player, type) }.first(3)
+        following = soonest.map do |type|
+          name = Engine::Admirers.name_for(player, type) || type
+          "#{name} _(#{Engine::Admirers.rooms_left(player, type)} left)_"
+        end
+        following << "+#{admirer_types.size - 3} more" if admirer_types.size > 3
+        company << "-# Soonest: #{following.join(' · ')}"
       end
-      following << "+#{admirer_types.size - 3} more" if admirer_types.size > 3
-      company << "-# Soonest: #{following.join(' · ')}"
+      container.text_display(content: company.join("\n"))
     end
-    company << Engine::Weekly.status_line
-    Engine::Seasons.status_consumables(player).each do |item|
-      max = item[:max] ? "/#{item[:max]}" : ''
-      company << "🍬 **#{item[:label]}** `#{item[:count]}#{max}` — eat anytime from the menu below."
-    end
-    container.text_display(content: company.join("\n"))
 
     player.reconcile_encounter!
     container.text_display(
-      content: '-# Defeat resets the run to Cycle 1 — LP, curses, living gear, titles, and deepest floor keep. ' \
-               '`/curses` · `/profile`'
+      content: '-# Defeat → Cycle 1 reset. LP, curses, living gear, titles, deepest floor keep. ' \
+               '`/curses` · `/profile` · **Events** for the weekly.'
     )
   end
 
-  def build_conditions_container(container, player)
-    container.text_display(content: "## Conditions — #{player.display_name}")
+  def build_events_container(container, player)
+    container.text_display(content: "## Events — #{player.display_name}")
     container.separator(divider: true, spacing: :small)
-    if (chastity = Engine::ChastitySystem.description(player))
+
+    mod = Engine::Weekly.current
+    seasonal = Engine::Seasons.active
+    label = seasonal && mod[:key].to_s == seasonal.key.to_s ? 'Season' : 'This week'
+    ends = Engine::Weekly.ends_at
+    container.text_display(
+      content: "### #{label} — #{mod[:name]}\n#{mod[:description]}\n-# Changes <t:#{ends}:R>."
+    )
+
+    if Engine::Seasons.friday_13?
+      container.separator(divider: true, spacing: :small)
+      container.text_display(
+        content: "### Also — Friday the 13th\n" \
+                 'The temple is feeling unlucky today: elites, random events, and mimics lean harder.'
+      )
+    end
+
+    consumables = Engine::Seasons.status_consumables(player)
+    if consumables.any?
+      container.separator(divider: true, spacing: :small)
+      lines = consumables.map do |item|
+        max = item[:max] ? "/#{item[:max]}" : ''
+        "🍬 **#{item[:label]}** `#{item[:count]}#{max}` — earned in-season, kept forever."
+      end
+      container.text_display(
+        content: "### Stash\n#{lines.join("\n")}\n-# Eat from the menu below when you have candy."
+      )
+    end
+
+    container.text_display(
+      content: '-# Weeklies rotate Mondays. Seasons replace the weekly while they run; rewards you earn stay.'
+    )
+  end
+
+  CONDITIONS_PAGE_SIZE = 6
+  # Body-altering keys that may not carry parts/remove_parts on the entry.
+  BODY_CONDITION_KEYS = %w[
+    mirror_changed futa_blessing towering pocket_sized
+  ].freeze
+
+  def condition_body_change?(cond)
+    return true if Array(cond['parts']).any? || Array(cond['remove_parts']).any?
+
+    BODY_CONDITION_KEYS.include?(cond['key'].to_s)
+  end
+
+  def condition_chastity?(cond)
+    fx = Hash(cond['effects'])
+    return true if fx['deny_climax'] || fx[:deny_climax]
+
+    cond['key'].to_s.match?(/chast|locked|caged|denied/)
+  end
+
+  def condition_pinned?(cond)
+    condition_chastity?(cond) || condition_body_change?(cond)
+  end
+
+  def sorted_conditions(player)
+    list = player.condition_list
+    pinned, rest = list.partition { |c| condition_pinned?(c) }
+    # Chastity before body changes within the pinned block.
+    chastity, body = pinned.partition { |c| condition_chastity?(c) }
+    chastity + body + rest
+  end
+
+  def format_condition_line(cond)
+    floors = cond['floors'].to_i
+    duration = cond['key'] == Engine::Corruption::KEY ? 'until defeat' : "#{floors} floor#{'s' unless floors == 1}"
+    summary = cond['effects'] ? Engine::FetishEvents.describe_effects(cond['effects']) : cond['summary']
+    mark =
+      if condition_chastity?(cond) then '🔒'
+      elsif condition_body_change?(cond) then '🪞'
+      else '•'
+      end
+    "#{mark} **#{cond['name']}** — #{summary} _(#{duration})_"
+  end
+
+  # Returns [slice, pages, page] so callers can attach a pager.
+  def build_conditions_container(container, player, page: 0)
+    all = sorted_conditions(player)
+    total = all.size
+    pages = [(total.to_f / CONDITIONS_PAGE_SIZE).ceil, 1].max
+    page = page.to_i.clamp(0, pages - 1)
+    slice = all.slice(page * CONDITIONS_PAGE_SIZE, CONDITIONS_PAGE_SIZE) || []
+
+    header = "## Conditions — #{player.display_name}"
+    header += "\n-# Page **#{page + 1}/#{pages}** · **#{total}** active" if total.positive?
+    container.text_display(content: header)
+    container.separator(divider: true, spacing: :small)
+
+    # Chastity from gear / denial flag — always surface on page 1.
+    if page.zero? && (chastity = Engine::ChastitySystem.description(player))
       container.text_display(content: "🔒 #{chastity}")
     end
-    conditions = player.condition_list
-    if conditions.empty?
-      container.text_display(content: '_No active conditions._')
+
+    if total.zero?
+      container.text_display(content: '_No active conditions._') unless Engine::ChastitySystem.in_chastity?(player)
     else
-      lines = conditions.map do |c|
-        floors = c['floors'].to_i
-        duration = c['key'] == Engine::Corruption::KEY ? 'until defeat' : "#{floors} floor#{'s' unless floors == 1}"
-        # Recompute from effects when possible: summaries stored by older
-        # versions can contain raw effect keys.
-        summary = c['effects'] ? Engine::FetishEvents.describe_effects(c['effects']) : c['summary']
-        "• **#{c['name']}** — #{summary} _(#{duration})_"
+      if page.zero? && all.any? { |c| condition_pinned?(c) }
+        pinned_n = all.count { |c| condition_pinned?(c) }
+        container.text_display(
+          content: "-# 🔒 chastity · 🪞 body change pin to page 1 (#{pinned_n} pinned)."
+        )
       end
-      container.text_display(content: lines.join("\n"))
+      container.text_display(content: slice.map { |c| format_condition_line(c) }.join("\n"))
     end
+
     container.separator(divider: false, spacing: :small)
     container.text_display(content: '-# Conditions tick down each floor and are cleared on defeat.')
+    [slice, pages, page]
   end
 end

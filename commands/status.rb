@@ -31,6 +31,9 @@ module Commands
           menu.option(label: 'Status', value: 'status',
                       description: 'Your delver sheet',
                       emoji: { name: '📜' }, default: current == :status)
+          menu.option(label: 'Events', value: 'events',
+                      description: 'Weekly, seasons & stash',
+                      emoji: { name: '📅' }, default: current == :events)
           menu.option(label: "Burdens (#{burdens})", value: 'burdens',
                       description: 'Cycle torments & oaths',
                       emoji: { name: '⛓️' }, default: current == :burdens)
@@ -46,6 +49,15 @@ module Commands
                         emoji: { name: '🍬' })
           end
         end
+      end
+    end
+
+    def events(event)
+      player = ErosHelpers.require_player(event) or return
+
+      ErosUI.reply_v2(event, colour: 0x9b59b6) do |c|
+        ErosUI.build_events_container(c, player)
+        status_nav(c, player, event, current: :events)
       end
     end
 
@@ -155,12 +167,13 @@ module Commands
       end
     end
 
-    def conditions(event)
+    def conditions(event, page: 0)
       player = ErosHelpers.require_player(event) or return
       threat = Engine::ThreatCalculator.calculate(player)
 
       ErosUI.reply_v2(event, colour: ErosUI.threat_color(threat.category)) do |c|
-        ErosUI.build_conditions_container(c, player)
+        _slice, pages, page = ErosUI.build_conditions_container(c, player, page: page)
+        Commands::Profile.attach_pager(c, 'eros:status:condpage', page, pages, event.user.id) if pages > 1
         status_nav(c, player, event, current: :conditions)
       end
     end
@@ -205,12 +218,20 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       case Array(event.values).first.to_s
+      when 'events' then Commands::Status.events(event)
       when 'burdens' then Commands::Status.burdens(event)
       when 'bonuses' then Commands::Status.bonuses(event)
-      when 'conditions' then Commands::Status.conditions(event)
+      when 'conditions' then Commands::Status.conditions(event, page: 0)
       when 'candy' then Commands::Status.eat_candy(event)
       else Commands::Status.run(event)
       end
+    end
+
+    button(custom_id: /^eros:status:condpage:-?\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      page = event.custom_id[/\Aeros:status:condpage:(-?\d+):\d+\z/, 1].to_i
+      Commands::Status.conditions(event, page: page)
     end
 
     # Legacy button ids — old panels in chat still work until they refresh.
