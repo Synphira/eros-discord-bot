@@ -526,7 +526,6 @@ module ErosUI
 
   def build_status_container(container, player)
     threat = Engine::ThreatCalculator.calculate(player)
-    stairs = Engine::Exploration.stairs_status(player)
     title = player.active_title_name
     hybrid = player.active_transformation_name
 
@@ -547,15 +546,8 @@ module ErosUI
     end
     container.text_display(content: identity.join("\n"))
 
-    # Climb
-    container.separator(divider: true, spacing: :small)
-    container.text_display(
-      content: "### Climb\n" \
-               "Rooms searched **#{stairs[:searched]}** · stairs from **#{stairs[:minimum]}** · " \
-               "guaranteed by **#{stairs[:limit]}**"
-    )
-
     # Body
+    container.separator(divider: true, spacing: :small)
     body = body_sizes_line(player).to_s.strip.sub(/\A\*\*Body\*\*\s*/, '')
     body_bits = []
     body_bits << body unless body.empty?
@@ -563,10 +555,10 @@ module ErosUI
                  "_(#{player.submission_display}, base #{player.submission})_"
     container.text_display(content: "### Body\n#{body_bits.join("\n")}")
 
-    # Vitals
+    # Stats
     container.separator(divider: true, spacing: :small)
     container.text_display(
-      content: "### Vitals\n" \
+      content: "### Stats\n" \
                "**Defiance** `#{player.defiance}/#{player.max_defiance}` · " \
                "**Lust** `#{player.lust}` · **LP** `#{player.lp}`\n" \
                "**STR** #{player.effective_strength} _(#{player.strength})_ · " \
@@ -574,7 +566,7 @@ module ErosUI
                "**RES** #{player.effective_resistance} _(#{player.resistance})_"
     )
 
-    # Threat — short; chastity / corruption detail live under Conditions & Events.
+    # Threat
     container.separator(divider: true, spacing: :small)
     threat_bits = [
       '### Threat',
@@ -582,13 +574,11 @@ module ErosUI
       "-# LP #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
       "Appearance +#{threat.appearance_component}"
     ]
-    if Engine::ChastitySystem.description(player)
-      threat_bits << '🔒 Chastity locked — details under **Conditions**.'
-    end
+    threat_bits << 'Chastity Locked' if Engine::ChastitySystem.in_chastity?(player)
     if Engine::Corruption.enabled?(player) && Engine::Corruption.level(player).positive?
       value = Engine::Corruption.level(player)
       name = Engine::Corruption.stage(value)&.at(1) || 'Touched'
-      threat_bits << "**Corruption** #{name} `#{value}/#{Engine::Corruption::MAX}` — effects under **Conditions**."
+      threat_bits << "Corruption #{name} `#{value}/#{Engine::Corruption::MAX}`"
     end
     container.text_display(content: threat_bits.join("\n"))
 
@@ -613,10 +603,6 @@ module ErosUI
     end
 
     player.reconcile_encounter!
-    container.text_display(
-      content: '-# Defeat → Cycle 1 reset. LP, curses, living gear, titles, deepest floor keep. ' \
-               '`/curses` · `/profile` · **Events** for the weekly.'
-    )
   end
 
   def build_events_container(container, player)

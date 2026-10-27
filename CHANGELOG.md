@@ -10,7 +10,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
-- **`/status` layout:** sheet is split into **Climb / Body / Vitals / Threat / Company** sections with dividers; Burdens, Bonuses, Conditions (and Eat Candy when relevant) live in one **select menu** instead of a button row.
+- **`/status` layout:** sheet is **Body / Stats / Threat / Company** with dividers (no Climb, no defeat footer); navigation is one **select menu**. Threat shows plain **Chastity Locked** and **Corruption** stage `x/100` when relevant.
 - **`/status` Events panel:** weekly/season modifier, Friday the 13th, and seasonal stash (candy) moved off the main sheet onto a dedicated **Events** menu entry. Threat keeps short chastity/corruption flags; full effect text stays under **Conditions**.
 - **`/status` Conditions paging:** lists **6** conditions per page with prev/next. **Chastity** and **body-change** conditions (plus the live chastity description) always land on page 1.
 - **Error channel posts:** Discord error reports are compact embeds (class, message, trigger, where, API details, hint, short stack) instead of full code-fence dumps. Full traces still go to `logs/errors.log`.
