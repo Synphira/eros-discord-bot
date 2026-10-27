@@ -65,7 +65,27 @@ module Engine
       'gaping' => { label: 'Gaping & Fisting', group: :fetish, default: false, description: 'Fisting and being left stretched wide open.' },
       'clowns' => { label: 'Clowns', group: :fetish, default: false, description: 'Painted faces, balloons, pies, and carnival filth (opt-in).' },
       'halloween_scares' => { label: 'Halloween Scares', group: :fetish, default: false,
-                              description: 'Jump-scare All Hallows rooms (opt-in; seasonal — only rolls Oct 30–Nov 5).' }
+                              description: 'Jump-scare All Hallows rooms (opt-in; seasonal — only rolls Oct 30–Nov 5).' },
+      'feast_excess' => { label: 'Feast Excess', group: :fetish, default: false,
+                          description: 'Stuffing, seconds, and gravy-drunk rooms (opt-in; seasonal — only rolls Nov 23–30).' },
+      'naughty_list' => { label: 'Naughty List', group: :fetish, default: false,
+                          description: 'Coal-warm confessions and chimney traps (opt-in; seasonal — only rolls Dec 20–26).' },
+      'resolutions' => { label: 'Broken Resolutions', group: :fetish, default: false,
+                        description: 'Failed vows and champagne-drunk rooms (opt-in; seasonal — only rolls Dec 31–Jan 2).' },
+      'heartbreak' => { label: 'Heartbreak', group: :fetish, default: false,
+                        description: 'Broken-heart nooks and obsessive portraits (opt-in; seasonal — only rolls Feb 12–15).' },
+      'parade_filth' => { label: 'Parade Filth', group: :fetish, default: false,
+                          description: 'Float rides and unmasking chambers (opt-in; seasonal — only rolls Carnival / Fat Tuesday weekend).' },
+      'spring_rut' => { label: 'Spring Rut', group: :fetish, default: false,
+                        description: 'Fertile gardens and empty-tomb hunger (opt-in; seasonal — only rolls Good Friday–Easter Monday).' },
+      'cruel_pranks' => { label: 'Cruel Pranks', group: :fetish, default: false,
+                          description: 'Reverse rooms and Pip masterpieces (opt-in; seasonal — only rolls April 1).' },
+      'maypole_bind' => { label: 'Maypole Binding', group: :fetish, default: false,
+                          description: 'Ribbon bindings and Beltane bonfires (opt-in; seasonal — only rolls May 1–2).' },
+      'fairy_rings' => { label: 'Fairy Rings', group: :fetish, default: false,
+                         description: 'Ring bindings and shortest-night revels (opt-in; seasonal — only rolls June 20–22).' },
+      'pride_excess' => { label: 'Parade Excess', group: :fetish, default: false,
+                          description: 'Body paint and afterparty rooms (opt-in; seasonal — only rolls Jun 25–Jul 1).' }
     }.freeze
 
     CORE_KEYS = PREFERENCES.select { |_, v| v[:group] == :core }.keys.freeze

@@ -18,8 +18,9 @@ module Engine
       name: "All Hallows' Heat",
       description: 'The temple puts on a mask: undead and demons throng the halls, lust runs hotter (×1.1), ' \
                    'undead lust ×1.2, +3 LP submitting to undead / +2 to demons, elites ×1.5, and events 25% more often. ' \
-                   'Mimics stir, biomes lean haunted, pumpkin altars and trick-or-treat rooms appear, Vex stocks costumes, ' \
-                   'named folk dress for the night, and candy/titles/gear you earn stay after the season.',
+                   'Every hallway pest wears an All Hallows name. Mimics stir, biomes lean haunted, pumpkin altars and ' \
+                   'trick-or-treat rooms appear, Vex stocks costumes, named folk dress for the night, and candy/titles/gear ' \
+                   'you earn stay after the season.',
       effects: {
         'lust_mult' => 1.1,
         'undead_lust_mult' => 1.2,
@@ -48,6 +49,146 @@ module Engine
         stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } }
     ].freeze
 
+
+  # Halloween — 135 aliases
+  MONSTER_ALIASES = {
+      "Alraune" => "Samhain Alraune",
+      "Amber Slime" => "Candle Amber Slime",
+      "Balloon Mistress" => "Grave Balloon Mistress",
+      "Banshee" => "Masquerade Banshee",
+      "Basilisk" => "Bone Basilisk",
+      "Bath Mimic" => "Cauldron Bath Mimic",
+      "Bear" => "Spectral Bear",
+      "Bed Mimic" => "Coffin Bed Mimic",
+      "Big-Shoe Brute" => "Bone-Shoe Brute",
+      "Black Orchid" => "Funeral Black Orchid",
+      "Blood Rose" => "All-Hallows Blood Rose",
+      "Bone Dancer" => "Masque Bone Dancer",
+      "Book Mimic" => "Grimoire Book Mimic",
+      "Broodmother" => "Web-Lantern Broodmother",
+      "Bubble Slime" => "Will-o'-Bubble Slime",
+      "Cambion" => "Masquerade Cambion",
+      "Carnal Fiend" => "Samhain Carnal Fiend",
+      "Carnival Clown" => "Dead Carnival Clown",
+      "Centaur" => "Night-Hunt Centaur",
+      "Chain Devil" => "Pumpkin-Chain Devil",
+      "Chair Mimic" => "Haunted Chair Mimic",
+      "Champagne Slime" => "Cider Champagne Slime",
+      "Chandelier Mimic" => "Jack-o'-Chandelier Mimic",
+      "Chest Mimic" => "Jack-o'-Chest Mimic",
+      "Clock Mimic" => "Doomsday Clock Mimic",
+      "Clothing Mimic" => "Costume Clothing Mimic",
+      "Corpse Flower" => "Harvest Corpse Flower",
+      "Cotton-Candy Imp" => "Cobweb-Candy Imp",
+      "Couch Mimic" => "Barrow Couch Mimic",
+      "Cream Slime" => "Marshmallow Cream Slime",
+      "Crypt Keeper" => "Lantern Crypt Keeper",
+      "Crystal Slime" => "Candy-Crystal Slime",
+      "Curtain Mimic" => "Veil Curtain Mimic",
+      "Demoness" => "Masquerade Demoness",
+      "Djinn" => "Smoke-and-Ember Djinn",
+      "Door Mimic" => "Threshold Door Mimic",
+      "Dragon" => "Bonefire Dragon",
+      "Dream Eater" => "Nightmare Dream Eater",
+      "Dryad" => "Autumn-Veil Dryad",
+      "Dullahan" => "Pumpkin Dullahan",
+      "Ember Fiend" => "Jack-o'-Ember Fiend",
+      "Fae Trickster" => "Samhain Fae Trickster",
+      "Foam Slime" => "Fog Foam Slime",
+      "Gargoyle" => "Cathedral Gargoyle",
+      "Gelatinous Mass" => "Wax Gelatinous Mass",
+      "Ghost" => "Masquerade Ghost",
+      "Ghoul" => "Treat-Basket Ghoul",
+      "Giant Bee" => "Wasp-of-Hallows Giant Bee",
+      "Giant Moth" => "Death's-Head Giant Moth",
+      "Giant Spider" => "Cobweb Giant Spider",
+      "Glow Slime" => "Jack-o'-Glow Slime",
+      "Goblin" => "Trick Goblin",
+      "Gorgon Matron" => "Stone-Lantern Gorgon Matron",
+      "Green Slime" => "Poison-Apple Green Slime",
+      "Harpy" => "Night-Cry Harpy",
+      "Headless Knight" => "Lantern Headless Knight",
+      "Hellhound" => "Hallow Hellhound",
+      "Honey Slime" => "Candy-Corn Honey Slime",
+      "Honker" => "Bone Honker",
+      "HuCow" => "Harvest HuCow",
+      "Ifrit" => "Bonfire Ifrit",
+      "Imp" => "Candy Imp",
+      "Incubus" => "Masquerade Incubus",
+      "Item Pile Mimic" => "Offering-Pile Mimic",
+      "Jelly Cube" => "Jelly-of-the-Dead Cube",
+      "Jellyfish" => "Ghostlight Jellyfish",
+      "Jester" => "Dead Jester",
+      "Jiangshi" => "Paper-Talisman Jiangshi",
+      "Kitsune" => "Foxfire Kitsune",
+      "Lamia" => "Moonlit Lamia",
+      "Lich" => "Candlecrown Lich",
+      "Living Ivy" => "Grave Living Ivy",
+      "Loom Mimic" => "Shroud Loom Mimic",
+      "Man-Eating Flower" => "Funeral Man-Eating Flower",
+      "Mandrake" => "Screaming Mandrake",
+      "Marionette Mistress" => "Ghost-String Marionette Mistress",
+      "Mercury Slime" => "Mirror Mercury Slime",
+      "Milk Slime" => "Moon-Milk Slime",
+      "Minotaur" => "Labyrinth Minotaur",
+      "Mirror Mimic" => "Black-Mirror Mimic",
+      "Moonflower" => "Blood Moonflower",
+      "Mummy" => "Bandage-and-Bat Mummy",
+      "Mycelian" => "Tomb Mycelian",
+      "Naga" => "Serpent-Mask Naga",
+      "Night Hag" => "Samhain Night Hag",
+      "Nightshade" => "Witching Nightshade",
+      "Ogre" => "Harvest Ogre",
+      "Oil Slime" => "Black-Candle Oil Slime",
+      "Oni" => "Festival Oni",
+      "Orc" => "Raid-Night Orc",
+      "Pale Bride" => "Veiled Pale Bride",
+      "Piano Mimic" => "Dirge Piano Mimic",
+      "Pie Clown" => "Grave-Pie Clown",
+      "Pit Fiend" => "Infernal Pit Fiend",
+      "Pitcher Plant" => "Offering Pitcher Plant",
+      "Pollen Sprite" => "Ash Pollen Sprite",
+      "Poltergeist" => "Rattle Poltergeist",
+      "Pudding Slime" => "Pumpkin Pudding Slime",
+      "Purple Slime" => "Grape-Poison Purple Slime",
+      "Rakshasa" => "Tiger-Mask Rakshasa",
+      "Revenant" => "Unfinished Revenant",
+      "Ringmaster" => "Carnival-of-Bones Ringmaster",
+      "Rose Slime" => "Wilted Rose Slime",
+      "Rubber Slime" => "Mask Rubber Slime",
+      "Rug Mimic" => "Flying-Carpet Grave Rug Mimic",
+      "Sap Dryad" => "Amber Sap Dryad",
+      "Satyr" => "Revel Satyr",
+      "Silkweaver" => "Shroud Silkweaver",
+      "Sin Eater" => "Confession Sin Eater",
+      "Siren" => "Foghorn Siren",
+      "Skeleton" => "Dancing Skeleton",
+      "Specter" => "Veil Specter",
+      "Statue Mimic" => "Gargoyle Statue Mimic",
+      "Stone Golem" => "Tomb Stone Golem",
+      "Strangler Fig" => "Noose Strangler Fig",
+      "Succubus" => "Masquerade Succubus",
+      "Sundew" => "Night-Dew Sundew",
+      "Syrup Slime" => "Molasses Syrup Slime",
+      "Tar Slime" => "Pitch Tar Slime",
+      "Tentacle Vine" => "Grasping Tentacle Vine",
+      "Thorn Vine" => "Briar Thorn Vine",
+      "Throne Mimic" => "Bone Throne Mimic",
+      "Tomb Widow" => "Veiled Tomb Widow",
+      "Treant" => "Withered Treant",
+      "Troll" => "Bridge-of-Bones Troll",
+      "Vampire" => "Crimson-Mask Vampire",
+      "Velvet Devil" => "Midnight Velvet Devil",
+      "Venus Mantrap" => "Hungry Venus Mantrap",
+      "Wardrobe Mimic" => "Costume Wardrobe Mimic",
+      "Wight" => "Barrow Wight",
+      "Wild Dog" => "Hellhound Wild Dog",
+      "Wildcat" => "Black-Cat Wildcat",
+      "Wolf" => "Bone Wolf",
+      "Wraith" => "Lantern Wraith",
+      "Zombie" => "Shambling Zombie"
+  }.freeze
+
     PUMPKIN_BLESSING = {
       key: 'pumpkin_glow', name: 'Pumpkin Glow', floors: 4,
       effects: { 'submit_lp_bonus' => 2, 'appearance' => 4, 'satisfy_bonus' => 0.04 },
@@ -57,27 +198,35 @@ module Engine
     # Named characters only — not random encounter monsters. Alpha is always
     # Syn's handiwork.
     DRESS = {
-      'Mimic Broodmother' => 'The Broodmother\'s lid is draped in tattered lace and paper bats her brood has glued on crooked. ' \
+      'Mimic Broodmother' => 'The Broodmother\'s lid is draped in tattered lace and paper bats her brood glued on crooked. ' \
                             'She looks absurd. She looks delighted.',
-      'Succubus Queen' => 'The Queen wears a jewelled half-mask and a gown cut for All Hallows — every inch of her ' \
-                         'announces that costume is just another kind of throne.',
-      'Incubus King' => 'The King has painted his horns gold and hung a cape that does nothing for his dignity. He ' \
-                       'strikes a pose anyway.',
-      'Verdant Dryad' => 'Autumn leaves crown the Dryad instead of summer flowers — a harvest halo, soft and inevitable.',
-      'Lich Lord' => 'A paper crown sits atop blue fire. The Lich did not ask for it. Someone (Syn) insisted. He is ' \
-                    'enduring the curriculum.',
+      'Succubus Queen' => 'The Queen wears a jewelled half-mask and a gown cut for All Hallows — costume as throne, ' \
+                         'every hallway a ballroom she owns.',
+      'Incubus King' => 'Gold paint on his horns, a cape that fights him, and a pose he practiced in three mirrors. ' \
+                       'He is having the time of his unlife.',
+      'Verdant Dryad' => 'Autumn leaves instead of summer flowers — a harvest halo, soft and inevitable. She sheds one ' \
+                        'on purpose when you look.',
+      'Lich Lord' => 'A paper crown sits atop blue fire. He did not ask for it. He will not remove it. Spite, now, ' \
+                    'is the outfit.',
       'Alpha Beast' => 'Syn has buckled a ridiculous bat-wing collar onto her pupper for All Hallows. He is delighted. ' \
-                      'You are compromised.',
-      'Eros' => 'Even the goddess has indulged the night — a ribbon of black lace somewhere a goddess should not need ' \
-               'lace, and a smile that says the temple is allowed to play dress-up.',
-      'Syn' => 'Syn has ink-smudged bat wings painted at the corners of her eyes and a needle tucked behind one ear ' \
-              'like a festive pin. She looks like she invented the holiday to have an excuse.',
-      'Berry' => 'Berry wears a tiny witch\'s hat at a practical angle and pretends it is for the customers. It is ' \
-                'absolutely for Syn.',
-      'Covar' => 'Covar has a mask. He claims it is for anonymity. It is velvet and fits him far too well.',
-      'Madame Vex' => 'Vex\'s living cloth has agreed — for once — to look like cobweb silk. She looks like a ghost who ' \
-                     'charges for fittings.',
-      'Pip' => 'Pip is in a bedsheet ghost costume with eyeholes cut by someone who hates symmetry. She is very proud.'
+                      'The wings flap. Dignity left the hallway.',
+      'Eros' => 'Even the goddess has indulged — black lace somewhere a goddess should not need lace, and a smile that ' \
+               'says the temple is allowed to play dress-up.',
+      'Syn' => 'Ink-smudged bat wings at the corners of her eyes. She keeps catching her reflection and looking pleased ' \
+              'with herself. Tonight she is the holiday\'s author, not its guest.',
+      'Berry' => 'A witch\'s hat at a practical angle, black lipstick, and a cauldron of foil candy by the till. She ' \
+                'swears the hat is "branding." Syn knows better.',
+      'Covar' => 'A velvet half-mask he claims is for anonymity. It fits him far too well. Living gear on the shelves ' \
+                'leans toward him like they want one too.',
+      'Madame Vex' => 'Cobweb silk, pale powder, and a fitting-room that smells like old perfume and new fear. She looks ' \
+                     'like a ghost who bills by the hour.',
+      'Pip' => 'A bedsheet ghost with eyeholes cut by someone who hates symmetry. She floats (she does not float) and ' \
+              'is extremely proud of the craftsmanship.',
+      'Sister Nectar' => 'Black lace apron over shrine whites, a tiny pumpkin cup among the brass, and a look that says ' \
+                        'milking is still holy even when the pumps wear bat stickers. Arrive tense. Leave drained. ' \
+                        'Spooked optional.',
+      'Fang' => 'White ink gone orange at the margins — maps of rooms that scream. He has sketched three haunted ' \
+               'hallways that do not exist yet. One of them has already moved.'
     }.freeze
 
     CLERGY_LINES = {
@@ -102,7 +251,7 @@ module Engine
         praise: 'He stamps your skin with a cold sigil that looks, briefly, like a candy skull.'
       },
       'Alpha Beast' => {
-        victory: 'Syn\'s pupper shakes his bat-wing collar proudly. He is delighted. You are compromised.',
+        victory: 'Syn\'s pupper shakes his bat-wing collar proudly. Somewhere a mask smiles back.',
         praise: 'He drops a mouthful of foil-wrapped candy on your chest and looks enormously proud.'
       },
       'Eros' => {
@@ -254,6 +403,10 @@ module Engine
       end
       lines
     end
+
+def monster_alias(base_name)
+  MONSTER_ALIASES[base_name.to_s]
+end
 
     Engine::Seasons.register!(KEY, self)
   end

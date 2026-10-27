@@ -77,7 +77,7 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(content: "## #{spec[:name]} — #{spec[:title]}")
         c.text_display(content: notice) if notice
-        c.text_display(content: spec[:intro])
+        c.text_display(content: Engine::Residents.resident_intro(id, player))
         case Engine::ThreatCalculator.calculate(player).category
         when :high
           c.text_display(
@@ -172,17 +172,28 @@ module Commands
         owned = player.owns_equipment?(record.id)
         price = Engine::Residents.vex_outfit_price(player, spec)
         mods = Engine::Treasure.format_stat_changes(spec[:stat_modifiers])
+        price_label = price.zero? ? 'free' : "#{price} LP"
+        tag =
+          if owned then ' _(owned)_'
+          elsif price.zero? then ' _(holiday — free forever)_'
+          else ''
+          end
         { spec: spec, record: record, owned: owned, price: price,
-          line: "**#{spec[:name]}** (#{price} LP)#{owned ? ' _(owned)_' : ''} — _#{spec[:description]}_\n-# #{mods}" }
+          line: "**#{spec[:name]}** (#{price_label})#{tag} — _#{spec[:description]}_\n-# #{mods}" }
       end
       c.text_display(content: entries.map { |e| e[:line] }.join("\n\n"))
       entries.each_slice(3) do |slice|
         c.row do |row|
           slice.each do |e|
-            row.button(label: (e[:owned] ? "Owned: #{e[:spec][:name]}" : "Buy: #{e[:spec][:name]}")[0, 80],
+            label =
+              if e[:owned] then "Owned: #{e[:spec][:name]}"
+              elsif e[:price].zero? then "Reclaim: #{e[:spec][:name]}"
+              else "Buy: #{e[:spec][:name]}"
+              end
+            row.button(label: label[0, 80],
                        style: e[:owned] ? :secondary : :success,
                        custom_id: "eros:resident:vex:buy:#{e[:record].id}:#{owner}",
-                       disabled: e[:owned] || player.lp < e[:price])
+                       disabled: e[:owned] || (e[:price].positive? && player.lp < e[:price]))
           end
         end
       end

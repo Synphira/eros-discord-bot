@@ -1529,6 +1529,8 @@ class Player < Sequel::Model(:players)
       return { ok: false, error: :duplicate, message: "You already own **#{item.name}**." }
     end
 
+    note_holiday_outfit!(item.name)
+
     if auto_equip || item.cursed
       equip_result = equip_item(item.id)
       if equip_result[:ok]
@@ -1661,6 +1663,21 @@ class Player < Sequel::Model(:players)
     cursed_shop_unlocks.include?(name.to_s)
   end
 
+  def holiday_outfits
+    Array(tracker_hash['holiday_outfits']).map(&:to_s).uniq
+  end
+
+  def note_holiday_outfit!(name)
+    name = name.to_s
+    return name if name.empty? || !Engine::Seasons.holiday_piece?(name)
+
+    list = holiday_outfits
+    return name if list.include?(name)
+
+    set_tracker!('holiday_outfits', list + [name])
+    name
+  end
+
   def strip_non_cursed_equipment!
     rows = DB[:player_equipment]
            .join(:equipment, id: :equipment_id)
@@ -1669,10 +1686,14 @@ class Player < Sequel::Model(:players)
            .select(Sequel[:equipment][:name], Sequel[:player_equipment][:id])
            .all
 
-    names = rows.map { |r| r[:name] }
-    ids = rows.map { |r| r[:id] }
+    # Holiday souvenirs stay — earned in-season, kept forever (also reclaimable free at Vex).
+    keep = Engine::Seasons.holiday_outfit_names
+    lost = rows.reject { |r| keep.include?(r[:name].to_s) }
+    ids = lost.map { |r| r[:id] }
     DB[:player_equipment].where(id: ids).delete unless ids.empty?
-    names
+    # Still record ownership for anything we kept, in case the tracker lagged.
+    rows.each { |r| note_holiday_outfit!(r[:name]) if keep.include?(r[:name].to_s) }
+    lost.map { |r| r[:name] }
   end
 
   MIMIC_CHORUS = [

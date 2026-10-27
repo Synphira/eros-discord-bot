@@ -21,5 +21,6 @@ logs/
 docs/
 webapp/
 
-# Syn-voice Discord paste changelog (player-facing announcements only)
+# Syn-voice Discord paste fodder (player-facing announcements only)
 DISCORD_CHANGELOG.md
+DISCORD_EVENTS.md

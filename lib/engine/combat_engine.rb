@@ -72,7 +72,8 @@ module Engine
         negation_used: h[:negation_used] || h['negation_used'],
         pliant: (h[:pliant] || h['pliant']).to_f,
         tangled: h[:tangled] || h['tangled'],
-        gaze_averted: h[:gaze_averted] || h['gaze_averted']
+        gaze_averted: h[:gaze_averted] || h['gaze_averted'],
+        base_name: h[:base_name] || h['base_name']
       }
     end
 
@@ -100,6 +101,7 @@ module Engine
       )
 
       snapshot = self.class.encounter_snapshot(encounter)
+      snapshot[:base_name] = template[:base_name] || template['base_name']
       snapshot[:tangled] = true if template[:tangled] || template['tangled']
       snapshot[:gaze_averted] = true if template[:gaze_averted] || template['gaze_averted']
       start_lines = @player.apply_combat_start_effects!(type)

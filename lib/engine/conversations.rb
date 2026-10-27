@@ -35,6 +35,7 @@ module Engine
     DRESS_WHO = {
       'berry' => 'Berry', 'syn' => 'Syn', 'covar' => 'Covar',
       'vex' => 'Madame Vex', 'pip' => 'Pip',
+      'nectar' => 'Sister Nectar', 'cartographer' => 'Fang',
       'broodmother' => 'Mimic Broodmother', 'queen' => 'Succubus Queen',
       'king' => 'Incubus King', 'dryad' => 'Verdant Dryad', 'lich' => 'Lich Lord',
       'alpha' => 'Alpha Beast', 'eros' => 'Eros'
@@ -647,6 +648,140 @@ module Engine
              'candles go out and I\'ll pretend I never said that."'
       },
       {
+        key: 'labor_day', label: 'Labor Day', question: 'What did Pip do to the spawn spell?',
+        category: 'temple', unlock: :labor_day,
+        unlock_text: 'Ask during Labor Day (Pip\'s Slow Spell), or after hearing it once',
+        berry: '"Pip broke the monster faucet and called it a holiday." Berry pinches the bridge of her nose. ' \
+               '"Syn has been muttering over the cadence for days. She will not ask the Incubus King. I offered ' \
+               'to send a note. She threatened to ink my ledger shut. Eat leftovers if we ever get a proper feast ' \
+               'week — this one is just traps and goblin pride."',
+        syn: 'Syn\'s jaw tightens. "Pip jammed a wrench into my spawn spell because she thought fewer pests meant ' \
+             'a *break*." A knife-edge smile. "The tower stuffed the halls with traps instead. Every crawling thing ' \
+             'wears one of her catalogue names. I am fixing it. Myself. I am not asking that horned smug bastard ' \
+             'for a favour — the King can choke on his own beads before I owe him over *this*. Stay out of the ' \
+             'sprung plates. Rate Pip\'s disasters if you must. Do not tell him I\'m struggling."'
+      },
+      {
+        key: 'thanksgiving', label: 'The Feast', question: 'Why is the temple setting a table?',
+        category: 'temple', unlock: :thanksgiving,
+        unlock_text: 'Ask during Feast of the Willing (Nov 23–30), or after hearing it once',
+        berry: '"Syn put a turkey hat on her pupper and pretended it was dignified." Berry\'s laugh is soft. ' \
+               '"Eat the leftovers. Wear the basting lace if Vex talks you into it. And if the King tries to claim ' \
+               'he brought the wine — he didn\'t. I checked the ledger."',
+        syn: 'Syn has flour on one cheek and does not wipe it. "Because hospitality is a leash that looks like ' \
+             'kindness." Fond. Dangerous. "Plants and beasts throng. Guests get carved. I buckled a ridiculous hat ' \
+             'onto my pupper and he *preened*. Ask Eros for theology. Ask me for seconds. Ask the King nothing — ' \
+             'he will lie about the wine."'
+      },
+      {
+        key: 'christmas', label: 'Yule', question: 'Why all the ribbon and mistletoe?',
+        category: 'temple', unlock: :christmas,
+        unlock_text: 'Ask during Yule of Surrender (Dec 20–26), or after hearing it once',
+        berry: '"She hung mistletoe like a trap and called it hospitality." Berry\'s smile is soft. "Eat the ' \
+               'stocking candy. Wear the antlers if you want to be hunted. And if the King claims he bought gifts — ' \
+               'check the receipts. There aren\'t any."',
+        syn: 'Syn has pine-needle ink at the corner of one eye. "Because gifts are bindings that look like ' \
+             'kindness." Fond. Sharp. "Undead and demons throng. Guests get wrapped. I buckled jingle bells on my ' \
+             'pupper and he *shook* like the whole tower should hear him. Ask Eros for theology. Ask me for ribbon. ' \
+             'Ask the King nothing — he will lie about the shopping."'
+      },
+      {
+        key: 'new_year', label: 'Midnight', question: 'What happens when the clock strikes?',
+        category: 'temple', unlock: :new_year,
+        unlock_text: 'Ask during Midnight Oath (Dec 31–Jan 2), or after hearing it once',
+        berry: '"Syn put a party hat on her pupper and pretended the glitter was dignified." Berry laughs. "Drink ' \
+               'the bubbles. Wear the countdown lace. And if the King says he planned the toast — he didn\'t. I ' \
+               'have the cork inventory."',
+        syn: 'Syn has glitter she will not wipe off. "Because midnights are for swearing things you will break ' \
+             'beautifully." A smile with teeth. "Lust runs hotter. Guests get toasted. I buckled a ridiculous hat ' \
+             'onto my pupper and he *preened* in confetti. Ask Eros for theology. Ask me for a vow. Ask the King ' \
+             'nothing — he will lie about the sparkler."'
+      },
+      {
+        key: 'valentines', label: 'Heartstring', question: 'Why are there arrows everywhere?',
+        category: 'temple', unlock: :valentines,
+        unlock_text: 'Ask during Heartstring Claim (Feb 12–15), or after hearing it once',
+        berry: '"Syn put a heart collar on her pupper and called it subtle." Berry\'s smile is soft. "Eat the ' \
+               'chocolate. Wear the rose circlet if you want to be aimed at. And if the King claims he wrote ' \
+               'everyone a letter — he didn\'t. I checked the ink."',
+        syn: 'Syn has rose-petal ink she will not wipe. "Because affection is a leash that looks like a gift." ' \
+             'Fond. Sharp. "Demons throng. Guests get claimed. I buckled a heart onto my pupper and he *clinked* ' \
+             'like the whole tower should hear him. Ask Eros for theology. Ask me for an arrow. Ask the King ' \
+             'nothing — he will lie about the poetry."'
+      },
+      {
+        key: 'mardi_gras', label: 'Carnival', question: 'Why all the beads and masks?',
+        category: 'temple', unlock: :mardi_gras,
+        unlock_text: 'Ask during Carnival of Beads (Fat Tuesday weekend), or after hearing it once',
+        berry: '"Syn put a feathered mask on her pupper and called it dignified." Berry laughs. "Eat the king ' \
+               'cake. Wear the beads if you want to be thrown at. And if the King claims he throws the best ' \
+               'strings — he doesn\'t. I checked the inventory."',
+        syn: 'Syn has glitter she will not wipe. "Because revelry is a leash that looks like a party." Fond. ' \
+             'Dangerous. "Clowns and demons throng. Guests get flashed for. I buckled feathers onto my pupper and ' \
+             'he *bounced* like the whole parade should hear him. Ask Eros for theology. Ask me for beads. Ask the ' \
+             'King nothing — he will lie about the throw."'
+      },
+      {
+        key: 'easter', label: "Hare's Hunt", question: 'Why the eggs and bunny ears?',
+        category: 'temple', unlock: :easter,
+        unlock_text: 'Ask during Hare\'s Hunt (Good Friday–Easter Monday), or after hearing it once',
+        berry: '"Syn put bunny ears on her pupper and pretended it was subtle." Berry\'s smile is soft. "Eat the ' \
+               'chocolate eggs. Wear the nest lace if you want to be hunted. And if the King claims he hid every ' \
+               'egg — he hid three. I counted."',
+        syn: 'Syn has pollen-ink she will not wipe. "Because spring is a leash that looks like a hunt." Fond. Sharp. ' \
+             '"Beasts and plants throng. Guests get nested. I buckled ears onto my pupper and he *flopped* like the ' \
+             'whole garden should hear him. Ask Eros for theology. Ask me for an egg. Ask the King nothing — he will ' \
+             'lie about the hiding."'
+      },
+      {
+        key: 'april_fools', label: "Fool's Trap", question: 'Why does Pip look so happy?',
+        category: 'temple', unlock: :april_fools,
+        unlock_text: 'Ask during Fool\'s Trap (April 1), or after hearing it once',
+        berry: '"Because it is April first and she has been saving traps all year." Berry pinches the bridge of her ' \
+               'nose. "Eat the fool\'s sweets. Wear the whoopee harness if you must. Syn is counting the hours. I am ' \
+               'counting the inventory of rubber noses."',
+        syn: 'Syn\'s jaw tightens, then softens into a reluctant smirk. "Because Pip gets one day where the temple ' \
+             'agrees with her sense of humour." Dry. Fond. Doomed. "Mimics and clowns throng. Traps lean harder. I ' \
+             'buckled a jester collar onto my pupper and he *jingled*. I am not fixing every whoopee cushion today. ' \
+             'Ask Eros for theology. Ask me after midnight. Ask Pip for a rating — she will give you one."'
+      },
+      {
+        key: 'may_day', label: 'Maypole', question: 'Why the ribbons and the pole?',
+        category: 'temple', unlock: :may_day,
+        unlock_text: 'Ask during Maypole Raising (May 1–2), or after hearing it once',
+        berry: '"Syn put a flower crown on her pupper and called it subtle." Berry\'s smile is soft. "Drink the May ' \
+               'wine. Wear the ribbons if you want to be wound. And if the King claims he raised the pole — he ' \
+               'didn\'t. Syn did."',
+        syn: 'Syn has petal-ink she will not wipe. "Because dancing is a leash that looks like a celebration." Fond. ' \
+             'Sharp. "Plants and beasts throng. Guests get wound. I buckled blooms onto my pupper and he *shook* ' \
+             'petals everywhere. Ask Eros for theology. Ask me for a ribbon. Ask the King nothing — he will lie about ' \
+             'the pole."'
+      },
+      {
+        key: 'midsummer', label: 'Longest Day', question: 'Why does the sun feel closer?',
+        category: 'temple', unlock: :midsummer,
+        unlock_text: 'Ask during Longest Day (June 20–22), or after hearing it once',
+        berry: '"Syn put a sunburst collar on her pupper and called it subtle." Berry\'s smile is soft. "Eat the sun ' \
+               'honey. Wear the halo if you want to be circled. And if the King claims he hung the solstice — he ' \
+               'didn\'t. Syn did."',
+        syn: 'Syn has gold-ink she will not wipe. "Because the longest day is a leash that looks like daylight." Fond. ' \
+             'Sharp. "Plants and demons throng. Guests get gilded. I buckled a sunburst onto my pupper and he *thinks* ' \
+             'the sun follows him. Ask Eros for theology. Ask me for a ring. Ask the King nothing — he will lie about ' \
+             'the solstice."'
+      },
+      {
+        key: 'pride', label: 'Pride Parade', question: 'Why all the glitter and flags?',
+        category: 'temple', unlock: :pride,
+        unlock_text: 'Ask during Pride Parade (Jun 25–Jul 1), or after hearing it once',
+        berry: '"Syn put a rainbow bandana on her pupper and pretended it was inventory." Berry laughs. "Eat the ' \
+               'glitter. Wear the flag if you want to be cheered. And if the King claims he invented the parade — he ' \
+               'didn\'t. Syn hung every banner."',
+        syn: 'Syn has glitter she will not wipe. "Because celebration is a leash that looks like a float." Fond. ' \
+             'Dangerous. "Slimes and demons throng. Guests get painted. I buckled rainbow onto my pupper and he ' \
+             '*marched* like the whole temple should cheer. Ask Eros for theology. Ask me for a flag. Ask the King ' \
+             'nothing — he will lie about who decorated."'
+      },
+      {
         key: 'cycles', label: 'The cycles', question: 'What happens after the top?',
         category: 'temple', unlock: { requirement: { cycles_completed: 1 } },
         unlock_text: 'Complete a cycle',
@@ -1040,6 +1175,17 @@ module Engine
       unlock = topic[:unlock]
       return true if unlock.nil? || unlock == :always
       return Engine::Halloween.syn_halloween_unlocked?(player) if unlock == :halloween
+      return Engine::LaborDay.syn_labor_unlocked?(player) if unlock == :labor_day
+      return Engine::Thanksgiving.syn_feast_unlocked?(player) if unlock == :thanksgiving
+      return Engine::Christmas.syn_yule_unlocked?(player) if unlock == :christmas
+      return Engine::NewYear.syn_midnight_unlocked?(player) if unlock == :new_year
+      return Engine::Valentines.syn_heartstring_unlocked?(player) if unlock == :valentines
+      return Engine::MardiGras.syn_carnival_unlocked?(player) if unlock == :mardi_gras
+      return Engine::Easter.syn_hare_unlocked?(player) if unlock == :easter
+      return Engine::AprilFools.syn_fool_unlocked?(player) if unlock == :april_fools
+      return Engine::MayDay.syn_maypole_unlocked?(player) if unlock == :may_day
+      return Engine::Midsummer.syn_midsummer_unlocked?(player) if unlock == :midsummer
+      return Engine::Pride.syn_pride_unlocked?(player) if unlock == :pride
       return Engine::TitleSystem.met?(player, unlock[:requirement]) if unlock[:requirement]
       if unlock[:any]
         return unlock[:any].any? { |key, need| player.tracker(key) >= need.to_i }
@@ -1052,7 +1198,8 @@ module Engine
       return "Defeat or satisfy #{topic[:boss]} (floor #{topic[:floor]}) once" if topic[:boss]
 
       unlock = topic[:unlock]
-      return topic[:unlock_text].to_s if unlock == :always || unlock.nil? || unlock == :halloween
+      return topic[:unlock_text].to_s if unlock == :always || unlock.nil? ||
+                                         %i[halloween labor_day thanksgiving christmas new_year valentines mardi_gras easter april_fools may_day midsummer pride].include?(unlock)
 
       base = topic[:unlock_text].to_s
       progress =
@@ -1273,6 +1420,17 @@ module Engine
 
       player.remember!('talk_heard', token) unless person == 'covar'
       Engine::Halloween.mark_syn_crumb!(player) if topic[:key] == 'all_hallows'
+      Engine::LaborDay.mark_syn_crumb!(player) if topic[:key] == 'labor_day'
+      Engine::Thanksgiving.mark_syn_crumb!(player) if topic[:key] == 'thanksgiving'
+      Engine::Christmas.mark_syn_crumb!(player) if topic[:key] == 'christmas'
+      Engine::NewYear.mark_syn_crumb!(player) if topic[:key] == 'new_year'
+      Engine::Valentines.mark_syn_crumb!(player) if topic[:key] == 'valentines'
+      Engine::MardiGras.mark_syn_crumb!(player) if topic[:key] == 'mardi_gras'
+      Engine::Easter.mark_syn_crumb!(player) if topic[:key] == 'easter'
+      Engine::AprilFools.mark_syn_crumb!(player) if topic[:key] == 'april_fools'
+      Engine::MayDay.mark_syn_crumb!(player) if topic[:key] == 'may_day'
+      Engine::Midsummer.mark_syn_crumb!(player) if topic[:key] == 'midsummer'
+      Engine::Pride.mark_syn_crumb!(player) if topic[:key] == 'pride'
       if (dress = Engine::Seasons.dress_line(DRESS_WHO[person]))
         text = "_#{dress}_\n\n#{text}"
       end

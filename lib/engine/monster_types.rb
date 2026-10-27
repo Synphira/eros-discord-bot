@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'threat_calculator'
+require_relative 'seasons'
 
 module Engine
   module MonsterTypes
@@ -160,8 +161,17 @@ module Engine
       TYPES.keys
     end
 
-    def family_for(name, type = nil)
-      TEXTURES[name.to_s] || DEFAULT_FAMILIES[type.to_s] || :smooth
+    def family_for(name, type = nil, base_name: nil)
+      candidates = [base_name, name].compact.map(&:to_s).uniq
+      candidates.each do |n|
+        return TEXTURES[n] if TEXTURES[n]
+      end
+      # Elite affix ("Ravenous Wolf") or seasonal alias that keeps the base as a suffix.
+      candidates.each do |n|
+        hit = TEXTURES.keys.select { |base| n == base || n.end_with?(" #{base}") }.max_by(&:length)
+        return TEXTURES[hit] if hit
+      end
+      DEFAULT_FAMILIES[type.to_s] || :smooth
     end
 
     def all_names
@@ -195,8 +205,11 @@ module Engine
         lust_damage = [(lust_damage * threat.lust_mult * cycle).round, 1].max
       end
 
+      base_name = info[:common_monsters].sample || 'Nameless Eldritch'
+      display = Engine::Seasons.monster_alias(base_name) || base_name
       monster = {
-        name: info[:common_monsters].sample || 'Nameless Eldritch',
+        name: display,
+        base_name: base_name,
         type: type.to_s,
         type_name: info[:name],
         type_description: info[:description],
@@ -208,7 +221,7 @@ module Engine
         max_hp: hp
       }
       # The Marionette Mistress opens every fight with her strings down.
-      monster[:tangled] = true if monster[:name] == 'Marionette Mistress'
+      monster[:tangled] = true if base_name == 'Marionette Mistress'
       player && elite ? Engine::Elites.roll!(monster, f) : monster
     end
 

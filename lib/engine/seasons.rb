@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'date'
+
 module Engine
   # Calendar seasons for the temple. Packs register themselves; Weekly and
   # world hooks ask Seasons what is active. Keep-forever rewards live on
@@ -8,14 +10,18 @@ module Engine
   # Pack contract (module_function):
   #   key, name, window?(now), ends_at(now), weekly -> Hash
   #   optional: dress_line(who), clergy_line(boss, kind), biome_weight_mult(key),
-  #             presence_suffix, chest_bonus!(player), note_submit!(player),
+  #             room_weight_mult(kind), monster_alias(base_name), presence_suffix,
+  #             chest_bonus!(player), note_submit!(player),
   #             status_consumables(player) -> [{id:, label:, count:}]
   module Seasons
     # Only one week-season weekly at a time. First match wins.
     PRIORITY = %w[
       valentines mardi_gras easter april_fools may_day midsummer pride
-      halloween thanksgiving christmas new_year
+      labor_day halloween thanksgiving christmas new_year
     ].freeze
+
+    # Vex rack tiers that are seasonal souvenirs (not basic / restored stock).
+    PERMANENT_TIERS = %w[basic restored].freeze
 
     @packs = {}
     @force_key = nil
@@ -71,7 +77,19 @@ module Engine
     end
 
     def fat_tuesday(year)
-      easter_sunday(year) - (47 * 24 * 3600)
+      # Calendar days, not raw seconds — DST would otherwise land a day early.
+      easter = easter_sunday(year)
+      d = Date.new(easter.year, easter.month, easter.day) - 47
+      Time.new(d.year, d.month, d.day)
+    end
+
+    # First Monday of September (US Labor Day).
+    def labor_day_monday(year)
+      year = year.to_i
+      day = 1
+      wday = Time.new(year, 9, day).wday
+      day += (1 - wday) % 7
+      Time.new(year, 9, day)
     end
 
     def friday_13?(now = Time.now)
@@ -123,6 +141,60 @@ module Engine
       return 1.0 unless pack&.respond_to?(:biome_weight_mult)
 
       pack.biome_weight_mult(biome_key)
+    end
+
+    # Exploration room pool multipliers (:monster, :trap, :treasure, :empty, :stairs).
+    def room_weight_mult(kind, now = Time.now)
+      pack = active(now)
+      return 1.0 unless pack&.respond_to?(:room_weight_mult)
+
+      pack.room_weight_mult(kind).to_f
+    end
+
+    # Seasonal display name for a base MonsterTypes roster entry (100% swap while active).
+    def monster_alias(base_name, now = Time.now)
+      pack = active(now)
+      return nil unless pack&.respond_to?(:monster_alias)
+
+      pack.monster_alias(base_name.to_s)
+    end
+
+    # Names in MonsterTypes missing from a pack's MONSTER_ALIASES (dev/smoke).
+    def monster_alias_gaps(pack_key)
+      pack = @packs[pack_key.to_s]
+      return [] unless pack&.respond_to?(:monster_alias)
+
+      require_relative 'monster_types' unless defined?(Engine::MonsterTypes)
+      Engine::MonsterTypes.all_names.uniq.reject { |n| pack.monster_alias(n).to_s.strip != '' }
+    end
+
+    def seasonal_tier?(tier)
+      !PERMANENT_TIERS.include?(tier.to_s)
+    end
+
+    def holiday_outfit_names
+      return [] unless defined?(Engine::Residents::VEX_OUTFITS)
+
+      Engine::Residents::VEX_OUTFITS.select { |s| seasonal_tier?(s[:tier]) }.map { |s| s[:name].to_s }
+    end
+
+    def holiday_piece?(name)
+      holiday_outfit_names.include?(name.to_s)
+    end
+
+    def reconcile_holiday_outfits!(player)
+      return [] unless player
+
+      names = holiday_outfit_names
+      return [] if names.empty?
+
+      owned = player.equipment.map { |e| e.name.to_s } & names
+      have = Array(player.tracker_hash['holiday_outfits']).map(&:to_s)
+      merged = (have + owned).uniq
+      return have if merged == have
+
+      player.set_tracker!('holiday_outfits', merged)
+      merged
     end
 
     def presence_text(users, towers, now = Time.now)

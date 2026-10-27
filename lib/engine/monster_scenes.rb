@@ -24,8 +24,8 @@ module Engine
                body: 'hide', knot: false }
     }.freeze
 
-    def family_for(monster_name, monster_type = nil)
-      Engine::MonsterTypes.family_for(monster_name, monster_type)
+    def family_for(monster_name, monster_type = nil, base_name: nil)
+      Engine::MonsterTypes.family_for(monster_name, monster_type, base_name: base_name)
     end
 
     def beast_traits(monster_name)

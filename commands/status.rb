@@ -24,6 +24,16 @@ module Commands
       bonuses = Engine::SupportBonuses.active_count(player)
       conditions = player.condition_list.size
       candy = Engine::Halloween.candy_count(player)
+      leftovers = Engine::Thanksgiving.leftovers_count(player)
+      stocking = Engine::Christmas.candy_count(player)
+      bubbles = Engine::NewYear.bubbles_count(player)
+      hearts = Engine::Valentines.hearts_count(player)
+      cake = Engine::MardiGras.cake_count(player)
+      eggs = Engine::Easter.eggs_count(player)
+      sweets = Engine::AprilFools.sweets_count(player)
+      wine = Engine::MayDay.wine_count(player)
+      honey = Engine::Midsummer.honey_count(player)
+      glitter = Engine::Pride.glitter_count(player)
 
       container.row do |row|
         row.string_select(custom_id: "eros:status:goto:#{uid}", placeholder: 'Open a panel…',
@@ -48,6 +58,56 @@ module Commands
                         description: 'Spend a Halloween sweet',
                         emoji: { name: '🍬' })
           end
+          if leftovers.positive?
+            menu.option(label: "Eat Leftovers (#{leftovers})", value: 'leftovers',
+                        description: 'Spend a feast plate',
+                        emoji: { name: '🍗' })
+          end
+          if stocking.positive?
+            menu.option(label: "Eat Stocking (#{stocking})", value: 'stocking',
+                        description: 'Spend a Yule sweet',
+                        emoji: { name: '🍬' })
+          end
+          if bubbles.positive?
+            menu.option(label: "Drink Bubbles (#{bubbles})", value: 'bubbles',
+                        description: 'Spend a midnight toast',
+                        emoji: { name: '🥂' })
+          end
+          if hearts.positive?
+            menu.option(label: "Eat Hearts (#{hearts})", value: 'hearts',
+                        description: 'Spend a chocolate heart',
+                        emoji: { name: '🍫' })
+          end
+          if cake.positive?
+            menu.option(label: "Eat King Cake (#{cake})", value: 'cake',
+                        description: 'Spend a carnival bite',
+                        emoji: { name: '🍰' })
+          end
+          if eggs.positive?
+            menu.option(label: "Eat Eggs (#{eggs})", value: 'eggs',
+                        description: 'Spend a chocolate egg',
+                        emoji: { name: '🥚' })
+          end
+          if sweets.positive?
+            menu.option(label: "Eat Fool's Sweets (#{sweets})", value: 'sweets',
+                        description: 'Spend an April joke candy',
+                        emoji: { name: '🃏' })
+          end
+          if wine.positive?
+            menu.option(label: "Drink May Wine (#{wine})", value: 'wine',
+                        description: 'Spend a maypole sip',
+                        emoji: { name: '🍷' })
+          end
+          if honey.positive?
+            menu.option(label: "Eat Sun Honey (#{honey})", value: 'honey',
+                        description: 'Spend a solstice sweet',
+                        emoji: { name: '🍯' })
+          end
+          if glitter.positive?
+            menu.option(label: "Eat Pride Glitter (#{glitter})", value: 'glitter',
+                        description: 'Spend a parade sweet',
+                        emoji: { name: '✨' })
+          end
         end
       end
     end
@@ -64,6 +124,70 @@ module Commands
     def eat_candy(event)
       player = ErosHelpers.require_player(event) or return
       result = Engine::Halloween.eat_candy!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_leftovers(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Thanksgiving.eat_leftovers!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_stocking(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Christmas.eat_candy!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def drink_bubbles(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::NewYear.eat_bubbles!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_hearts(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Valentines.eat_hearts!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_cake(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::MardiGras.eat_cake!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_eggs(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Easter.eat_eggs!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_sweets(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::AprilFools.eat_sweets!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def drink_wine(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::MayDay.eat_wine!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_honey(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Midsummer.eat_honey!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def eat_glitter(event)
+      player = ErosHelpers.require_player(event) or return
+      result = Engine::Pride.eat_glitter!(player)
+      reply_after_eat(event, player, result)
+    end
+
+    def reply_after_eat(event, player, result)
       player.refresh if player.respond_to?(:refresh)
       notice = result[:ok] ? "✅ #{result[:message]}" : "❌ #{result[:message]}"
       threat = Engine::ThreatCalculator.calculate(player)
@@ -73,6 +197,7 @@ module Commands
         status_nav(c, player, event, current: :status)
       end
     end
+    private_class_method :reply_after_eat
 
     def bonuses(event)
       player = ErosHelpers.require_player(event) or return
@@ -223,6 +348,16 @@ module Commands
       when 'bonuses' then Commands::Status.bonuses(event)
       when 'conditions' then Commands::Status.conditions(event, page: 0)
       when 'candy' then Commands::Status.eat_candy(event)
+      when 'leftovers' then Commands::Status.eat_leftovers(event)
+      when 'stocking' then Commands::Status.eat_stocking(event)
+      when 'bubbles' then Commands::Status.drink_bubbles(event)
+      when 'hearts' then Commands::Status.eat_hearts(event)
+      when 'cake' then Commands::Status.eat_cake(event)
+      when 'eggs' then Commands::Status.eat_eggs(event)
+      when 'sweets' then Commands::Status.eat_sweets(event)
+      when 'wine' then Commands::Status.drink_wine(event)
+      when 'honey' then Commands::Status.eat_honey(event)
+      when 'glitter' then Commands::Status.eat_glitter(event)
       else Commands::Status.run(event)
       end
     end
@@ -251,6 +386,12 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Status.eat_candy(event)
+    end
+
+    button(custom_id: /^eros:status:leftovers:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Status.eat_leftovers(event)
     end
 
     button(custom_id: /^eros:status:conditions:\d+$/) do |event|

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-%w[core body kink fetish halloween].each { |pack| require_relative "event_packs/#{pack}" }
+%w[core body kink fetish halloween thanksgiving christmas new_year valentines mardi_gras easter april_fools may_day midsummer pride].each { |pack| require_relative "event_packs/#{pack}" }
 
 module Engine
   module FetishEvents
@@ -1057,7 +1057,11 @@ module Engine
         decline: { label: 'Leave', text: 'Keep your voice', lust: 2,
                    scene: 'You thank him politely and leave with your voice intact.' }
       }
-    }.merge(EventPacks::CORE, EventPacks::BODY, EventPacks::KINK, EventPacks::FETISH, EventPacks::HALLOWEEN).freeze
+    }.merge(EventPacks::CORE, EventPacks::BODY, EventPacks::KINK, EventPacks::FETISH,
+            EventPacks::HALLOWEEN, EventPacks::THANKSGIVING, EventPacks::CHRISTMAS,
+            EventPacks::NEW_YEAR, EventPacks::VALENTINES, EventPacks::MARDI_GRAS,
+            EventPacks::EASTER, EventPacks::APRIL_FOOLS, EventPacks::MAY_DAY,
+            EventPacks::MIDSUMMER, EventPacks::PRIDE).freeze
 
     KEYS = EVENTS.keys.freeze
     TAGS = EVENTS.transform_values { |e| e[:tag] }.freeze
@@ -1261,6 +1265,76 @@ module Engine
         if added.positive?
           log << "You tuck away **#{added} Halloween Candy** " \
                  "(**#{Engine::Halloween.candy_count(player)}/#{Engine::Halloween::CANDY_MAX}** in your pouch — keeps after the season)."
+        end
+      end
+      if opt[:leftovers].to_i.positive?
+        added = Engine::Thanksgiving.grant_leftovers!(player, opt[:leftovers].to_i)
+        if added.positive?
+          log << "You wrap **#{added} Leftovers** for later " \
+                 "(**#{Engine::Thanksgiving.leftovers_count(player)}/#{Engine::Thanksgiving::LEFTOVERS_MAX}** in your tin — keeps after the feast)."
+        end
+      end
+      if opt[:christmas_candy].to_i.positive?
+        added = Engine::Christmas.grant_candy!(player, opt[:christmas_candy].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Stocking Candy** " \
+                 "(**#{Engine::Christmas.candy_count(player)}/#{Engine::Christmas::CANDY_MAX}** in your stocking — keeps after Yule)."
+        end
+      end
+      if opt[:new_year_bubbles].to_i.positive?
+        added = Engine::NewYear.grant_bubbles!(player, opt[:new_year_bubbles].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Champagne Bubbles** " \
+                 "(**#{Engine::NewYear.bubbles_count(player)}/#{Engine::NewYear::BUBBLES_MAX}** in your tin — keeps after midnight)."
+        end
+      end
+      if opt[:valentines_hearts].to_i.positive?
+        added = Engine::Valentines.grant_hearts!(player, opt[:valentines_hearts].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Chocolate Hearts** " \
+                 "(**#{Engine::Valentines.hearts_count(player)}/#{Engine::Valentines::HEARTS_MAX}** in your tin — keeps after Heartstring)."
+        end
+      end
+      if opt[:mardi_gras_cake].to_i.positive?
+        added = Engine::MardiGras.grant_cake!(player, opt[:mardi_gras_cake].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} King Cake** " \
+                 "(**#{Engine::MardiGras.cake_count(player)}/#{Engine::MardiGras::CAKE_MAX}** in your tin — keeps after Carnival)."
+        end
+      end
+      if opt[:easter_eggs].to_i.positive?
+        added = Engine::Easter.grant_eggs!(player, opt[:easter_eggs].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Chocolate Eggs** " \
+                 "(**#{Engine::Easter.eggs_count(player)}/#{Engine::Easter::EGGS_MAX}** in your basket — keeps after Hare's Hunt)."
+        end
+      end
+      if opt[:april_fools_sweets].to_i.positive?
+        added = Engine::AprilFools.grant_sweets!(player, opt[:april_fools_sweets].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Fool's Sweets** " \
+                 "(**#{Engine::AprilFools.sweets_count(player)}/#{Engine::AprilFools::SWEETS_MAX}** in your tin — keeps after Fool's Trap)."
+        end
+      end
+      if opt[:may_day_wine].to_i.positive?
+        added = Engine::MayDay.grant_wine!(player, opt[:may_day_wine].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} May Wine** " \
+                 "(**#{Engine::MayDay.wine_count(player)}/#{Engine::MayDay::WINE_MAX}** in your tin — keeps after Maypole)."
+        end
+      end
+      if opt[:midsummer_honey].to_i.positive?
+        added = Engine::Midsummer.grant_honey!(player, opt[:midsummer_honey].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Sun Honey** " \
+                 "(**#{Engine::Midsummer.honey_count(player)}/#{Engine::Midsummer::HONEY_MAX}** in your tin — keeps after Longest Day)."
+        end
+      end
+      if opt[:pride_glitter].to_i.positive?
+        added = Engine::Pride.grant_glitter!(player, opt[:pride_glitter].to_i)
+        if added.positive?
+          log << "You tuck away **#{added} Pride Glitter** " \
+                 "(**#{Engine::Pride.glitter_count(player)}/#{Engine::Pride::GLITTER_MAX}** in your tin — keeps after Pride Parade)."
         end
       end
       Array(spec[:tracker]).each { |t| player.bump_tracker!(t) }

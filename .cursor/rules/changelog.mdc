@@ -11,6 +11,7 @@ Whenever you **add**, **change**, or **fix** behavior in this repo, update the m
 - **Web version** (anything under `webapp/`): [`webapp/CHANGELOG.md`](webapp/CHANGELOG.md) only — never the bot changelog.
 - A bot change that also reaches the web version through `webapp/tools/sync_from_bot.rb` goes in the bot changelog; add a web entry too only if web players notice something web-specific.
 - **Player-facing Discord announce copy:** also append to [`DISCORD_CHANGELOG.md`](DISCORD_CHANGELOG.md) (gitignored — local paste fodder only). See below.
+- **Season / holiday event posts:** one dedicated paste per event in [`DISCORD_EVENTS.md`](DISCORD_EVENTS.md) (gitignored). Do **not** fold full event announces into the tower-update changelog.
 
 ## How to update (`CHANGELOG.md` / web)
 
@@ -33,9 +34,20 @@ Update this when the change is something a **delver would notice in Discord**. C
 
 Then a blank line, then the body. Season announces may swap the bold title (e.g. **All Hallows' Heat — from Syn**) but keep the megaphones and the role ping on the next line.
 
+**Same calendar day = one paste block.** Fold that day’s player-facing notes under a single megaphone header; don’t open a new `##` for every feature landed the same day.
+
 **Skip entirely:** lore/art/NovelAI briefs, migrations, Postgres/CI/gitignore/ops, refactors, env vars, and anything players wouldn’t see or understand.
 
 If the only changelog hit is engineering/ops, leave `DISCORD_CHANGELOG.md` alone.
+
+## `DISCORD_EVENTS.md` (Syn’s event announces)
+
+Update this when you **add or meaningfully change a calendar season / holiday event** players will notice. Same Syn voice and megaphone + Updates-role header as the Discord changelog, but:
+
+- **One event = one paste block** (title the bold line with the event name, e.g. **Yule of Surrender — from Syn**).
+- Include Discord `<t:UNIX:R>` / `<t:UNIX:D>` countdowns for start and end; refresh UNIX stamps when the year rolls.
+- Cover window, what changes in the tower, stash/outfit/titles, opt-in Content Options, and a Syn Talk tease.
+- Leave general feature shipping notes in `DISCORD_CHANGELOG.md`; leave full event posts here.
 
 ## Do not skip
 

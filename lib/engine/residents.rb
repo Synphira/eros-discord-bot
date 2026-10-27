@@ -615,7 +615,8 @@ module Engine
       { name: 'Fishnet Tights', slot: 'legs', type: 'armor', cost: 60, tier: :restored,
         description: 'Fishnets worn over bare skin and under no illusions.',
         stat_modifiers: { 'appearance' => 9, 'submit_lp_bonus' => 1 } },
-      # Seasonal All Hallows' rack — only stocked Oct 30–Nov 5; owned pieces keep forever.
+      # Seasonal racks (halloween, labor_day, …): in-season stock; once earned,
+      # pieces stay forever and reclaim free at Vex (defeat/restart safe).
       { name: 'Masquerade Domino', slot: 'head', type: 'armor', cost: 55, tier: :halloween,
         description: 'A black lace half-mask. The temple loves a face that admits it came to play.',
         stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
@@ -624,16 +625,138 @@ module Engine
         stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
       { name: 'Cobweb Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :halloween,
         description: 'Sheer black webs for thighs. Something always seems to catch in them.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Labor Day — Pip-inspired field kit (delvers only; tower folk stay undressed for this one).
+      { name: 'Askew Field Goggles', slot: 'head', type: 'armor', cost: 50, tier: :labor_day,
+        description: 'Pip\'s signature goggles, one lens smudged, strap never quite even. You look like you ' \
+                     'came to measure hinges — and stayed to be measured.',
+        stat_modifiers: { 'appearance' => 8, 'explore_lp' => 1 } },
+      { name: "Trapwright's Open Harness", slot: 'chest', type: 'armor', cost: 90, tier: :labor_day,
+        description: 'Scavenged straps and sprung-plate panels that cover collarbones, ribs, and back — and ' \
+                     'leave both breasts bare, framed like samples for the catalogue.',
+        stat_modifiers: { 'appearance' => 12, 'lust_mult' => 1.06, 'submit_lp_bonus' => 1, 'satisfy_bonus' => 0.03 } },
+      { name: 'Seatless Tool Chaps', slot: 'legs', type: 'armor', cost: 70, tier: :labor_day,
+        description: 'Heavy chaps for thigh and shin, tool loops clinking — and nothing whatsoever over the ' \
+                     'ass. Pip swears the airflow helps her think. The traps agree.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      { name: 'Catalogue Crotch Window', slot: 'groin', type: 'armor', cost: 75, tier: :labor_day,
+        description: 'A reinforced ring and short apron that cover hips and nothing that matters. Cock or ' \
+                     'cunt sits framed, labeled only by how eager the next plate will be to test it.',
+        stat_modifiers: { 'appearance' => 11, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2 } },
+      # Thanksgiving — Feast of the Willing harvest rack.
+      { name: 'Cornucopia Circlet', slot: 'head', type: 'armor', cost: 55, tier: :thanksgiving,
+        description: 'A circlet of gilt horn and silk leaves. It says you came to be served — and to serve.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'explore_lp' => 1 } },
+      { name: 'Basting-String Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :thanksgiving,
+        description: 'Lace and kitchen twine that frames the chest like a roast worth staring at. Warm butter fantasy.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.07, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04 } },
+      { name: 'Gravy-Silk Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :thanksgiving,
+        description: 'Sheer stockings the colour of good gravy — sticky implication, elegant lie.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Christmas — Yule of Surrender ribbon rack.
+      { name: 'Antler Circlet', slot: 'head', type: 'armor', cost: 55, tier: :christmas,
+        description: 'Gilt antlers and a velvet bow. You look like you came to be hunted under the tree.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Ribbon-Wrapped Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :christmas,
+        description: 'Scarlet ribbon that frames the chest like a gift mid-unwrap. The bow is a suggestion.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Mistletoe Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :christmas,
+        description: 'Sheer evergreen silk with berry embroidery at the thigh. Standing under anything becomes a dare.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # New Year — Midnight Oath glitter rack.
+      { name: 'Countdown Tiara', slot: 'head', type: 'armor', cost: 55, tier: :new_year,
+        description: 'Glitter and a tiny clock face. You look like a resolution that already failed beautifully.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'explore_lp' => 1 } },
+      { name: 'Midnight Lace Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :new_year,
+        description: 'Black lace for the last hour of the year — cut to make every toast a confession.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Champagne Sheer Hose', slot: 'legs', type: 'armor', cost: 65, tier: :new_year,
+        description: 'Hose the colour of good bubbles. Standing for the countdown becomes a pose.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Valentines — Heartstring Claim rose rack.
+      { name: 'Rose Circlet', slot: 'head', type: 'armor', cost: 55, tier: :valentines,
+        description: 'Fresh roses and a silk bow. You look like you came to be aimed at.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Heart-Cut Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :valentines,
+        description: 'Crimson silk cut in a heart over the chest — a target painted as fashion.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.1, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Arrow-Silk Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :valentines,
+        description: 'Sheer rose silk with tiny embroidered arrows climbing the thigh. Standing still becomes a dare.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Mardi Gras — Carnival of Beads mask rack.
+      { name: 'Feathered Domino', slot: 'head', type: 'armor', cost: 55, tier: :mardi_gras,
+        description: 'A half-mask of gilt and plumes. You look like you came to be thrown beads at — and to catch them.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Bead-Draped Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :mardi_gras,
+        description: 'Purple-gold-green silk under a cascade of cheap beads that somehow look expensive on you.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Parade Sheer Hose', slot: 'legs', type: 'armor', cost: 65, tier: :mardi_gras,
+        description: 'Sheer hose the colour of parade dusk. Standing on a float becomes a pose.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Easter — Hare's Hunt warren rack.
+      { name: 'Bunny-Ear Circlet', slot: 'head', type: 'armor', cost: 55, tier: :easter,
+        description: 'Soft ears and a silk bow. You look like you came to be hunted in the garden.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Pastel Nest Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :easter,
+        description: 'Pastel silk cut to frame the chest like a nest worth filling. Spring fantasy, temple honesty.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Spring-Silk Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :easter,
+        description: 'Sheer stockings the colour of new leaves — delicate lie, fertile implication.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # April Fools — Fool's Trap jester rack.
+      { name: 'Askew Jester Cap', slot: 'head', type: 'armor', cost: 55, tier: :april_fools,
+        description: 'Bells that never quite hang even. You look like you came to be the joke — and to enjoy it.',
+        stat_modifiers: { 'appearance' => 8, 'explore_lp' => 1, 'submit_lp_bonus' => 1 } },
+      { name: 'Whoopee Harness', slot: 'chest', type: 'armor', cost: 90, tier: :april_fools,
+        description: 'Straps and a cushion panel that sighs when squeezed. Pip swears it is art. The traps agree.',
+        stat_modifiers: { 'appearance' => 12, 'lust_mult' => 1.06, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.03 } },
+      { name: 'Striped Fool Hose', slot: 'legs', type: 'armor', cost: 65, tier: :april_fools,
+        description: 'Loud stripes for thighs. Standing still becomes a punchline.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # May Day — Maypole Raising ribbon rack.
+      { name: 'Flower Crown', slot: 'head', type: 'armor', cost: 55, tier: :may_day,
+        description: 'Fresh blooms and a ribbon bow. You look like you came to be crowned — and claimed.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Maypole Ribbon Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :may_day,
+        description: 'Streaming ribbons that frame the chest like a pole worth dancing around. Soft bondage fantasy.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Petal-Silk Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :may_day,
+        description: 'Sheer stockings the colour of crushed petals. Standing still becomes a dance.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Midsummer — Longest Day sun rack.
+      { name: 'Sun Halo', slot: 'head', type: 'armor', cost: 55, tier: :midsummer,
+        description: 'A thin gold circlet that catches every lamp. You look like you came to be worshipped — and kept.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Honey-Gold Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :midsummer,
+        description: 'Sheer gold silk that frames the chest like a fairy ring worth stepping into. Soft midsummer fantasy.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Glow-Silk Stockings', slot: 'legs', type: 'armor', cost: 65, tier: :midsummer,
+        description: 'Sheer stockings the colour of late sunlight. Standing still becomes golden hour.',
+        stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } },
+      # Pride — Pride Parade glitter rack.
+      { name: 'Rainbow Bandana', slot: 'head', type: 'armor', cost: 55, tier: :pride,
+        description: 'Cheap silk in every colour, knotted like a claim. You look like you came to march — and be marched on.',
+        stat_modifiers: { 'appearance' => 9, 'satisfy_bonus' => 0.03, 'submit_lp_bonus' => 1 } },
+      { name: 'Flag-Draped Bodice', slot: 'chest', type: 'armor', cost: 95, tier: :pride,
+        description: 'A flag worn as fashion — cut to show what the parade is celebrating. Soft bondage of found-family pride.',
+        stat_modifiers: { 'appearance' => 13, 'lust_mult' => 1.08, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05 } },
+      { name: 'Glitter Parade Hose', slot: 'legs', type: 'armor', cost: 65, tier: :pride,
+        description: 'Sheer hose dusted with edible-looking glitter. Standing on a float becomes a dare.',
         stat_modifiers: { 'appearance' => 10, 'agility' => 1, 'submit_lp_bonus' => 1 } }
     ].freeze
 
     def vex_outfit_stock(player)
+      Engine::Seasons.reconcile_holiday_outfits!(player)
       restored = vex_restored?(player)
+      earned = Array(player.tracker_hash['holiday_outfits']).map(&:to_s)
       VEX_OUTFITS.select do |spec|
-        case spec[:tier]
-        when :halloween then Engine::Seasons.active?(:halloween)
-        when :basic then true
-        else restored
+        if Engine::Seasons.seasonal_tier?(spec[:tier])
+          # In-season rack, or forever once you've earned that souvenir.
+          Engine::Seasons.active?(spec[:tier].to_s) || earned.include?(spec[:name].to_s)
+        elsif spec[:tier] == :basic
+          true
+        else
+          restored
         end
       end
     end
@@ -663,6 +786,12 @@ module Engine
     end
 
     def vex_outfit_price(player, spec)
+      # Holiday souvenirs you've already earned are always free to reclaim.
+      if Engine::Seasons.seasonal_tier?(spec[:tier]) &&
+         Array(player.tracker_hash['holiday_outfits']).map(&:to_s).include?(spec[:name].to_s)
+        return 0
+      end
+
       raw = [(spec[:cost] * Engine::ThreatCalculator.price_multiplier(player)).round, 1].max
       player.lp_price(raw)
     end
@@ -685,22 +814,40 @@ module Engine
       return { ok: false, message: "You already own **#{item.name}**." } if player.owns_equipment?(item.id)
 
       price = vex_outfit_price(player, spec)
-      unless player.spend_lp!(price, already_priced: true)
+      if price.positive? && !player.spend_lp!(price, already_priced: true)
         return { ok: false, message: "\"Cash first, poetry later. **#{price} LP**, delver — you have " \
                                      "#{player.lp}.\"" }
       end
 
       grant = player.grant_equipment!(item, auto_equip: false)
       unless grant[:ok]
-        player.refund_lp!(price)
+        player.refund_lp!(price) if price.positive?
         return grant
       end
 
       player.bump_tracker!('vex_outfits_bought')
-      { ok: true,
-        message: "Vex fits **#{item.name}** to you with a tailor's hands and a listener's silence. " \
-                 "\"There,\" she says at last. \"Now the tower can read you properly.\" " \
-                 "_(**#{price} LP** — equip it from `e,equipment`.)_" }
+      if price.zero?
+        { ok: true,
+          message: "Vex hands **#{item.name}** back without looking up from the kettle. " \
+                   '"Holiday piece. You earned it — it stays on my rack for you, free, forever. ' \
+                   "Don't lose the story.\" _(equip from `e,equipment`.)_" }
+      else
+        { ok: true,
+          message: "Vex fits **#{item.name}** to you with a tailor's hands and a listener's silence. " \
+                   "\"There,\" she says at last. \"Now the tower can read you properly.\" " \
+                   "_(**#{price} LP** — equip it from `e,equipment`.)_" }
+      end
+    end
+
+    def resident_intro(id, _player = nil)
+      spec = resident(id)
+      return nil unless spec
+
+      if id.to_s == 'pip' && Engine::LaborDay.active?
+        return Engine::LaborDay.pip_trap_intro
+      end
+
+      spec[:intro]
     end
 
     def negotiate_cost(player, item)

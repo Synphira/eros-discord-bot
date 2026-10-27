@@ -633,7 +633,7 @@ module ErosUI
         "🍬 **#{item[:label]}** `#{item[:count]}#{max}` — earned in-season, kept forever."
       end
       container.text_display(
-        content: "### Stash\n#{lines.join("\n")}\n-# Eat from the menu below when you have candy."
+        content: "### Stash\n#{lines.join("\n")}\n-# Eat or drink from the menu below when your stash has anything."
       )
     end
 

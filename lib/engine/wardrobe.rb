@@ -62,6 +62,84 @@ module Engine
         effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04 },
         blurb: 'Mask, bodice, and webs worn together: the temple reads you as dressed for All Hallows — ' \
                'and keeps paying that compliment long after the candles go out.'
+      },
+      'field_sample' => {
+        name: 'Field Sample', bonus_name: 'Catalogue Bait',
+        pieces: ['Askew Field Goggles', "Trapwright's Open Harness", 'Seatless Tool Chaps',
+                 'Catalogue Crotch Window'],
+        effects: { 'appearance' => 5, 'lust_mult' => 1.05, 'submit_lp_bonus' => 2, 'trap_avoid_bonus' => -0.05 },
+        blurb: 'Goggles, open harness, seatless chaps, and a crotch window worn together: breasts, ass, and ' \
+               'sex bare on purpose. The tower\'s traps read you as a willing sample — and lean in harder.'
+      },
+      'feast_of_the_willing' => {
+        name: 'Feast of the Willing', bonus_name: 'Second Helping',
+        pieces: ['Cornucopia Circlet', 'Basting-String Bodice', 'Gravy-Silk Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'plant_submit_lp' => 1 },
+        blurb: 'Circlet, basting bodice, and gravy silk worn together: the temple reads you as a guest who ' \
+               'came to be carved — and keeps plating compliments long after the feast ends.'
+      },
+      'yule_of_surrender' => {
+        name: 'Yule of Surrender', bonus_name: 'Gift-Wrapped',
+        pieces: ['Antler Circlet', 'Ribbon-Wrapped Bodice', 'Mistletoe Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'demon_submit_lp' => 1 },
+        blurb: 'Antlers, ribbon, and mistletoe silk worn together: the temple reads you as a gift mid-unwrap — ' \
+               'and keeps tying compliments long after the tree comes down.'
+      },
+      'midnight_oath' => {
+        name: 'Midnight Oath', bonus_name: 'First Toast',
+        pieces: ['Countdown Tiara', 'Midnight Lace Bodice', 'Champagne Sheer Hose'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'explore_lp' => 1 },
+        blurb: 'Tiara, midnight lace, and champagne hose worn together: the temple reads you as a vow already ' \
+               'breaking — and keeps toasting that honesty after the clock strikes.'
+      },
+      'heartstring_heat' => {
+        name: 'Heartstring Claim', bonus_name: 'Be Mine',
+        pieces: ['Rose Circlet', 'Heart-Cut Bodice', 'Arrow-Silk Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.05, 'demon_submit_lp' => 1 },
+        blurb: 'Rose circlet, heart-cut bodice, and arrow silk worn together: the temple reads you as a valentine ' \
+               'mid-claim — and keeps aiming compliments long after the arrows stop.'
+      },
+      'carnival_heat' => {
+        name: 'Carnival of Beads', bonus_name: 'Throw Me Beads',
+        pieces: ['Feathered Domino', 'Bead-Draped Bodice', 'Parade Sheer Hose'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'clown_submit_lp' => 1 },
+        blurb: 'Feathered mask, bead-draped bodice, and parade hose worn together: the temple reads you as a float ' \
+               'worth throwing for — and keeps cheering that honesty after Fat Tuesday.'
+      },
+      'hares_heat' => {
+        name: "Hare's Hunt", bonus_name: 'Nest Ready',
+        pieces: ['Bunny-Ear Circlet', 'Pastel Nest Bodice', 'Spring-Silk Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'beast_submit_lp' => 1 },
+        blurb: 'Bunny ears, nest bodice, and spring silk worn together: the temple reads you as a prize mid-hunt — ' \
+               'and keeps nesting compliments long after Monday.'
+      },
+      'fools_heat' => {
+        name: "Fool's Trap", bonus_name: 'Gotcha',
+        pieces: ['Askew Jester Cap', 'Whoopee Harness', 'Striped Fool Hose'],
+        effects: { 'appearance' => 5, 'submit_lp_bonus' => 2, 'explore_lp' => 1, 'trap_avoid_bonus' => -0.05 },
+        blurb: 'Jester cap, whoopee harness, and striped hose worn together: the temple reads you as a willing ' \
+               'punchline — and keeps setting you up long after April 1.'
+      },
+      'maypole_heat' => {
+        name: 'Maypole Raising', bonus_name: 'Wound Pretty',
+        pieces: ['Flower Crown', 'Maypole Ribbon Bodice', 'Petal-Silk Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'plant_submit_lp' => 1 },
+        blurb: 'Flower crown, ribbon bodice, and petal silk worn together: the temple reads you as a dancer mid-wind — ' \
+               'and keeps tying compliments long after the pole comes down.'
+      },
+      'longest_day' => {
+        name: 'Longest Day', bonus_name: 'Golden Hour',
+        pieces: ['Sun Halo', 'Honey-Gold Bodice', 'Glow-Silk Stockings'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'plant_submit_lp' => 1 },
+        blurb: 'Sun halo, honey-gold bodice, and glow silk worn together: the temple reads you as midsummer mid-ring — ' \
+               'and keeps gilding compliments long after the solstice fades.'
+      },
+      'pride_parade' => {
+        name: 'Pride Parade', bonus_name: 'Out & Proud',
+        pieces: ['Rainbow Bandana', 'Flag-Draped Bodice', 'Glitter Parade Hose'],
+        effects: { 'appearance' => 6, 'submit_lp_bonus' => 2, 'satisfy_bonus' => 0.04, 'explore_lp' => 1 },
+        blurb: 'Rainbow bandana, flag bodice, and glitter hose worn together: the temple reads you as a float worth ' \
+               'cheering — and keeps celebrating that honesty after the parade rolls out.'
       }
     }.freeze
 

@@ -40,3 +40,31 @@ namespace :commands do
     load File.expand_path('register_commands.rb', __dir__)
   end
 end
+
+namespace :seasons do
+  desc 'List MonsterTypes names missing from each pack MONSTER_ALIASES (optional PACK=halloween)'
+  task :monster_alias_gaps do
+    require_relative 'lib/engine/seasons'
+    %w[
+      halloween labor_day thanksgiving christmas new_year
+      valentines mardi_gras easter april_fools may_day midsummer pride
+    ].each { |pack| require_relative "lib/engine/#{pack}" }
+    require_relative 'lib/engine/monster_types'
+
+    keys = ENV['PACK'] ? [ENV['PACK']] : Engine::Seasons.packs.keys
+    keys.each do |key|
+      pack = Engine::Seasons.pack(key)
+      unless pack&.respond_to?(:monster_alias)
+        puts "#{key}: (no monster_alias)"
+        next
+      end
+      gaps = Engine::Seasons.monster_alias_gaps(key)
+      if gaps.empty?
+        puts "#{key}: ok (#{Engine::MonsterTypes.all_names.uniq.size} aliases)"
+      else
+        puts "#{key}: MISSING #{gaps.size} — #{gaps.join(', ')}"
+        exit 1
+      end
+    end
+  end
+end

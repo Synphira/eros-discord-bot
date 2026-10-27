@@ -388,7 +388,14 @@ module Engine
         treasure: @player.current_floor.to_i > 20 ? 19 : 15,
         stairs: (rooms_on_floor + rooms_offset) >= stairs_minimum(threat) ? STAIRS_WEIGHTS.fetch(threat.category, 9) : 0,
         empty: 15
-      }
+      }.each_with_object({}) do |(kind, w), out|
+        if w.to_i <= 0
+          out[kind] = 0
+        else
+          scaled = (w * Engine::Seasons.room_weight_mult(kind)).round
+          out[kind] = [[scaled, 1].max, 90].min
+        end
+      end
     end
 
     def projected_pool_kinds(count)
