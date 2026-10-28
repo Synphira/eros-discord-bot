@@ -5,30 +5,336 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Endless Ruins of Sin — Wiki</title>
   <meta name="description" content="Player wiki for Endless Ruins of Sin — 18+ NSFW Discord tower game." />
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+  <meta name="theme-color" content="#1a1020" />
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/dark.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --theme-color: #8b3a5c;
+      --theme-color: #e879b8;
+      --eros-bg: #0c0a10;
+      --eros-bg-raised: #14101a;
+      --eros-bg-sidebar: #100d16;
+      --eros-bg-code: #1a1522;
+      --eros-border: #2a2238;
+      --eros-text: #ebe4f0;
+      --eros-muted: #a898b8;
+      --eros-pink: #e879b8;
+      --eros-pink-soft: #f0a8d0;
+      --eros-purple: #9b7dff;
+      --eros-glow: rgba(232, 121, 184, 0.18);
     }
-    body {
-      font-size: 16px;
+
+    html, body {
+      background: var(--eros-bg);
+      color: var(--eros-text);
+      font-family: 'Source Sans 3', system-ui, sans-serif;
+      font-size: 16.5px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
     }
-    .app-name-link img {
-      max-height: 1.6em;
-      vertical-align: middle;
+
+    /* —— Cover —— */
+    section.cover {
+      background: #0a0810 !important;
+      color: var(--eros-text) !important;
     }
-    .sidebar {
-      padding-top: 0;
+    section.cover .cover-main {
+      max-width: 720px;
     }
+    section.cover .cover-main > p:first-child img {
+      max-width: min(920px, 94vw);
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow:
+        0 0 0 1px rgba(232, 121, 184, 0.25),
+        0 24px 80px rgba(0, 0, 0, 0.65),
+        0 0 60px var(--eros-glow);
+      margin-bottom: 1.25rem;
+    }
+    section.cover h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: 0.04em;
+      color: #f5eef5 !important;
+      margin: 0.4rem 0 0.6rem;
+    }
+    section.cover h1 small,
+    section.cover h1 span {
+      color: var(--eros-pink-soft) !important;
+      font-weight: 500;
+    }
+    section.cover p {
+      color: var(--eros-muted) !important;
+      font-size: 1.05rem;
+      max-width: 36em;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    section.cover .cover-main > p:last-child a {
+      border-radius: 999px;
+      border: 1px solid rgba(232, 121, 184, 0.45) !important;
+      color: var(--eros-pink-soft) !important;
+      background: rgba(232, 121, 184, 0.08) !important;
+      padding: 0.55rem 1.35rem !important;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    section.cover .cover-main > p:last-child a:hover {
+      background: rgba(232, 121, 184, 0.2) !important;
+      border-color: var(--eros-pink) !important;
+      box-shadow: 0 0 24px var(--eros-glow);
+    }
+    section.cover .cover-main > p:last-child a:first-child {
+      background: linear-gradient(135deg, #c45a9a, #8b5cf6) !important;
+      border-color: transparent !important;
+      color: #fff !important;
+    }
+    section.cover .cover-main > p:last-child a:first-child:hover {
+      box-shadow: 0 0 28px rgba(155, 125, 255, 0.45);
+    }
+
+    /* —— Chrome —— */
     .nsfw-banner {
-      background: #3b0a2e;
-      color: #f5e6ee;
-      padding: 0.65rem 1rem;
-      font-size: 0.9rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(90deg, #2a0a22, #1a1028 40%, #2a0a22);
+      color: #f0dce8;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
       text-align: center;
+      border-bottom: 1px solid rgba(232, 121, 184, 0.28);
+      letter-spacing: 0.02em;
     }
     .nsfw-banner strong {
-      color: #ffb3d1;
+      color: var(--eros-pink-soft);
+    }
+
+    .sidebar {
+      background: var(--eros-bg-sidebar) !important;
+      border-right: 1px solid var(--eros-border) !important;
+      color: var(--eros-muted) !important;
+    }
+    .sidebar .app-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.35rem;
+      letter-spacing: 0.06em;
+      color: var(--eros-text) !important;
+      border-bottom: 1px solid var(--eros-border);
+      padding: 1rem 0 0.85rem;
+      margin: 0 0.5rem 0.5rem;
+    }
+    .sidebar .app-name-link {
+      color: var(--eros-text) !important;
+    }
+    .sidebar ul li a {
+      color: var(--eros-muted) !important;
+      font-weight: 400;
+    }
+    .sidebar ul li a:hover {
+      color: var(--eros-pink-soft) !important;
+      text-decoration: none;
+    }
+    .sidebar ul li.active > a {
+      color: var(--eros-pink) !important;
+      border-right: 2px solid var(--eros-pink);
+      background: var(--eros-glow);
+      font-weight: 600;
+    }
+    .sidebar-nav > ul > li > p,
+    .sidebar-nav > ul > li > strong,
+    .sidebar ul li > strong,
+    .sidebar-nav p {
+      color: var(--eros-purple) !important;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      margin-top: 1rem !important;
+    }
+    .sidebar-toggle {
+      background: transparent !important;
+    }
+    .sidebar-toggle span {
+      background-color: var(--eros-pink) !important;
+    }
+    .search {
+      margin: 0 0.75rem 0.75rem !important;
+      border-bottom: none !important;
+    }
+    .search input {
+      background: var(--eros-bg-raised) !important;
+      border: 1px solid var(--eros-border) !important;
+      border-radius: 8px !important;
+      color: var(--eros-text) !important;
+      padding: 0.55rem 0.75rem !important;
+    }
+    .search input::placeholder {
+      color: var(--eros-muted);
+    }
+    .search .matching-post {
+      border-bottom-color: var(--eros-border) !important;
+    }
+    .search .matching-post a {
+      color: var(--eros-pink-soft) !important;
+    }
+    .search .matching-post p {
+      color: var(--eros-muted) !important;
+    }
+
+    .github-corner svg {
+      fill: var(--eros-pink) !important;
+      color: var(--eros-bg) !important;
+    }
+
+    /* —— Content —— */
+    .content {
+      padding-top: 1.5rem;
+    }
+    .markdown-section {
+      max-width: 860px;
+      color: var(--eros-text);
+      padding: 30px 40px 60px;
+    }
+    .markdown-section h1,
+    .markdown-section h2,
+    .markdown-section h3,
+    .markdown-section h4 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600;
+      color: #f7f0f8;
+      letter-spacing: 0.02em;
+      border-bottom: none;
+    }
+    .markdown-section h1 {
+      font-size: 2.35rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--eros-border);
+    }
+    .markdown-section h2 {
+      font-size: 1.65rem;
+      margin-top: 2rem;
+      color: var(--eros-pink-soft);
+    }
+    .markdown-section h3 {
+      font-size: 1.3rem;
+      color: var(--eros-purple);
+    }
+    .markdown-section p,
+    .markdown-section li {
+      color: var(--eros-text);
+    }
+    .markdown-section a {
+      color: var(--eros-pink);
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .markdown-section a:hover {
+      color: var(--eros-pink-soft);
+      border-bottom-color: rgba(232, 121, 184, 0.5);
+    }
+    .markdown-section strong {
+      color: #fff;
+      font-weight: 600;
+    }
+    .markdown-section em {
+      color: var(--eros-pink-soft);
+    }
+    .markdown-section blockquote {
+      border-left: 3px solid var(--eros-pink);
+      background: rgba(232, 121, 184, 0.06);
+      color: var(--eros-muted);
+      padding: 0.6rem 1rem;
+      margin: 1.25rem 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .markdown-section code {
+      background: var(--eros-bg-code) !important;
+      color: var(--eros-pink-soft) !important;
+      border: 1px solid var(--eros-border);
+      border-radius: 5px;
+      padding: 0.12em 0.4em;
+      font-size: 0.9em;
+    }
+    .markdown-section pre {
+      background: var(--eros-bg-code) !important;
+      border: 1px solid var(--eros-border) !important;
+      border-radius: 10px !important;
+      box-shadow: none !important;
+    }
+    .markdown-section pre > code {
+      border: none !important;
+      color: var(--eros-text) !important;
+      background: transparent !important;
+    }
+    .markdown-section hr {
+      border: none;
+      border-top: 1px solid var(--eros-border);
+      margin: 2rem 0;
+    }
+
+    /* Tables — long catalogs */
+    .markdown-section table {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+      border-collapse: collapse;
+      margin: 1.25rem 0 1.75rem;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      border: 1px solid var(--eros-border);
+      border-radius: 10px;
+    }
+    .markdown-section tr {
+      border-top: 1px solid var(--eros-border);
+    }
+    .markdown-section tr:nth-child(2n) {
+      background: rgba(155, 125, 255, 0.05);
+    }
+    .markdown-section th {
+      background: rgba(232, 121, 184, 0.12);
+      color: var(--eros-pink-soft);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--eros-border);
+      white-space: nowrap;
+    }
+    .markdown-section td {
+      padding: 0.55rem 0.85rem;
+      border: none;
+      vertical-align: top;
+      color: var(--eros-text);
+    }
+
+    /* Scrollbar (webkit) */
+    .sidebar::-webkit-scrollbar,
+    .markdown-section table::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .sidebar::-webkit-scrollbar-thumb,
+    .markdown-section table::-webkit-scrollbar-thumb {
+      background: rgba(232, 121, 184, 0.35);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .markdown-section {
+        padding: 20px 18px 48px;
+      }
+      .nsfw-banner {
+        font-size: 0.78rem;
+      }
     }
   </style>
 </head>
@@ -42,14 +348,17 @@
       name: 'Endless Ruins of Sin',
       repo: 'Synphira/eros-discord-bot',
       homepage: 'Home.md',
+      coverpage: true,
+      onlyCover: false,
       loadSidebar: true,
       subMaxLevel: 2,
       auto2top: true,
       relativePath: true,
       search: {
-        placeholder: 'Search the wiki',
-        noData: 'No results',
-        depth: 4
+        placeholder: 'Search the tower…',
+        noData: 'Nothing found in these halls',
+        depth: 4,
+        hideOtherSidebarContent: true
       }
     }
   </script>
