@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Endless Ruins of Sin — Wiki</title>
+  <meta name="description" content="Player wiki for Endless Ruins of Sin — 18+ NSFW Discord tower game." />
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css" />
+  <style>
+    :root {
+      --theme-color: #8b3a5c;
+    }
+    body {
+      font-size: 16px;
+    }
+    .app-name-link img {
+      max-height: 1.6em;
+      vertical-align: middle;
+    }
+    .sidebar {
+      padding-top: 0;
+    }
+    .nsfw-banner {
+      background: #3b0a2e;
+      color: #f5e6ee;
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .nsfw-banner strong {
+      color: #ffb3d1;
+    }
+  </style>
+</head>
+<body>
+  <div class="nsfw-banner">
+    <strong>18+ only.</strong> Explicit NSFW game guide — leave if you are under 18.
+  </div>
+  <div id="app">Loading wiki…</div>
+  <script>
+    window.$docsify = {
+      name: 'Endless Ruins of Sin',
+      repo: 'Synphira/eros-discord-bot',
+      homepage: 'Home.md',
+      loadSidebar: true,
+      subMaxLevel: 2,
+      auto2top: true,
+      relativePath: true,
+      search: {
+        placeholder: 'Search the wiki',
+        noData: 'No results',
+        depth: 4
+      }
+    }
+  </script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+</body>
+</html>

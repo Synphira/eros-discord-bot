@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-28
+
+### Added
+
+- **Player wiki** ([`Wiki/`](Wiki/README.md)): encyclopedia for delvers — how to play, commands, content options, calendar, bestiary, people, places, glossary, plus full catalogs for **equipment**, **living gear**, **Vex outfits**, **marks**, **curses**, **titles**, **achievements**, and **transformations** (what they do and where to get them). GitHub Pages deploy workflow (Docsify) included — enable **Settings → Pages → Source: GitHub Actions** once the workflow lands on `main`.
+
 ## 2026-10-27
 
 ### Added

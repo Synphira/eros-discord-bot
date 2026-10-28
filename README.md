@@ -147,7 +147,7 @@ panel; slash/prefix commands send a **new** message. Replies use Discord
 - **Curses** — from defeat and often from climax / satisfy / wins; manage via `/curses`.
 - **Marks, quests, hybrids, admirers, altars, biomes, weekly modifiers, elites** — see `/help` Tutorial for the player-facing tour.
 
-Design lore lives under [`docs/lore/`](docs/lore/README.md). Player-facing changes go in [`CHANGELOG.md`](CHANGELOG.md).
+Player wiki: [`Wiki/`](Wiki/README.md). Design lore (local): `docs/lore/`. Player-facing changes: [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
@@ -162,7 +162,8 @@ commands/              # Discord command & button handlers
 lib/engine/            # game rules, events, conversations
 lib/models/            # Player and friends
 db/migrations/
-docs/lore/             # design bible
+Wiki/                  # player encyclopedia
+docs/lore/             # design bible (local)
 webapp/                # standalone browser port (separate changelog)
 .env.example
 ```
