@@ -38,27 +38,28 @@ module CharacterArchetypes
     'eager' => {
       value: 3,
       label: 'Eager',
-      text: 'Eagerly submit — I want to be taken by monsters (+3 Submission)'
+      text: 'Eager — lean into Submit: easier to satisfy, more LP when you yield, ' \
+            'but lust hits land harder (+3 Submission)'
     },
     'curious' => {
       value: 1,
       label: 'Curious',
-      text: 'Curious but open — I might submit if the monster is appealing (+1 Submission)'
+      text: 'Curious — a little more willing to Submit, a little hotter when touched (+1 Submission)'
     },
     'neutral' => {
       value: 0,
       label: 'Neutral',
-      text: "Neutral — I'll decide based on the situation (0 Submission)"
+      text: "Neutral — Fight or Submit as the moment asks (0 Submission)"
     },
     'reluctant' => {
       value: -1,
       label: 'Reluctant',
-      text: "Reluctant — I'll only submit if absolutely necessary (−1 Submission)"
+      text: 'Reluctant — prefer Fight; lust hits land a touch softer (−1 Submission)'
     },
     'resistant' => {
       value: -3,
       label: 'Resistant',
-      text: "Very resistant — I'll fight back with all I've got (−3 Submission)"
+      text: 'Resistant — Fight path: lust hits land softer, but satisfying foes is harder (−3 Submission)'
     }
   }.freeze
 

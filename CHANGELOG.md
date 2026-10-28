@@ -11,6 +11,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 ### Added
 
 - **Player wiki** ([`Wiki/`](Wiki/README.md)): encyclopedia for delvers — how to play, commands, content options, calendar, bestiary, people, places, glossary, plus full catalogs for **equipment**, **living gear**, **Vex outfits**, **marks**, **curses**, **titles**, **achievements**, and **transformations** (what they do and where to get them). GitHub Pages deploy (Docsify) with a dark temple theme (pink/purple accents + EROS banner cover). Enable **Settings → Pages → Source: GitHub Actions** once the workflow lands on `main`.
+- **`rake balance:combat`**: offline TTK / climax-pressure table for tuning Fight softcap, HP, and Submission lust.
+
+### Changed
+
+- **Combat rebalance (Fight + Submission):** Fight damage uses a softcap plus a linear STR share (deep-cycle AGI can no longer erase high STR). Hallway monsters are a bit tougher (`20 + floor×5` HP, `7 + floor` lust) and gain a light **level HP mult**; bosses/relics use the same mult. Lust hits never drop below **22%** of raw. **Submission** now matters: Resistant softens lust taken; Eager takes more lust, satisfies easier (existing curve), and earns bonus Submit LP. Create blurbs spell out the tradeoff. No stat wipe.
+
 
 ## 2026-10-27
 

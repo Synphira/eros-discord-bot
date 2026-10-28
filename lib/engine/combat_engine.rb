@@ -36,6 +36,15 @@ module Engine
     CURSE_CHANCE_PER_CYCLE = 0.05
     CURSE_CHANCE_CAP = 0.85
 
+    # Fight damage: diminishing softcap plus a linear floor so deep-cycle
+    # AGI (which also scales with cycle) cannot erase high STR entirely.
+    # strike = softcap(STR) + LINEAR_STR_SHARE * STR; AGI cuts at most 45%.
+    STR_SOFT = 90.0
+    LINEAR_STR_SHARE = 0.5
+    AGI_CUT_CAP = 0.45
+    # Resistance never blunts a lust hit below this fraction of raw lust_damage.
+    LUST_HIT_FLOOR = 0.22
+
     Encounter = Struct.new(
       :name, :type, :type_name, :color, :strength, :agility, :lust_damage, :hp, :max_hp,
       :special, :enraged, :is_boss, :elite, :relic,
@@ -48,6 +57,29 @@ module Engine
 
     def self.act!(player, action, encounter)
       new(player).act!(action, encounter)
+    end
+
+    # Public helpers for boss intros and the balance:combat rake.
+    def self.stance_start_line(player)
+      new(player).send(:submission_stance_line)
+    end
+
+    def self.softcap_strength(str)
+      str = str.to_f
+      return 0.0 if str <= 0
+
+      STR_SOFT * (1.0 - (1.0 / (1.0 + (str / STR_SOFT))))
+    end
+
+    def self.strike_power(str)
+      str = str.to_f
+      return 0.0 if str <= 0
+
+      softcap_strength(str) + (LINEAR_STR_SHARE * str)
+    end
+
+    def self.submission_lust_mult(player)
+      new(player).send(:submission_lust_mult)
     end
 
     def self.encounter_snapshot(encounter)
@@ -85,7 +117,7 @@ module Engine
       template = monster || Exploration.generate_monster(@player.current_floor, player: @player)
       type = (template[:type] || 'beast').to_s
       info = MonsterTypes.fetch(type) || MonsterTypes.fetch(:beast)
-      hp = (template[:hp] || template[:max_hp] || (18 + @player.current_floor * 4)).to_i
+      hp = (template[:hp] || template[:max_hp] || (20 + @player.current_floor * 5)).to_i
       max_hp = (template[:max_hp] || hp).to_i
       encounter = Encounter.new(
         name: template[:name],
@@ -105,6 +137,9 @@ module Engine
       snapshot[:tangled] = true if template[:tangled] || template['tangled']
       snapshot[:gaze_averted] = true if template[:gaze_averted] || template['gaze_averted']
       start_lines = @player.apply_combat_start_effects!(type)
+      if (stance = submission_stance_line)
+        start_lines << stance
+      end
       Engine::TransformationSystem.combat_start!(@player, snapshot, start_lines)
       Engine::Admirers.intervene_start!(@player, snapshot, start_lines)
       if @player.tracker('bottled_ceremony').positive?
@@ -255,8 +290,10 @@ module Engine
     end
 
     def player_hit_damage(enc)
-      base = @player.effective_strength - (enc[:agility] / 2)
-      base = base.round
+      strike = self.class.strike_power(@player.effective_strength)
+      agi_cut = enc[:agility].to_f / 2.0
+      agi_cut = [agi_cut, strike * AGI_CUT_CAP].min
+      base = (strike - agi_cut).round
       # Fighting a Basilisk with your eyes averted: you land less.
       base = [(base * 0.75).round, 1].max if enc[:gaze_averted]
       base = 1 if base < 1
@@ -268,16 +305,62 @@ module Engine
       100.0 / (100 + (@player.effective_resistance * 3.5))
     end
 
+    # Signed submission (stance + gear + curses). Unlike effective_submission,
+    # this may be negative — Resistant stays Resistant for lust tradeoffs.
+    def combat_submission
+      @player.submission.to_i +
+        @player.equipment_effect_sum('submission').round +
+        @player.curse_effect_sum('submission').round
+    end
+
+    # Resistant takes less lust; Eager takes more. Clamped for gear stacks.
+    def submission_lust_mult
+      sub = combat_submission
+      mult = if sub.negative?
+               1.0 + (sub * (0.15 / 3.0))
+             elsif sub.positive?
+               1.0 + (sub * (0.25 / 3.0))
+             else
+               1.0
+             end
+      mult.clamp(0.75, 1.45)
+    end
+
+    # Eager and stacked Submission pay extra LP on Submit actions.
+    def submission_submit_lp_bonus
+      sub = combat_submission
+      return 0 if sub <= 0
+
+      [(sub * 2) / 3, 0].max.floor
+    end
+
+    def submission_stance_line
+      sub = combat_submission
+      return nil if sub.zero?
+
+      mult = submission_lust_mult
+      pct = ((mult - 1.0) * 100).round
+      if sub.negative?
+        "_Resistant: lust taken ×#{format('%.2f', mult)} (#{pct}%)._"
+      else
+        bonus = submission_submit_lp_bonus
+        extra = bonus.positive? ? " · Submit +#{bonus} LP" : ''
+        "_Eager lean: lust taken ×#{format('%.2f', mult)} (+#{pct}%)#{extra}._"
+      end
+    end
+
     def monster_lust_hit(enc)
       base = (enc[:lust_damage] * resistance_factor) - @player.effective_lust_resist
       base *= 0.9 if Engine::TransformationSystem.resonance?(@player, enc[:type])
       base = (base * @player.curse_effect_product("#{enc[:type]}_damage_mult", default: 1.0)).to_f
       base *= @player.lust_damage_multiplier(monster_type: enc[:type])
       base = base.round
-      # Resistance can blunt a lust hit, but never below 15% of its raw
-      # strength — deep-cycle delvers still feel the tower's touch.
-      floor_hit = [(enc[:lust_damage].to_i * 0.15).ceil, 1].max
-      [base, floor_hit].max
+      # Resistance can blunt a lust hit, but never below this fraction of
+      # raw strength — deep-cycle delvers still feel the tower's touch.
+      floor_hit = [(enc[:lust_damage].to_i * LUST_HIT_FLOOR).ceil, 1].max
+      hit = [base, floor_hit].max
+      hit = [(hit * submission_lust_mult).round, 1].max
+      hit
     end
 
     def curse_chance(base, enc)
@@ -382,6 +465,7 @@ module Engine
       lp_reward = 1 + (enc[:strength].to_i / 2)
       lp_reward += (@player.curse_effect_sum('submit_lp_bonus') +
                     @player.curse_effect_sum("#{enc[:type]}_submit_lp")).round
+      lp_reward += submission_submit_lp_bonus
       lp_reward = (lp_reward * @player.curse_effect_product('submit_lp_mult', default: 1.0) *
                    Engine::Elites.submit_lp_mult(enc)).round
       lp_reward = [lp_reward, 1].max

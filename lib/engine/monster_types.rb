@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'threat_calculator'
+require_relative 'tower'
 require_relative 'seasons'
 
 module Engine
@@ -193,15 +194,16 @@ module Engine
 
       strength = 2 + (f / 2)
       agility = 1 + (f / 3)
-      lust_damage = 5 + f
-      hp = 18 + (f * 4)
+      lust_damage = 7 + f
+      hp = 20 + (f * 5)
 
       if player
         threat = ThreatCalculator.monster_modifiers(player)
         cycle = player.cycle_multiplier
+        level_hp = Tower.delver_hp_mult(player.level)
         strength = [(strength * threat.stat_mult * cycle).round, 1].max
         agility = [(agility * threat.stat_mult * cycle).round, 1].max
-        hp = [(hp * threat.stat_mult * cycle).round, 8].max
+        hp = [(hp * threat.stat_mult * cycle * level_hp).round, 8].max
         lust_damage = [(lust_damage * threat.lust_mult * cycle).round, 1].max
       end
 

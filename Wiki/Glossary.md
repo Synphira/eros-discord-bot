@@ -16,6 +16,6 @@
 | **Oath** | Extra torment mid-climb (+10% LP); up to two |
 | **Relic** | Boss made from a sacred object (cycle 2+) |
 | **Season** | Holiday window that renames pests and leans the tower |
-| **Submission stance** | Eager → Resistant attitude chosen at create; persists |
+| **Submission stance** | Eager → Resistant attitude chosen at create; persists. High Sub = hotter lust hits, easier Satisfy, bonus Submit LP. Low Sub = softer lust hits, harder Satisfy |
 | **Threat** | Difficulty and lust pressure from LP and curses |
 | **Trophy** | Boss-clear souvenir; one equipped; lost on defeat |

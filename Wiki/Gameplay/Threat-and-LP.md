@@ -24,8 +24,10 @@ Drop the tag or boost and those titles go away. Bonuses work in DMs and other se
 
 ## Threat
 
-Threat rises mainly with how much **LP** you’ve banked and how many **curses** you carry. Higher Threat means stronger, hornier monsters and more monster-heavy rooms.
+Threat rises mainly with how much **LP** you’ve banked and how many **curses** you carry (appearance from gear can nudge it too). Higher Threat means stronger, hornier monsters and more monster-heavy rooms.
 
 Getting rich makes the tower hungrier. Manage curses if you want the halls quieter.
+
+Monster **HP** also scales a little with your **level** and a lot with your **cycle** — deep climbs stay multi-turn even when your STR is absurd. See [Combat](Combat.md).
 
 → [Curses](../Systems/Curses.md) · [Defeat & cycles](Defeat-Cycles-Burdens.md)

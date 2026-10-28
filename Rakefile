@@ -41,6 +41,14 @@ namespace :commands do
   end
 end
 
+namespace :balance do
+  desc 'Print combat TTK / climax pressure samples (softcap, HP, Submission lust)'
+  task :combat do
+    load File.expand_path('tools/balance_combat.rb', __dir__)
+    BalanceCombat.report
+  end
+end
+
 namespace :seasons do
   desc 'List MonsterTypes names missing from each pack MONSTER_ALIASES (optional PACK=halloween)'
   task :monster_alias_gaps do

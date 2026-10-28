@@ -29,5 +29,12 @@ module Engine
     def clear_reward_lp(cycle)
       CLEAR_LP_PER_CYCLE * [cycle.to_i, 1].max
     end
+
+    # Hallway and boss HP scale gently with delver level so deep levels
+    # stay multi-turn fights without relying on cycle alone.
+    # Lv 1 → 1.0 · Lv 100 ≈ 1.2 · Lv 400 ≈ 1.4
+    def delver_hp_mult(level)
+      1.0 + (0.02 * Math.sqrt([level.to_i - 1, 0].max))
+    end
   end
 end

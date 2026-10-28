@@ -704,9 +704,10 @@ module Engine
 
       threat = ThreatCalculator.monster_modifiers(player)
       cycle = player.cycle_multiplier
+      level_hp = Tower.delver_hp_mult(player.level)
       strength = [(boss[:strength] * threat.stat_mult * cycle).round, 1].max
       agility = [(boss[:agility] * threat.stat_mult * cycle).round, 1].max
-      hp = [(boss[:hp] * threat.stat_mult * cycle).round, 20].max
+      hp = [(boss[:hp] * threat.stat_mult * cycle * level_hp).round, 20].max
       lust_damage = [(boss[:lust_damage] * threat.lust_mult * cycle).round, 1].max
 
       encounter = CombatEngine::Encounter.new(
@@ -725,6 +726,9 @@ module Engine
 
       player.store_encounter!(CombatEngine.encounter_snapshot(encounter))
       start_lines = player.apply_combat_start_effects!(boss[:type])
+      if (stance = CombatEngine.stance_start_line(player))
+        start_lines << stance
+      end
 
       # A Depraved clear is judged by the themes you face her with: the
       # snapshot is taken now, at her door, so mid-fight toggles neither
@@ -830,9 +834,10 @@ module Engine
     def start_relic_encounter(player, floor, host, relic, relic_key)
       threat = ThreatCalculator.monster_modifiers(player)
       cycle = player.cycle_multiplier
+      level_hp = Tower.delver_hp_mult(player.level)
       strength = [((host[:strength] * relic[:strength_mult]) * threat.stat_mult * cycle).round, 1].max
       agility = [((host[:agility] * relic[:agility_mult]) * threat.stat_mult * cycle).round, 1].max
-      hp = [((host[:hp] * relic[:hp_mult]) * threat.stat_mult * cycle).round, 20].max
+      hp = [((host[:hp] * relic[:hp_mult]) * threat.stat_mult * cycle * level_hp).round, 20].max
       lust_damage = [((host[:lust_damage] * relic[:lust_mult]) * threat.lust_mult * cycle).round, 1].max
 
       # The Mirror Queen is a true doppelganger: she copies the delver
@@ -845,7 +850,7 @@ module Engine
       if relic_key == 'mirror_queen'
         strength = [[player.effective_strength, (strength * 0.85).round].max, 1].max
         agility = [[player.effective_agility, (agility * 0.85).round].max, 1].max
-        hp = [hp, (player.max_defiance * 1.5).round].max
+        hp = [hp, (player.max_defiance * 1.5 * level_hp).round].max
         lust_damage = [[(player.effective_strength * 1.1).round, lust_damage].max,
                        (lust_damage * 1.6).round].min
       end
@@ -867,6 +872,9 @@ module Engine
 
       player.store_encounter!(CombatEngine.encounter_snapshot(encounter))
       start_lines = player.apply_combat_start_effects!(relic[:type])
+      if (stance = CombatEngine.stance_start_line(player))
+        start_lines << stance
+      end
       cycle_note = player.current_cycle.to_i > 1 ? " · Cycle #{player.current_cycle} ×#{cycle.round(2)}" : ''
 
       message = <<~MSG.strip
