@@ -1,3 +1,5 @@
+![EROS](assets/eros-banner.jpg)
+
 # Endless Ruins of Sin
 
 A text-based dark-fantasy **NSFW** Discord roguelike. You descend a lust-soaked tower of rooms, traps, monsters, and domain lords toward **Eros, Goddess of Lust**, on floor 35.

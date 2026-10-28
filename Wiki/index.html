@@ -35,67 +35,18 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* —— Cover —— */
-    section.cover {
-      background: #0a0810 !important;
-      color: var(--eros-text) !important;
-    }
-    section.cover .cover-main {
-      max-width: 720px;
-    }
-    section.cover .cover-main > p:first-child img {
-      max-width: min(920px, 94vw);
+    /* —— Home banner —— */
+    .markdown-section img[src*="eros-banner"] {
+      display: block;
       width: 100%;
+      max-width: 100%;
       height: auto;
       border-radius: 10px;
+      margin: 0 0 1.25rem;
       box-shadow:
-        0 0 0 1px rgba(232, 121, 184, 0.25),
-        0 24px 80px rgba(0, 0, 0, 0.65),
-        0 0 60px var(--eros-glow);
-      margin-bottom: 1.25rem;
-    }
-    section.cover h1 {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-weight: 600;
-      font-size: clamp(1.8rem, 4vw, 2.6rem);
-      letter-spacing: 0.04em;
-      color: #f5eef5 !important;
-      margin: 0.4rem 0 0.6rem;
-    }
-    section.cover h1 small,
-    section.cover h1 span {
-      color: var(--eros-pink-soft) !important;
-      font-weight: 500;
-    }
-    section.cover p {
-      color: var(--eros-muted) !important;
-      font-size: 1.05rem;
-      max-width: 36em;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    section.cover .cover-main > p:last-child a {
-      border-radius: 999px;
-      border: 1px solid rgba(232, 121, 184, 0.45) !important;
-      color: var(--eros-pink-soft) !important;
-      background: rgba(232, 121, 184, 0.08) !important;
-      padding: 0.55rem 1.35rem !important;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-    }
-    section.cover .cover-main > p:last-child a:hover {
-      background: rgba(232, 121, 184, 0.2) !important;
-      border-color: var(--eros-pink) !important;
-      box-shadow: 0 0 24px var(--eros-glow);
-    }
-    section.cover .cover-main > p:last-child a:first-child {
-      background: linear-gradient(135deg, #c45a9a, #8b5cf6) !important;
-      border-color: transparent !important;
-      color: #fff !important;
-    }
-    section.cover .cover-main > p:last-child a:first-child:hover {
-      box-shadow: 0 0 28px rgba(155, 125, 255, 0.45);
+        0 0 0 1px rgba(232, 121, 184, 0.22),
+        0 16px 48px rgba(0, 0, 0, 0.45),
+        0 0 40px var(--eros-glow);
     }
 
     /* —— Chrome —— */
@@ -348,8 +299,6 @@
       name: 'Endless Ruins of Sin',
       repo: 'Synphira/eros-discord-bot',
       homepage: 'Home.md',
-      coverpage: true,
-      onlyCover: false,
       loadSidebar: true,
       subMaxLevel: 2,
       auto2top: true,
