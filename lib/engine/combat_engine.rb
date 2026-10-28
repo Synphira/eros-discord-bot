@@ -763,8 +763,11 @@ module Engine
       @player.clear_encounter!
 
       is_boss = enc[:is_boss] || (@player.current_floor % 5).zero?
-      kind = demon_kind(enc)
-      @player.bump_tracker!("#{kind}_defeats") if kind && !satisfied
+      unless satisfied
+        @player.bump_tracker!("#{enc[:type]}_defeats") if enc[:type]
+        kind = demon_kind(enc)
+        @player.bump_tracker!("#{kind}_defeats") if kind
+      end
 
       if is_boss
         @player.bump_tracker!('bosses_defeated')

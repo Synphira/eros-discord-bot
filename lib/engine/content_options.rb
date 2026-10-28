@@ -60,6 +60,8 @@ module Engine
       'size_difference' => { label: 'Size Difference', group: :fetish, default: false, description: 'Huge partners stretching you.' },
       'degradation' => { label: 'Degradation', group: :fetish, default: false, description: 'Name-calling instead of praise.' },
       'maid_service' => { label: 'Maid Service', group: :fetish, default: false, description: 'Uniforms and serving the house.' },
+      'bunny_service' => { label: 'Bunny Service', group: :fetish, default: false,
+                           description: 'Bunny outfits, club floors, and being put on display as the evening\'s entertainment.' },
       'pony_play' => { label: 'Pony Play', group: :fetish, default: false, description: 'Harnesses, bits, tails, and trotting.' },
       'gags_hoods' => { label: 'Gags & Hoods', group: :fetish, default: false, description: 'Ball gags, ring gags, and leather hoods.' },
       'gaping' => { label: 'Gaping & Fisting', group: :fetish, default: false, description: 'Fisting and being left stretched wide open.' },

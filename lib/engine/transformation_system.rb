@@ -371,6 +371,69 @@ module Engine
         special_event_description: 'Sometimes you ink a binding sigil mid-fight, and the monster holds still to be decorated',
         special: { kind: :stun, chance: 0.15,
                    text: 'Your needle kisses the %<name>s with a binding sigil — it holds perfectly still, stunned and preening!' }
+      },
+      'pig' => {
+        name: 'Pig', group: 'Beast',
+        description: 'A soft snout, greedy appetite, and a body that keeps every feast it is given',
+        requirement: { weight_gain_events: 5 },
+        appearance: ['snout', 'soft floppy ears', 'curly tail', 'plush belly'],
+        events: { 'weight_gain' => 35 },
+        buff: 'Greedy Bulk', buff_description: 'Take 25% less lust damage, +20% LP from weight-gain events',
+        effects: { 'damage_reduction' => 0.75, 'weight_gain_event_lp_mult' => 1.2 },
+        special_event: 'Mud Wallow',
+        special_event_description: 'Sometimes your soft hide drinks a hit and turns it into defiance',
+        special: { kind: :absorb, chance: 0.18,
+                   text: 'You sink into a greedy wallow as the %<name>s strikes — soft hide drinks the hit and you recover **%<amount>s** defiance!' }
+      },
+      'bunny' => {
+        name: 'Bunny', group: 'Beast',
+        description: 'Long ears, a cotton tail, and a body trained to hop, serve, and look delicious doing it',
+        requirement: { maid_events: 3, bunny_events: 5 },
+        appearance: ['long ears', 'cotton tail', 'digitigrade calves', 'powder-soft fur along the hips'],
+        events: { 'bunny_service' => 30, 'maid_service' => 20 },
+        buff: 'Hop and Serve', buff_description: '+20% dodge chance, +10% seduction chance',
+        effects: { 'dodge_bonus' => 0.2, 'satisfy_bonus' => 0.1 },
+        special_event: 'Cottonflash',
+        special_event_description: 'Sometimes a flash of ears and tail freezes the monster for a beat',
+        special: { kind: :stun, chance: 0.13,
+                   text: 'Your ears flick and that cotton tail pops — the %<name>s stares, utterly distracted, and loses its turn!' }
+      },
+      'jellyfish' => {
+        name: 'Jellyfish', group: 'Synthetic',
+        description: 'A soft bell-dome crown and trailing fronds that numb whatever they kiss',
+        requirement: { slime_submissions: 10, oviposition_events: 3 },
+        appearance: ['translucent fringe-hair', 'soft bell-dome crown', 'trailing oral arms', 'faint bioluminescence'],
+        buff: 'Nettle Veil', buff_description: 'Take 20% less lust damage, half lust damage from slimes',
+        effects: { 'damage_reduction' => 0.8, 'slime_lust_mult' => 0.5 },
+        special_event: 'Nettle Sting',
+        special_event_description: 'Sometimes your trailing fronds numb the monster, costing it a turn',
+        special: { kind: :stun, chance: 0.18,
+                   text: 'Silken fronds brush the %<name>s and fire goes soft — it hangs numb and loses its turn!' }
+      },
+      'oni' => {
+        name: 'Oni', group: 'Demon',
+        description: 'Short thick horns, tusks, and a club-hand hunger that would rather break a fight than kneel in it',
+        requirement: { demon_defeats: 15, monsters_killed: 25 },
+        appearance: ['crimson skin flush', 'short thick horns', 'tusks', 'iron club calluses'],
+        monsters: { demon: 25 },
+        buff: 'Club Right', buff_description: '+3 Strength, +4 LP on fight victories, submit LP ×0.75',
+        effects: { 'strength' => 3, 'victory_lp_bonus' => 4, 'submit_lp_mult' => 0.75, 'crit_chance' => 0.1 },
+        special_event: 'Horn Slam',
+        special_event_description: 'Sometimes you simply slam horn-first and fold the monster',
+        special: { kind: :crush, chance: 0.14,
+                   text: 'You drop your horns and slam — the %<name>s folds under the hit for **%<amount>s** damage!' }
+      },
+      'gorgon' => {
+        name: 'Gorgon', group: 'Beast',
+        description: 'Living serpent hair and a gaze that softens foes into eager, slack devotion',
+        requirement: { mind_control_events: 5, objectification_events: 5 },
+        appearance: ['living serpent hair', 'slit-pupil eyes', 'scale-dusted cheekbones', 'a gaze that pins'],
+        buff: 'Serpent Gaze', buff_description: '+25% seduction / satisfy chance',
+        effects: { 'satisfy_bonus' => 0.25 },
+        special_event: 'Petrifying Glance',
+        special_event_description: 'Sometimes your gaze leaves the monster slack and far easier to satisfy for the rest of the fight',
+        special: { kind: :pliant, chance: 0.18,
+                   text: 'Your serpent hair hisses and your eyes catch the %<name>s — it goes soft-stone slack, **+%<amount>s%%** easier to satisfy!' }
       }
     }.freeze
 
@@ -680,6 +743,10 @@ module Engine
         enc[:strength] = [(enc[:strength].to_i * 0.8).round, 1].max
         enc[:lust_damage] = [(enc[:lust_damage].to_i * 0.8).round, 1].max
         nil
+      when :pliant
+        before = enc[:pliant].to_f
+        enc[:pliant] = [before + 0.20, 0.45].min
+        ((enc[:pliant] - before) * 100).round
       when :thrall then hurt!(enc, [enc[:strength].to_i, 1].max)
       when :crush then hurt!(enc, [(player.effective_strength * 1.5).round, 1].max)
       when :drain

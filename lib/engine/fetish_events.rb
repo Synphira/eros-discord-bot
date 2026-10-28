@@ -1056,6 +1056,98 @@ module Engine
         },
         decline: { label: 'Leave', text: 'Keep your voice', lust: 2,
                    scene: 'You thank him politely and leave with your voice intact.' }
+      },
+      'bunny_lounge' => {
+        name: 'Bunny Lounge', tag: 'bunny_service', tracker: 'bunny_events',
+        blurb: 'a club floor with a rack of bunny outfits.',
+        intro: 'Music thumps through a velvet lounge. A rack waits by the bar: glossy black leotards, satin ears, cuffs, ' \
+               'and a second rail of straps and collars that cover almost nothing. A host with a coy smile holds both hangers out.',
+        accept: {
+          label: 'Classic bunny', text: 'Leotard, ears, cuffs, and cotton tail',
+          scenes: ['You wriggle into the high-cut leotard; the cotton tail settles against your lower back as the ears ' \
+                   'clip into place. Cuffs click shut around your wrists — decorative, until a patron hooks a finger through one.',
+                   'You spend the set ferrying drinks on a silver tray, bent just far enough that every eye finds the ' \
+                   'curve of the outfit. When the set ends, the host tips you the way the lounge prefers: bent over the bar, ' \
+                   'tail bouncing, tray forgotten.'],
+          by_part: {
+            'vagina' => 'He takes you over the sticky bar top, leotard pulled aside, fucking your pussy while the next song rolls.',
+            'anus' => 'He flips the cotton tail up and sinks into your ass against the bar, the lounge cheering without looking away.'
+          },
+          parts: {
+            'penis' => 'Someone palms your cock through the thin front of the leotard until you stain the satin dark.',
+            'breasts' => 'The plunge neckline keeps slipping; hands help it fail on purpose.'
+          },
+          lp: 8, lust: 12,
+          condition: { key: 'classic_bunny', name: 'Classic Bunny', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.1, 'agility' => 1 } }
+        },
+        alt: {
+          label: 'Reverse bunny', text: 'Ears, cuffs, collar, and straps — nothing covering', needs_tag: 'exhibitionism',
+          scenes: ['The host cinches a collar, clips the ears, and wraps you in straps that frame everything and hide ' \
+                   'nothing. Your nipples, sex, and ass are on open display while the cotton tail rides bare above your crack.',
+                   'You work the floor like that — tray, smile, nothing else — until a regular leads you to a booth and ' \
+                   'uses the cuffs as handles while the lounge watches over their drinks.'],
+          by_part: {
+            'vagina' => 'He spreads you on the booth seat and fucks your bare pussy, straps digging in with every thrust.',
+            'anus' => 'He bends you over the booth table and takes your ass while the reverse outfit leaves every inch on show.'
+          },
+          parts: {
+            'penis' => 'Your cock bobs free against the tray edge; someone strokes you in time with the music until you spill.',
+            'breasts' => 'Your bare breasts bounce with every step; patrons tip by pinching.'
+          },
+          lp: 9, lust: 16,
+          condition: { key: 'reverse_bunny', name: 'Reverse Bunny', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.15, 'submission' => 1 } }
+        },
+        decline: { label: 'Skip the shift', text: 'Leave the outfits on the rack', lust: 2,
+                   scene: 'You decline with a polite smile. The host shrugs and hangs both outfits back — someone else will wear them.' },
+        fight: { name: 'Velvet Devil', label: 'Fight the host', type: :demon,
+                 text: 'The host\'s smile sharpens — the lounge wants a fight more than a server tonight.' }
+      },
+      'velvet_warren' => {
+        name: 'Velvet Warren', tag: 'bunny_service', tracker: 'bunny_events',
+        blurb: 'a private suite with two bunny outfits laid out on silk.',
+        intro: 'A private warren suite: low lights, mirrors, and two outfits waiting on the bed. One is the classic club ' \
+               'bunny — leotard, ears, cuffs, fluffy tail. The other is reverse: straps, collar, ears, and nothing left to the imagination.',
+        accept: {
+          label: 'Wear the classic', text: 'Full bunny leotard for a private fitting',
+          scenes: ['You dress in the classic kit while a suited attendant adjusts the tail and ears, then walks you through ' \
+                   'poses in the mirror — serve, curtsy, present — until the leotard feels like second skin.',
+                   'The fitting ends with you on the silk sheets, still in costume, taken slow and thorough as a thank-you for looking the part.'],
+          by_part: {
+            'vagina' => 'He pulls the crotch aside and fills your pussy while the ears flop with every thrust.',
+            'anus' => 'He lifts the cotton tail and fucks your ass, praising how well the outfit holds you open.'
+          },
+          parts: {
+            'penis' => 'He strokes you through the satin until you soak the front of the leotard.',
+            'breasts' => 'He mouths your nipples through the plunge until the fabric is wet and clinging.'
+          },
+          lp: 8, lust: 13,
+          condition: { key: 'classic_bunny', name: 'Classic Bunny', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.1, 'agility' => 1 } }
+        },
+        alt: {
+          label: 'Wear the reverse', text: 'Straps and ears only — fully on display', needs_tag: 'exhibitionism',
+          scenes: ['The attendant buckles you into the reverse kit: collar snug, ears upright, straps framing breasts and ' \
+                   'hips while your sex stays bare. The mirrors show everything. You are not allowed to cover up.',
+                   'They make you hold poses until your thighs shake, then take you on the mirrored vanity so you watch ' \
+                   'yourself get used in nothing but bunny straps.'],
+          by_part: {
+            'vagina' => 'He spreads you against the glass and fucks your bare pussy while you stare at your own ears and open mouth.',
+            'anus' => 'He bends you over the vanity and fills your ass, the reverse straps the only thing between you and the room.'
+          },
+          parts: {
+            'penis' => 'Your cock stands free; they edge you until precum paints the vanity top.',
+            'breasts' => 'Bare breasts press to cold mirror glass with every thrust from behind.'
+          },
+          lp: 9, lust: 17,
+          condition: { key: 'reverse_bunny', name: 'Reverse Bunny', floors: 3,
+                       effects: { 'satisfy_bonus' => 0.15, 'submission' => 1 } }
+        },
+        decline: { label: 'Leave the suite', text: 'Keep your own clothes', lust: 2,
+                   scene: 'You leave the outfits folded on the silk. The warren door clicks shut behind you, disappointed.' },
+        fight: { name: 'Warren Host', label: 'Refuse and fight', type: :beast,
+                 text: 'The attendant\'s ears flatten — the warren does not take rejection gently.' }
       }
     }.merge(EventPacks::CORE, EventPacks::BODY, EventPacks::KINK, EventPacks::FETISH,
             EventPacks::HALLOWEEN, EventPacks::THANKSGIVING, EventPacks::CHRISTMAS,

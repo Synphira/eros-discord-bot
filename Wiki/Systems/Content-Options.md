@@ -71,6 +71,7 @@ Use the menu, or toggle one theme by name/key with `e,fetish_options`. `e,slutti
 
 - Body Writing (`body_writing`)
 - Broken Resolutions (`resolutions`)
+- Bunny Service (`bunny_service`)
 - Clowns (`clowns`) — also lets clown monsters appear in the halls
 - Corruption (`corruption`)
 - Cruel Pranks (`cruel_pranks`)
