@@ -468,6 +468,15 @@ module ErosUI
   LOG_COMPONENT_BUDGET = 22
   LOG_CHAR_BUDGET = 3300
 
+  # Scene lines are wrapped in _italics_. A second _pair_ inside the line
+  # makes Discord print the underscores instead of italicizing. Inner emphasis
+  # becomes bold so the wrap stays one clean pair.
+  def scene_text(text)
+    body = text.to_s.gsub(/(?<![[:alnum:]\\])_([^_\n]+?)_(?![[:alnum:]])/, '**\1**')
+    body = body.delete('_')
+    "_#{body}_"
+  end
+
   def dedupe_article(text)
     @proper_name_article ||= /\b[Tt]he (?=(?:#{Engine::BossFights::PROPER_NAMES.join('|')})\b)/
     text.gsub(/\b([Tt]he) the\b/i, '\1').gsub(@proper_name_article, '')
@@ -480,7 +489,7 @@ module ErosUI
       scene = dedupe_article(scene) if scene
       entry = dedupe_article(entry.to_s) unless scene
       if scene
-        segments << [:scene, "_#{scene}_"]
+        segments << [:scene, scene_text(scene)]
       elsif segments.last&.first == :text
         segments.last[1] = "#{segments.last[1]}\n#{entry}"
       else

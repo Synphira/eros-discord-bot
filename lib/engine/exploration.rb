@@ -535,13 +535,13 @@ module Engine
       elsif attention >= 15
         @player.gain_lust!(8)
         lines << '_A voice with no mouth, close as breath on your ear: "Closer," Eros purrs. Something ' \
-                 'vast and warm brushes the length of you and is gone, leaving your skin singing. ' \
-                 '_Lust +8._'
+                 'vast and warm brushes the length of you and is gone, leaving your skin singing._'
+        lines << '_Lust +8._'
       else
         @player.gain_lust!(5)
         lines << '_The candlelight bends toward you, all at once, like a head turning. You feel ' \
-                 '**considered** — briefly, distantly, the way weather considers a field. Then it passes. ' \
-                 '_Lust +5._'
+                 '**considered** — briefly, distantly, the way weather considers a field. Then it passes._'
+        lines << '_Lust +5._'
       end
       lines << '_No monster finds you here. Down here, the only hunger that matters is hers._'
 

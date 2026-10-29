@@ -1264,7 +1264,7 @@ module Engine
                  'hair from your violet eyes. "Those wings," she murmurs. "That ink. That tired little smirk." ' \
                  'Her cruel smile softens into something almost reverent. "You are wearing the shape of the ' \
                  'one who dreamed this whole temple into being, little architect. Syn is the reflection, pet. ' \
-                 '_You_ are the source she was poured from."_'
+                 '**You** are the source she was poured from."_'
       end
 
       if eros_form_keys(player).include?('eldritch_bride')
@@ -1331,7 +1331,7 @@ module Engine
                   'like she has been let in on the temple\'s oldest secret. "Every tattoo she sells, you ' \
                   'authored. Every exhausted little sigh, yours first." She catches your chin and turns your ' \
                   'face to the light. "Kneel for your goddess, little original — the reflection kneels to ' \
-                  '_you_ when the parlour closes."'
+                  '**you** when the parlour closes."'
       end
 
       if eros_form_keys(player).include?('eldritch_bride')

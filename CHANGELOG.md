@@ -8,6 +8,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-10-28
 
+### Fixed
+
+- Italic scene lines no longer show raw `_` underscores. Nested emphasis (Mirror Duet’s “your loss”, an Eros line, the dreaming court’s lust note, an admirer courting line) was breaking Discord’s italic markup.
+
 ### Added
 
 - **Five hybrids:** **Pig** (weight-gain feasts → greedy bulk + Mud Wallow), **Bunny** (maid + new Bunny Service rooms → hop/serve; unlock Bunny Lounge / Velvet Warren with classic vs reverse outfit), **Jellyfish** (slime + oviposition → Nettle Sting stun), **Oni** (fight-kill demons → +STR, victory LP, weaker Submit pay), **Gorgon** (mind-control + objectification → +25% satisfy and Petrifying Glance). New `/options` fetish **Bunny Service**. Fight victories now track per-type defeats (e.g. `demon_defeats`) for Oni unlock.

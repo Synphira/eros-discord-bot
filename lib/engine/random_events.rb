@@ -786,7 +786,7 @@ module Engine
         finish_choice!(player, data, log)
       when 'send_back'
         log << { scene: 'You press your palm flat to hers through the glass and shake your head. She mouths ' \
-                        'something — _your loss_ — and steps backward into your reflection, which wears her ' \
+                        'something — **your loss** — and steps backward into your reflection, which wears her ' \
                         'smirk a moment longer than yours.' }
         if Engine::ContentOptions.enabled?(player, 'body_writing')
           player.add_condition!(
