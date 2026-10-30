@@ -6,7 +6,7 @@ Earn LP from combat, quests, clears, events, altars, and more. Spend it on:
 
 - Levels and stats (`/levelup`)
 - Berry’s shop
-- Removing or suppressing curses
+- Removing, suppressing, or unsuppressing curses
 - Syn’s parlour marks
 - Hybrid / chimera work
 - Tearing off living gear (and related costs)

@@ -11,6 +11,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 ### Fixed
 
 - **Vex’s counter** no longer fails with Discord’s 40-component cap. Her rack is six pieces a page (◀ Rack / Rack ▶), and negotiating or refitting a worn living piece is a menu instead of one button row per piece.
+- **Unsuppress a curse** from Syn’s ledger (**Unsuppress**, same **25 LP** as suppression). That page lists only smothered curses, with one Unsuppress button each. Waking the last one returns you to the main ledger.
 
 ## 2026-10-28
 

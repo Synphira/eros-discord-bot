@@ -30,6 +30,7 @@ Buttons belong to whoever opened the panel. Pressing a button **edits** that mes
 | `/curses` | `e,curses` | Syn’s ledger |
 | `/removecurse` | `e,removecurse [N]` | Remove a curse (**50 LP**) |
 | `/suppresscurse` | `e,suppresscurse [N]` | Silence until defeat (**25 LP**) |
+| `/curses` → **Unsuppress** | — | Wake one smothered curse now (**25 LP**, same as suppression) |
 
 ## Gear & shops
 

@@ -70,7 +70,8 @@ module Commands
                    "**Your LP:** #{player.lp}\n" \
                    "_**Remove** (#{Player::CURSE_REMOVE_COST} LP) pays Syn to destroy one for good. " \
                    "**Suppress** (#{Player::CURSE_SUPPRESS_COST} LP) pays her to smother one until your " \
-                   'next defeat. She accepts the Lust Points. She does not accept your taste._'
+                   "next defeat. **Unsuppress** (#{Player::CURSE_SUPPRESS_COST} LP) pays the same to wake " \
+                   'a smothered blessing now. She accepts the Lust Points. She does not accept your taste._'
         )
 
         entries.each do |entry|
@@ -118,6 +119,13 @@ module Commands
               disabled: player.lp < cost
             )
           end
+          if suppressed.any?
+            row.button(
+              label: "Unsuppress (#{suppressed.size})",
+              style: :primary,
+              custom_id: "eros:curses:wake:#{event.user.id}"
+            )
+          end
           row.button(label: '🖤 Talk to Syn', style: :secondary, custom_id: "eros:talk:syn:#{event.user.id}")
           row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{event.user.id}")
         end
@@ -140,9 +148,78 @@ module Commands
         )
         c.text_display(content: "**Smothered blessings:**\n#{lines.join("\n")}")
         c.row do |row|
+          row.button(label: "Unsuppress (#{suppressed.size})", style: :primary,
+                     custom_id: "eros:curses:wake:#{event.user.id}")
           row.button(label: '🖤 Talk to Syn', style: :secondary, custom_id: "eros:talk:syn:#{event.user.id}")
           row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{event.user.id}")
         end
+      end
+    end
+
+    # Same ledger as removal and suppression, but only smothered curses,
+    # and the only action is to wake one for the suppression fee.
+    def show_wake(event, page: 0, notice: nil)
+      player = ErosHelpers.require_player(event) or return
+
+      if Eros.encounter_for(player)
+        ErosUI.reply_v2(event, ephemeral: true, with_actions: :combat) do |c|
+          c.text_display(content: '_Syn\'s voice, flat: "Not mid-fight, pet."_')
+        end
+        return
+      end
+
+      suppressed = player.suppressed_curses.sort_by(&:name)
+      if suppressed.empty?
+        show(event, notice: notice || '_🖤 **Syn:** "Nothing is smothered, pet. Every blessing on you is already awake — for better or worse."_')
+        return
+      end
+
+      pages = [(suppressed.size.to_f / PAGE_SIZE).ceil, 1].max
+      page = page.to_i.clamp(0, pages - 1)
+      slice = suppressed.slice(page * PAGE_SIZE, PAGE_SIZE) || []
+      cost = Player::CURSE_SUPPRESS_COST
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(content: "## 🖤 Syn's Curse Ledger — #{player.display_name}")
+        c.text_display(
+          content: '_Syn looks at the covered names and her mouth tightens. "I hated smothering these. ' \
+                   'Beautiful things, gagged under my ink because you paid me to." She taps the ledger. ' \
+                   '"Pay me the same again and I will peel the ink back. Gladly. I still charge. Waking ' \
+                   'a blessing is not a favour, pet. It is a purchase."_'
+        )
+        c.text_display(content: notice) if notice
+        c.separator(divider: true, spacing: :small)
+        c.text_display(
+          content: "**Smothered blessings:** #{suppressed.size} · **Your LP:** #{player.lp}\n" \
+                   "_**Unsuppress** (#{cost} LP) pays Syn to wake one now. Only smothered blessings " \
+                   'are on this page. The ones already awake stay on the ledger._'
+        )
+
+        slice.each do |curse|
+          type_name = Engine::CurseCatalog.type_label(Engine::CurseCatalog.type_for(curse.name))
+          c.text_display(
+            content: "**#{curse.name}** · _#{type_name}_\n#{curse.description}"
+          )
+          c.row do |row|
+            row.button(
+              label: "Unsuppress · #{cost} LP",
+              style: :primary,
+              custom_id: "eros:curses:act:wake:#{curse.id}:#{page}:#{event.user.id}",
+              disabled: player.lp < cost
+            )
+          end
+        end
+
+        Commands::Profile.attach_pager(c, 'eros:curses:wakepage', page, pages, event.user.id) if pages > 1
+
+        c.row do |row|
+          row.button(label: '◀ Ledger', style: :secondary, custom_id: "eros:curses:page:0:#{event.user.id}")
+          row.button(label: '🖤 Talk to Syn', style: :secondary, custom_id: "eros:talk:syn:#{event.user.id}")
+          row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{event.user.id}")
+        end
+
+        c.separator(divider: false, spacing: :small)
+        c.text_display(content: "-# Only smothered blessings · **Unsuppress** costs #{cost} LP, the same as suppression")
       end
     end
 
@@ -155,6 +232,17 @@ module Commands
       if Eros.encounter_for(player)
         ErosUI.reply_v2(event, ephemeral: true, with_actions: :combat) do |c|
           c.text_display(content: '_Syn\'s voice, flat: "Not mid-fight, pet."_')
+        end
+        return
+      end
+
+      if action.to_s == 'wake'
+        result = player.unsuppress_curse!(curse_id)
+        notice = syn_wake_notice(result)
+        if result[:ok] && player.suppressed_curses.empty?
+          show(event, notice: notice)
+        else
+          show_wake(event, page: page, notice: notice)
         end
         return
       end
@@ -215,6 +303,28 @@ module Commands
       "_🖤 **Syn:** #{line} _(#{cost} LP#{lp_left ? " · LP left: #{lp_left}" : ''})_"
     end
 
+    def syn_wake_notice(result)
+      unless result[:ok]
+        case result[:error]
+        when :insufficient_lp
+          return "_🖤 **Syn:** \"No.\" She keeps the ink where it is. \"Waking a blessing costs the same " \
+                 "as smothering it, pet. #{result[:message]}\"_"
+        when :stale
+          return '_🖤 **Syn:** "That one is already awake, pet. I will not charge you to uncover a blessing ' \
+                 'that is already shouting."_'
+        else
+          return "_🖤 **Syn:** \"Not so fast, pet.\" #{result[:message]}_"
+        end
+      end
+
+      curse = result[:curse]
+      lp_left = result[:message][/LP left: (\d+)/, 1]
+      cost = Player::CURSE_SUPPRESS_COST
+      "_🖤 **Syn:** She peels the ink back with something like relief. **#{curse.name}** stirs awake on " \
+        "your skin. \"There. As it should be.\" She still holds out her hand. " \
+        "**#{cost} LP#{lp_left ? " · LP left: #{lp_left}" : ''}**_"
+    end
+
     def syn_bulk_notice(result)
       unless result[:ok]
         if result[:error] == :insufficient_lp
@@ -242,11 +352,24 @@ module Commands
       Commands::Curses.show(event, page: page)
     end
 
-    button(custom_id: /^eros:curses:act:(remove|suppress):\d+:\d+:\d+$/) do |event|
+    button(custom_id: /^eros:curses:act:(remove|suppress|wake):\d+:\d+:\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
-      match = event.custom_id.match(/\Aeros:curses:act:(remove|suppress):(\d+):(\d+):(\d+)\z/)
+      match = event.custom_id.match(/\Aeros:curses:act:(remove|suppress|wake):(\d+):(\d+):(\d+)\z/)
       Commands::Curses.apply(event, match[1], match[2], page: match[3].to_i)
+    end
+
+    button(custom_id: /^eros:curses:wake:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Curses.show_wake(event)
+    end
+
+    button(custom_id: /^eros:curses:wakepage:-?\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      page = event.custom_id[/\Aeros:curses:wakepage:(-?\d+):\d+\z/, 1].to_i
+      Commands::Curses.show_wake(event, page: page)
     end
 
     button(custom_id: /^eros:curses:remove_all:\d+:\d+$/) do |event|
@@ -258,7 +381,7 @@ module Commands
 
     application_command(:curses) { |event| Commands::Curses.run(event) }
 
-    command(:curses, description: "Syn's curse ledger: pay her to suppress or remove blessings she would rather keep") do |event|
+    command(:curses, description: "Syn's curse ledger: pay her to suppress, unsuppress, or remove blessings") do |event|
       Commands::Curses.run(event)
       nil
     end

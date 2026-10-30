@@ -7,7 +7,7 @@ Runs the **parlour** and the **curse ledger**. Marks (tattoos and piercings), Su
 | Command | What she does |
 | --- | --- |
 | `/parlour` | Permanent marks for LP |
-| `/curses` | Page, suppress, or remove curses |
+| `/curses` | Page, suppress, unsuppress, or remove curses |
 
 ## Berry
 

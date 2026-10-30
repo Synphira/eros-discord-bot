@@ -30,9 +30,9 @@ module Commands
         ]
       },
       'curses' => {
-        label: 'Curses', emoji: '🩸', blurb: 'View, remove and suppress curses',
+        label: 'Curses', emoji: '🩸', blurb: 'View, remove, suppress and unsuppress curses',
         commands: [
-          ['/curses', 'e,curses', "Syn's curse ledger: page your blessings five at a time and pay her — reluctantly — to Suppress or Remove each one"],
+          ['/curses', 'e,curses', "Syn's curse ledger: page your blessings five at a time and pay her — reluctantly — to Suppress, Unsuppress, or Remove each one"],
           ['/removecurse', 'e,removecurse [N]', 'Remove a curse for 50 LP'],
           ['/suppresscurse', 'e,suppresscurse [N]', 'Silence a curse for 25 LP until your next defeat']
         ]

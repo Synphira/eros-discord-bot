@@ -13,6 +13,7 @@ Defeat, climaxing in combat, satisfying a monster, and sometimes winning. Deeper
 | `/curses` | — | Syn's ledger |
 | `/removecurse` | 50 LP | Remove for good |
 | `/suppresscurse` | 25 LP | Silence until next defeat |
+| `/curses` → **Unsuppress** | 25 LP | Wake one smothered curse now (same fee as suppression) |
 
 ## Catalog by monster type
 

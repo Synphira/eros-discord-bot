@@ -1430,6 +1430,38 @@ class Player < Sequel::Model(:players)
     result.merge(message: message)
   end
 
+  # Same fee as suppression. Wakes one smothered curse immediately.
+  def unsuppress_curse!(curse_id)
+    curse = suppressed_curses.find { |c| c.id.to_i == curse_id.to_i }
+    return { ok: false, error: :stale, message: 'That curse is not smothered.' } unless curse
+
+    priced = lp_price(CURSE_SUPPRESS_COST)
+    unless spend_lp!(priced, already_priced: true)
+      return {
+        ok: false,
+        error: :insufficient_lp,
+        message: "You don't have enough Lust Points! You need #{priced} LP."
+      }
+    end
+
+    updated = DB[:player_curses]
+              .where(player_id: discord_id, curse_id: curse.id, is_suppressed: true)
+              .update(is_suppressed: false)
+    if updated.zero?
+      refund_lp!(priced)
+      return { ok: false, error: :stale, message: 'That curse is not smothered.' }
+    end
+
+    count = active_curse_count
+    set_tracker!('max_curses_simultaneous', count) if count > tracker('max_curses_simultaneous')
+
+    {
+      ok: true,
+      curse: curse,
+      message: "**#{curse.name}** is awake again. (LP left: #{lp})"
+    }
+  end
+
   def reactivate_suppressed_curses!
     names = suppressed_curses.map(&:name)
     DB[:player_curses].where(player_id: discord_id, is_suppressed: true).update(is_suppressed: false) if names.any?
