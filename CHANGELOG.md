@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-10-30
+
+### Fixed
+
+- **Vex’s counter** no longer fails with Discord’s 40-component cap. Her rack is six pieces a page (◀ Rack / Rack ▶), and negotiating or refitting a worn living piece is a menu instead of one button row per piece.
+
 ## 2026-10-28
 
 ### Fixed

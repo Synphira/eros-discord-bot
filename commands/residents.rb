@@ -6,6 +6,11 @@ module Commands
     extend Discordrb::Commands::CommandContainer
 
     COLOUR = 0x8a6d6b
+    # Discord caps a message at 40 components. Vex's rack used to be one
+    # button per outfit, and her bench one row per worn living piece — a
+    # restored delver with holiday souvenirs crossed the cap and the panel
+    # failed to send. Six pieces a page, and the bench is two menus.
+    RACK_PAGE_SIZE = 6
 
     module_function
 
@@ -43,7 +48,7 @@ module Commands
       end
     end
 
-    def show(event, id, notice: nil)
+    def show(event, id, notice: nil, rack_page: 0)
       player = ErosHelpers.require_player(event) or return
       spec = Engine::Residents.resident(id)
       return hub(event, notice: 'That resident has wandered off.') unless spec
@@ -105,8 +110,8 @@ module Commands
 
         case id.to_s
         when 'vex'
-          vex_services(c, player, owner)
-          vex_outfit_counter(c, player, owner)
+          vex_services(c, player, owner, rack_page: rack_page)
+          vex_outfit_counter(c, player, owner, page: rack_page)
         when 'pip' then pip_services(c, player, owner)
         when 'nectar' then nectar_services(c, player, owner)
         when 'cartographer' then cartographer_services(c, player, owner)
@@ -121,7 +126,7 @@ module Commands
       end
     end
 
-    def vex_services(c, player, owner)
+    def vex_services(c, player, owner, rack_page: 0)
       c.separator(divider: true, spacing: :small)
       worn = player.equipped_mimics
       if worn.empty?
@@ -133,6 +138,7 @@ module Commands
       end
 
       restored = Engine::Residents.vex_restored?(player)
+      refitted = Engine::Residents.refitted_names(player)
       c.text_display(
         content: '**Her bench** — negotiate a worn piece off intact ' \
                  "(**from #{Engine::Residents::NEGOTIATE_MIN * (restored ? 2 : 1)} LP** — " \
@@ -141,30 +147,43 @@ module Commands
                  "temperament (**#{Engine::Residents::REFIT_COST} LP**, once per piece)." \
                  "#{restored ? ' _Her fees doubled with the new room — rent, she says._' : ''}"
       )
-      worn.each do |item|
-        refitted = Engine::Residents.refitted_names(player).include?(item.name)
-        c.row do |row|
-          row.button(label: "Negotiate off: #{item.name}"[0, 80], style: :primary,
-                     custom_id: "eros:resident:vex:off:#{item.id}:#{owner}",
-                     disabled: player.lp < Engine::Residents.negotiate_cost(player, item))
-          row.button(label: "Refit: #{item.name}"[0, 80], style: :secondary,
-                     custom_id: "eros:resident:vex:refit:#{item.id}:#{owner}",
-                     disabled: refitted || player.lp < Engine::Residents::REFIT_COST)
+      c.row do |row|
+        row.string_select(custom_id: "eros:resident:vex:offsel:#{rack_page}:#{owner}",
+                          placeholder: 'Negotiate a piece off intact…',
+                          min_values: 1, max_values: 1) do |menu|
+          worn.first(25).each do |item|
+            cost = Engine::Residents.negotiate_cost(player, item)
+            menu.option(label: "#{item.name} (#{cost} LP)"[0, 100], value: item.id.to_s,
+                        description: (player.lp < cost ? 'Not enough LP' : 'Comes off intact, still yours')[0, 100])
+          end
+        end
+      end
+      open = worn.reject { |item| refitted.include?(item.name) }
+      return if open.empty?
+
+      c.row do |row|
+        row.string_select(custom_id: "eros:resident:vex:refitsel:#{rack_page}:#{owner}",
+                          placeholder: 'Refit a piece\'s temperament…',
+                          min_values: 1, max_values: 1) do |menu|
+          open.first(25).each do |item|
+            menu.option(label: item.name[0, 100], value: item.id.to_s,
+                        description: "#{Engine::Residents::REFIT_COST} LP, once"[0, 100])
+          end
         end
       end
     end
 
-    def vex_outfit_counter(c, player, owner)
+    def rack_page_for(player, item_id)
+      stock = Engine::Residents.vex_outfit_stock(player)
+      index = stock.index { |spec| Engine::Residents.vex_outfit_record(spec)&.id.to_s == item_id.to_s }
+      index ? index / RACK_PAGE_SIZE : 0
+    end
+
+    def vex_outfit_counter(c, player, owner, page: 0)
       c.separator(divider: true, spacing: :small)
       Engine::Residents.sync_vex_outfits!
       restored = Engine::Residents.vex_restored?(player)
       stock = Engine::Residents.vex_outfit_stock(player)
-      c.text_display(
-        content: '**Her rack** — clothes, not living gear: cut by her own hand to be *read* in. Every ' \
-                 'piece raises your **Appearance** (and so your threat), makes monsters easier to ' \
-                 'satisfy, and pays better when you submit. The tower rewards being looked at.' \
-                 "#{restored ? ' _The new room has a proper rack — the stock has doubled. Rent has its privileges._' : ''}"
-      )
       entries = stock.filter_map do |spec|
         record = Engine::Residents.vex_outfit_record(spec)
         next unless record
@@ -181,10 +200,20 @@ module Commands
         { spec: spec, record: record, owned: owned, price: price,
           line: "**#{spec[:name]}** (#{price_label})#{tag} — _#{spec[:description]}_\n-# #{mods}" }
       end
-      c.text_display(content: entries.map { |e| e[:line] }.join("\n\n"))
-      entries.each_slice(3) do |slice|
+      pages = [(entries.size.to_f / RACK_PAGE_SIZE).ceil, 1].max
+      page = page.to_i.clamp(0, pages - 1)
+      slice = entries.slice(page * RACK_PAGE_SIZE, RACK_PAGE_SIZE) || []
+      intro = '**Her rack** — clothes, not living gear: cut by her own hand to be *read* in. Every ' \
+              'piece raises your **Appearance** (and so your threat), makes monsters easier to ' \
+              'satisfy, and pays better when you submit. The tower rewards being looked at.' \
+              "#{restored ? ' _The new room has a proper rack — the stock has doubled. Rent has its privileges._' : ''}"
+      parts = [intro]
+      parts << "-# Rack **#{page + 1}/#{pages}**" if pages > 1
+      parts << slice.map { |e| e[:line] }.join("\n\n") if slice.any?
+      c.text_display(content: parts.join("\n\n"))
+      slice.each_slice(3) do |group|
         c.row do |row|
-          slice.each do |e|
+          group.each do |e|
             label =
               if e[:owned] then "Owned: #{e[:spec][:name]}"
               elsif e[:price].zero? then "Reclaim: #{e[:spec][:name]}"
@@ -195,6 +224,18 @@ module Commands
                        custom_id: "eros:resident:vex:buy:#{e[:record].id}:#{owner}",
                        disabled: e[:owned] || (e[:price].positive? && player.lp < e[:price]))
           end
+        end
+      end
+      return if pages <= 1
+
+      c.row do |row|
+        if page.positive?
+          row.button(label: '◀ Rack', style: :secondary,
+                     custom_id: "eros:resident:vex:rack:#{page - 1}:#{owner}")
+        end
+        if page < pages - 1
+          row.button(label: 'Rack ▶', style: :secondary,
+                     custom_id: "eros:resident:vex:rack:#{page + 1}:#{owner}")
         end
       end
     end
@@ -349,7 +390,29 @@ module Commands
       item_id = event.custom_id[/\Aeros:resident:vex:buy:(\d+):\d+\z/, 1]
       result = Engine::Residents.buy_vex_outfit!(player, item_id)
       player.refresh
-      Commands::Residents.show(event, 'vex', notice: "#{result[:ok] ? '✅' : '❌'} #{result[:message]}")
+      Commands::Residents.show(event, 'vex', rack_page: Commands::Residents.rack_page_for(player, item_id),
+                                      notice: "#{result[:ok] ? '✅' : '❌'} #{result[:message]}")
+    end
+
+    string_select(custom_id: /^eros:resident:vex:(offsel|refitsel):\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      action, page = event.custom_id.match(/\Aeros:resident:vex:(offsel|refitsel):(\d+):\d+\z/).captures
+      item_id = Array(event.values).first.to_s
+      result = action == 'offsel' ? Engine::Residents.negotiate_off!(player, item_id) : Engine::Residents.refit!(player, item_id)
+      player.refresh
+      Commands::Residents.show(event, 'vex', rack_page: page.to_i,
+                                      notice: "#{result[:ok] ? '✅' : '❌'} #{result[:message]}")
+    end
+
+    button(custom_id: /^eros:resident:vex:rack:\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      page = event.custom_id[/\Aeros:resident:vex:rack:(\d+):\d+\z/, 1]
+      Commands::Residents.show(event, 'vex', rack_page: page.to_i)
     end
 
     button(custom_id: /^eros:resident:pip:(spotting|wedge|note):\d+$/) do |event|
