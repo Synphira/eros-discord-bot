@@ -34,6 +34,21 @@ module Commands
         return
       end
 
+      if person == 'syn' && Engine::SaintQuest.syn_gone?(player)
+        ErosUI.reply_v2(event, colour: colour_for('berry')) do |c|
+          c.text_display(content: "## Empty stool — #{player.display_name}\n#{Engine::SaintQuest.press!(player, 'stool')}")
+          c.row do |row|
+            row.button(label: '🍓 Talk to Berry', style: :secondary, custom_id: "eros:talk:berry:#{event.user.id}")
+            row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{event.user.id}")
+          end
+        end
+        return
+      end
+
+      if person == 'syn' && (line = Engine::SaintQuest.note_syn_visit!(player))
+        notice = [line, notice].compact.join("\n\n")
+      end
+
       if person == 'syn' && Engine::Conversations.reveal_ready?(player)
         Engine::Conversations.note_revealed!(player)
         notice = [Engine::Conversations::REVEAL_SCENE, notice].compact.join("\n\n")
@@ -53,6 +68,7 @@ module Commands
                        custom_id: "eros:talk:cat:#{person}:#{cat[:key]}:#{event.user.id}")
           end
         end
+        saint_actions(c, player, person, event.user.id)
         nav_row(c, event, player, person)
       end
     end
@@ -60,6 +76,7 @@ module Commands
     def show_category(event, person, category, notice: nil)
       player = ErosHelpers.require_player(event) or return
       person = Engine::Conversations.normalize_person(person)
+      return show(event, person, notice: notice) if person == 'syn' && Engine::SaintQuest.syn_gone?(player)
       category = category.to_s
       unless Engine::Conversations::CATEGORIES.any? { |c| c[:key] == category }
         return show(event, person, notice: notice)
@@ -103,6 +120,7 @@ module Commands
 
         covar_bed_note(c, player, person)
 
+        saint_actions(c, player, person, event.user.id)
         c.row do |row|
           # Distinct from eros:talk:{person}:{uid} (Berry/Syn switcher) — Discord
           # rejects duplicate custom_ids on one panel.
@@ -155,6 +173,9 @@ module Commands
       if Engine::Conversations.fairy?(person) && Engine::Conversations.temple_revealed?(player)
         c.text_display(content: '-# You know what this place is now. Their answers have changed — ask again.')
       end
+      if person != 'covar' && (grief = Engine::SaintQuest.grief_for(player, person))
+        c.text_display(content: grief)
+      end
       if Engine::Conversations.fairy?(person) &&
          Engine::Conversations.topics_for(player, person).any? { |t| t[:boss] && t[:unlocked] && Engine::Conversations.boss_satisfied?(player, t) }
         c.text_display(content: '-# They especially want to hear about the bosses you **satisfied**, not just beat.')
@@ -180,6 +201,20 @@ module Commands
       end
     end
 
+    def saint_actions(c, player, person, uid)
+      if Engine::SaintQuest.apology_ready?(player) && person == 'syn'
+        c.row do |row|
+          row.button(label: 'Someone below wants to apologize', style: :danger,
+                     custom_id: "eros:saint:apology:#{uid}")
+        end
+      elsif Engine::SaintQuest.thread_ready?(player) && person == 'vex'
+        c.row do |row|
+          row.button(label: 'Ask for the thread', style: :danger,
+                     custom_id: "eros:saint:thread:#{uid}")
+        end
+      end
+    end
+
     def nav_row(c, event, player, person)
       uid = event.user.id
       if person == 'covar'
@@ -201,8 +236,12 @@ module Commands
         c.row do |row|
           row.button(label: '🍓 Talk to Berry', style: person == 'berry' ? :primary : :secondary,
                      custom_id: "eros:talk:berry:#{uid}", disabled: person == 'berry')
-          row.button(label: '🖤 Talk to Syn', style: person == 'syn' ? :primary : :secondary,
-                     custom_id: "eros:talk:syn:#{uid}", disabled: person == 'syn')
+          if Engine::SaintQuest.syn_gone?(player)
+            row.button(label: 'Empty stool', style: :secondary, custom_id: "eros:saint:stool:#{uid}")
+          else
+            row.button(label: '🖤 Talk to Syn', style: person == 'syn' ? :primary : :secondary,
+                       custom_id: "eros:talk:syn:#{uid}", disabled: person == 'syn')
+          end
         end
         c.row do |row|
           row.button(label: '🍓 Quest Board', style: :secondary, custom_id: "eros:quests:view:#{uid}")
@@ -238,6 +277,17 @@ module Commands
 
       person, category = event.custom_id.match(/\Aeros:talk:topic:(#{PERSON_RE}):(#{CAT_RE}):\d+\z/).captures
       Commands::Conversations.ask(event, person, category, Array(event.values).first.to_s)
+    end
+
+    button(custom_id: /^eros:saint:(apology|thread):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      action = event.custom_id[/\Aeros:saint:(apology|thread):\d+\z/, 1]
+      notice = Engine::SaintQuest.press!(player, action)
+      Commands::Conversations.show(event, action == 'apology' ? 'syn' : 'vex', notice: notice)
     end
   end
 end

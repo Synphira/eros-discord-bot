@@ -266,6 +266,8 @@ module Engine
     # The quest only exists for delvers inked enough to be family-adjacent:
     # five of Syn's marks, not yet accepted, not yet finished.
     def story_offered?(player)
+      return false if defined?(Engine::SaintQuest) && Engine::SaintQuest.syn_gone?(player)
+
       !story_accepted?(player) && !story_done?(player) &&
         Engine::Marks.owned(player).size >= STORY_MARKS_REQUIRED
     end
@@ -284,6 +286,8 @@ module Engine
     end
 
     def story_current(player)
+      return nil if defined?(Engine::SaintQuest) && Engine::SaintQuest.syn_gone?(player)
+
       STORY[story_step(player)] if story_accepted?(player) && !story_done?(player)
     end
 

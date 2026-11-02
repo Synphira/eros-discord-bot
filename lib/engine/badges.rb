@@ -7,6 +7,11 @@ module Engine
   module Badges
     STAFF = %w[developer debugger].freeze
 
+    # Shown only when held. A locked row would spoil how it was earned.
+    STORY = [
+      { key: 'saint_returned', name: 'The Pull', emoji: '🫧' }
+    ].freeze
+
     SEASONS = [
       { key: 'valentines', name: 'Heartstring', emoji: '💘',
         trackers: %w[valentines_submits valentines_hearts_eaten valentine_events heartbreak_events] },
@@ -101,12 +106,15 @@ module Engine
     def ordered(player)
       keys = held(player)
       staff = STAFF.select { |key| keys.include?(key) }
+      story = STORY.map { |row| row[:key] }.select { |key| keys.include?(key) }
       seasons = SEASONS.map { |row| row[:key] }.select { |key| keys.include?(key) }
-      staff + seasons
+      staff + story + seasons
     end
 
     def emoji_for(key)
-      STAFF_MARKS.dig(key, :emoji) || SEASONS.find { |row| row[:key] == key }&.dig(:emoji)
+      STAFF_MARKS.dig(key, :emoji) ||
+        SEASONS.find { |row| row[:key] == key }&.dig(:emoji) ||
+        STORY.find { |row| row[:key] == key }&.dig(:emoji)
     end
 
     def profile_line(player)
@@ -126,6 +134,9 @@ module Engine
       ordered(player).each do |key|
         mark = STAFF_MARKS[key]
         lines << "#{mark[:emoji]} **#{mark[:name]}**" if mark
+      end
+      STORY.each do |row|
+        lines << "#{row[:emoji]} **#{row[:name]}**" if holds?(player, row[:key])
       end
       SEASONS.each do |row|
         title = season_title(row[:key])

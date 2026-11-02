@@ -30,8 +30,9 @@ module Commands
 
       owned = Engine::Marks.owned(player)
       offers = Engine::Marks.available(player)
+      intro = Engine::SaintQuest.parlour_intro(player) || INTRO
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
-        c.text_display(content: INTRO)
+        c.text_display(content: intro)
         c.text_display(content: notice) if notice
         if (regard = Engine::Regard.line(player, :parlour))
           c.text_display(content: regard)
@@ -75,8 +76,17 @@ module Commands
 
         c.row do |row|
           row.button(label: '🍓 Talk to Berry', style: :secondary, custom_id: "eros:talk:berry:#{event.user.id}")
-          row.button(label: '🖤 Talk to Syn', style: :primary, custom_id: "eros:talk:syn:#{event.user.id}")
+          if Engine::SaintQuest.syn_gone?(player)
+            row.button(label: 'Empty stool', style: :secondary, custom_id: "eros:saint:stool:#{event.user.id}")
+          else
+            row.button(label: '🖤 Talk to Syn', style: :primary, custom_id: "eros:talk:syn:#{event.user.id}")
+          end
           row.button(label: 'All Shops', style: :secondary, custom_id: "eros:shop:menu:#{event.user.id}")
+        end
+        if Engine::SaintQuest.needle_ready?(player)
+          c.row do |row|
+            row.button(label: 'Ask Berry for the needle', style: :danger, custom_id: "eros:saint:needle:#{event.user.id}")
+          end
         end
       end
     end
@@ -155,6 +165,17 @@ module Commands
       next unless ErosHelpers.assert_button_owner!(event)
 
       Commands::Parlour.show(event)
+    end
+
+    button(custom_id: /^eros:saint:(needle|stool):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      action = event.custom_id[/\Aeros:saint:(needle|stool):\d+\z/, 1]
+      notice = Engine::SaintQuest.press!(player, action)
+      Commands::Parlour.show(event, notice: notice)
     end
 
     application_command(:parlour) { |event| Commands::Parlour.show(event) }

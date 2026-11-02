@@ -156,6 +156,21 @@ module Engine
     end
 
     def calculate
+      if defined?(Engine::SaintQuest) && Engine::SaintQuest.syn_gone?(@player)
+        percent = 100.0
+        category = :high
+        return Result.new(
+          percent: percent,
+          category: category,
+          lp_component: 0.0,
+          curse_component: 0.0,
+          appearance_component: 0.0,
+          stat_mult: stat_multiplier(percent, category),
+          lust_mult: lust_multiplier(percent, category),
+          encounter_bonus: encounter_bonus(percent, category)
+        )
+      end
+
       scale = LP_SCALE_BASE + (LP_SCALE_PER_LEVEL * @player.level.to_i)
       lp_component = LP_MAX * (1 - Math.exp(-[@player.lp.to_f, 0].max / scale))
       curse_component = [@player.active_curse_count * CURSE_WEIGHT, CURSE_MAX].min

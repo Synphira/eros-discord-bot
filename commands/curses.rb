@@ -36,6 +36,10 @@ module Commands
         return
       end
 
+      if Engine::SaintQuest.syn_gone?(player)
+        return show_sealed(event, player, notice)
+      end
+
       entries, pages, page = page_entries(player, page)
       suppressed = player.suppressed_curses.sort_by(&:name)
 
@@ -137,6 +141,23 @@ module Commands
       end
     end
 
+    def show_sealed(event, player, notice = nil)
+      names = (player.active_curses + player.suppressed_curses).map(&:name)
+      list = names.empty? ? '_No blessings on you. The lock is still the lock._' : names.map { |name| "• **#{name}**" }.join("\n")
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(content: "## 🖤 The Ledger Is Shut — #{player.display_name}")
+        c.text_display(content: notice) if notice
+        c.text_display(
+          content: '_Berry has the book. Syn does not. Nothing on this page can be smothered, stripped, or paid back to sleep._'
+        )
+        c.text_display(content: list)
+        c.row do |row|
+          row.button(label: '🍓 Talk to Berry', style: :secondary, custom_id: "eros:talk:berry:#{event.user.id}")
+          row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{event.user.id}")
+        end
+      end
+    end
+
     def show_sleeping(event, player, suppressed)
       lines = suppressed.map { |curse| "• ~~#{curse.name}~~" }
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
@@ -166,6 +187,10 @@ module Commands
           c.text_display(content: '_Syn\'s voice, flat: "Not mid-fight, pet."_')
         end
         return
+      end
+
+      if Engine::SaintQuest.syn_gone?(player)
+        return show_sealed(event, player, notice)
       end
 
       suppressed = player.suppressed_curses.sort_by(&:name)
@@ -277,6 +302,8 @@ module Commands
     def syn_result_notice(result, action)
       unless result[:ok]
         case result[:error]
+        when :syn_gone
+          return result[:message]
         when :insufficient_lp
           return "_🖤 **Syn:** \"No.\" She closes the ledger. \"Your Lust Points are the only reason " \
                  "I agree to this vandalism, pet. #{result[:message]}\"_"
@@ -306,6 +333,8 @@ module Commands
     def syn_wake_notice(result)
       unless result[:ok]
         case result[:error]
+        when :syn_gone
+          return result[:message]
         when :insufficient_lp
           return "_🖤 **Syn:** \"No.\" She keeps the ink where it is. \"Waking a blessing costs the same " \
                  "as smothering it, pet. #{result[:message]}\"_"
@@ -327,6 +356,7 @@ module Commands
 
     def syn_bulk_notice(result)
       unless result[:ok]
+        return result[:message] if result[:error] == :syn_gone
         if result[:error] == :insufficient_lp
           return "_🖤 **Syn:** \"No.\" She closes the ledger. \"Your Lust Points are the only reason " \
                  "I agree to this vandalism, pet. #{result[:message]}\"_"

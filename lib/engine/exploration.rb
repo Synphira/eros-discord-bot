@@ -488,6 +488,22 @@ module Engine
         return event_room(Engine::RandomEvents.start!(@player))
       end
 
+      if !Engine::Tower.boss_floor?(floor) && defined?(Engine::SaintQuest) &&
+         (whisper = Engine::SaintQuest.whisper_line(@player))
+        return RoomResult.new(
+          kind: :empty,
+          colour: COLOURS[:empty],
+          with_actions: true,
+          message: <<~MSG.strip
+            **Floor #{floor}** — the water remembers.
+            #{Engine::Biomes.line(@player)}#{domain_suffix}
+
+            _#{whisper}_
+            Defiance `#{@player.defiance}/#{@player.max_defiance}` · Lust `#{@player.lust}` · LP `#{@player.lp}`
+          MSG
+        )
+      end
+
       weights = pool_weights(threat)
       pick = rand(weights.values.sum)
       kind = weights.find { |_, w| (pick -= w) < 0 }.first

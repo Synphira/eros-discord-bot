@@ -46,6 +46,7 @@ module Commands
           ErosUI.append_action_log(c, result[:log])
           dress_ask_button(c, player, result[:encounter], event.user.id)
           victory_talk_button(c, result[:encounter], event.user.id)
+          saint_button(c, player, result[:encounter], event.user.id, allow_pull: false)
         end
         return
       end
@@ -66,6 +67,7 @@ module Commands
           ErosUI.append_action_log(c, result[:log])
           dress_ask_button(c, player, result[:encounter], event.user.id)
           victory_talk_button(c, result[:encounter], event.user.id)
+          saint_button(c, player, result[:encounter], event.user.id, allow_pull: true)
         end
         return
       end
@@ -120,6 +122,18 @@ module Commands
       end
     end
 
+    def saint_button(container, player, enc, owner_id, allow_pull:)
+      return unless enc
+
+      offer = Engine::SaintQuest.offer(player, enc, allow_pull: allow_pull)
+      return unless offer
+
+      container.row do |row|
+        row.button(label: offer[:label], style: :secondary,
+                   custom_id: "eros:saint:#{offer[:action]}:#{owner_id}")
+      end
+    end
+
     button(custom_id: /^eros:dress:ask:(queen|lich):\d+$/) do |event|
       next unless ErosHelpers.assert_button_owner!(event)
 
@@ -140,6 +154,19 @@ module Commands
 
       choice = event.custom_id[/\Aeros:phase:(resist|give_in):\d+\z/, 1]
       Commands::Combat.run_action(event, choice.to_sym)
+    end
+
+    button(custom_id: /^eros:saint:(glass|taking|pull):\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      player = Player[event.user.id]
+      next unless player
+
+      action = event.custom_id[/\Aeros:saint:(glass|taking|pull):\d+\z/, 1]
+      text = Engine::SaintQuest.press!(player, action)
+      ErosUI.reply_v2(event, ephemeral: true) do |c|
+        c.text_display(content: text)
+      end
     end
 
     application_command(:fight) { |event| Commands::Combat.run_action(event, :fight) }

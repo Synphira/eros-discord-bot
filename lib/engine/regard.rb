@@ -108,6 +108,11 @@ module Engine
     # A depraved presentation speaks first; a provocative one speaks
     # when nothing louder has already been earned.
     def line(player, context)
+      if context.to_sym == :cursed && defined?(Engine::SaintQuest) &&
+         (grief = Engine::SaintQuest.grief_for(player, 'covar'))
+        return grief
+      end
+
       if Engine::ThreatCalculator.calculate(player).category == :high &&
          (seen = appearance_line(player, context))
         return seen

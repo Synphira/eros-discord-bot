@@ -20,7 +20,7 @@ module Commands
     HELP = <<~TXT.strip
       **Dev commands** (prefix only, developer + bug testers)
       `e,dev [user id] <command>` — that delver; leave the id off to target yourself
-      `win`, `boss`, `finalboss`, `elite`, `event`, and `npc` always play on your own screen
+      `win`, `boss`, `relic`, `finalboss`, `elite`, `event`, and `npc` always play on your own screen
       `e,dev debug` — toggle debug mode (one-hit kills, monsters never act, guaranteed flee/satisfy, traps avoided)
       `e,dev syn` — grant and wear the whole Syn set (owner only)
       `e,dev synlock` — toggle the Syn lock: cursed gear stays in the pack, and the set survives defeat (owner only)
@@ -35,6 +35,7 @@ module Commands
       `e,dev unlockcursed` — unlock every Cursed Shop item
       `e,dev win` — kill the current monster (runs the normal victory path)
       `e,dev boss` — jump to the next boss floor and start the fight
+      `e,dev relic <name>` — jump to a floor that relic can hold and start that fight
       `e,dev finalboss` — jump to Eros (final boss)
       `e,dev cycle` — complete the current cycle instantly
       `e,dev reset` — run a defeat reset (keeps progression)
@@ -49,7 +50,7 @@ module Commands
 
     # These open a fight or a scene whose buttons follow the person who typed
     # the command. They cannot safely drive someone else's delver.
-    SELF_ONLY = %w[win boss finalboss elite event npc].freeze
+    SELF_ONLY = %w[win boss relic finalboss elite event npc].freeze
 
     def reply(event, text)
       note = Thread.current[:eros_dev_target]
@@ -131,6 +132,7 @@ module Commands
         reply(event, 'Every Cursed Shop item unlocked.')
       when 'win' then win(event, player)
       when 'boss' then jump_to_boss(event, player, next_boss_floor(player))
+      when 'relic' then force_relic(event, player, args.join(' '))
       when 'finalboss' then jump_to_boss(event, player, Engine::Tower::FINAL_BOSS_FLOOR)
       when 'cycle'
         Eros.clear_encounter!(player)
@@ -610,6 +612,76 @@ module Commands
 
       Engine::Weekly.override!(key == 'auto' ? nil : key)
       reply(event, "#{Engine::Weekly.status_line}\n-# Override lasts until the bot restarts.")
+    end
+
+    def resolve_relic(text)
+      raw = text.to_s.downcase.strip
+      return nil if raw.empty?
+
+      key = raw.gsub(/[^a-z0-9]+/, '_').gsub(/\Athe_/, '').gsub(/_+\z/, '')
+      aliases = { 'saint' => 'drowned_saint', 'sin' => 'drowned_sin', 'bride' => 'pale_bride',
+                  'mirror' => 'mirror_queen', 'confessional' => 'empty_confessional',
+                  'chalice' => 'never_emptying_chalice', 'altar' => 'first_altar_stone',
+                  'dragon' => 'hoardheart_dragon' }
+      key = aliases[key] || key
+      return key if Engine::BossFights::RELICS.key?(key)
+
+      Engine::BossFights::RELICS.each do |relic_key, spec|
+        name = spec[:name].to_s.downcase.gsub(/[^a-z0-9]+/, '_').gsub(/\Athe_/, '').gsub(/_+\z/, '')
+        return relic_key if name == key
+      end
+      nil
+    end
+
+    def relic_test_floor(player, key)
+      spec = Engine::BossFights::RELICS[key]
+      legal = [5, 10, 15, 20, 25, 30].reject { |floor| Engine::BossFights.dress_counsel_blocks_relic?(player, floor) }
+      affinity = Array(spec[:affinity]).map(&:to_i)
+      (affinity & legal).first || legal.first || affinity.first || 25
+    end
+
+    def force_relic(event, player, name)
+      key = resolve_relic(name)
+      unless key
+        list = Engine::BossFights::RELICS.map { |relic_key, spec| "`#{relic_key}` — #{spec[:name]}" }
+        head = name.to_s.strip.empty? ? 'Name a relic.' : "Unknown relic `#{name}`."
+        return reply(event, "#{head}\n#{list.join("\n")}")
+      end
+
+      floor = relic_test_floor(player, key)
+      raised = player.current_cycle.to_i < 2
+      Eros.clear_encounter!(player)
+      player.clear_event!
+      player.update(current_cycle: 2) if raised
+      player.note_floor_reached!(floor)
+      player.update(highest_boss_defeated: floor - 5, sanctuary: false, pos_x: 0, pos_y: 0)
+      Engine::BossFights.pin_relic!(player, floor, key)
+
+      host = Engine::BossFights.boss_for_floor(floor)
+      relic = Engine::BossFights::RELICS[key]
+      started = Engine::BossFights.start_relic_encounter(player, floor, host, relic, key)
+      enc = started[:encounter]
+      enc = Engine::CombatEngine.encounter_snapshot(enc) unless enc.is_a?(Hash)
+      Eros.set_encounter!(player, enc.merge(is_boss: true))
+
+      forced = Engine::SaintQuest.forced_relic(player) if defined?(Engine::SaintQuest)
+      aside = if raised
+                "\n-# Cycle was under 2, so this jump set you to Cycle 2. Relics do not hold a throne before then."
+              else
+                ''
+              end
+      aside += "\n-# The story still calls **#{Engine::BossFights::RELICS.dig(forced, :name)}** on the next real boss floor." if forced && forced != key
+
+      ErosUI.reply_v2(event, colour: relic[:color], with_actions: :combat) do |c|
+        c.text_display(content: "#{started[:message]}#{aside}")
+        c.separator(divider: true, spacing: :small)
+        c.text_display(
+          content: '**Boss fight!** Choose **Fight**, **Flee**, or **Submit**.' \
+                   "\n-# Submitting is a gamble: land #{Engine::CombatEngine.boss_satisfy_needed(player)} successful " \
+                   "submits to satisfy the boss for ×#{Engine::CombatEngine::BOSS_SATISFY_LP_MULT} LP — " \
+                   "but it keeps attacking and you can't dodge while submitting."
+        )
+      end
     end
 
     def jump_to_boss(event, player, floor)

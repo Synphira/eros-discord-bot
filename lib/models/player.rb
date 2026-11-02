@@ -93,6 +93,7 @@ class Player < Sequel::Model(:players)
   def character_story_tracker_key?(key)
     k = key.to_s
     return true if CHARACTER_STORY_TRACKERS.include?(k)
+    return true if k.start_with?('saint_') || k == 'syn_taken' || k == 'drowned_saint_defeats'
     return true if k.match?(/\Aresident_(?:met_)?[a-z]+\z/)
     return true if k.match?(/\Aresident_[a-z]+_(?:step|start)\z/)
 
@@ -455,7 +456,7 @@ class Player < Sequel::Model(:players)
     "Cycle #{cycle} · Floor #{floor}"
   end
 
-  def complete_cycle!
+  def complete_cycle!(deepen: true)
     cleared = current_cycle.to_i
     reward = Engine::Tower.clear_reward_lp(cleared)
     gain_lp!(reward)
@@ -478,6 +479,7 @@ class Player < Sequel::Model(:players)
       active_event: nil
     )
     note_floor_reached!(1)
+    Engine::SaintQuest.note_cycle!(self) if deepen && defined?(Engine::SaintQuest)
     Engine::NPCSystem.reset_finished!(self)
     Engine::Burdens.apply_branded_start!(self)
     { cleared_cycle: cleared, new_cycle: cleared + 1, lp: reward, conditions_expired: expired }
@@ -1349,7 +1351,20 @@ class Player < Sequel::Model(:players)
     DB[:player_curses].where(player_id: discord_id, curse_id: curse.id).delete.positive?
   end
 
+  def curse_ledger_locked_result
+    return nil unless defined?(Engine::SaintQuest) && Engine::SaintQuest.syn_gone?(self)
+
+    {
+      ok: false,
+      error: :syn_gone,
+      message: '**Berry** keeps the ledger shut. _"She is not here to take your coin, sugar. ' \
+               'I am not smothering or stripping a blessing while she is gone."_'
+    }
+  end
+
   def remove_curse_at!(index)
+    return locked if (locked = curse_ledger_locked_result)
+
     list = active_curses_ordered
     curse = list[index]
     return { ok: false, error: :invalid_index, message: 'That curse number is invalid.' } unless curse
@@ -1382,6 +1397,8 @@ class Player < Sequel::Model(:players)
   end
 
   def remove_all_curses!
+    return curse_ledger_locked_result if curse_ledger_locked_result
+
     list = active_curses_ordered
     return { ok: false, error: :no_curses, message: "You don't have any curses to remove!" } if list.empty?
 
@@ -1420,6 +1437,8 @@ class Player < Sequel::Model(:players)
   end
 
   def suppress_curse_at!(index)
+    return curse_ledger_locked_result if curse_ledger_locked_result
+
     curse = active_curses_ordered[index]
     return { ok: false, error: :invalid_index, message: 'That curse number is invalid.' } unless curse
 
@@ -1437,6 +1456,8 @@ class Player < Sequel::Model(:players)
 
   # Same fee as suppression. Wakes one smothered curse immediately.
   def unsuppress_curse!(curse_id)
+    return curse_ledger_locked_result if curse_ledger_locked_result
+
     curse = suppressed_curses.find { |c| c.id.to_i == curse_id.to_i }
     return { ok: false, error: :stale, message: 'That curse is not smothered.' } unless curse
 
@@ -1487,6 +1508,8 @@ class Player < Sequel::Model(:players)
   end
 
   def suppress_curse!(curse_id, cost:)
+    return curse_ledger_locked_result if curse_ledger_locked_result
+
     priced = lp_price(cost)
     return { ok: false, error: :insufficient_lp } unless spend_lp!(priced, already_priced: true)
 

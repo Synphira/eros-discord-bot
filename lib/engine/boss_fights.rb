@@ -169,6 +169,13 @@ module Engine
         hp_mult: 1.05, strength_mult: 0.95, agility_mult: 1.0, lust_mult: 1.2,
         object: 'a glass reliquary tank taller than the throne, full of dark water, in which something vast and patient is coiled',
         awakening: 'The glass does not break. It opens — a seam of light, a sigh of cold water — and she comes out of her reliquary the way the goddess comes out of her throne room: unhurried, enormous, and attended by more tentacles than you can count, each one tipped in crimson and already reaching for you. There are two eldritch things in this temple, delver. You are looking at the one that is not allowed upstairs.'
+      },
+      'drowned_sin' => {
+        name: 'The Drowned Sin', type: 'eldritch', type_name: 'Relic · Eldritch', color: 0x3b0a2e,
+        special: 'many_arms', trophy: nil, affinity: [25],
+        hp_mult: 1.05, strength_mult: 0.95, agility_mult: 1.0, lust_mult: 1.2,
+        object: 'the same glass tank, cracked now, and what is coiled in it is wearing a shape the parlour is missing',
+        awakening: 'The glass is already cracked. She comes out wearing the absence you made: ink, a needle that is not hers, and more arms than the saint ever needed. The tower does not call this a relic. It calls it what you fed it.'
       }
     }.freeze
 
@@ -637,7 +644,7 @@ module Engine
     # by relics, and a relic never holds two thrones in one cycle.
     def relic_assignment(player, floor)
       floor = floor.to_i
-      return nil if floor >= Tower::FINAL_BOSS_FLOOR || player.current_cycle.to_i < 2
+      return nil if floor >= Tower::FINAL_BOSS_FLOOR
       # Covar's dress quest needs the real Queen / Lich for counsel — while
       # that step is active, their floor cannot be a relic stand-in (even if
       # a relic was already rolled earlier this cycle).
@@ -651,14 +658,27 @@ module Engine
                  {}
                end
       key = floor.to_s
+
+      # The saint's story can force a throne on cycle 1, over a saved "none",
+      # and past the relic cap. Floor 35 and a dress-counsel floor still refuse.
+      if defined?(Engine::SaintQuest) && (forced = Engine::SaintQuest.forced_relic(player))
+        unless floors[key] == forced
+          player.set_tracker!('relic_assignments',
+                              { 'cycle' => player.current_cycle.to_i, 'floors' => floors.merge(key => forced) })
+        end
+        return forced
+      end
+
+      return nil if player.current_cycle.to_i < 2
       return floors[key] == 'none' ? nil : floors[key] if floors.key?(key)
 
-      used = floors.values.reject { |v| v == 'none' }
+      used = floors.values.reject { |v| v == 'none' || v == 'drowned_sin' }
+      pool = RELICS.keys - used - ['drowned_sin']
       assigned =
         if used.size >= RELIC_CAP_PER_CYCLE || rand >= RELIC_CHANCE
           'none'
         else
-          weighted_relic_pick(RELICS.keys - used, floor) || 'none'
+          weighted_relic_pick(pool, floor) || 'none'
         end
       player.set_tracker!('relic_assignments',
                           { 'cycle' => player.current_cycle.to_i, 'floors' => floors.merge(key => assigned) })
@@ -685,6 +705,23 @@ module Engine
         Array.new(RELICS[k][:affinity].to_a.include?(floor.to_i) ? RELIC_AFFINITY_WEIGHT : 1, k)
       end
       bag.sample
+    end
+
+    # Dev tool. Pins one relic to a boss floor for this cycle so a flee-and-return
+    # finds the same throne. The story's forced relic still wins on a later explore.
+    def pin_relic!(player, floor, relic_key)
+      return unless RELICS.key?(relic_key.to_s)
+
+      saved = player.tracker_hash['relic_assignments']
+      floors = if saved.is_a?(Hash) && saved['cycle'].to_i == player.current_cycle.to_i &&
+                  saved['floors'].is_a?(Hash)
+                 saved['floors'].dup
+               else
+                 {}
+               end
+      floors[floor.to_i.to_s] = relic_key.to_s
+      player.set_tracker!('relic_assignments',
+                          { 'cycle' => player.current_cycle.to_i, 'floors' => floors })
     end
 
     def relic_spec(encounter)
@@ -839,6 +876,9 @@ module Engine
       agility = [((host[:agility] * relic[:agility_mult]) * threat.stat_mult * cycle).round, 1].max
       hp = [((host[:hp] * relic[:hp_mult]) * threat.stat_mult * cycle * level_hp).round, 20].max
       lust_damage = [((host[:lust_damage] * relic[:lust_mult]) * threat.lust_mult * cycle).round, 1].max
+      if relic_key == 'drowned_sin' && defined?(Engine::SaintQuest)
+        lust_damage = [(lust_damage * (1.0 + Engine::SaintQuest.lust_bonus(player))).round, 1].max
+      end
 
       # The Mirror Queen is a true doppelganger: she copies the delver
       # whole. Her strength and speed are the player's own (never below
@@ -1041,8 +1081,14 @@ module Engine
       LEGACY_NAMES.fetch(boss_name.to_s, boss_name.to_s)
     end
 
+    # The Sin fights with the Saint's scenes. Her name stays her own everywhere else.
+    def presentation_name(boss_name)
+      name = canonical_name(boss_name)
+      name == 'The Drowned Sin' ? 'Drowned Saint' : name
+    end
+
     def phase(boss_name)
-      PHASES[canonical_name(boss_name)]
+      PHASES[presentation_name(boss_name)]
     end
 
     def phase_line(player, boss_name, key)
@@ -1185,7 +1231,7 @@ module Engine
                                            fallback: SCENES.dig('Mirror Queen', kind, 'any'))
       end
 
-      spec = SCENES.dig(boss_name, kind) or return nil
+      spec = SCENES.dig(presentation_name(boss_name), kind) or return nil
 
       parts = Engine::ChastitySystem.scene_parts(player)
       pool = parts.flat_map { |part| Array(spec[part]) } + Array(spec['any'])
@@ -1634,7 +1680,7 @@ module Engine
     end
 
     def satisfy_closing(boss_name)
-      SATISFY_CLOSINGS[canonical_name(boss_name.to_s)]
+      SATISFY_CLOSINGS[presentation_name(boss_name.to_s)]
     end
 
     def boss_defeat_reward(player, encounter)

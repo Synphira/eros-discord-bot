@@ -579,10 +579,14 @@ module ErosUI
     container.separator(divider: true, spacing: :small)
     threat_bits = [
       '### Threat',
-      "**#{threat_label(threat.category)}** #{threat_bar(threat.percent)}",
-      "-# LP #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
-      "Appearance +#{threat.appearance_component}"
+      "**#{threat_label(threat.category)}** #{threat_bar(threat.percent)}"
     ]
+    if defined?(Engine::SaintQuest) && Engine::SaintQuest.syn_gone?(player)
+      threat_bits << "-# Eros's wrath. She is not finished with what you did."
+    else
+      threat_bits << "-# LP #{threat.lp_component}% · Curses +#{threat.curse_component} · " \
+                      "Appearance +#{threat.appearance_component}"
+    end
     threat_bits << 'Chastity Locked' if Engine::ChastitySystem.in_chastity?(player)
     if Engine::Corruption.enabled?(player) && Engine::Corruption.level(player).positive?
       value = Engine::Corruption.level(player)

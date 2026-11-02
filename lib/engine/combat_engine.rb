@@ -787,6 +787,7 @@ module Engine
         end
         boss_line!(enc, :beaten, log) unless satisfied
         note_broodmother_feat!(enc, log, satisfied: satisfied)
+        Engine::SaintQuest.note_fight!(@player, enc, log, satisfied: satisfied) if defined?(Engine::SaintQuest)
         if first_meeting && (memento = Engine::BossFights.memento_for(enc[:name]))
           @player.add_keepsake!(memento)
           log << "_Kept, for the shelf: #{memento}._"
@@ -894,10 +895,11 @@ module Engine
         log << '_Every desire laid bare before her — this clear counts toward **Depraved One**._'
       end
       @player.set_tracker!('depraved_armed', 0)
+      granted_warmth = defined?(Engine::SaintQuest) && Engine::SaintQuest.note_eros!(@player, log, satisfied: satisfied)
       if satisfied && (closing = Engine::BossFights.satisfy_closing(enc[:name]))
         log << { scene: closing }
       end
-      clear = @player.complete_cycle!
+      clear = @player.complete_cycle!(deepen: !granted_warmth)
       log << "**#{enc[:name]} yields!** The Endless Ruins shudder — you have conquered the goddess's tower!"
       log << "Tower clear reward: **+#{clear[:lp]} LP**."
       log << "The ruins twist and reset around you. You awaken on **Floor 1** of **Cycle #{clear[:new_cycle]}** — " \
@@ -917,6 +919,7 @@ module Engine
       end
       log << { scene: MonsterScenes.combat_line(@player, :defeated, enc[:name], enc[:type]) }
       @player.set_tracker!('depraved_armed', 0)
+      Engine::SaintQuest.note_death!(@player, enc) if defined?(Engine::SaintQuest)
       result = @player.apply_defeat_curse!(monster_type: enc[:type])
       loss = @player.reset_run!
       @player.clear_encounter!

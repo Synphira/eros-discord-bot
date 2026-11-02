@@ -8,6 +8,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-11-02
 
+### Added
+
+- A hidden story can start from the Drowned Saint's victory screen. It is not listed on `/quests`. While it is underway, curses cannot be smothered or removed, and threat stays at its ceiling. Finishing it leaves a permanent badge.
+
 ### Fixed
 
 - The bot starts again. The `e,dev info` category menu is registered on the event container, which is what provides select menus.
@@ -16,6 +20,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - `e,dev info` opens one panel. A menu jumps between Overview, Run, Combat, Submissions, Events, Lists, and Other. Type in the menu to filter those categories.
 - `e,dev <user id> <command>` runs that command on that delver. Leave the id off and it targets you. `win`, `boss`, `finalboss`, `elite`, `event`, and `npc` still play on your own screen.
+- `e,dev relic <name>` moves you to a boss floor that relic can hold and starts that fight. On cycle 1 it lifts you to cycle 2 first. It plays on your own screen.
 
 ## 2026-11-01
 
