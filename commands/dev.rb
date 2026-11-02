@@ -2,6 +2,7 @@
 
 module Commands
   module Dev
+    extend Discordrb::EventContainer
     extend Discordrb::Commands::CommandContainer
 
     COLOUR = 0x2f3136

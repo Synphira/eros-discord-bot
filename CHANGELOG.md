@@ -8,6 +8,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-11-02
 
+### Fixed
+
+- The bot starts again. The `e,dev info` category menu is registered on the event container, which is what provides select menus.
+
 ### Changed
 
 - `e,dev info` opens one panel. A menu jumps between Overview, Run, Combat, Submissions, Events, Lists, and Other. Type in the menu to filter those categories.
