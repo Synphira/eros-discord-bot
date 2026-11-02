@@ -232,7 +232,7 @@ module Engine
       list = owned(player)
       return nil if list.empty?
 
-      "**Marks** #{list.map { |k| MARKS[k][:name] }.join(', ')}"
+      "**Marks:** #{list.map { |k| MARKS[k][:name] }.join(', ')}"
     end
   end
 end

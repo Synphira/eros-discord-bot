@@ -42,8 +42,8 @@ module Commands
         title = target.active_title_name
         c.text_display(content: "## #{target.display_name}")
         identity = []
-        identity << "_#{title}_" if title
-        identity << target.gender.to_s
+        identity << "**Title:** #{title}" if title
+        identity << "**Body:** #{target.gender}"
         form = target.active_transformation_name
         identity << "**Form:** #{form}" if form
         c.text_display(content: identity.join("\n"))
