@@ -1,12 +1,15 @@
 ---
 name: Profile select, badges, chat rank
-overview: "Replace the profile button rows with one select menu, add event badges earned from the seasons already in the tower, and add a support-server-only chat rank with a prefix command and a components card."
+overview: "Replace the profile button rows with one select menu, add event badges plus developer and debugger badges, add a second developer who cannot take the Syn set or The Original Syn, and add a support-server-only chat rank."
 todos:
   - id: profile-select
     content: Replace attach_nav button rows with one string select, and keep the old button handlers so panels already on screen still open
     status: pending
+  - id: co-developer
+    content: Add co-developer 266358927401287680 beside DEVELOPER_ID. Owner-only stays The Original Syn, Syn Fae, and the Syn gear. Dev commands stay open to both.
+    status: pending
   - id: badge-catalog
-    content: Add lib/engine/badges.rb, grant from existing seasonal trackers, backfill on profile view, and show earned badges on the profile
+    content: Add lib/engine/badges.rb, grant season badges from existing trackers, sync developer and debugger badges from role, and show them on the profile
     status: pending
   - id: badge-page
     content: Add a Badges option on the profile select that lists every season badge, earned and still locked
@@ -20,12 +23,15 @@ todos:
   - id: chat-rank-card
     content: Render the rank as a components card with the speaker's avatar thumbnail and an XP bar, falling back to text if the avatar URL is missing
     status: pending
+  - id: syn-set-commands
+    content: Add owner-only e,dev syn to grant and wear the whole Syn set, and e,dev synlock to skip cursed auto-equip and keep that set through defeat
+    status: pending
 isProject: false
 ---
 
 # Profile select, event badges, and support-server chat rank
 
-Three slices. The select comes first because the profile nav is already at Discord's five-buttons-per-row cap, and Badges needs a destination. Badges reuse seasonal trackers that already exist. Chat rank is a different number from tower level and lives only in the support server.
+Four slices. The select comes first because the profile nav is already at Discord's five-buttons-per-row cap, and Badges needs a destination. Badges reuse seasonal trackers that already exist, plus two staff marks. A second developer can use `e,dev` and wear the developer badge, and cannot take the Syn set or **The Original Syn**. Chat rank is a different number from tower level and lives only in the support server.
 
 ## Profile command becomes a select
 
@@ -102,6 +108,17 @@ Suggested marks, rewrite freely. The emoji is the profile display. The name is w
 | christmas | Yule | 🎁 |
 | new_year | Midnight | 🥂 |
 
+Two staff badges sit beside the seasons. They are not on the calendar, and a locked one is never listed. Someone who does not hold it does not see the row.
+
+| Key | Name | Emoji | Who holds it |
+| --- | --- | --- | --- |
+| developer | Developer | 🖤 | `Engine::Dev.owner?` and each co-developer |
+| debugger | Debugger | 🪲 | `Engine::Dev.bug_tester?` |
+
+Labor Day's season badge already uses 🔧, so the debugger mark is a different glyph. Change it if you want.
+
+A person who is both a co-developer and a bug tester holds both badges. The owner is not a debugger unless their id is also in `BUG_TESTER_IDS`.
+
 ### Grant, store, backfill
 
 Store the season key, never the tracker key. `remember!('badges', 'halloween')` appends to the array and ignores duplicates. Read them with `Array(tracker_hash['badges'])`. Do not read them through `Player#tracker`, which forces `to_i` and would turn the array into 0.
@@ -112,21 +129,77 @@ Grant from one hook, not from every event file. At the end of `Player#bump_track
 
 Backfill on your own profile view, same moment as `backfill_story_keepsakes!`: if any mapped tracker is already positive, grant the badge. Delvers who played a season before this ships still have the mark.
 
-No dev grant in the first slice unless `e,dev` already has a nearby "give title" path worth mirroring. Operators can wait.
+Staff badges do not use that hook. `remember!` only adds, and a removed tester should lose the mark. `Badges.sync_staff!(player)` runs from the same profile view (and from `check_progress!`, which already awards **Sin Sculptor** and **Climax Checker**). It rewrites only the `developer` and `debugger` keys to match the roles above, and leaves season keys alone.
+
+Season badges are not granted by `e,dev`. The staff ones follow the role, so there is nothing to hand out by hand.
 
 ### Display
 
 On the profile header, under keepsakes, one line when they have any:
 
-**Badges** followed by the emoji in `Seasons::PRIORITY` order.
+**Badges** followed by the emoji: staff first (`developer`, then `debugger`), then `Seasons::PRIORITY`.
 
-Show all of them. Twelve fit on a line, so there is no pin limit in this slice. A pin shelf can wait until the catalog outgrows one line.
+Show every badge the delver holds. The season set fits on a line, so there is no pin limit in this slice. A pin shelf can wait until the catalog outgrows one line.
 
-The Badges page (select value `badges`) lists every catalog entry. Earned ones show emoji, name, and season. Locked ones show the season name and "not earned" with no tracker counts, so the page is a calendar, not a strategy guide. Own profile only. Looking up another delver shows their earned emoji on the card and no Badges menu.
+The Badges page (select value `badges`) lists every season. Earned ones show emoji, name, and season. Locked ones show the season name and "not earned" with no tracker counts, so the page is a calendar, not a strategy guide. Staff badges appear on that page only when held, with no locked row and no hint that they exist. Own profile only for the page. Looking up another delver shows their earned emoji on the card, staff marks included, and no Badges menu.
 
 No `/badges` slash command. The page lives on the profile select. `e,profile` remains the way in.
 
-Changelogs: `CHANGELOG.md` when the badges actually grant and show. `DISCORD_CHANGELOG.md` only once a delver can see one on a profile. Do not announce the tracker list.
+Changelogs: `CHANGELOG.md` when the badges actually grant and show. `DISCORD_CHANGELOG.md` only once a delver can see a season badge on a profile. Do not announce the tracker list, the staff badges, or the second id.
+
+## Second developer, and the Syn set
+
+Today one id is the owner. [`Engine::Dev.developer_id`](lib/engine/dev.rb) reads `DEVELOPER_ID`. `owner?` is that id. `developer?` is the owner or anyone in `BUG_TESTER_IDS`, and that is who may run `e,dev`. `Player#progress_value(:is_developer)` is `owner?`, so **The Original Syn**, **Sin Sculptor**, and the **Syn Fae** form stay on the owner. [`Player#equip_item`](lib/models/player.rb) refuses `dev_only` gear to anyone else.
+
+Add a co-developer without widening `owner?`.
+
+- Constant `Engine::Dev::CO_DEVELOPER_IDS = [266_358_927_401_287_680]`, plus optional `CO_DEVELOPER_IDS` in `.env` (comma-separated) merged in, the way `BUG_TESTER_IDS` already parses.
+- `co_developer?(user_id)` is membership in that list.
+- `developer?` becomes owner or co-developer or bug tester. Both developers and the testers keep `e,dev`.
+- `owner?` and `:is_developer` stay the single `DEVELOPER_ID`. **The Original Syn**, **Sin Sculptor**, and **Syn Fae** do not move.
+
+The co-developer gets the developer badge and the dev command list. They do not get the Syn equipment set or **The Original Syn**. That pair stays the owner's, because Syn is based on them.
+
+Close the command holes that would hand those out anyway:
+
+- [`grant_equipment!`](lib/models/player.rb) refuses a `dev_only` item before insert unless `owner?`. Today the check is only inside `equip_item`, so `e,dev item` can still drop the pieces into a pack.
+- `e,dev title original_syn`, and `original_syn` inside `e,dev title all`, refuse unless the acting user is the owner.
+- `e,dev hybrid syn_fae`, and `syn_fae` inside `e,dev hybrid all`, refuse the same way. The form is already owner-only through `:is_developer`. The command must not bypass that for the new id.
+
+`e,dev title sin_sculptor` can still be forced by anyone with dev access. Automatic award of that title stays owner-only.
+
+### `e,dev syn`
+
+Owner only. Anyone else with dev access gets the same refusal the gear already uses: it recognises one maker.
+
+[`Wardrobe::DEV_GEAR`](lib/engine/wardrobe.rb) is the whole set. Seven pieces, `cursed: false`, `dev_only: true`:
+
+- Syn's Cursed Ink Needle (weapon)
+- Syn's Smudged Tiara (head)
+- Syn's Lace Scraps (chest)
+- Syn's Garter of Vials (legs)
+- Syn's Smoked-Glass Wings (accessory)
+- Syn's Belled Heels (feet)
+- Syn's Tower-Script Thong (groin)
+
+The command grants any missing piece and equips all seven. If a cursed piece is in one of those slots, lift it into the pack (`is_equipped` false). Do not delete it, do not charge LP, and do not run the Cursed Shop unlock. Then equip the Syn piece. Report each piece in one reply.
+
+Document it on the `HELP` string in [`commands/dev.rb`](commands/dev.rb). No slash command.
+
+### `e,dev synlock`
+
+Owner only. Toggles a tracker `syn_lock` between 0 and 1. It is not in `RUN_TRACKERS` or `CHARACTER_STORY_TRACKERS`, so defeat and `/restart` keep it. In-memory like debug mode would forget the lock every boot, which fails the point.
+
+While `syn_lock` is on, two things change, and only for the owner:
+
+1. **Cursed gear does not auto-equip.** [`grant_equipment!`](lib/models/player.rb) equips when `auto_equip` is set or `item.cursed` is true. Living gear uses that second path and takes the slot, and `equip_item` will not put a Syn piece on over it without `e,remove`. With the lock on, a cursed grant still adds the item to the pack and skips that equip. A manual `e,equip` of living gear still works. Ordinary non-cursed auto-equip still works.
+2. **Defeat does not delete the set.** `reset_run!` calls `strip_non_cursed_equipment!`, and that **deletes** every non-cursed row except holiday outfits. The Syn pieces are not cursed, so a defeat currently destroys them. With the lock on, rows whose `stat_modifiers` include `dev_only` are left owned and left equipped. Holiday outfits stay on their own rule.
+
+With the lock off, both paths behave as they do now.
+
+`e,dev info` includes `syn lock on/off` next to the debug flag so you can see it.
+
+These two commands are operator-only. `CHANGELOG.md` gets a short ops line. `DISCORD_CHANGELOG.md` stays quiet.
 
 ## Support-server chat rank
 
@@ -222,8 +295,9 @@ The listener can see author and guild from `server_messages` alone. Skipping `e,
 ## Build order
 
 1. Select menu in `attach_nav`, handler `eros:profile:goto`, old button handlers left in place. Badges option hidden until the page exists, or present and opening a one-line empty state. Ship this on its own so the nav can be clicked before badges and rank exist.
-2. `Badges` catalog, `bump_tracker!` hook, backfill, profile line, Badges page on the select.
-3. Migration, `ChatRank`, listener, `e,rank`, NSFW-gate exemption, thumbnail card, help and wiki lines.
+2. Co-developer id, owner checks on `grant_equipment!` and on `e,dev title` / `e,dev hybrid` for **The Original Syn** and **Syn Fae**. Then `e,dev syn` and `e,dev synlock`.
+3. `Badges` catalog, `bump_tracker!` hook, staff sync, backfill, profile line, Badges page on the select.
+4. Migration, `ChatRank`, listener, `e,rank`, NSFW-gate exemption, thumbnail card, help and wiki lines.
 
 `CHANGELOG.md` entries land with the slice a delver can see (the select, then badges, then `e,rank`). `DISCORD_CHANGELOG.md` waits until a slice is visible in the tower or the support server, and it does not explain the XP formula. Chat rank is support-server only, so its paste belongs in the support server rather than the tower-update changelog if those audiences differ. Until that channel split exists, one `DISCORD_CHANGELOG.md` block for `e,rank` is enough.
 
