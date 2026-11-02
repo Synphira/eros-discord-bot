@@ -88,8 +88,9 @@ module Engine
 
       id = player.discord_id
       staff = []
-      staff << 'developer' if Engine::Dev.owner?(id) || Engine::Dev.co_developer?(id)
-      staff << 'debugger' if Engine::Dev.bug_tester?(id)
+      dev = Engine::Dev.owner?(id) || Engine::Dev.co_developer?(id)
+      staff << 'developer' if dev
+      staff << 'debugger' if dev || Engine::Dev.bug_tester?(id)
       seasons = held(player) - STAFF
       updated = staff + seasons
       return if updated == held(player)

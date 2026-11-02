@@ -114,11 +114,11 @@ Two staff badges sit beside the seasons. They are not on the calendar, and a loc
 | Key | Name | Emoji | Who holds it |
 | --- | --- | --- | --- |
 | developer | Developer | 🖤 | `Engine::Dev.owner?` and each co-developer |
-| debugger | Debugger | 🪲 | `Engine::Dev.bug_tester?` |
+| debugger | Debugger | 🪲 | owner, each co-developer, and `Engine::Dev.bug_tester?` |
 
 Labor Day's season badge already uses 🔧, so the debugger mark is a different glyph. Change it if you want.
 
-A person who is both a co-developer and a bug tester holds both badges. The owner is not a debugger unless their id is also in `BUG_TESTER_IDS`.
+The owner and each co-developer hold both staff badges. A bug tester who is not a developer holds only the debugger mark.
 
 ### Grant and store
 
