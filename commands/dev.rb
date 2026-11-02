@@ -18,10 +18,12 @@ module Commands
 
     HELP = <<~TXT.strip
       **Dev commands** (prefix only, developer + bug testers)
+      `e,dev [user id] <command>` — that delver; leave the id off to target yourself
+      `win`, `boss`, `finalboss`, `elite`, `event`, and `npc` always play on your own screen
       `e,dev debug` — toggle debug mode (one-hit kills, monsters never act, guaranteed flee/satisfy, traps avoided)
       `e,dev syn` — grant and wear the whole Syn set (owner only)
       `e,dev synlock` — toggle the Syn lock: cursed gear stays in the pack, and the set survives defeat (owner only)
-      `e,dev info` — raw player + tracker dump
+      `e,dev info` — readable player sheet and full tracker list
       `e,dev set <level|lp|lust|defiance|str|agi|res|sub|floor|cycle> <n>`
       `e,dev heal` — full defiance, base lust
       `e,dev curse <name>` · `e,dev uncurse <name|all>`
@@ -44,26 +46,64 @@ module Commands
 
     module_function
 
+    # These open a fight or a scene whose buttons follow the person who typed
+    # the command. They cannot safely drive someone else's delver.
+    SELF_ONLY = %w[win boss finalboss elite event npc].freeze
+
     def reply(event, text)
+      note = Thread.current[:eros_dev_target]
+      text = "#{note}\n#{text}" if note
       ErosUI.reply_v2(event, colour: COLOUR) { |c| c.text_display(content: text[0, 3900]) }
     end
 
-    def find_player(event)
-      player = Player[event.user.id]
-      reply(event, 'No delver — `e,create` first.') unless player
-      player
+    def snowflake(token)
+      raw = token.to_s[/\A<@!?(\d+)>\z/, 1] || token.to_s
+      raw.match?(/\A\d{17,20}\z/) ? raw.to_i : nil
+    end
+
+    def find_player(event, discord_id = event.user.id)
+      player = Player[discord_id.to_i]
+      return player if player
+
+      if discord_id.to_i == event.user.id.to_i
+        reply(event, 'No delver — `e,create` first.')
+      else
+        reply(event, "No delver for `#{discord_id}`.")
+      end
+      nil
+    end
+
+    def debug_for(event, target_id)
+      unless Engine::Dev.developer?(target_id)
+        return reply(event, 'Debug mode only applies to a developer, co-developer, or bug tester.')
+      end
+
+      on = Engine::Dev.toggle_debug!(target_id)
+      whose = target_id.to_i == event.user.id.to_i ? 'you' : "`#{target_id}`"
+      reply(event, "Debug mode **#{on ? 'ON' : 'OFF'}** for #{whose}.")
     end
 
     def dispatch(event, sub, args)
-      sub = sub.to_s.downcase
+      sub = sub.to_s
+      target_id = event.user.id.to_i
+      if (id = snowflake(sub))
+        target_id = id
+        sub = args.shift.to_s
+      end
+      sub = sub.downcase
       return reply(event, HELP) if sub.empty? || sub == 'help'
+      return debug_for(event, target_id) if sub == 'debug'
+      return set_week(event, args[0].to_s.downcase) if sub == 'week'
 
-      if sub == 'debug'
-        on = Engine::Dev.toggle_debug!(event.user.id)
-        return reply(event, "Debug mode **#{on ? 'ON' : 'OFF'}**.")
+      if SELF_ONLY.include?(sub) && target_id != event.user.id.to_i
+        return reply(event, "`#{sub}` plays out on your own screen. Run it without a user id.")
       end
 
-      player = find_player(event) or return
+      player = find_player(event, target_id) or return
+      if target_id != event.user.id.to_i
+        Thread.current[:eros_dev_target] = "Target **#{player.display_name}** · `#{player.discord_id}`"
+      end
+
       case sub
       when 'info' then info(event, player)
       when 'syn' then grant_syn_set(event, player)
@@ -104,7 +144,6 @@ module Commands
       when 'event' then force_event(event, player, args[0].to_s.downcase)
       when 'npc' then force_npc(event, player, args[0].to_s.downcase, args[1])
       when 'elite' then force_elite(event, player, args[0].to_s.downcase)
-      when 'week' then set_week(event, args[0].to_s.downcase)
       when 'conditions', 'condition'
         player.clear_conditions! if args[0].to_s.casecmp?('clear')
         list = player.condition_list.map { |c| "• **#{c['name']}** (#{c['floors']} floors) — #{c['summary']}" }
@@ -112,22 +151,157 @@ module Commands
       else
         reply(event, "Unknown dev command `#{sub}`.\n\n#{HELP}")
       end
+    ensure
+      Thread.current[:eros_dev_target] = nil
     end
+
+    INFO_CHUNK = 3500
 
     def info(event, player)
       player.refresh
-      lines = [
-        "**#{player.display_name}** (#{player.discord_id}) · debug #{Engine::Dev.debug?(player) ? 'ON' : 'off'} · syn lock #{player.syn_locked? ? 'on' : 'off'}",
-        "Lv #{player.level} · STR #{player.strength} AGI #{player.agility} RES #{player.resistance} SUB #{player.submission}",
-        "Effective STR #{player.effective_strength} AGI #{player.effective_agility} RES #{player.effective_resistance}",
-        "Defiance #{player.defiance}/#{player.max_defiance} · Lust #{player.lust} · LP #{player.lp}",
-        "Cycle #{player.current_cycle} · Floor #{player.current_floor} · Highest boss #{player.highest_boss_defeated}",
-        "Titles #{player.earned_titles.size} · Achievements #{player.earned_achievements.size}",
-        "Preferences #{player.preferences.inspect}",
-        "Sizes #{player.body_sizes.inspect}",
-        "```json\n#{JSON.pretty_generate(player.tracker_hash)[0, 2500]}\n```"
-      ]
-      reply(event, lines.join("\n"))
+      blocks = [info_header(player), *info_tracker_blocks(player)]
+      note = Thread.current[:eros_dev_target]
+      blocks[0] = "#{note}\n#{blocks[0]}" if note
+      ErosUI.reply_v2(event, colour: COLOUR) do |container|
+        pack_info(blocks).each_with_index do |text, index|
+          container.separator(divider: true, spacing: :small) if index == 1
+          container.text_display(content: text)
+        end
+      end
+    end
+
+    def info_header(player)
+      [
+        "**#{player.display_name}** · `#{player.discord_id}`",
+        "Debug **#{Engine::Dev.debug?(player) ? 'on' : 'off'}** · Syn lock **#{player.syn_locked? ? 'on' : 'off'}**",
+        '',
+        "**Level** #{player.level}",
+        "**STR** #{player.strength} → #{player.effective_strength} · " \
+          "**AGI** #{player.agility} → #{player.effective_agility} · " \
+          "**RES** #{player.resistance} → #{player.effective_resistance} · " \
+          "**SUB** #{player.submission}",
+        "**Defiance** #{player.defiance}/#{player.max_defiance} · **Lust** #{player.lust} · **LP** #{grouped_number(player.lp)}",
+        "**Cycle** #{player.current_cycle} · **Floor** #{player.current_floor} · " \
+          "**Highest boss** #{player.highest_boss_defeated}",
+        "**Titles** #{player.earned_titles.size} · **Achievements** #{player.earned_achievements.size}",
+        info_body(player),
+        info_content(player)
+      ].join("\n")
+    end
+
+    def info_body(player)
+      sizes = player.body_sizes.is_a?(Hash) ? player.body_sizes.transform_keys(&:to_s) : {}
+      return '**Body:** —' if sizes.empty?
+
+      order = %w[breasts butt penis]
+      keys = order.select { |key| sizes.key?(key) } + (sizes.keys.map(&:to_s) - order)
+      parts = keys.filter_map do |key|
+        next unless sizes.key?(key)
+
+        label = Engine::ContentOptions::BODY_SIZES.dig(key, :label) || key.capitalize
+        raw = sizes[key]
+        shown = Engine::ContentOptions.size_label(key, raw)
+        shown = shown.to_s.capitalize if shown.to_s == raw.to_s
+        "#{label} #{shown}"
+      end
+      "**Body:** #{parts.join(' · ')}"
+    end
+
+    def info_content(player)
+      catalog = Engine::ContentOptions::PREFERENCES
+      off = catalog.filter_map { |key, spec| spec[:label] unless Engine::ContentOptions.enabled?(player, key) }
+      stored = player.preferences.is_a?(Hash) ? player.preferences : {}
+      extra = stored.keys.map(&:to_s) - catalog.keys
+      line = off.empty? ? '**Content:** all on' : "**Content off:** #{off.join(', ')}"
+      return line if extra.empty?
+
+      "#{line}\n**Extra prefs:** #{extra.sort.join(', ')}"
+    end
+
+    def info_tracker_blocks(player)
+      data = player.tracker_hash.transform_keys(&:to_s)
+      return ['**Trackers**\n_none_'] if data.empty?
+
+      scalars = []
+      lists = []
+      width = data.keys.map(&:length).max
+      data.keys.sort.each do |key|
+        value = data[key]
+        if value.is_a?(Array)
+          lists << [key, value] unless value.empty?
+        elsif value.is_a?(Hash)
+          lists << [key, value.map { |child, child_value| "#{child}: #{child_value}" }] unless value.empty?
+        else
+          scalars << "#{key.ljust(width)}  #{grouped_number(value)}"
+        end
+      end
+
+      blocks = []
+      fenced_chunks(scalars).each_with_index do |fence, index|
+        title = index.zero? ? '**Trackers**' : '**Trackers** (continued)'
+        blocks << "#{title}\n#{fence}"
+      end
+      lists.each { |key, values| blocks.concat(info_list_blocks(key, values)) }
+      blocks.empty? ? ['**Trackers**\n_none_'] : blocks
+    end
+
+    def info_list_blocks(key, values)
+      header = "**#{key}** (#{values.size})"
+      items = values.map(&:to_s)
+      chunks = []
+      line = +''
+      items.each do |item|
+        piece = line.empty? ? item : ", #{item}"
+        if header.length + 1 + line.length + piece.length > INFO_CHUNK && !line.empty?
+          chunks << "#{chunks.empty? ? header : "**#{key}** (continued)"}\n#{line}"
+          line = item.dup
+        else
+          line << piece
+        end
+      end
+      chunks << "#{chunks.empty? ? header : "**#{key}** (continued)"}\n#{line}" unless line.empty?
+      chunks
+    end
+
+    def fenced_chunks(lines)
+      return [] if lines.empty?
+
+      chunks = []
+      buf = []
+      size = 8
+      lines.each do |line|
+        addition = line.length + 1
+        if size + addition > INFO_CHUNK && buf.any?
+          chunks << "```\n#{buf.join("\n")}\n```"
+          buf = [line]
+          size = 8 + addition
+        else
+          buf << line
+          size += addition
+        end
+      end
+      chunks << "```\n#{buf.join("\n")}\n```" if buf.any?
+      chunks
+    end
+
+    def pack_info(blocks)
+      packed = []
+      blocks.each do |block|
+        if packed.last && packed.last.length + block.length + 2 <= INFO_CHUNK && !packed.last.include?('```')
+          packed[-1] = "#{packed[-1]}\n\n#{block}"
+        else
+          packed << block
+        end
+      end
+      packed
+    end
+
+    def grouped_number(value)
+      return value.to_s unless value.is_a?(Integer)
+
+      sign = value.negative? ? '-' : ''
+      digits = value.abs.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+      "#{sign}#{digits}"
     end
 
     def set_field(event, player, field, value)
