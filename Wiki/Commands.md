@@ -50,7 +50,7 @@ Buttons belong to whoever opened the panel. Pressing a button **edits** that mes
 
 | Slash | Prefix | What it does |
 | --- | --- | --- |
-| `/profile` | `e,profile [name]` | Your profile, or look someone up |
+| `/profile` | `e,profile [name]` | Your profile (menu: titles, badges, collections, and the rest), or look someone up |
 | `/titles` · `/title` | `e,titles` · `e,title` | View and wear titles |
 | `/achievements` | `e,achievements` | Achievements by category |
 | `/transformation` | `e,transformation` / `e,hybrid` | Hybrids and Chimera fusion |

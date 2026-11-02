@@ -12,6 +12,10 @@ module Engine
       ENV.fetch('BUG_TESTER_IDS', '').split(/[\s,]+/).grep(/\A\d+\z/).map(&:to_i)
     end
 
+    def co_developer_ids
+      ENV.fetch('CO_DEVELOPER_IDS', '').split(/[\s,]+/).grep(/\A\d+\z/).map(&:to_i)
+    end
+
     def developer_id
       raw = ENV.fetch('DEVELOPER_ID', '').strip
       raw.match?(/\A\d+\z/) ? raw.to_i : nil
@@ -26,8 +30,12 @@ module Engine
       bug_tester_ids.include?(user_id.to_i)
     end
 
+    def co_developer?(user_id)
+      co_developer_ids.include?(user_id.to_i)
+    end
+
     def developer?(user_id)
-      owner?(user_id) || bug_tester?(user_id)
+      owner?(user_id) || co_developer?(user_id) || bug_tester?(user_id)
     end
 
     def debug?(player)

@@ -246,6 +246,7 @@ class Player < Sequel::Model(:players)
     data = tracker_hash.dup
     data[key.to_s] = data[key.to_s].to_i + by
     update(trackers: data)
+    Engine::Badges.note_tracker!(self, key) if defined?(Engine::Badges)
   end
 
   def remember!(key, value)
@@ -346,6 +347,7 @@ class Player < Sequel::Model(:players)
   end
 
   def check_progress!
+    Engine::Badges.sync_staff!(self) if defined?(Engine::Badges)
     note_highest_level!
     lines = []
     3.times do
@@ -1545,6 +1547,12 @@ class Player < Sequel::Model(:players)
   def grant_equipment!(item, auto_equip: false)
     item = ::Equipment[item] unless item.is_a?(::Equipment)
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
+
+    if item.stat_modifiers.is_a?(Hash) && item.stat_modifiers['dev_only'] && !Engine::Dev.owner?(discord_id)
+      return { ok: false, error: :dev_only,
+               message: "**#{item.name}** stirs, recognises that you are not its maker, and will not " \
+                        'be worn. Some things have exactly one owner.' }
+    end
 
     if owns_equipment?(item.id)
       return { ok: false, error: :duplicate, message: "You already own **#{item.name}**." }

@@ -63,18 +63,15 @@ module Commands
                    "**Achievements** #{target.earned_achievements.size}/#{Engine::TitleSystem.visible_achievements(target).size} · " \
                    "**Hybrid forms** #{target.unlocked_transformations.size}/#{Engine::TransformationSystem.visible(target).size}"
         )
-        keepsakes = target.keepsakes
-        if keepsakes.any?
-          shown = target.displayed_keepsakes.map { |k| Player.keepsake_emoji(k) }.join(' ')
-          hint = target.keepsake_pins.any? ? '' : ' _(your latest — pin favourites in Collections)_'
-          c.text_display(content: "**Keepsakes** #{shown}#{hint}")
-        end
+        Engine::Badges.sync_staff!(target)
+        badge_line = Engine::Badges.profile_line(target)
+        c.text_display(content: badge_line) if badge_line
         if news.any?
           c.separator(divider: true, spacing: :small)
           c.text_display(content: news.join("\n"))
         end
         if own && target.character_name.to_s.empty?
-          c.text_display(content: '-# Unnamed delvers are hidden from the leaderboard — press **Rename** to choose a name.')
+          c.text_display(content: '-# Unnamed delvers are hidden from the leaderboard — open the menu and choose **Rename**.')
         end
         attach_nav(c, event.user.id, :profile, rename: own) if own
       end
@@ -91,7 +88,6 @@ module Commands
         player.refresh
       end
       all = player.keepsakes
-      pins = player.keepsake_pins
       pages = [(all.size.to_f / KEEPSAKES_PER_PAGE).ceil, 1].max
       page = page.to_i.clamp(0, pages - 1)
       slice = all.slice(page * KEEPSAKES_PER_PAGE, KEEPSAKES_PER_PAGE) || []
@@ -99,7 +95,7 @@ module Commands
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         c.text_display(
           content: "## Collections — #{player.display_name}\n" \
-                   "_#{all.size} keepsake#{'s' unless all.size == 1} · **#{pins.size}/#{Player::KEEPSAKE_PIN_LIMIT} pinned** to your profile shelf_"
+                   "_#{all.size} keepsake#{'s' unless all.size == 1}_"
         )
         c.text_display(content: notice) if notice
         if all.empty?
@@ -110,23 +106,28 @@ module Commands
         else
           lines = slice.each_with_index.map do |text, i|
             n = (page * KEEPSAKES_PER_PAGE) + i + 1
-            pins.include?(text) ? "**#{n}.** 📌 #{Player.keepsake_emoji(text)} #{text}" : "**#{n}.** #{Player.keepsake_emoji(text)} #{text}"
+            "**#{n}.** #{Player.keepsake_emoji(text)} #{text}"
           end
           c.text_display(content: lines.join("\n"))
-          c.separator(divider: true, spacing: :small)
-          c.text_display(content: '-# Pin up to three favourites — those are the ones your profile shows.')
-          slice.each_with_index do |text, i|
-            index = (page * KEEPSAKES_PER_PAGE) + i
-            c.row do |row|
-              label = "#{pins.include?(text) ? '📌 Unpin' : 'Pin'} ##{index + 1}: #{text}"
-              row.button(label: label[0, 80], style: pins.include?(text) ? :primary : :secondary,
-                         custom_id: "eros:keepsakes:pin:#{index}:#{page}:#{event.user.id}")
-            end
-          end
         end
 
         attach_pager(c, 'eros:keepsakes:page', page, pages, event.user.id) if pages > 1
         attach_nav(c, event.user.id, :collections)
+      end
+    end
+
+    def show_badges(event)
+      player = ErosHelpers.require_player(event) or return
+      Engine::Badges.sync_staff!(player)
+      player.refresh
+
+      ErosUI.reply_v2(event, colour: COLOUR) do |c|
+        c.text_display(
+          content: "## Badges — #{player.display_name}\n" \
+                   '_Marks from seasons you played. They stay. A season you missed stays blank._'
+        )
+        c.text_display(content: Engine::Badges.page_lines(player).join("\n"))
+        attach_nav(c, event.user.id, :badges)
       end
     end
 
@@ -277,7 +278,7 @@ module Commands
         end
         if viewer
           rank = Engine::ProfileSystem.rank_of(viewer, stat)
-          note = rank ? "Your rank: **##{rank}**" : 'Set a character name (`/profile` → **Rename**) to appear on the leaderboard.'
+          note = rank ? "Your rank: **##{rank}**" : 'Set a character name (`/profile` → **Rename** in the menu) to appear on the leaderboard.'
           c.text_display(content: "-# #{note}")
         end
         c.row do |row|
@@ -294,7 +295,7 @@ module Commands
       player = ErosHelpers.require_player(event) or return
       if raw.nil? || raw.strip.empty?
         ErosUI.reply_v2(event, ephemeral: true) do |c|
-          c.text_display(content: 'Usage: `e,name Your Character Name` — or `/profile` → **Rename**.')
+          c.text_display(content: 'Usage: `e,name Your Character Name` — or `/profile` → **Rename** in the menu.')
         end
         return
       end
@@ -330,26 +331,58 @@ module Commands
       show_titles(event, notice: result[:message])
     end
 
-    def attach_nav(container, owner_id, current, rename: false)
+    def attach_nav(container, owner_id, current, rename: true)
       container.row do |row|
-        {
-          profile: ['Profile', "eros:profile:view:#{owner_id}"],
-          titles: ['Titles', "eros:titles:view:#{owner_id}"],
-          achievements: ['Achievements', "eros:achievements:view:#{owner_id}"],
-          hybrids: ['Hybrids', "eros:hybrid:view:#{owner_id}"],
-          leaderboard: ['Leaderboard', "eros:lb:open:#{owner_id}"]
-        }.each do |key, (label, id)|
-          row.button(label: label, style: key == current ? :primary : :secondary, custom_id: id)
+        row.string_select(custom_id: "eros:profile:goto:#{owner_id}", placeholder: 'Open a panel…',
+                          min_values: 1, max_values: 1) do |menu|
+          menu.option(label: 'Profile', value: 'profile', description: 'Your delver card',
+                      emoji: { name: '📜' }, default: current == :profile)
+          menu.option(label: 'Titles', value: 'titles', description: 'Names you have earned',
+                      emoji: { name: '🏷️' }, default: current == :titles)
+          menu.option(label: 'Achievements', value: 'achievements', description: 'Feats and rewards',
+                      emoji: { name: '🏆' }, default: current == :achievements)
+          menu.option(label: 'Hybrids', value: 'hybrids', description: 'Forms you can wear',
+                      emoji: { name: '🦋' }, default: current == :hybrids)
+          menu.option(label: 'Collections', value: 'collections', description: 'Keepsakes you have kept',
+                      emoji: { name: '🎁' }, default: current == :collections)
+          menu.option(label: 'Badges', value: 'badges', description: 'Seasons you played',
+                      emoji: { name: '🎖️' }, default: current == :badges)
+          menu.option(label: 'Leaderboard', value: 'leaderboard', description: 'Named delvers',
+                      emoji: { name: '📊' }, default: current == :leaderboard)
+          if rename
+            menu.option(label: 'Parlour', value: 'parlour', description: "Syn's bench",
+                        emoji: { name: '🖤' })
+            menu.option(label: 'Rename', value: 'rename', description: 'Choose a character name',
+                        emoji: { name: '✏️' })
+          end
         end
       end
-      container.row do |row|
-        row.button(label: 'Collections', style: current == :collections ? :primary : :secondary,
-                   custom_id: "eros:collections:view:#{owner_id}")
-        if rename
-          row.button(label: 'Rename', style: :success, custom_id: "eros:profile:rename:#{owner_id}")
-          row.button(label: 'Parlour', style: :secondary, custom_id: "eros:parlour:view:#{owner_id}")
+    end
+
+    def open_profile_panel(event, choice)
+      case choice
+      when 'profile' then show_profile(event)
+      when 'titles' then show_titles(event)
+      when 'achievements' then show_achievements(event)
+      when 'hybrids' then Commands::Transformation.show(event)
+      when 'collections' then show_collections(event)
+      when 'badges' then show_badges(event)
+      when 'leaderboard' then show_leaderboard(event)
+      when 'parlour' then Commands::Parlour.show(event)
+      when 'rename'
+        player = Player[event.user.id]
+        unless player
+          ErosUI.reply_v2(event, ephemeral: true) { |c| c.text_display(content: 'No profile. `/create` first.') }
+          return
         end
+        ErosUI.show_name_modal(event, "eros:namemodal:rename:#{event.user.id}", current: player.character_name)
       end
+    end
+
+    string_select(custom_id: /^eros:profile:goto:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+
+      Commands::Profile.open_profile_panel(event, Array(event.values).first.to_s)
     end
 
     button(custom_id: /^eros:profile:view:\d+$/) do |event|

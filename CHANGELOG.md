@@ -8,6 +8,15 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-11-01
 
+### Changed
+
+- Co-developer ids are read from `CO_DEVELOPER_IDS` in the environment. A blank value means there is no co-developer.
+
+### Added
+
+- **Profile menu.** `/profile` moves between Profile, Titles, Achievements, Hybrids, Collections, Badges, and the Leaderboard from one menu. Rename and Parlour are on that menu. Old buttons on messages already on screen still work.
+- **Season badges** show on the profile card. One is earned the first time you play during that event, and it stays through defeat and `/restart`. Seasons you have not played since this shipped stay locked. Keepsakes are listed only under Collections.
+
 ### Fixed
 
 - Gateway disconnects (`Connection reset by peer` and `SSL_read: unexpected eof while reading`) no longer post to the error channel. Discord closed the socket; the bot reconnects on its own. A reset raised from our own code still reports.

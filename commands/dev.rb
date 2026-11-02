@@ -196,12 +196,20 @@ module Commands
     end
 
     def grant_titles(event, player, key)
-      keys = key == 'all' ? Engine::TitleSystem::TITLES.keys : [key]
+      keys = key == 'all' ? Engine::TitleSystem::TITLES.keys.dup : [key]
+      unless Engine::Dev.owner?(event.user.id)
+        if keys.include?('original_syn')
+          return reply(event, '**The Original Syn** recognises one maker.') if key != 'all'
+
+          keys -= ['original_syn']
+        end
+      end
       unknown = keys.reject { |k| Engine::TitleSystem::TITLES.key?(k) }
       return reply(event, "Unknown title `#{key}`. Keys: #{Engine::TitleSystem::TITLES.keys.join(', ')}") if unknown.any?
 
       player.update(titles: (player.earned_titles | keys))
-      reply(event, "Granted #{keys.size} title(s).")
+      note = key == 'all' && !Engine::Dev.owner?(event.user.id) ? ' **The Original Syn** was left out.' : ''
+      reply(event, "Granted #{keys.size} title(s).#{note}")
     end
 
     def grant_hybrids(event, player, key)
@@ -213,11 +221,20 @@ module Commands
         return reply(event, 'All hybrid forms locked.')
       end
 
-      keys = key == 'all' ? all : [key]
+      keys = key == 'all' ? all.dup : [key]
       return reply(event, "Unknown form `#{key}`. Keys: #{all.join(', ')}") unless (keys - all).empty?
 
+      unless Engine::Dev.owner?(event.user.id)
+        if keys.include?('syn_fae')
+          return reply(event, '**Syn Fae** recognises one maker.') if key != 'all'
+
+          keys -= ['syn_fae']
+        end
+      end
+
       player.update(transformations: player.unlocked_transformations | keys)
-      reply(event, "Unlocked #{keys.size} hybrid form(s).")
+      note = key == 'all' && !Engine::Dev.owner?(event.user.id) ? ' **Syn Fae** was left out.' : ''
+      reply(event, "Unlocked #{keys.size} hybrid form(s).#{note}")
     end
 
     def grant_achievements(event, player, id)

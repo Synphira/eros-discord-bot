@@ -53,7 +53,7 @@ module Commands
       'progress' => {
         label: 'Progress', emoji: '🏆', blurb: 'Profile, titles, achievements, hybrids, leaderboard',
         commands: [
-          ['/profile', 'e,profile [name]', 'Your profile and lifetime stats, or look up another delver'],
+          ['/profile', 'e,profile [name]', 'Your profile menu — titles, badges, collections, and the rest — or look up another delver'],
           ['/titles · /title', 'e,titles · e,title [name|auto]', 'View and wear earned titles'],
           ['/achievements', 'e,achievements [category]', 'Achievements by category'],
           ['/transformation', 'e,transformation [name|clear|fuse A + B]', 'Hybrid forms, or fuse two into a Chimera'],
