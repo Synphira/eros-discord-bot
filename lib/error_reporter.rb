@@ -61,6 +61,23 @@ module ErrorReporter
                     .map { |l| l.sub(%r{\A.*?eros-discord-bot[/\\]}, '').sub(/:in /, '  in ') }
   end
 
+  # Discord (or the host) closes the gateway socket whenever it feels like it.
+  # discordrb reconnects. These are that close, not a bug in a command.
+  def peer_reset?(error)
+    error.is_a?(Errno::ECONNRESET) ||
+      (error.is_a?(OpenSSL::SSL::SSLError) && error.message.to_s.match?(/unexpected eof/i))
+  end
+
+  # Only the gateway read/connect loop. A reset raised from our code still reports.
+  def gateway_drop?(error)
+    return false unless peer_reset?(error)
+
+    frames = Array(error.backtrace)
+    return false if frames.any? { |line| line.include?('eros-discord-bot') }
+
+    frames.any? { |line| line.include?('discordrb/gateway.rb') }
+  end
+
   def report(error)
     message = error.message.to_s.lines.map(&:strip).reject(&:empty?).join(' — ')
     # Discord API errors (e.g. InvalidFormBody) carry field-level details in
@@ -214,10 +231,32 @@ module ErrorReporter
 
   module LoggerPatch
     def log_exception(error)
+      if ErrorReporter.gateway_drop?(error)
+        warn "[gateway] Discord closed the socket (#{error.class}: #{error.message.to_s.lines.first.to_s.strip}). Reconnecting."
+        return
+      end
+
       ErrorReporter.report(error)
+    end
+  end
+
+  # readpartial raises these instead of EOFError when the peer resets the
+  # TLS socket. The loop's rescue otherwise logs and keeps reading a dead
+  # socket. Close it the same way a clean EOF already does, so connect_loop
+  # opens a new one.
+  module GatewayPeerDrops
+    def handle_error(error)
+      unless ErrorReporter.peer_reset?(error)
+        super
+        return
+      end
+
+      @pipe_broken = true
+      handle_internal_close('Discord closed the gateway socket')
     end
   end
 end
 
 Discordrb::Events::EventHandler.prepend(ErrorReporter::HandlerContext)
 Discordrb::Logger.prepend(ErrorReporter::LoggerPatch)
+Discordrb::Gateway.prepend(ErrorReporter::GatewayPeerDrops)
