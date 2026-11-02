@@ -18,6 +18,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - **Profile menu.** `/profile` moves between Profile, Titles, Achievements, Hybrids, Collections, Badges, and the Leaderboard from one menu. Rename and Parlour are on that menu. Old buttons on messages already on screen still work.
 - **Season badges** show on the profile card. One is earned by playing during that event, including progress you already made while the event is still running. It stays through defeat and `/restart`. A season that is not running does not grant from old counters. Keepsakes are listed only under Collections.
+- The profile card lists the name, then the title, then the body, then **Form:**. A fused form uses a blended name (Syn Fae woven with Angel is **Syn Angel**) instead of a hyphenated chimera label.
 
 ### Fixed
 

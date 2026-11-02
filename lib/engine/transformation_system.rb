@@ -449,6 +449,18 @@ module Engine
     CHIMERA_PRIMARY_TRACKER = 'chimera_primary'
     CHIMERA_SECONDARY_TRACKER = 'chimera_secondary'
 
+    # The word kept when a form is woven into a chimera's name.
+    # One-word forms use their own name.
+    FORM_STEMS = {
+      'living_doll' => 'Doll',
+      'eldritch_bride' => 'Eldritch',
+      'hoard_dragon' => 'Dragon',
+      'clockwork_maid' => 'Clockwork',
+      'porcelain_muse' => 'Porcelain',
+      'bone_marionette' => 'Marionette',
+      'syn_fae' => 'Syn'
+    }.freeze
+
     module_function
 
     def get(key)
@@ -479,13 +491,21 @@ module Engine
       [primary, secondary]
     end
 
+    def form_stem(key)
+      FORM_STEMS[key.to_s] || TRANSFORMATIONS.dig(key.to_s, :name).to_s.split.first
+    end
+
+    def chimera_blend_name(primary_key, secondary_key)
+      "#{form_stem(primary_key)} #{form_stem(secondary_key)}"
+    end
+
     def chimera_form(player)
       combo = chimera_combo(player) or return nil
       primary = TRANSFORMATIONS[combo[0]]
       secondary = TRANSFORMATIONS[combo[1]]
 
       {
-        name: "#{primary[:name]}-#{secondary[:name]} Chimera",
+        name: chimera_blend_name(combo[0], combo[1]),
         group: 'Chimera',
         description: "A fused hybrid: #{primary[:description]} — woven through with another shape: #{secondary[:description]}",
         appearance: (Array(primary[:appearance]) + Array(secondary[:appearance])).uniq,

@@ -40,12 +40,13 @@ module Commands
 
       ErosUI.reply_v2(event, colour: COLOUR) do |c|
         title = target.active_title_name
-        header = "## #{target.display_name}"
-        c.text_display(content: header)
-        hybrid = target.active_transformation_name
-        identity = title ? "_#{title}_ · #{target.gender}" : target.gender.to_s
-        identity += " · **Hybrid:** #{hybrid}" if hybrid
-        c.text_display(content: identity)
+        c.text_display(content: "## #{target.display_name}")
+        identity = []
+        identity << "_#{title}_" if title
+        identity << target.gender.to_s
+        form = target.active_transformation_name
+        identity << "**Form:** #{form}" if form
+        c.text_display(content: identity.join("\n"))
         marks = Engine::Marks.profile_line(target)
         c.text_display(content: marks) if marks
         c.separator(divider: true, spacing: :small)
