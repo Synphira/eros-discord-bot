@@ -10,7 +10,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
-- `e,dev info` is a labeled sheet: stats, body, and content options, then every tracker one per line. Options that are on collapse to "all on". Lists such as bosses seen are no longer cut off mid-JSON.
+- `e,dev info` opens one panel. A menu jumps between Overview, Run, Combat, Submissions, Events, Lists, and Other. Type in the menu to filter those categories.
 - `e,dev <user id> <command>` runs that command on that delver. Leave the id off and it targets you. `win`, `boss`, `finalboss`, `elite`, `event`, and `npc` still play on your own screen.
 
 ## 2026-11-01

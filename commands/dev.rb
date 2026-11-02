@@ -23,7 +23,7 @@ module Commands
       `e,dev debug` — toggle debug mode (one-hit kills, monsters never act, guaranteed flee/satisfy, traps avoided)
       `e,dev syn` — grant and wear the whole Syn set (owner only)
       `e,dev synlock` — toggle the Syn lock: cursed gear stays in the pack, and the set survives defeat (owner only)
-      `e,dev info` — readable player sheet and full tracker list
+      `e,dev info` — one panel; the menu jumps between stats, run, combat, submissions, events, and lists
       `e,dev set <level|lp|lust|defiance|str|agi|res|sub|floor|cycle> <n>`
       `e,dev heal` — full defiance, base lust
       `e,dev curse <name>` · `e,dev uncurse <name|all>`
@@ -155,19 +155,145 @@ module Commands
       Thread.current[:eros_dev_target] = nil
     end
 
-    INFO_CHUNK = 3500
+    # One text display, kept under Discord's 4000-character component cap.
+    INFO_LIMIT = 3400
+    INFO_BUCKETS = [
+      ['run', 'Run', 'Floors, cycles, LP, traps, climaxes'],
+      ['combat', 'Combat', 'Kills, defeats, bosses'],
+      ['submissions', 'Submissions', 'Submissions by kind'],
+      ['events', 'Events', 'Room and fetish counters'],
+      ['lists', 'Lists', 'Bosses, curses, badges, and other stored names'],
+      ['other', 'Other', 'Leftover counters']
+    ].freeze
 
     def info(event, player)
+      show_info(event, player, 'overview')
+    end
+
+    def show_info(event, player, page)
       player.refresh
-      blocks = [info_header(player), *info_tracker_blocks(player)]
-      note = Thread.current[:eros_dev_target]
-      blocks[0] = "#{note}\n#{blocks[0]}" if note
+      pages = info_catalog(player)
+      current = pages.find { |entry| entry[:value] == page } || pages.first
       ErosUI.reply_v2(event, colour: COLOUR) do |container|
-        pack_info(blocks).each_with_index do |text, index|
-          container.separator(divider: true, spacing: :small) if index == 1
-          container.text_display(content: text)
+        container.text_display(content: current[:text])
+        container.row do |row|
+          row.string_select(
+            custom_id: "eros:dev:info:#{player.discord_id}:#{event.user.id}",
+            placeholder: 'Jump to a category…',
+            min_values: 1, max_values: 1
+          ) do |menu|
+            pages.each do |entry|
+              menu.option(
+                label: entry[:label],
+                value: entry[:value],
+                description: entry[:blurb],
+                default: entry[:value] == current[:value]
+              )
+            end
+          end
         end
       end
+    end
+
+    def info_catalog(player)
+      data = player.tracker_hash.transform_keys(&:to_s)
+      grouped = Hash.new { |hash, key| hash[key] = [] }
+      data.keys.sort.each { |key| grouped[info_bucket(key, data[key])] << key }
+
+      pages = [{
+        value: 'overview',
+        label: 'Overview',
+        blurb: 'Stats, body, and content options',
+        text: info_header(player)
+      }]
+      INFO_BUCKETS.each do |key, label, blurb|
+        keys = grouped[key]
+        next if keys.empty?
+
+        chunks = info_bucket_chunks(player, data, label, keys, key == 'lists')
+        chunks.each_with_index do |text, index|
+          suffix = chunks.size > 1 ? " #{index + 1}" : ''
+          range = "#{keys.first} – #{keys.last}"
+          pages << {
+            value: "#{key}#{suffix.tr(' ', '-')}",
+            label: "#{label}#{suffix}",
+            blurb: (chunks.size > 1 ? range : blurb)[0, 100],
+            text: text
+          }
+        end
+      end
+      pages
+    end
+
+    def info_bucket(key, value)
+      return 'lists' if value.is_a?(Array) || value.is_a?(Hash)
+      return 'submissions' if key.end_with?('_submissions') || key == 'submissions'
+      return 'run' if key == 'events_escaped' || key.match?(/floor|cycle|depth|lp_earned|trap|treasure|climax|flee|chest|rooms_/)
+      return 'combat' if key.end_with?('_defeats') || key.match?(/\A(?:monsters_killed|bosses_|tentacle_pit)/)
+      return 'events' if key.include?('event') || key.end_with?('_encounters') || key.end_with?('_transformations')
+
+      'other'
+    end
+
+    def info_bucket_chunks(player, data, label, keys, lists)
+      heading = "**#{player.display_name}** · `#{player.discord_id}`\n**#{label}**\n"
+      lines = lists ? info_list_lines(data, keys) : info_scalar_lines(data, keys)
+      budget = INFO_LIMIT - heading.length - (lists ? 1 : 8)
+      budget = 200 if budget < 200
+      chunk_lines(lines, budget).map do |chunk|
+        body = lists ? chunk.join("\n") : "```\n#{chunk.join("\n")}\n```"
+        "#{heading}#{body}"[0, INFO_LIMIT]
+      end
+    end
+
+    def info_scalar_lines(data, keys)
+      width = keys.map(&:length).max
+      keys.map { |key| "#{key.ljust(width)}  #{grouped_number(data[key])}" }
+    end
+
+    def info_list_lines(data, keys)
+      lines = []
+      keys.each do |key|
+        value = data[key]
+        items = value.is_a?(Hash) ? value.map { |child, child_value| "#{child}: #{child_value}" } : Array(value).map(&:to_s)
+        next if items.empty?
+
+        lines << "**#{key}** (#{items.size})"
+        line = +''
+        items.each do |item|
+          item = item[0, 200]
+          piece = line.empty? ? item : ", #{item}"
+          if line.length + piece.length > 240 && !line.empty?
+            lines << line
+            line = item.dup
+          else
+            line << piece
+          end
+        end
+        lines << line unless line.empty?
+        lines << ''
+      end
+      lines
+    end
+
+    def chunk_lines(lines, budget)
+      pages = []
+      buf = []
+      size = 0
+      lines.each do |line|
+        line = line[0, budget]
+        addition = line.length + 1
+        if size + addition > budget && buf.any?
+          pages << buf
+          buf = [line]
+          size = addition
+        else
+          buf << line
+          size += addition
+        end
+      end
+      pages << buf unless buf.empty?
+      pages.empty? ? [['_none_']] : pages
     end
 
     def info_header(player)
@@ -216,84 +342,6 @@ module Commands
       return line if extra.empty?
 
       "#{line}\n**Extra prefs:** #{extra.sort.join(', ')}"
-    end
-
-    def info_tracker_blocks(player)
-      data = player.tracker_hash.transform_keys(&:to_s)
-      return ['**Trackers**\n_none_'] if data.empty?
-
-      scalars = []
-      lists = []
-      width = data.keys.map(&:length).max
-      data.keys.sort.each do |key|
-        value = data[key]
-        if value.is_a?(Array)
-          lists << [key, value] unless value.empty?
-        elsif value.is_a?(Hash)
-          lists << [key, value.map { |child, child_value| "#{child}: #{child_value}" }] unless value.empty?
-        else
-          scalars << "#{key.ljust(width)}  #{grouped_number(value)}"
-        end
-      end
-
-      blocks = []
-      fenced_chunks(scalars).each_with_index do |fence, index|
-        title = index.zero? ? '**Trackers**' : '**Trackers** (continued)'
-        blocks << "#{title}\n#{fence}"
-      end
-      lists.each { |key, values| blocks.concat(info_list_blocks(key, values)) }
-      blocks.empty? ? ['**Trackers**\n_none_'] : blocks
-    end
-
-    def info_list_blocks(key, values)
-      header = "**#{key}** (#{values.size})"
-      items = values.map(&:to_s)
-      chunks = []
-      line = +''
-      items.each do |item|
-        piece = line.empty? ? item : ", #{item}"
-        if header.length + 1 + line.length + piece.length > INFO_CHUNK && !line.empty?
-          chunks << "#{chunks.empty? ? header : "**#{key}** (continued)"}\n#{line}"
-          line = item.dup
-        else
-          line << piece
-        end
-      end
-      chunks << "#{chunks.empty? ? header : "**#{key}** (continued)"}\n#{line}" unless line.empty?
-      chunks
-    end
-
-    def fenced_chunks(lines)
-      return [] if lines.empty?
-
-      chunks = []
-      buf = []
-      size = 8
-      lines.each do |line|
-        addition = line.length + 1
-        if size + addition > INFO_CHUNK && buf.any?
-          chunks << "```\n#{buf.join("\n")}\n```"
-          buf = [line]
-          size = 8 + addition
-        else
-          buf << line
-          size += addition
-        end
-      end
-      chunks << "```\n#{buf.join("\n")}\n```" if buf.any?
-      chunks
-    end
-
-    def pack_info(blocks)
-      packed = []
-      blocks.each do |block|
-        if packed.last && packed.last.length + block.length + 2 <= INFO_CHUNK && !packed.last.include?('```')
-          packed[-1] = "#{packed[-1]}\n\n#{block}"
-        else
-          packed << block
-        end
-      end
-      packed
     end
 
     def grouped_number(value)
@@ -569,6 +617,20 @@ module Commands
       player.note_floor_reached!(floor)
       player.update(highest_boss_defeated: floor - 5, sanctuary: false)
       Commands::Explore.run(event)
+    end
+
+    string_select(custom_id: /^eros:dev:info:\d+:\d+$/) do |event|
+      next unless ErosHelpers.assert_button_owner!(event)
+      next unless Engine::Dev.developer?(event.user.id)
+
+      target_id = event.custom_id.split(':')[3].to_i
+      player = Player[target_id]
+      unless player
+        ErosUI.reply_v2(event, ephemeral: true) { |container| container.text_display(content: "No delver for `#{target_id}`.") }
+        next
+      end
+
+      Commands::Dev.show_info(event, player, Array(event.values).first.to_s)
     end
 
     command(:dev, help_available: false) do |event, sub, *args|
