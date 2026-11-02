@@ -25,7 +25,7 @@ todos:
     status: pending
   - id: syn-set-commands
     content: Add owner-only e,dev syn to grant and wear the whole Syn set, and e,dev synlock to skip cursed auto-equip and keep that set through defeat
-    status: pending
+    status: completed
 isProject: false
 ---
 

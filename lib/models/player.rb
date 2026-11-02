@@ -1547,6 +1547,12 @@ class Player < Sequel::Model(:players)
     DB[:player_equipment].where(player_id: discord_id, equipment_id: equipment_id).count.positive?
   end
 
+  # Owner-only. While on, cursed grants stay in the pack, and the Syn
+  # set is left alone when a defeat strips ordinary gear.
+  def syn_locked?
+    Engine::Dev.owner?(discord_id) && tracker('syn_lock').positive?
+  end
+
   def grant_equipment!(item, auto_equip: false)
     item = ::Equipment[item] unless item.is_a?(::Equipment)
     return { ok: false, error: :not_found, message: 'Item not found.' } unless item
@@ -1574,7 +1580,10 @@ class Player < Sequel::Model(:players)
 
     note_holiday_outfit!(item.name)
 
-    if auto_equip || item.cursed
+    # A locked owner keeps every cursed grant in the pack, even when the
+    # caller also asked to auto-equip. Uncursed auto-equip still binds.
+    bind = item.cursed ? !syn_locked? : auto_equip
+    if bind
       equip_result = equip_item(item.id)
       if equip_result[:ok]
         return {
@@ -1726,17 +1735,27 @@ class Player < Sequel::Model(:players)
            .join(:equipment, id: :equipment_id)
            .where(player_id: discord_id)
            .where(Sequel[:equipment][:cursed] => false)
-           .select(Sequel[:equipment][:name], Sequel[:player_equipment][:id])
+           .select(Sequel[:equipment][:name], Sequel[:equipment][:stat_modifier_json],
+                   Sequel[:player_equipment][:id])
            .all
 
     # Holiday souvenirs stay — earned in-season, kept forever (also reclaimable free at Vex).
+    # The owner's locked Syn set stays worn too.
     keep = Engine::Seasons.holiday_outfit_names
-    lost = rows.reject { |r| keep.include?(r[:name].to_s) }
+    locked = syn_locked?
+    lost = rows.reject { |r| keep.include?(r[:name].to_s) || (locked && dev_only_gear?(r[:stat_modifier_json])) }
     ids = lost.map { |r| r[:id] }
     DB[:player_equipment].where(id: ids).delete unless ids.empty?
     # Still record ownership for anything we kept, in case the tracker lagged.
     rows.each { |r| note_holiday_outfit!(r[:name]) if keep.include?(r[:name].to_s) }
     lost.map { |r| r[:name] }
+  end
+
+  def dev_only_gear?(raw)
+    mods = raw.is_a?(Hash) ? raw : JSON.parse(raw.to_s)
+    mods.is_a?(Hash) && mods['dev_only']
+  rescue JSON::ParserError
+    false
   end
 
   MIMIC_CHORUS = [

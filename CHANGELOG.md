@@ -12,6 +12,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - Co-developer ids are read from `CO_DEVELOPER_IDS` in the environment. A blank value means there is no co-developer.
 - The owner and each co-developer wear the debugger badge as well as the developer badge. Bug testers still wear only the debugger badge.
+- `e,dev syn` grants and equips the Syn set for the owner. `e,dev synlock` keeps that set through defeat and stops cursed gear from auto-equipping while it is on.
 
 ### Added
 

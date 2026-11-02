@@ -19,6 +19,8 @@ module Commands
     HELP = <<~TXT.strip
       **Dev commands** (prefix only, developer + bug testers)
       `e,dev debug` — toggle debug mode (one-hit kills, monsters never act, guaranteed flee/satisfy, traps avoided)
+      `e,dev syn` — grant and wear the whole Syn set (owner only)
+      `e,dev synlock` — toggle the Syn lock: cursed gear stays in the pack, and the set survives defeat (owner only)
       `e,dev info` — raw player + tracker dump
       `e,dev set <level|lp|lust|defiance|str|agi|res|sub|floor|cycle> <n>`
       `e,dev heal` — full defiance, base lust
@@ -64,6 +66,8 @@ module Commands
       player = find_player(event) or return
       case sub
       when 'info' then info(event, player)
+      when 'syn' then grant_syn_set(event, player)
+      when 'synlock' then toggle_syn_lock(event, player)
       when 'set' then set_field(event, player, args[0], args[1])
       when 'heal'
         player.update(defiance: player.max_defiance, lust: player.base_lust)
@@ -113,7 +117,7 @@ module Commands
     def info(event, player)
       player.refresh
       lines = [
-        "**#{player.display_name}** (#{player.discord_id}) · debug #{Engine::Dev.debug?(player) ? 'ON' : 'off'}",
+        "**#{player.display_name}** (#{player.discord_id}) · debug #{Engine::Dev.debug?(player) ? 'ON' : 'off'} · syn lock #{player.syn_locked? ? 'on' : 'off'}",
         "Lv #{player.level} · STR #{player.strength} AGI #{player.agility} RES #{player.resistance} SUB #{player.submission}",
         "Effective STR #{player.effective_strength} AGI #{player.effective_agility} RES #{player.effective_resistance}",
         "Defiance #{player.defiance}/#{player.max_defiance} · Lust #{player.lust} · LP #{player.lp}",
@@ -169,6 +173,48 @@ module Commands
       count = ds.delete
       player.clamp_defiance!
       reply(event, "Removed #{count} curse(s).")
+    end
+
+    MAKER_REFUSAL = "**Syn's gear** stirs, recognises that you are not its maker, and will not " \
+                    'be worn. Some things have exactly one owner.'
+
+    def grant_syn_set(event, player)
+      return reply(event, MAKER_REFUSAL) unless Engine::Dev.owner?(event.user.id)
+
+      Engine::Wardrobe.sync_dev_gear!
+      lines = Engine::Wardrobe::DEV_GEAR.map { |spec| wear_syn_piece(player, spec[:name]) }
+      reply(event, lines.join("\n"))
+    end
+
+    def wear_syn_piece(player, name)
+      item = ::Equipment.where(name: name).first
+      return "Missing **#{name}**." unless item
+
+      unless player.owns_equipment?(item.id)
+        grant = player.grant_equipment!(item, auto_equip: false)
+        return grant[:message] unless grant[:ok]
+      end
+
+      current = player.equipment_for_slot(item.slot)
+      lifted = nil
+      if current && current.cursed && current.id != item.id
+        DB[:player_equipment]
+          .where(player_id: player.discord_id, equipment_id: current.id)
+          .update(is_equipped: false)
+        lifted = current.name
+      end
+
+      result = player.equip_item(item.id)
+      line = result[:ok] ? "Wearing **#{item.name}**." : result[:message]
+      lifted ? "#{line} **#{lifted}** is in the pack." : line
+    end
+
+    def toggle_syn_lock(event, player)
+      return reply(event, MAKER_REFUSAL) unless Engine::Dev.owner?(event.user.id)
+
+      on = !player.tracker('syn_lock').positive?
+      player.set_tracker!('syn_lock', on ? 1 : 0)
+      reply(event, "Syn lock **#{on ? 'ON' : 'OFF'}**.")
     end
 
     def give_item(event, player, name)
