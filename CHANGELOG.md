@@ -15,7 +15,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 ### Added
 
 - **Profile menu.** `/profile` moves between Profile, Titles, Achievements, Hybrids, Collections, Badges, and the Leaderboard from one menu. Rename and Parlour are on that menu. Old buttons on messages already on screen still work.
-- **Season badges** show on the profile card. One is earned the first time you play during that event, and it stays through defeat and `/restart`. Seasons you have not played since this shipped stay locked. Keepsakes are listed only under Collections.
+- **Season badges** show on the profile card. One is earned by playing during that event, including progress you already made while the event is still running. It stays through defeat and `/restart`. A season that is not running does not grant from old counters. Keepsakes are listed only under Collections.
 
 ### Fixed
 

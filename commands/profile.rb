@@ -63,6 +63,7 @@ module Commands
                    "**Achievements** #{target.earned_achievements.size}/#{Engine::TitleSystem.visible_achievements(target).size} · " \
                    "**Hybrid forms** #{target.unlocked_transformations.size}/#{Engine::TransformationSystem.visible(target).size}"
         )
+        Engine::Badges.grant_active!(target)
         Engine::Badges.sync_staff!(target)
         badge_line = Engine::Badges.profile_line(target)
         c.text_display(content: badge_line) if badge_line
@@ -118,6 +119,7 @@ module Commands
 
     def show_badges(event)
       player = ErosHelpers.require_player(event) or return
+      Engine::Badges.grant_active!(player)
       Engine::Badges.sync_staff!(player)
       player.refresh
 

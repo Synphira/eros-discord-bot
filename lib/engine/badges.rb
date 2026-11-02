@@ -65,6 +65,24 @@ module Engine
       player.remember!('badges', season)
     end
 
+    # While a season is the one currently running, progress already on the
+    # delver counts. Counters only move during the event, and they are not
+    # read once that event is over, so a past season does not grant itself
+    # in the off-week.
+    def grant_active!(player)
+      return unless player
+
+      pack = Engine::Seasons.active
+      return unless pack.respond_to?(:key)
+
+      row = SEASONS.find { |season| season[:key] == pack.key.to_s }
+      return unless row
+      return if holds?(player, row[:key])
+      return unless row[:trackers].any? { |tracker| player.tracker(tracker).positive? }
+
+      player.remember!('badges', row[:key])
+    end
+
     def sync_staff!(player)
       return unless player
 

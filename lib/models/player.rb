@@ -347,7 +347,10 @@ class Player < Sequel::Model(:players)
   end
 
   def check_progress!
-    Engine::Badges.sync_staff!(self) if defined?(Engine::Badges)
+    if defined?(Engine::Badges)
+      Engine::Badges.grant_active!(self)
+      Engine::Badges.sync_staff!(self)
+    end
     note_highest_level!
     lines = []
     3.times do
