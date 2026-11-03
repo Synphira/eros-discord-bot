@@ -172,10 +172,17 @@ module Engine
       },
       'drowned_sin' => {
         name: 'The Drowned Sin', type: 'eldritch', type_name: 'Relic · Eldritch', color: 0x3b0a2e,
-        special: 'many_arms', trophy: nil, affinity: [25],
+        special: 'fused_reach', trophy: nil, affinity: [25],
         hp_mult: 1.05, strength_mult: 0.95, agility_mult: 1.0, lust_mult: 1.2,
-        object: 'the same glass tank, cracked now, and what is coiled in it is wearing a shape the parlour is missing',
-        awakening: 'The glass is already cracked. She comes out wearing the absence you made: ink, a needle that is not hers, and more arms than the saint ever needed. The tower does not call this a relic. It calls it what you fed it.'
+        object: 'the same glass tank, cracked, and the woman coiled in the dark water is Syn and the goddess worn as one body',
+        awakening: 'The glass is already cracked. What climbs out is taller than the parlour and still dripping: ' \
+                   'waist-length platinum hair, artfully ruined, falling into the goddess\'s ash-grey bangs and their ' \
+                   'crimson hearts; pitch-black horns through a smudged tiara; heavy-lidded violet eyes burning Eros\'s ' \
+                   'deep red above a smirk that is also that cruel smile. Inked, pierced skin shows under a glossy white ' \
+                   'high-cut bodysuit split over black lace, the red heart on her chest, a black choker, a bell at one ear. ' \
+                   'Smoked-glass wings droop where a mantle should flare, and behind them enormous white tentacles coil, ' \
+                   'wet crimson-magenta suckers moving on their own, one wrapped around a needle that belongs to the bench. ' \
+                   'She is the shape you fed the tank. She is both of them.'
       }
     }.freeze
 
@@ -494,6 +501,46 @@ module Engine
         unimpressed: ['The tentacles withdraw into the dark water. Even the deep can be disappointed.'],
         beaten: ['The great shape slides apart and pours itself back toward the reliquary, tentacles retreating into the dark until only ripples remain.']
       },
+      'The Drowned Sin' => {
+        assault: {
+          'vagina' => ['She pins your thighs with an inked hand and a white tentacle at once. The tentacle — smooth, its ' \
+                       'underside wet crimson-magenta — slides into your cunt while platinum hair and pitch-black horns ' \
+                       'curtain your face, violet eyes burning the goddess\'s red, and she fucks you in the cold rhythm of the tank.'],
+          'penis' => ['A suckered white tentacle coils around your cock and strokes you while her inked fingers, a bell ' \
+                      'ticking at her ear, tease the tip. The red heart on her glossy white bodysuit presses to your chest. ' \
+                      'The smirk is Syn\'s. The glow in those heavy-lidded eyes is Eros\'s.'],
+          'anus' => ['Tentacles pour from behind her drooping smoked-glass wings, lift you, and spread you, and one thick ' \
+                     'white length pushes into your ass. A black-cuffed wrist holds your hip. Black lace and the white ' \
+                     'bodysuit cling to her, both soaked, both hers.'],
+          'breasts' => ['Crimson suckers and a parlour-inked mouth find your breasts together, kissing your nipples while ' \
+                        'ash-grey bangs — marked with crimson hearts — fall across smudged violet eyes that burn red.'],
+          'any' => ['She takes you as both of them: Syn\'s inked hands and needle-sure grip, Eros\'s white tentacles ' \
+                    'coiling every limb, ruined platinum hair stuck to heart-marked bangs, lace and glossy white dripping ' \
+                    'tank-water onto you.']
+        },
+        willing: {
+          'vagina' => ['You open yourself to the woman who is both of them, and a thick white tentacle slides into your ' \
+                       'cunt while her inked fingers spread you, horns lowered, violet eyes lit red, the red heart on her ' \
+                       'chest brushing your mouth.'],
+          'penis' => ['You offer your cock and she takes it the way the parlour takes a commission and the throne takes a ' \
+                      'pet: inked hand, suckered tentacle, bell chiming, her cruel tired smile watching you leak against ' \
+                      'white and black lace.'],
+          'anus' => ['You present yourself, and a slick white tentacle fills your ass while smoked-glass wings fold around ' \
+                     'you and her black-cuffed hands hold you open under the goddess\'s horns and Syn\'s smirk.'],
+          'breasts' => ['You bare your breasts and she answers with suckers and an ink-stained mouth together, ' \
+                        'until you are arching into platinum hair, a smudged tiara, and the sweep of pitch-black horns.'],
+          'any' => ['You stop struggling and she receives you wearing both: choker and bell, lace under the white bodysuit, ' \
+                    'smoked-glass wings, and white tentacles with crimson suckers closing over your head like dark water.']
+        },
+        wanting: ['Her horns tilt. Another tentacle uncoils from the smoked glass of her wings, ink bleeding along the ' \
+                  'white, and the smirk — tired and cruel at once — says she is not done wearing either of them.'],
+        sated: ['The tentacles shudder, suckers flashing crimson-magenta, and she laughs in the parlour\'s register and ' \
+                'the throne\'s. Platinum hair curtains the red heart on her chest. For a moment the fused shape is simply pleased.'],
+        unimpressed: ['One heavy-lidded violet eye, lit from within with Eros\'s red, looks you over. A tentacle flicks, ' \
+                      'bored, and the bell at her ear does not bother to ring. "The parlour has had better. So has the throne."'],
+        beaten: ['Your last blow drives her back into the cracked glass. Horns scrape the tank. Smoked-glass wings fold, ' \
+                 'white tentacles lash once and coil in, and what looks out at you is still Syn\'s smirk on the goddess\'s mouth.']
+      },
       'Eros' => {
         assault: {
           'vagina' => ['Eros pulls you into her lap and slides two fingers into your cunt, curling them lazily while she purrs in your ear. "So wet already. You climbed thirty-five floors just for this, didn\'t you, pet?"',
@@ -540,6 +587,10 @@ module Engine
       'first_worship' => ['The %<name>s hums the first hymn, and the note goes through the floor and up your spine like a hand.'],
       'hoard_heat' => ['The %<name>s\'s heart slams in its golden cage, and furnace heat rolls off her scales in waves!'],
       'many_arms' => ['Another tentacle — and another — uncoils out of the dark of the %<name>s, and they find you all at once.'],
+      'fused_reach' => ['%<name>s reaches with an inked hand and a white tentacle at once — needle, crimson suckers, ' \
+                        'platinum hair and pitch-black horns all arriving together.',
+                        '%<name>s\'s smoked-glass wings shed another tentacle. Ash-grey heart-marked bangs fall across ' \
+                        'violet eyes burning red as it finds you.'],
       'dominion_block' => ['%<name>s crooks one finger and the chamber doors slam shut. "Leaving so soon, pet? I didn\'t give you permission."',
                            '%<name>s laughs as you turn to run. "Sit." Your body obeys before your mind does, and you stay right where she wants you.'],
       'dominion_heat' => ["The tower pulses with %<name>s's will, and every sin in its walls floods into you as heat!",
@@ -1058,6 +1109,21 @@ module Engine
               'kissing you in a hundred places, drawn down into an embrace with no edges until you cannot ' \
               'remember the surface at all.'
       },
+      'The Drowned Sin' => {
+        intro: 'She stops, and the tank-water runs off all of her at once: Syn\'s ruined waist-length platinum hair and ' \
+               'inked, pierced skin poured into Eros\'s towering shape — ash-grey bangs marked with crimson hearts, ' \
+               'pitch-black horns through a smudged tiara, heavy-lidded violet eyes burning deep red, a glossy white ' \
+               'bodysuit split over black lace with the red heart on her chest. Smoked-glass wings droop. Behind them ' \
+               'the goddess\'s white tentacles spread, crimson-magenta suckers glistening, one coiled around a needle. ' \
+               '*"Kneel,"* she says, parlour and throne in the same mouth. *"You fed me both of them. Open."*',
+        resist_label: 'Refuse the shape', give_label: 'Open to both of them',
+        resist: 'You strike at the offered tentacle — and the inked hand catches your wrist, horns lowering, ' \
+                'red-violet eyes delighted. She comes in anyway, lace and glossy white and suckers, insulted that ' \
+                'you tried to separate one of her from the other.',
+        give: 'You open your arms. She draws you up the way the goddess draws a pet into her lap and the way Syn ' \
+              'pulls a client onto the bench: black-cuffed hands, a bell, the needle set aside, white tentacles ' \
+              'closing until the only face left is hers.'
+      },
       'Eros' => {
         intro: 'Eros stops fighting and simply opens her arms, her great white tentacles spreading wide behind her like a ' \
                'living mantle, crimson undersides glistening. The chamber fills with warm, rose-scented heat. *"You have ' \
@@ -1081,14 +1147,8 @@ module Engine
       LEGACY_NAMES.fetch(boss_name.to_s, boss_name.to_s)
     end
 
-    # The Sin fights with the Saint's scenes. Her name stays her own everywhere else.
-    def presentation_name(boss_name)
-      name = canonical_name(boss_name)
-      name == 'The Drowned Sin' ? 'Drowned Saint' : name
-    end
-
     def phase(boss_name)
-      PHASES[presentation_name(boss_name)]
+      PHASES[canonical_name(boss_name)]
     end
 
     def phase_line(player, boss_name, key)
@@ -1133,6 +1193,14 @@ module Engine
           'One thick tentacle slides into your pussy and pumps you slow and deep while the rest hold you open for her.'
         elsif parts.include?('penis')
           'One thick tentacle coils around your cock and strokes you slow and thorough while the rest hold you open for her.'
+        end
+      when 'The Drowned Sin'
+        if parts.include?('vagina')
+          'One thick white tentacle slides into your pussy and pumps you slow while her inked fingers spread you ' \
+            'under the red heart on her chest.'
+        elsif parts.include?('penis')
+          'One thick white tentacle coils around your cock and strokes you while her inked hand holds you open, ' \
+            'the bell at her ear ticking with each pull.'
         end
       end
     end
@@ -1231,7 +1299,7 @@ module Engine
                                            fallback: SCENES.dig('Mirror Queen', kind, 'any'))
       end
 
-      spec = SCENES.dig(presentation_name(boss_name), kind) or return nil
+      spec = SCENES.dig(boss_name, kind) or return nil
 
       parts = Engine::ChastitySystem.scene_parts(player)
       pool = parts.flat_map { |part| Array(spec[part]) } + Array(spec['any'])
@@ -1523,6 +1591,14 @@ module Engine
           log << "Lust +10! (now #{player.lust})"
         end
 
+      when 'fused_reach'
+        if rand(100) < 30
+          log << special_line(player, 'fused_reach', name,
+                              "#{name} reaches for you with an inked hand and a white tentacle at once!")
+          player.gain_lust!(10)
+          log << "Lust +10! (now #{player.lust})"
+        end
+
       when 'seductive_gaze'
         if action == :fight && rand(100) < 40
           log << special_line(player, 'seductive_gaze', name, "The #{name} catches your eye with her seductive gaze! Your will wavers!")
@@ -1640,6 +1716,11 @@ module Engine
                          'clearly intends it not to be — that the family resemblance runs all the way down. ' \
                          '"Tell her," something in you understands, without words, "that her saint was ' \
                          'worshipped." Then the dark water closes, and you are merely very, very wet.',
+      'The Drowned Sin' => 'She lets you go sucker by sucker, then with an inked thumb along your jaw, the bell ' \
+                           'gone quiet. Platinum hair sticks to ash-grey bangs marked in crimson hearts. The red ' \
+                           'in her violet eyes banks. "Tell them," she says, Syn\'s tired mouth and Eros\'s purr ' \
+                           'at once, "that you looked at both of us and did not look away." The cracked glass ' \
+                           'takes her back. You are wet, ink-smudged, and marked.',
       'Eros' => 'She does not rise from the throne. She does not have to: the whole room leans toward her ' \
                 'satisfaction like plants toward a window. "There," Eros purrs, as her tentacles uncoil ' \
                 'from you with obscene reluctance, suckers letting go one kiss at a time. "That is how a ' \
@@ -1663,7 +1744,8 @@ module Engine
       'Chalice That Never Empties' => 'a cork that smells eternally of first wine',
       'First Altar Stone' => 'a grain of warm grit from the first hymn',
       'Hoardheart Dragon' => 'a coin that is always slightly too warm',
-      'Drowned Saint' => 'a bead of dark water that refuses to dry'
+      'Drowned Saint' => 'a bead of dark water that refuses to dry',
+      'The Drowned Sin' => 'a sucker-mark filled in with wet black ink, the bell still dripping'
     }.freeze
 
     def memento_for(name)
@@ -1680,7 +1762,7 @@ module Engine
     end
 
     def satisfy_closing(boss_name)
-      SATISFY_CLOSINGS[presentation_name(boss_name.to_s)]
+      SATISFY_CLOSINGS[canonical_name(boss_name.to_s)]
     end
 
     def boss_defeat_reward(player, encounter)

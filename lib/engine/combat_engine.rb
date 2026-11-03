@@ -186,7 +186,7 @@ module Engine
       phase_choice = PHASE_ACTIONS.include?(action.to_sym)
       if enc[:phase] == 'pending' && !phase_choice
         return { ok: false, error: :phase, phase: phase_labels(enc), encounter: enc,
-                 log: ["The #{enc[:name]} is waiting for your answer. Choose one of the two options."] }
+                 log: ["#{foe_name(enc, 'The')} is waiting for your answer. Choose one of the two options."] }
       end
       if phase_choice && enc[:phase] != 'pending'
         return { ok: false, error: :no_phase, log: ['There is nothing to answer right now.'] }
@@ -257,6 +257,14 @@ module Engine
     end
 
     private
+
+    # "The Drowned Sin" already carries its article. Other foes do not.
+    def foe_name(enc, article = 'the')
+      name = enc[:name].to_s
+      return name.sub(/\Athe\b/i, article) if name.match?(/\Athe\b/i)
+
+      "#{article} #{name}"
+    end
 
     def normalize(encounter)
       type = (encounter[:type] || encounter['type'] || 'beast').to_s
@@ -383,9 +391,9 @@ module Engine
       surprise = !Engine::Dev.debug?(@player) && rand < @player.curse_effect_sum('crit_chance')
       damage *= 2 if surprise
       enc[:hp] = [enc[:hp] - damage, 0].max
-      log << "**Surprise attack!** You catch the #{enc[:name]} off guard." if surprise
+      log << "**Surprise attack!** You catch #{foe_name(enc, 'the')} off guard." if surprise
       log << { scene: MonsterScenes.combat_line(@player, :fight, enc[:name], enc[:type]) }
-      log << "You deal **#{damage}** damage to the #{enc[:name]}! " \
+      log << "You deal **#{damage}** damage to #{foe_name(enc, 'the')}! " \
              "(HP `#{enc[:hp]}/#{enc[:max_hp]}`)"
 
       lifesteal = @player.curse_effect_sum('lifesteal')
@@ -476,7 +484,7 @@ module Engine
       Engine::Seasons.note_submit!(@player)
       demon_kind = demon_kind(enc)
       @player.bump_tracker!("#{demon_kind}_submissions") if demon_kind
-      log << "You submit to the #{enc[:name]}, gaining **#{lp_reward}** Lust Points for your willingness."
+      log << "You submit to #{foe_name(enc, 'the')}, gaining **#{lp_reward}** Lust Points for your willingness."
 
       boss_scene = enc[:is_boss] && Engine::BossFights.scene(@player, enc[:name], :willing)
       if boss_scene
@@ -510,12 +518,12 @@ module Engine
 
       if rand < chance
         log << { scene: MonsterScenes.combat_line(@player, :satisfied, enc[:name], enc[:type]) }
-        log << "The #{enc[:name]} shudders with pleasure, completely satisfied by your submission!"
+        log << "#{foe_name(enc, 'The')} shudders with pleasure, completely satisfied by your submission!"
         log << 'The monster, now spent, lets you slip away without further incident.'
         return :satisfied
       end
 
-      log << "The #{enc[:name]} isn't satisfied yet _(#{(chance * 100).round}% chance)_…"
+      log << "#{foe_name(enc, 'The')} isn't satisfied yet _(#{(chance * 100).round}% chance)_…"
       nil
     end
 
@@ -525,16 +533,16 @@ module Engine
         enc[:satisfaction] = enc[:satisfaction].to_i + 1
         if enc[:satisfaction] >= needed
           boss_line!(enc, :sated, log)
-          log << "The #{enc[:name]} arches and cries out, **completely satisfied**!"
+          log << "#{foe_name(enc, 'The')} arches and cries out, **completely satisfied**!"
           log << 'Spent and sated, it lets you pass deeper into the tower.'
           return :satisfied
         end
         boss_line!(enc, :wanting, log)
-        log << "The #{enc[:name]} moans, clearly enjoying you — **satisfaction #{enc[:satisfaction]}/#{needed}** " \
+        log << "#{foe_name(enc, 'The')} moans, clearly enjoying you — **satisfaction #{enc[:satisfaction]}/#{needed}** " \
                "_(#{(chance * 100).round}% per submit)_. It wants more…"
       else
         boss_line!(enc, :unimpressed, log)
-        log << "The #{enc[:name]} is unimpressed — satisfaction stays at **#{enc[:satisfaction]}/#{needed}** " \
+        log << "#{foe_name(enc, 'The')} is unimpressed — satisfaction stays at **#{enc[:satisfaction]}/#{needed}** " \
                "_(#{(chance * 100).round}% per submit)_."
       end
       nil
@@ -599,7 +607,7 @@ module Engine
       return nil if enc[:satisfaction] < self.class.boss_satisfy_needed(@player)
 
       boss_line!(enc, :sated, log)
-      log << "The #{enc[:name]} arches and cries out, **completely satisfied**!"
+      log << "#{foe_name(enc, 'The')} arches and cries out, **completely satisfied**!"
       :satisfied
     end
 
@@ -649,7 +657,7 @@ module Engine
       Engine::Admirers.record_satisfaction!(@player, enc, log)
       award_combat_end_bonus!(log)
       roll_curse!(enc, log, CURSE_CHANCE_SATISFIED,
-                  "Satisfied, the #{enc[:name]} leaves its mark on you")
+                  "Satisfied, #{foe_name(enc, 'the')} leaves its mark on you")
       if Engine::Elites.elite?(enc)
         @player.gain_lp!(Engine::Elites::SATISFY_LP_BONUS)
         @player.bump_tracker!('elites_satisfied')
@@ -664,7 +672,7 @@ module Engine
       @climaxed_this_turn = true if climax
       if climax && !climax[:broken] && !@player.climax_denied?
         roll_curse!(enc, climax[:lines], CURSE_CHANCE_ORGASM,
-                    "Cumming for the #{enc[:name]} marks you as the tower's own")
+                    "Cumming for #{foe_name(enc, 'the')} marks you as the tower's own")
       end
       climax
     end
@@ -700,26 +708,26 @@ module Engine
       return false if Engine::TransformationSystem.combat_special!(@player, enc, log) == :skip
 
       if rand < @player.curse_effect_sum('intimidate_chance')
-        log << "The #{enc[:name]} falters before your radiance and backs away without touching you!"
+        log << "#{foe_name(enc, 'The')} falters before your radiance and backs away without touching you!"
         return false
       end
 
       negation = @player.curse_effect_sum('negation_chance')
       if !enc[:negation_used] && negation.positive? && rand < negation
         enc[:negation_used] = true
-        log << "Your flesh briefly merges with a nearby object — the #{enc[:name]}'s attack is **absorbed**! " \
+        log << "Your flesh briefly merges with a nearby object — #{foe_name(enc, 'the')}'s attack is **absorbed**! " \
                '_(Phantom Latch, once per combat)_'
         return false
       end
 
       if enc[:type] != 'undead' && rand >= @player.curse_effect_product('accuracy', default: 1.0)
-        log << "The #{enc[:name]} flinches from your necrotic aura and **misses** you!"
+        log << "#{foe_name(enc, 'The')} flinches from your necrotic aura and **misses** you!"
         return false
       end
 
       if action != :submit && rand < dodge_chance(enc)
         log << { scene: MonsterScenes.combat_line(@player, :dodge, enc[:name], enc[:type]) }
-        log << "You dodge the #{enc[:name]}! _(#{(dodge_chance(enc) * 100).round}% dodge chance)_"
+        log << "You dodge #{foe_name(enc, 'the')}! _(#{(dodge_chance(enc) * 100).round}% dodge chance)_"
         return false
       end
 
@@ -729,7 +737,7 @@ module Engine
       log << if enc[:name] == 'Mirror Queen'
                'You close in on yourself, wearing your own body, your own hands already reaching!'
              else
-               "The #{enc[:name]} closes in and gets its hands on you!"
+               "#{foe_name(enc, 'The')} closes in and gets its hands on you!"
              end
       assault_scene = (enc[:is_boss] && Engine::BossFights.scene(@player, enc[:name], :assault)) ||
                       MonsterScenes.generate_assault(@player, enc[:name], monster_type: enc[:type])
@@ -799,17 +807,17 @@ module Engine
         lp = (lp * BOSS_SATISFY_LP_MULT).round if satisfied
         @player.gain_lp!(lp)
         if satisfied
-          log << "You satisfied the #{enc[:name]}! You gain **#{lp}** Lust Points " \
+          log << "You satisfied #{foe_name(enc, 'the')}! You gain **#{lp}** Lust Points " \
                  "_(×#{BOSS_SATISFY_LP_MULT} for winning through submission)_!"
           if (closing = Engine::BossFights.satisfy_closing(enc[:name]))
             log << { scene: closing }
           end
           roll_curse!(enc, log, CURSE_CHANCE_BOSS,
-                      "Even satisfied, the #{enc[:name]} does not let you leave unmarked")
+                      "Even satisfied, #{foe_name(enc, 'the')} does not let you leave unmarked")
         else
-          log << "You defeated the #{enc[:name]}! You gain **#{lp}** Lust Points!"
+          log << "You defeated #{foe_name(enc, 'the')}! You gain **#{lp}** Lust Points!"
           roll_curse!(enc, log, CURSE_CHANCE_BOSS,
-                      "Victory tastes sweet — and the #{enc[:name]} makes sure you pay for it")
+                      "Victory tastes sweet — and #{foe_name(enc, 'the')} makes sure you pay for it")
         end
 
         if reward[:special_item]
@@ -851,10 +859,10 @@ module Engine
         end
         log << { scene: MonsterScenes.combat_line(@player, :victory, enc[:name], enc[:type]) }
         if @player.curse_effect_flag?("#{enc[:type]}_no_lp")
-          log << "You defeated the #{enc[:name]}! You gain no Lust Points due to your curse."
+          log << "You defeated #{foe_name(enc, 'the')}! You gain no Lust Points due to your curse."
           roll_curse!(enc, log,
                       Engine::Elites.elite?(enc) ? CURSE_CHANCE_ELITE_VICTORY : CURSE_CHANCE_VICTORY,
-                      "As the #{enc[:name]} yields, the tower slips its brand into you")
+                      "As #{foe_name(enc, 'the')} yields, the tower slips its brand into you")
           return { ok: true, victory: true, encounter: enc, log: log, lp_gained: 0 }
         end
 
@@ -864,10 +872,10 @@ module Engine
         @player.gain_lp!(lp_gain)
         @player.bump_tracker!('elites_defeated') if Engine::Elites.elite?(enc)
         elite_note = Engine::Elites.elite?(enc) ? " _(×#{Engine::Elites::VICTORY_LP_MULT} for an elite)_" : ''
-        log << "You defeated the #{enc[:name]}! You gain **#{lp_gain}** Lust Points!#{elite_note}"
+        log << "You defeated #{foe_name(enc, 'the')}! You gain **#{lp_gain}** Lust Points!#{elite_note}"
         roll_curse!(enc, log,
                     Engine::Elites.elite?(enc) ? CURSE_CHANCE_ELITE_VICTORY : CURSE_CHANCE_VICTORY,
-                    "As the #{enc[:name]} yields, the tower slips its brand into you")
+                    "As #{foe_name(enc, 'the')} yields, the tower slips its brand into you")
       end
       
       { ok: true, victory: true, encounter: enc, log: log }
