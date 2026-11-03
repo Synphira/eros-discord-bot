@@ -175,6 +175,7 @@ module Engine
       @player.update(in_combat: true) unless @player.in_combat
       log = []
       @climaxed_this_turn = false
+      @phylactery_held = false
 
       if action.to_sym == :flee
         @player.bump_tracker!('flee_attempts')
@@ -247,7 +248,7 @@ module Engine
         if immortal_vs?(enc[:type])
           @player.update(defiance: 1)
           log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-        elsif !@player.try_cheat_death!(log)
+        elsif !spared_by_phylactery?(log)
           return finish_defeat!(enc, log)
         end
       end
@@ -410,10 +411,10 @@ module Engine
           if immortal_vs?(enc[:type])
             @player.update(defiance: 1)
             log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-            return false
+          elsif !spared_by_phylactery?(log)
+            log << "You've been completely broken! Game over."
+            return true
           end
-          log << "You've been completely broken! Game over."
-          return true
         end
       end
 
@@ -506,7 +507,7 @@ module Engine
           if immortal_vs?(enc[:type])
             @player.update(defiance: 1)
             log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-          else
+          elsif !spared_by_phylactery?(log)
             log << "You've been completely consumed by pleasure! Game over."
             return :broken
           end
@@ -598,10 +599,12 @@ module Engine
       if climax
         log.concat(climax[:lines])
         if climax[:broken]
-          return :broken unless immortal_vs?(enc[:type])
-
-          @player.update(defiance: 1)
-          log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
+          if immortal_vs?(enc[:type])
+            @player.update(defiance: 1)
+            log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
+          elsif !spared_by_phylactery?(log)
+            return :broken
+          end
         end
       end
       return nil if enc[:satisfaction] < self.class.boss_satisfy_needed(@player)
@@ -689,6 +692,7 @@ module Engine
         log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
         return false
       end
+      return false if spared_by_phylactery?(log)
 
       log << "You've been broken by your own living gear! Game over."
       true
@@ -757,10 +761,10 @@ module Engine
         if immortal_vs?(enc[:type])
           @player.update(defiance: 1)
           log << 'A curse keeps you conscious — you cannot be finished by this foe (defiance holds at **1**).'
-          return false
+        elsif !spared_by_phylactery?(log)
+          log << "The relentless pleasure overwhelms you completely! Game over."
+          return true
         end
-        log << "The relentless pleasure overwhelms you completely! Game over."
-        return true
       end
 
       false
@@ -920,6 +924,11 @@ module Engine
     end
 
     def finish_defeat!(enc, log)
+      if spared_by_phylactery?(log)
+        @player.store_encounter!(enc)
+        return { ok: true, ongoing: true, encounter: enc, log: log }
+      end
+
       if enc[:name].to_s.include?('Champagne Slime')
         log << { scene: 'She does not finish you so much as toast you — raised, golden, and entirely ' \
                         'the centrepiece, while the tower applauds in fizz. You are, regrettably, delicious.' }
@@ -952,6 +961,11 @@ module Engine
     end
 
     def finish_broken!(enc, log)
+      if spared_by_phylactery?(log)
+        @player.store_encounter!(enc)
+        return { ok: true, ongoing: true, encounter: enc, log: log }
+      end
+
       log << { scene: MonsterScenes.combat_line(@player, :broken, enc[:name], enc[:type]) }
       result = @player.apply_defeat_curse!(monster_type: enc[:type])
       loss = @player.reset_run!
@@ -971,6 +985,23 @@ module Engine
       log << "You are cast out of **Cycle #{loss[:cycle_lost]}** — the tower begins again from **Cycle 1**." if loss[:cycle_lost]
       log << 'Floor, defiance, and lust reset — LP, curses, and living (cursed) gear persist.'
       { ok: true, broken: true, encounter: enc, log: log, curse: result[:curse] }
+    end
+
+    # One charge covers the whole action. The first break spends it. Anything
+    # else in that same click that would finish the run is held back.
+    def spared_by_phylactery?(log)
+      if @phylactery_held
+        if @player.defiance <= 0
+          restored = [(@player.max_defiance / 2.0).round, 1].max
+          @player.update(defiance: restored)
+          log << "_The phylactery is still open. It holds you at **#{restored}** defiance._"
+        end
+        return true
+      end
+      return false unless @player.try_cheat_death!(log)
+
+      @phylactery_held = true
+      true
     end
 
     def immortal_vs?(type)

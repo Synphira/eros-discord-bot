@@ -1022,7 +1022,7 @@ module Engine
       return { broken: false, log: log } unless climax
 
       log.concat(climax[:lines])
-      if climax[:broken]
+      if climax[:broken] && !player.try_cheat_death!(log)
         loss = player.reset_run!
         curse = player.apply_defeat_curse!
         if curse[:curse]

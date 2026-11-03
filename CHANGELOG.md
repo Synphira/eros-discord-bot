@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-11-03
+
+### Fixed
+
+- **Lich's Phylactery** spends one charge on the blow that would end the run, and that charge covers the rest of the same action. A follow-up orgasm in that same click no longer dumps you back to cycle 1 while a charge was still sitting there.
+
 ## 2026-11-02
 
 ### Added

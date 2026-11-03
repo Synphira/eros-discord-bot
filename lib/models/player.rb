@@ -964,6 +964,8 @@ class Player < Sequel::Model(:players)
   def take_damage!(amount)
     adjust_defiance!(-amount)
     if dead?
+      return :survived if try_cheat_death!([])
+
       reset_run!
       :died
     else
@@ -1239,8 +1241,6 @@ class Player < Sequel::Model(:players)
     end
 
     broken = defiance <= 0
-    immortal = type && curse_effect_flag?("#{type}_no_death")
-    broken = false if broken && !immortal && try_cheat_death!(lines)
     bump_tracker!('climaxes_survived') unless broken
 
     { lines: lines, broken: broken }

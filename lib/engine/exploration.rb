@@ -219,6 +219,7 @@ module Engine
 
       lines.concat(climax[:lines])
       return [lines.join("\n"), false] unless climax[:broken]
+      return [lines.join("\n"), false] if player.try_cheat_death!(lines)
 
       player.reset_run!
       curse = player.apply_defeat_curse!
@@ -564,7 +565,7 @@ module Engine
       broken = false
       if (climax = @player.try_climax!)
         lines.concat(Array(climax[:lines]))
-        broken = climax[:broken]
+        broken = climax[:broken] && !@player.try_cheat_death!(lines)
         if broken
           @player.reset_run!
           curse = @player.apply_defeat_curse!
