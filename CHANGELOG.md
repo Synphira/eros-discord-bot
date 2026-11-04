@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-11-04
+
+### Fixed
+
+- Asking someone a question during a season no longer repeats their outfit line in the same message. It stays once, above the answer.
+
 ## 2026-11-03
 
 ### Fixed

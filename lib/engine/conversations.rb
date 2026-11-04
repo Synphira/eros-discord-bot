@@ -1431,9 +1431,8 @@ module Engine
       Engine::MayDay.mark_syn_crumb!(player) if topic[:key] == 'may_day'
       Engine::Midsummer.mark_syn_crumb!(player) if topic[:key] == 'midsummer'
       Engine::Pride.mark_syn_crumb!(player) if topic[:key] == 'pride'
-      if (dress = Engine::Seasons.dress_line(DRESS_WHO[person]))
-        text = "_#{dress}_\n\n#{text}"
-      end
+      # The holiday outfit line lives in the talk header. Prepending it here
+      # printed it twice on the same panel as the answer.
       { ok: true, person: person, topic: topic, text: text, heard_before: heard,
         satisfied_extra: !satisfied_extra.nil? }
     end
