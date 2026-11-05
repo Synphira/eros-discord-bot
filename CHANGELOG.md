@@ -10,7 +10,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Changed
 
-- All Hallows, the Feast, Developer, and Debugger use custom badge icons. The Pull, earned by finishing the Drowned Sin story, uses one too.
+- Season and staff badges use custom icons. The Pull, earned by finishing the Drowned Sin story, uses Dark Secrets.
 
 ## 2026-11-04
 
