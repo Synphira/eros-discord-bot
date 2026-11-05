@@ -9,7 +9,7 @@ module Engine
 
     # Shown only when held. A locked row would spoil how it was earned.
     STORY = [
-      { key: 'saint_returned', name: 'The Pull', emoji: '🫧' }
+      { key: 'saint_returned', name: 'The Pull', emoji: '<:Dark_Secrets:1567992033937854639>' }
     ].freeze
 
     SEASONS = [
@@ -29,9 +29,9 @@ module Engine
         trackers: %w[pride_submits pride_glitter_eaten pride_events pride_excess_events] },
       { key: 'labor_day', name: 'Field Test', emoji: '🔧',
         trackers: %w[labor_day_submits] },
-      { key: 'halloween', name: 'All Hallows', emoji: '🎃',
+      { key: 'halloween', name: 'All Hallows', emoji: '<:All_Hallows_Heat:1567991700704460831>',
         trackers: %w[halloween_submits halloween_candy_eaten trick_or_treat_events halloween_scare_events] },
-      { key: 'thanksgiving', name: 'The Feast', emoji: '🍗',
+      { key: 'thanksgiving', name: 'The Feast', emoji: '<:Feast_of_the_Willing:1567992335109853407>',
         trackers: %w[thanksgiving_submits thanksgiving_leftovers_eaten feast_table_events feast_excess_events] },
       { key: 'christmas', name: 'Yule', emoji: '🎁',
         trackers: %w[christmas_submits christmas_candy_eaten mistletoe_events naughty_list_events] },
@@ -40,8 +40,8 @@ module Engine
     ].freeze
 
     STAFF_MARKS = {
-      'developer' => { name: 'Developer', emoji: '🖤' },
-      'debugger' => { name: 'Debugger', emoji: '🪲' }
+      'developer' => { name: 'Developer', emoji: '<:Developer:1567991747462697060>' },
+      'debugger' => { name: 'Debugger', emoji: '<:Debugger:1567991787836936334>' }
     }.freeze
 
     SEASON_BY_TRACKER = SEASONS.each_with_object({}) do |row, map|

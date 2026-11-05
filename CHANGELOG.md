@@ -6,6 +6,12 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ---
 
+## 2026-11-05
+
+### Changed
+
+- All Hallows, the Feast, Developer, and Debugger use custom badge icons. The Pull, earned by finishing the Drowned Sin story, uses one too.
+
 ## 2026-11-04
 
 ### Fixed
