@@ -129,8 +129,8 @@ module Engine
         name: 'Lich Lord',
         emoji: '❄️',
         heading: 'Talking with the Lich Lord',
-        intro: '_Frost-crown flicker. Blue flame in empty sockets. "Fascinating. Wrong, but fascinating. ' \
-               'Speak. I am taking notes."_',
+        intro: '_The frost crown flickers. Blue flame sits in empty sockets. He does not invite you closer. ' \
+               '"State your question. I am listening, which is more than most of you deserve."_',
         victory_only: true
       },
       'alpha' => {

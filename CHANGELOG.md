@@ -12,6 +12,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 - Talk screens show a small portrait beside the greeting of whoever you are speaking with.
 
+### Fixed
+
+- The Lich Lord's greeting no longer repeats the speech he gives when you ask who he is.
+
 ### Changed
 
 - Season and staff badges use custom icons. The Pull, earned by finishing the Drowned Sin story, uses Dark Secrets.
