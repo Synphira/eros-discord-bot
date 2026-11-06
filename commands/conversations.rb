@@ -157,12 +157,15 @@ module Commands
     end
 
     def header(c, player, person, spec, notice)
+      heading = "## #{spec[:emoji]} #{spec[:heading]} — #{player.display_name}\n#{spec[:intro]}"
       if (url = Engine::TalkPortraits.url_for(person))
-        c.media_gallery do |gallery|
-          gallery.item(url: url, description: spec[:name])
+        c.section do |section|
+          section.text_display(content: heading)
+          section.thumbnail(url: url, description: spec[:name])
         end
+      else
+        c.text_display(content: heading)
       end
-      c.text_display(content: "## #{spec[:emoji]} #{spec[:heading]} — #{player.display_name}\n#{spec[:intro]}")
       if (dress = Engine::Conversations.dress_note(person))
         c.text_display(content: "_#{dress}_")
       end

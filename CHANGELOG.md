@@ -10,7 +10,7 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ### Added
 
-- Talk screens show a portrait of whoever you are speaking with.
+- Talk screens show a small portrait beside the greeting of whoever you are speaking with.
 
 ### Changed
 
