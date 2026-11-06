@@ -38,31 +38,37 @@ module ErosUI
     event.is_a?(Discordrb::Events::ComponentEvent)
   end
 
-  def reply_v2(event, ephemeral: false, colour: ACCENT, with_actions: false, &block)
+  def reply_v2(event, ephemeral: false, colour: ACCENT, with_actions: false, attachments: nil, &block)
     owner_id = event.user.id
+    panel = {
+      colour: colour,
+      with_actions: with_actions,
+      owner_id: owner_id,
+      attachments: attachments
+    }
 
     if ephemeral
-      return respond_v2(event, ephemeral: true, colour: colour, with_actions: with_actions, owner_id: owner_id, &block) if interaction_event?(event)
+      return respond_v2(event, ephemeral: true, **panel, &block) if interaction_event?(event)
 
-      send_v2(event.channel, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+      send_v2(event.channel, **panel, &block)
       return
     end
 
     if component_event?(event)
       begin
-        update_v2(event, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+        update_v2(event, **panel, &block)
       rescue StandardError => e
         warn "[panel] Editing the message failed (#{e.message.to_s.lines.map(&:strip).reject(&:empty?).join(' — ')}); " \
              'sending a new message instead.'
-        respond_or_send(event, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+        respond_or_send(event, **panel, &block)
       end
       return
     end
 
     if interaction_event?(event)
-      respond_or_send(event, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+      respond_or_send(event, **panel, &block)
     else
-      send_v2(event.channel, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+      send_v2(event.channel, **panel, &block)
     end
   end
 
@@ -74,40 +80,61 @@ module ErosUI
 
   # Discord only accepts an interaction reply within 3 seconds; after that the
   # token is dead, so the panel is posted as a normal channel message instead.
-  def respond_or_send(event, colour:, with_actions:, owner_id:, &block)
-    respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+  def respond_or_send(event, colour:, with_actions:, owner_id:, attachments: nil, &block)
+    respond_v2(event, ephemeral: false, colour: colour, with_actions: with_actions, owner_id: owner_id,
+               attachments: attachments, &block)
   rescue StandardError => e
     raise unless interaction_expired?(e) && event.channel
 
     warn '[panel] Interaction expired before the bot replied (slow response); posting to the channel instead.'
-    send_v2(event.channel, colour: colour, with_actions: with_actions, owner_id: owner_id, &block)
+    send_v2(event.channel, colour: colour, with_actions: with_actions, owner_id: owner_id,
+            attachments: attachments, &block)
   end
 
-  def update_v2(event, colour: ACCENT, with_actions: false, owner_id:)
-    event.update_message(has_components: true) do |_builder, view|
-      view.container(colour: colour) do |container|
-        yield container
-        attach_action_buttons(container, with_actions, owner_id)
+  def update_v2(event, owner_id:, colour: ACCENT, with_actions: false, attachments: nil)
+    with_attachment_files(attachments) do |files|
+      event.update_message(has_components: true, attachments: files) do |_builder, view|
+        view.container(colour: colour) do |container|
+          yield container
+          attach_action_buttons(container, with_actions, owner_id)
+        end
       end
     end
   end
 
-  def respond_v2(event, ephemeral: false, colour: ACCENT, with_actions: false, wait: false, owner_id:)
-    event.respond(has_components: true, ephemeral: ephemeral, wait: wait) do |_builder, view|
-      view.container(colour: colour) do |container|
-        yield container
-        attach_action_buttons(container, with_actions, owner_id)
+  def respond_v2(event, owner_id:, ephemeral: false, colour: ACCENT, with_actions: false, wait: false, attachments: nil)
+    with_attachment_files(attachments) do |files|
+      event.respond(has_components: true, ephemeral: ephemeral, wait: wait, attachments: files) do |_builder, view|
+        view.container(colour: colour) do |container|
+          yield container
+          attach_action_buttons(container, with_actions, owner_id)
+        end
       end
     end
   end
 
-  def send_v2(channel, colour: ACCENT, with_actions: false, owner_id:)
-    view = Discordrb::Webhooks::View.new
-    view.container(colour: colour) do |container|
-      yield container
-      attach_action_buttons(container, with_actions, owner_id)
+  def send_v2(channel, owner_id:, colour: ACCENT, with_actions: false, attachments: nil)
+    with_attachment_files(attachments) do |files|
+      view = Discordrb::Webhooks::View.new
+      view.container(colour: colour) do |container|
+        yield container
+        attach_action_buttons(container, with_actions, owner_id)
+      end
+      channel.send_message!(has_components: true, components: view, attachments: files)
     end
-    channel.send_message!(has_components: true, components: view)
+  end
+
+  # Opens portrait files for one Discord upload, then closes them.
+  # `attachments` is a path or a list of paths. Missing files are skipped.
+  def with_attachment_files(attachments)
+    files = Array(attachments).filter_map do |path|
+      next unless path.is_a?(String) && File.file?(path)
+
+      File.open(path, 'rb')
+    end
+    yield(files.empty? ? nil : files)
+  ensure
+    Array(files).each { |file| file.close unless file.closed? }
   end
 
   def attach_action_buttons(container, with_actions, owner_id)

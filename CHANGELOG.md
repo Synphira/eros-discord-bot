@@ -8,6 +8,10 @@ Format: newest entries first. Dates use the day the work landed in this repo.
 
 ## 2026-11-05
 
+### Added
+
+- Talk screens show a portrait of whoever you are speaking with.
+
 ### Changed
 
 - Season and staff badges use custom icons. The Pull, earned by finishing the Drowned Sin story, uses Dark Secrets.

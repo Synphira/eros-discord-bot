@@ -59,7 +59,7 @@ module Commands
         return show_category(event, person, categories.first[:key], notice: notice)
       end
 
-      ErosUI.reply_v2(event, colour: colour_for(person)) do |c|
+      ErosUI.reply_v2(event, colour: colour_for(person), attachments: Engine::TalkPortraits.path_for(person)) do |c|
         header(c, player, person, spec, notice)
         c.text_display(content: '_Pick a subject. Then ask._')
         c.row do |row|
@@ -88,7 +88,7 @@ module Commands
       locked = topics.reject { |t| t[:unlocked] }
       cat_label = Engine::Conversations.category_label(category)
 
-      ErosUI.reply_v2(event, colour: colour_for(person)) do |c|
+      ErosUI.reply_v2(event, colour: colour_for(person), attachments: Engine::TalkPortraits.path_for(person)) do |c|
         header(c, player, person, spec, notice)
         c.text_display(content: "### #{cat_label}")
 
@@ -157,6 +157,11 @@ module Commands
     end
 
     def header(c, player, person, spec, notice)
+      if (url = Engine::TalkPortraits.url_for(person))
+        c.media_gallery do |gallery|
+          gallery.item(url: url, description: spec[:name])
+        end
+      end
       c.text_display(content: "## #{spec[:emoji]} #{spec[:heading]} — #{player.display_name}\n#{spec[:intro]}")
       if (dress = Engine::Conversations.dress_note(person))
         c.text_display(content: "_#{dress}_")
